@@ -1,0 +1,22 @@
+h1 {
+  color: blue;
+}
+
+header {
+   display: flex;
+}
+
+barone {
+   display: flex;
+   background-color: #d9d8d1;
+}
+
+flex-row {
+   display: flex;
+   flex-direction: row;
+}
+
+flex-col {
+   display: flex;
+   flex-direction: column;
+}
