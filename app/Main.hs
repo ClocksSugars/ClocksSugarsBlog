@@ -16,8 +16,11 @@ pageHTML = docTypeHtml $ do
       link ! rel "stylesheet" ! href "styles.css"
       H.title "ClocksSugars' Blog"
    body $ do
-      H.div ! A.id "bar-one" ! class_ "barone" $ do
-         header ! class_ "flex-col" $ do
-            h1 "ClocksSugars' Blog"
-            p "The home of 'Application Unification'"
-      p "some text here"
+      H.section ! class_ "pagebound" $ do
+         H.div ! A.id "barone" ! class_ "bar-one" $ do
+            header ! class_ "flex-col margin15" $ do
+               h1 ! class_ "marginsmall" $ "ClocksSugars' Blog"
+               p ! class_ "marginless" $ "The home of 'Application Unification'"
+         H.div ! A.id "bartwo" ! class_ "bar-two" $ do
+            p ! class_ "marginless" $ "Home"
+         p "some text here"

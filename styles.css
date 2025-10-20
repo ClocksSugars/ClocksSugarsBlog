@@ -1,22 +1,86 @@
+@property --page-aesth {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: lightblue;
+}
+
+@property --margin-size {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 15px;
+}
+
 h1 {
-  color: blue;
+  color: grey;
 }
 
-header {
+.bar-one {
    display: flex;
 }
 
-barone {
-   display: flex;
-   background-color: #d9d8d1;
+.marginless {
+   margin-top: 0px;
+   margin-bottom: 0px;
 }
 
-flex-row {
+.marginsmall {
+   margin-top: 3px;
+   margin-bottom: 3px;
+}
+
+.margin15 {
+   margin-top: 15px;
+   margin-bottom: 15px;
+}
+
+.bar-two {
+   border-radius: 5px;
+   background-color: var(--page-aesth);
+   padding: 5px;
+}
+
+.flex-row {
    display: flex;
    flex-direction: row;
 }
 
-flex-col {
+.flex-col {
    display: flex;
    flex-direction: column;
+}
+
+.pagebound {
+   border-radius: 5px;
+   background: white;
+   background-color: white;
+   max-width: 640px;
+   margin-left: auto;
+   margin-right: auto;
+   text-align: justify;
+   padding-right: var(--margin-size);
+   padding-left: var(--margin-size);
+   padding-bottom: 15px;
+}
+
+body {
+   background-image: url(assets/tribackgrey.png);
+   background-repeat: repeat;
+
+   -webkit-animation: scrolling 5s linear infinite;
+   -moz-animation: scrolling 5s linear infinite;
+   -o-animation: scrolling 5s linear infinite;
+   animation: scrolling 5s linear infinite;
+   /*
+   background-color: var(--page-aesth);
+   background: var(--page-aesth);
+   */
+}
+
+@-webkit-keyframes scrolling {
+  from{
+      background-position: 0 0;
+  }
+  to{
+      background-position: 10% 200%;
+  }
 }
