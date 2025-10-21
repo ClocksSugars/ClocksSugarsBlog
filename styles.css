@@ -10,6 +10,12 @@
   initial-value: 15px;
 }
 
+@property --page-width {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 640px;
+}
+
 h1 {
   color: grey;
 }
@@ -53,7 +59,7 @@ h1 {
    border-radius: 5px;
    background: white;
    background-color: white;
-   max-width: 640px;
+   max-width: var(--page-width);
    margin-left: auto;
    margin-right: auto;
    text-align: justify;
@@ -62,25 +68,33 @@ h1 {
    padding-bottom: 15px;
 }
 
+img {
+   width: var(--page-width);
+}
+
+img.squareheight {
+   height: var(--page-width);
+}
+
+
 body {
    background-image: url(assets/tribackgrey.png);
    background-repeat: repeat;
 
-   -webkit-animation: scrolling 5s linear infinite;
-   -moz-animation: scrolling 5s linear infinite;
-   -o-animation: scrolling 5s linear infinite;
-   animation: scrolling 5s linear infinite;
+   animation: backgroundroll 5s linear infinite;
    /*
    background-color: var(--page-aesth);
    background: var(--page-aesth);
    */
 }
 
-@-webkit-keyframes scrolling {
+@keyframes backgroundroll {
   from{
-      background-position: 0 0;
+      background-position-x: 0px;
+      background-position-y: 0px;
   }
   to{
-      background-position: 10% 200%;
+     background-position-x: 99px;
+     background-position-y: 342px;
   }
 }

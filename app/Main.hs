@@ -24,3 +24,4 @@ pageHTML = docTypeHtml $ do
          H.div ! A.id "bartwo" ! class_ "bar-two" $ do
             p ! class_ "marginless" $ "Home"
          p "some text here"
+         img ! src "assets/diagram.svg" ! class_ "squareheight"
