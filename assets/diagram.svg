@@ -73,6 +73,8 @@
     </text>
     <circle cx="80" cy="480" r="4" fill="#000"></circle>
     <text x="80" y="470" font-size="14" fill="#000">p</text>
+    <circle cx="220" cy="420" r="4" fill="#000"></circle>
+    <text x="228" y="425" font-size="14" fill="#000">f(p)</text>
   </g>
 
   <g>
@@ -98,5 +100,6 @@
     <circle cx="380" cy="480" r="4" fill="#000"></circle>
     <circle cx="520" cy="420" r="4" fill="#000"></circle>
     <text x="390" y="480" font-size="14" fill="#000">p</text>
+    <text x="495" y="435" font-size="14" fill="#000">f(p)</text>
   </g>
 </svg>
