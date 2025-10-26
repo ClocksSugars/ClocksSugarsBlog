@@ -81,13 +81,15 @@ body {
    background-image: url(assets/tribackgrey.png);
    background-repeat: repeat;
 
-   animation: backgroundroll 5s linear infinite;
+   
+   /* animation: backgroundroll 5s linear infinite; */
    /*
    background-color: var(--page-aesth);
    background: var(--page-aesth);
    */
 }
 
+/*
 @keyframes backgroundroll {
   from{
       background-position-x: 0px;
@@ -97,4 +99,4 @@ body {
      background-position-x: 99px;
      background-position-y: 342px;
   }
-}
+}*/
