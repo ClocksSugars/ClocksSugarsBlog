@@ -10,7 +10,8 @@ import Text.Blaze.Html5.Attributes as A
 import Text.Blaze.Html.Renderer.String as R
 import System.Directory
 
-import Latexcombinators
+import LatexToHtml.MainTools
+import LatexToHtml.TreeCleaner (extractDocument)
 import LaTeXUtils
 import Text.LaTeX.Base.Parser
 import Data.Either.Utils
@@ -19,14 +20,17 @@ main :: IO ()
 main = do
    handle <- openFile "latexraw/anatomyRn/philofmath.tex" ReadMode
    xs <- hGetContents handle
-   writeFile "parsetreeexp3.txt" $ myShow . extractDocument . fromRight . parseLaTeX . fromString $ xs
+   let doc = extractDocument . fromRight . parseLaTeX . fromString $ xs
+   writeFile "test.html" $ R.renderHtml . pageHTML . processLatexToHtml $ doc
    hClose handle
-   --print $ fromRight . parseLaTeX . fromString $ xs
--- main = outerErr $ do
---    let filename = "latexraw/anatomyRn/philofmath.tex"
---    filetext <- obtainFile filename
---    parseTree <- innerErr (parseLaTeX filetext) InvalidLatex
---    return ()
+
+-- main :: IO ()
+-- main = do
+--    handle <- openFile "latexraw/anatomyRn/philofmath.tex" ReadMode
+--    xs <- hGetContents handle
+--    writeFile "parsetreeexp3.txt" $ myShow . extractDocument . fromRight . parseLaTeX . fromString $ xs
+--    hClose handle
+
 
 innerErr :: (Show a) => Either a b -> (String -> FailureMode) -> Either FailureMode b
 innerErr exs kind = case exs of
@@ -53,8 +57,8 @@ data FailureMode =
 
 --main = writeFile "ExamplePage.html" $ R.renderHtml pageHTML
 
-pageHTML :: Html
-pageHTML = docTypeHtml $ do
+pageHTML :: Html -> Html
+pageHTML pageContent = docTypeHtml $ do
    H.head $ do
       meta ! charset "utf-8"
       meta ! name "viewport" ! content "width=device-width"
@@ -68,5 +72,5 @@ pageHTML = docTypeHtml $ do
                p ! class_ "marginless" $ "The home of 'Application Unification'"
          H.div ! A.id "bartwo" ! class_ "bar-two" $ do
             p ! class_ "marginless" $ "Home"
-         p "some text here"
-         img ! src "assets/diagram.svg" ! class_ "squareheight"
+         pageContent
+         --img ! src "assets/diagram.svg" ! class_ "squareheight"

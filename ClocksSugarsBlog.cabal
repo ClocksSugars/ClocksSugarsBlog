@@ -65,8 +65,11 @@ executable ClocksSugarsBlog
    main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-   other-modules:    Latexcombinators,
-                     LaTeXUtils
+   other-modules:    LatexToHtml.MainTools,
+                     LatexToHtml.TreeCleaner,
+                     LatexToHtml.ProcessingTypes,
+                     LaTeXUtils,
+                  -- HtmlProcessingTypes,
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -80,7 +83,8 @@ executable ClocksSugarsBlog
                      directory,
                      transformers,
                      MissingH,
-                     text
+                     text,
+                     ListLike
 
 
     -- Directories containing source files.
