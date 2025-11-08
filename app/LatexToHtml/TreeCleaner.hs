@@ -1,5 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
-module LatexToHtml.TreeCleaner (extractDocument, processOneTwo, inlineCommands, attachRightMostLaTeX, spanLaTeX) where
+module LatexToHtml.TreeCleaner (
+   extractDocument,
+   processOne,
+   processTwo,
+   Htmllatexinter,
+   processOneTwo,
+   inlineCommands,
+   attachRightMostLaTeX,
+   spanLaTeX
+) where
 
 import Data.ListLike (fromText)
 import Data.Text (splitOn)
@@ -78,35 +87,38 @@ data Htmllatexinter =
    |  InLineEffect LaTeX -- for commands that belong in a paragraph
    |  Section Text
    |  List Text (Maybe [TeXArg]) [[Htmllatexinter]] -- instead of having items, we put item stuff in each element
-   |  Figure Text
+--   |  Figure Text
    |  LineBreak
-   deriving (Eq)
+   deriving (Eq, Show)
 
 inlineCommands :: [String]
 inlineCommands = ["emph","textbf"]
 
 processOne :: LaTeX -> [Htmllatexinter]
 processOne arg = let
-   isWhiteSpace :: String -> Bool
-   isWhiteSpace [] = True
-   isWhiteSpace (' ':xs) = isWhiteSpace xs
-   isWhiteSpace ('\n':xs) = isWhiteSpace xs
-   isWhiteSpace ('\t':xs) = isWhiteSpace xs
-   isWhiteSpace _ = False
-   subprocess :: LaTeX -> Either [Htmllatexinter] Htmllatexinter
-   subprocess (TeXRaw xs) = if isWhiteSpace . fromText $ xs
-      then Left []
-      else Right (Prose xs)
+   subprocess (TeXRaw xs) = Right $ Prose xs
+   -- isWhiteSpace :: String -> Bool
+   -- isWhiteSpace [] = True
+   -- isWhiteSpace (' ':xs) = isWhiteSpace xs
+   -- isWhiteSpace ('\n':xs) = isWhiteSpace xs
+   -- isWhiteSpace ('\t':xs) = isWhiteSpace xs
+   -- isWhiteSpace _ = False
+   -- subprocess :: LaTeX -> Either [Htmllatexinter] Htmllatexinter
+   -- subprocess (TeXRaw xs) = if isWhiteSpace . fromText $ xs
+   --    then Left []
+   --    else Right (Prose xs)
    subprocess (TeXComment _) = Left []
    subprocess (TeXSeq exs1 exs2) = Left $ case (subprocess exs1, subprocess exs2) of
       (Left a, Left b) -> a ++ b
       (Left a, Right b) -> a ++ [b]
       (Right a, Left b) -> a:b
       (Right a, Right b) -> [a,b]
-   subprocess (TeXComm "Section" [FixArg (TeXRaw title)]) = Right $ Section title
+   subprocess (TeXComm "section" [FixArg (TeXRaw title)]) = Right $ Section title
    subprocess (TeXEnv kind texargs content) = case (kind, texargs) of
          ("itemize", _) -> Right $ List "itemize" Nothing $
-            map processOne (splitByDelimiterLaTeX (TeXCommS "item") content)
+            -- must drop 1 bc content preceeding first \item should be ignored. we can also guarentee
+            -- there is 2 since this should have compiled in latex thus having at least one \item
+            map processOne (drop 1 $ splitByDelimiterLaTeX (TeXCommS "item") content)
          (_, _) -> Right . RawPrint $ render (TeXEnv kind texargs content) -- This is under the assumption that it is a math env
    subprocess (TeXMath sign content) = Right . InLineEffect $ TeXMath sign content
    subprocess (TeXBraces content) = case content of
@@ -125,11 +137,19 @@ processOne arg = let
       Left thing -> thing
 
 addLineBreaks :: [Htmllatexinter] -> [Htmllatexinter]
-addLineBreaks ((Prose content):xs) = intersperse LineBreak (
-   map Prose (splitOn "\n\n" content)
-   ) ++ addLineBreaks xs
-addLineBreaks (x:xs) = x: addLineBreaks xs
-addLineBreaks [] = []
+addLineBreaks stuff = let
+   worker :: [Htmllatexinter] -> [Htmllatexinter]
+   worker ((Prose content):xs) = intersperse LineBreak (
+      map Prose (splitOn "\n\n" content)
+      ) ++ worker xs
+   worker (x:xs) = x: worker xs
+   worker [] = []
+   pruneEmpty :: [Htmllatexinter] -> [Htmllatexinter]
+   pruneEmpty ((Prose ""):xs) = pruneEmpty xs
+   pruneEmpty (x:xs) = (x : pruneEmpty xs)
+   pruneEmpty [] = []
+   in pruneEmpty . worker $ stuff
+
 
 -- Things that cause or dont cause a new paragraph
 --    - A new section/heading negates a linebreak but causes a paragraph to start
@@ -139,6 +159,7 @@ addLineBreaks [] = []
 processTwo :: [Htmllatexinter] -> [HtmlVers]
 processTwo [] = []
 processTwo ((RawPrint content):xs) = RawText content : processTwo xs
+processTwo ((RawLaTeX content):xs) = (RawText $ render content) : processTwo xs
 processTwo ((Section content):xs) = Subheading content : processTwo xs
 processTwo ((List kind margs items):xs) = case kind of
    "itemize" -> Itemize (map (ListItem . processTwo) items) : processTwo xs
@@ -158,14 +179,15 @@ processTwo arg = let
    inLineTranslation (InLineEffect (TeXMath sign content)) = RawText . render $ TeXMath sign content
    inLineTranslation (InLineEffect otherwise) = RawText . render $ otherwise -- Just displays invalid commands so we can see
    inLineTranslation (Prose xs) = RawText xs
-   inLineTranslation _ = RawText "" -- this should NEVER HAPPEN since
+   inLineTranslation _ = RawText "failcase" -- this should NEVER HAPPEN since
    -- it is applied to the takeWhile in the below span which has as its
    -- condition that the constructor is Prose or InLineEffect
    worker :: [Htmllatexinter] -> [HtmlVers]
    worker (LineBreak:xs) = worker xs
+   worker [] = []
    worker xs = let
       (paragraph, remainder2) = span cond xs
-      in Paragraph (map inLineTranslation paragraph) : worker remainder2
+      in (Paragraph (map inLineTranslation paragraph) : worker remainder2)
    (prose, remainder) = span paragraphRelevant arg
    in (worker . addLineBreaks $ prose) ++ processTwo remainder
 

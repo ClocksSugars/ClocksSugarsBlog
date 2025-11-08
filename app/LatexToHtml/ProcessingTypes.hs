@@ -11,4 +11,5 @@ data HtmlVers =
    |  Enumerate Text [HtmlVers]
    |  ListItem [HtmlVers]
    |  Subheading Text -- <h2>
+   deriving ( Show )
 --   |  Env Text [HtmlVers]

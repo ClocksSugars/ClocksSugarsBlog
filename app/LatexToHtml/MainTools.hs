@@ -1,5 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
-module LatexToHtml.MainTools (processLatexToHtml) where
+module LatexToHtml.MainTools (
+   processLatexToHtml,
+   processThree
+) where
 
 import LatexToHtml.ProcessingTypes
 import LatexToHtml.TreeCleaner (processOneTwo)
