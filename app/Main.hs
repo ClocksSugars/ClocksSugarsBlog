@@ -3,6 +3,7 @@ module Main where
 
 import System.IO
 import Data.String
+import Data.Text (Text)
 import Control.Monad.Trans.Except
 
 import Text.Blaze.Html5 as H
@@ -28,42 +29,12 @@ main = do
    writeFile "inspect1.txt" $ show part1
    let part2 = processTwo part1
    writeFile "inspect2.txt" $ show part2
-   let part3 = processThree part2
-   writeFile "test.html" $ R.renderHtml . pageHTML $ part3
+   let (part3, index) = processThree "philofmath" part2 blankIndex
+   writeFile "test.html" $ R.renderHtml $ pageHTML "Nascent's Philosophy of Mathematics" part3
+   writeFile "CumulativeReferences.txt" $ show . references $ index
    hClose handle
 
--- main :: IO ()
--- main = do
---    handle <- openFile "latexraw/anatomyRn/philofmath.tex" ReadMode
---    xs <- hGetContents handle
---    writeFile "parsetreeexp3.txt" $ myShow . extractDocument . fromRight . parseLaTeX . fromString $ xs
---    hClose handle
 
-
-innerErr :: (Show a) => Either a b -> (String -> FailureMode) -> Either FailureMode b
-innerErr exs kind = case exs of
-   Left err -> Left . kind . show $ err
-   Right xs -> Right xs
-
--- outerErr :: ExceptT FailureMode IO () -> IO ()
--- outerErr eio = case eio of
---    Right _ -> return ()
---    Left err -> print err
-
--- obtainFile :: String -> IO (Either FailureMode String)
--- obtainFile filename = do
---    return (if
---       doesFileExist filename
---       then Right $
---          withFile filename ReadMode hGetContents
---       else Left $ NoSuchFile filename
---          )
-
-data FailureMode =
-      NoSuchFile String
-   |  InvalidLatex String
-
---main = writeFile "ExamplePage.html" $ R.renderHtml pageHTML
 
 katexArgs :: Html
 katexArgs = "const katexargs = { delimiters: ["
@@ -78,8 +49,8 @@ katexArgs = "const katexargs = { delimiters: ["
    <> "{left: \"\\[\", right: \"\\]\", display: true}"
    <> "], throwOnError : false}"
 
-pageHTML :: Html -> Html
-pageHTML pageContent = docTypeHtml $ do
+pageHTML :: Text -> Html -> Html
+pageHTML pageTitle pageContent = docTypeHtml $ do
    H.head $ do
       meta ! charset "utf-8"
       meta ! name "viewport" ! content "width=device-width"
@@ -98,5 +69,6 @@ pageHTML pageContent = docTypeHtml $ do
                p ! class_ "marginless" $ "The home of 'Application Unification'"
          H.div ! A.id "bartwo" ! class_ "bar-two" $ do
             p ! class_ "marginless" $ "Home"
+         h2 . toHtml $ pageTitle
          pageContent
          --img ! src "assets/diagram.svg" ! class_ "squareheight"

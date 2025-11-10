@@ -1,4 +1,4 @@
-@property --page-aesth {
+ @property --page-aesth {
   syntax: "<color>";
   inherits: false;
   initial-value: lightblue;
@@ -68,6 +68,10 @@ h1 {
    padding-bottom: 15px;
 }
 
+figure {
+   align-items: center;
+}
+
 img {
    width: var(--page-width);
 }
@@ -81,7 +85,7 @@ body {
    background-image: url(assets/tribackgrey.png);
    background-repeat: repeat;
 
-   
+
    /* animation: backgroundroll 5s linear infinite; */
    /*
    background-color: var(--page-aesth);

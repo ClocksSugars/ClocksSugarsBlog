@@ -1,0 +1,14 @@
+% this is for macros that need to be interpretted differently on web
+% i.e. svgs have to go through a very different process on latex than
+% on html
+%
+\newcommand{\figuresvgwithcaption}[2]{%
+	\begin{figure}[tbh]%
+		\centering%
+		\includesvg{#1}%
+		\caption{\centering #2}%
+	\end{figure}%
+}
+%
+\newcommand{\squote}[1]{`#1'}
+\newcommand{\dquote}[1]{``#1"}

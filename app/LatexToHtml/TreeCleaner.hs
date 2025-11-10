@@ -87,7 +87,7 @@ data Htmllatexinter =
    |  InLineEffect LaTeX -- for commands that belong in a paragraph
    |  Section Text
    |  List Text (Maybe [TeXArg]) [[Htmllatexinter]] -- instead of having items, we put item stuff in each element
---   |  Figure Text
+   |  IFigure Text Text
    |  LineBreak
    deriving (Eq, Show)
 
@@ -96,6 +96,7 @@ inlineCommands = ["emph","textbf"]
 
 processOne :: LaTeX -> [Htmllatexinter]
 processOne arg = let
+   subprocess :: LaTeX -> Either [Htmllatexinter] Htmllatexinter
    subprocess (TeXRaw xs) = Right $ Prose xs
    -- isWhiteSpace :: String -> Bool
    -- isWhiteSpace [] = True
@@ -103,7 +104,6 @@ processOne arg = let
    -- isWhiteSpace ('\n':xs) = isWhiteSpace xs
    -- isWhiteSpace ('\t':xs) = isWhiteSpace xs
    -- isWhiteSpace _ = False
-   -- subprocess :: LaTeX -> Either [Htmllatexinter] Htmllatexinter
    -- subprocess (TeXRaw xs) = if isWhiteSpace . fromText $ xs
    --    then Left []
    --    else Right (Prose xs)
@@ -114,6 +114,12 @@ processOne arg = let
       (Right a, Left b) -> a:b
       (Right a, Right b) -> [a,b]
    subprocess (TeXComm "section" [FixArg (TeXRaw title)]) = Right $ Section title
+   subprocess (TeXComm "figuresvgwithcaption" [FixArg (TeXRaw location), FixArg (TeXRaw content)]) =
+      Right $ IFigure (location <> ".svg") content
+   subprocess (TeXComm "dquote" [FixArg dquotearg]) = subprocess $
+      TeXSeq (TeXRaw "\"") $ attachRightMostLaTeX dquotearg $ TeXRaw"\""
+   subprocess (TeXComm "squote" [FixArg dquotearg]) = subprocess $
+      TeXSeq (TeXRaw "'") $ attachRightMostLaTeX dquotearg $ TeXRaw"'"
    subprocess (TeXEnv kind texargs content) = case (kind, texargs) of
          ("itemize", _) -> Right $ List "itemize" Nothing $
             -- must drop 1 bc content preceeding first \item should be ignored. we can also guarentee
@@ -161,6 +167,7 @@ processTwo [] = []
 processTwo ((RawPrint content):xs) = RawText content : processTwo xs
 processTwo ((RawLaTeX content):xs) = (RawText $ render content) : processTwo xs
 processTwo ((Section content):xs) = Subheading content : processTwo xs
+processTwo ((IFigure location content):xs) = Figure location content : processTwo xs
 processTwo ((List kind margs items):xs) = case kind of
    "itemize" -> Itemize (map (ListItem . processTwo) items) : processTwo xs
    _ -> Paragraph [RawText "failed here"] : processTwo xs
@@ -174,7 +181,7 @@ processTwo arg = let
    cond :: Htmllatexinter -> Bool
    cond x= (x /= LineBreak)
    inLineTranslation :: Htmllatexinter -> HtmlVers
-   inLineTranslation (InLineEffect (TeXComm "emph" [FixArg (TeXRaw content)])) = Italicisize content
+   inLineTranslation (InLineEffect (TeXComm "emph" [FixArg (TeXRaw content)])) = Emphasize content
    inLineTranslation (InLineEffect (TeXComm "textbf" [FixArg (TeXRaw content)])) = Bold content
    inLineTranslation (InLineEffect (TeXMath sign content)) = RawText . render $ TeXMath sign content
    inLineTranslation (InLineEffect otherwise) = RawText . render $ otherwise -- Just displays invalid commands so we can see
