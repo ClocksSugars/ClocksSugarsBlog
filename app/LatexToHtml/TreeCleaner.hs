@@ -6,8 +6,6 @@ module LatexToHtml.TreeCleaner (
    Htmllatexinter,
    processOneTwo,
    inlineCommands,
-   attachRightMostLaTeX,
-   spanLaTeX
 ) where
 
 import Data.ListLike (fromText)
@@ -15,6 +13,7 @@ import Data.Text (splitOn)
 import Data.List (intersperse)
 -- import Data.String
 import Data.Maybe
+import Data.Map.Strict (Map)
 import Text.LaTeX.Base
 -- import Text.Megaparsec
 -- import Text.Megaparsec.Char
@@ -24,6 +23,8 @@ import Text.LaTeX.Base.Syntax
 import Control.Applicative
 
 import LatexToHtml.ProcessingTypes
+import LatexToHtml.NewCommand
+import LatexToHtml.Utils
 
 -- This all exists under the assumption that
 --  the document being processed can produce
@@ -41,38 +42,6 @@ extractDocument restOfIt = let
    interiorDoc (TeXSeq exs1 exs2) = interiorDoc exs1 <|> interiorDoc exs2
    interiorDoc _ = Nothing
    in fromMaybe restOfIt (interiorDoc restOfIt)
-
--- climbs down the tree and attaches something at maximum right-most depth
-attachRightMostLaTeX :: LaTeX -> LaTeX -> LaTeX
-attachRightMostLaTeX (TeXSeq ex exs) attachment = TeXSeq ex (
-   attachRightMostLaTeX exs attachment
-   )
-attachRightMostLaTeX exs attachment = TeXSeq exs attachment
-
--- This function assumes that the LaTeX TeXSeq tree branches right only
-spanLaTeX :: (LaTeX -> Bool) -> LaTeX -> (LaTeX, LaTeX)
-spanLaTeX cond content = let
-   worker :: (LaTeX, LaTeX) -> (LaTeX, LaTeX)
-   worker (taken, TeXSeq ex exs) = if cond ex
-      then worker (attachRightMostLaTeX taken ex, exs)
-      else (taken, exs)
-   worker (taken, ex) = if cond ex
-      then (attachRightMostLaTeX taken ex, TeXEmpty)
-      else (taken, TeXEmpty)
-   removeCap (TeXSeq TeXEmpty exs, remainder) = (exs, remainder)
-   removeCap (exs, remainder) = (exs, remainder)
-   in removeCap . worker $ (TeXEmpty, content)
-
-splitByDelimiterLaTeX :: LaTeX -> LaTeX -> [LaTeX]
-splitByDelimiterLaTeX delimiter content = let
-   cond :: LaTeX -> Bool
-   cond x = x /= delimiter
-   worker :: [LaTeX] -> LaTeX -> [LaTeX]
-   worker xs TeXEmpty = xs
-   worker xs exs = let
-      (taken, remainder) = spanLaTeX cond exs
-      in worker (xs ++ [taken]) remainder
-   in worker [] content
 
  -- Things that should cause the document to be sectioned in order of priority:
  --   - Section Heading
@@ -126,7 +95,8 @@ processOne arg = let
             -- there is 2 since this should have compiled in latex thus having at least one \item
             map processOne (drop 1 $ splitByDelimiterLaTeX (TeXCommS "item") content)
          (_, _) -> Right . RawPrint $ render (TeXEnv kind texargs content) -- This is under the assumption that it is a math env
-   subprocess (TeXMath sign content) = Right . InLineEffect $ TeXMath sign content
+   subprocess (TeXMath sign content) = Right . InLineEffect $
+      TeXMath sign $ applyMathCommands content
    subprocess (TeXBraces content) = case content of
       TeXEmpty -> Left []
       exs -> subprocess exs

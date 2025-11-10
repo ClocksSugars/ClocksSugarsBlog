@@ -68,7 +68,8 @@ executable ClocksSugarsBlog
    other-modules:    LatexToHtml.MainTools,
                      LatexToHtml.TreeCleaner,
                      LatexToHtml.ProcessingTypes,
-                     LaTeXUtils,
+                     LatexToHtml.NewCommand,
+                     LatexToHtml.Utils,
                   -- HtmlProcessingTypes,
 
     -- LANGUAGE extensions used by modules in this package.

@@ -1,6 +1,38 @@
-module LaTeXUtils where
+module LatexToHtml.Utils where
 
 import Text.LaTeX.Base.Syntax
+
+-- climbs down the tree and attaches something at maximum right-most depth
+attachRightMostLaTeX :: LaTeX -> LaTeX -> LaTeX
+attachRightMostLaTeX (TeXSeq ex exs) attachment = TeXSeq ex (
+   attachRightMostLaTeX exs attachment
+   )
+attachRightMostLaTeX exs attachment = TeXSeq exs attachment
+
+-- This function assumes that the LaTeX TeXSeq tree branches right only
+spanLaTeX :: (LaTeX -> Bool) -> LaTeX -> (LaTeX, LaTeX)
+spanLaTeX cond content = let
+   worker :: (LaTeX, LaTeX) -> (LaTeX, LaTeX)
+   worker (taken, TeXSeq ex exs) = if cond ex
+      then worker (attachRightMostLaTeX taken ex, exs)
+      else (taken, exs)
+   worker (taken, ex) = if cond ex
+      then (attachRightMostLaTeX taken ex, TeXEmpty)
+      else (taken, TeXEmpty)
+   removeCap (TeXSeq TeXEmpty exs, remainder) = (exs, remainder)
+   removeCap (exs, remainder) = (exs, remainder)
+   in removeCap . worker $ (TeXEmpty, content)
+
+splitByDelimiterLaTeX :: LaTeX -> LaTeX -> [LaTeX]
+splitByDelimiterLaTeX delimiter content = let
+   cond :: LaTeX -> Bool
+   cond x = x /= delimiter
+   worker :: [LaTeX] -> LaTeX -> [LaTeX]
+   worker xs TeXEmpty = xs
+   worker xs exs = let
+      (taken, remainder) = spanLaTeX cond exs
+      in worker (xs ++ [taken]) remainder
+   in worker [] content
 
 myShow4 :: [TeXArg] -> String
 myShow4 [] = ""

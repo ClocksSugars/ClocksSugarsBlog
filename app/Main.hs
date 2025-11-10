@@ -13,9 +13,7 @@ import Text.Blaze.Internal (MarkupM(Empty))
 import System.Directory
 
 import LatexToHtml.MainTools
-import LatexToHtml.ProcessingTypes
-import LatexToHtml.TreeCleaner (extractDocument, processOne, processTwo)
-import LaTeXUtils
+import LatexToHtml.Utils
 import Text.LaTeX.Base.Parser
 import Data.Either.Utils
 

@@ -4,11 +4,25 @@ module LatexToHtml.MainTools (
    processThree,
    IndexState(IndexState),
    references,
-   blankIndex
+   blankIndex,
+   extractDocument,
+   processOne,
+   processTwo,
+   Htmllatexinter,
+   processOneTwo,
+   inlineCommands,
+   -- HtmlVers,
 ) where
 
 import LatexToHtml.ProcessingTypes
-import LatexToHtml.TreeCleaner (processOneTwo)
+import LatexToHtml.TreeCleaner (
+   extractDocument,
+   processOne,
+   processTwo,
+   Htmllatexinter,
+   processOneTwo,
+   inlineCommands
+   )
 
 import Text.Blaze.Internal (MarkupM(Empty))
 import Text.Blaze.Html5 as H
@@ -24,14 +38,16 @@ data IndexState = IndexState
    {  theorems    :: Int
    ,  figures     :: Int
    ,  expressions :: Int -- i.e. eq number
-   ,  references :: Map String Text
+   ,  subsection  :: Int
+   ,  references  :: Map String Text
    }
 
 blankIndex = IndexState {
       theorems    = 1
    ,  figures     = 1
    ,  expressions = 1
-   ,  references = empty
+   ,  subsection  = 0 -- it is common to have a section 0 preamble so this must start at zero
+   ,  references  = empty
    }
 
 processThree :: Text -> [HtmlVers] -> IndexState -> (Html, IndexState)
@@ -49,7 +65,10 @@ processThree pagename content indexstate = let
       RawText x -> (toHtml x, propind)
       Emphasize x -> (i $ toHtml x, propind)
       Bold x -> (b $ toHtml x, propind)
-      Subheading x -> (h3 $ toHtml x, propind)
+      Subheading x -> let
+         newind = propind { subsection = subsection propind + 1 }
+         secnumber = subsection newind
+         in (h3 . toHtml $ show secnumber <> ". " <> fromText x, newind)
       ListItem xs -> passFirst li $ repeatCase xs propind
       Itemize xs -> passFirst ul $ repeatCase xs propind
       Enumerate _ xs -> passFirst ol $ repeatCase xs propind -- TODO change ol to (ol ! something) when order instructions available
