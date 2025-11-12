@@ -1,0 +1,122 @@
+\newcounter{statements}[section]
+\renewcommand{\thestatements}{\thesection.\arabic{statements}}
+
+\usepackage{tcolorbox}
+
+\makeatletter
+\newcommand{\@myifempty}[3]{\if\relax\detokenize{#1}\textnormal{#2}\else\textnormal{#3}\fi}
+
+
+\newtcolorbox[use counter=statements]%
+	{label definition}%
+	[2]%
+	[]%
+	{%
+		colback=white,%
+		colframe=LightGreen,%
+		coltitle=black,%
+		title=Definition \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		label=def:#2%
+	}
+
+\newtcolorbox[use counter=statements]%
+	{definition}%
+	[1]%
+	[]%
+	{%
+		colback=white,%
+		colframe=LightGreen,%
+		coltitle=black,%
+		title=Definition \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+	}
+	
+\newtcolorbox[use counter=statements]%
+	{label theorem}%
+	[2]%
+	[]%
+	{%
+		colback=white,%
+		colframe=LightRed,%
+		coltitle=black,%
+		title=Theorem \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		label=thm:#2%
+	}
+
+\newtcolorbox[use counter=statements]%
+	{theorem}%
+	[1]%
+	{%
+		colback=white,%
+		colframe=LightRed,%
+		coltitle=black,%
+		title=Theorem \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+	}
+	
+\newtcolorbox%
+	{label proof}%
+	[2]%
+	[Proof.]%
+	{%
+		colback=white,%
+		colframe=LightGrey,%
+		coltitle=black,%
+		title=#2,%
+		label=prf:#1%
+	}
+
+\newtcolorbox%
+	{proof}%
+	[1]%
+	[Proof.]
+	{%
+		colback=white,%
+		colframe=LightGrey,%
+		coltitle=black,%
+		title=#1,%
+	}
+	
+\newtcolorbox[use counter=statements]%
+	{label lemma}%
+	[2]%
+	[]%
+	{%
+		colback=white,%
+		colframe=LightPink,%
+		coltitle=black,%
+		title=Lemma \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		label=lem:#2%
+	}
+
+\newtcolorbox[use counter=statements]%
+	{lemma}%
+	[1]%
+	{%
+		colback=white,%
+		colframe=LightPink,%
+		coltitle=black,%
+		title=#1 and \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+	}
+	
+\newtcolorbox[use counter=statements]%
+	{label corollary}%
+	[2]%
+	[]%
+	{%
+		colback=white,%
+		colframe=LightYellow,%
+		coltitle=black,%
+		title=Corollary \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		label=crl:#2%
+	}
+
+\newtcolorbox[use counter=statements]%
+	{corollary}%
+	[1]%
+	{%
+		colback=white,%
+		colframe=LightYellow,%
+		coltitle=black,%
+		title=#1 and \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+	}
+	
+\makeatother

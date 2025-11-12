@@ -6,7 +6,7 @@ import LatexToHtml.Utils (
    spanLaTeX
    )
 
-import Data.Map.Strict (Map, empty, fromList, (!))
+import Data.Map.Strict (Map, empty, fromList, (!?))
 import Text.LaTeX.Base
 import Text.LaTeX.Base.Syntax
 
@@ -40,9 +40,15 @@ applyMathCommands = let
       TeXEmpty -> TeXEmpty
       TeXRaw x -> TeXRaw x
       TeXComm x args -> let
-         func = argMathCommands ! x
-         in func $ map applyInArgs args
-      TeXCommS x -> zeroArgMathCommands ! x
+         iffunc = argMathCommands !? x
+         in case iffunc of
+            Just func -> func $ map applyInArgs args
+            Nothing -> TeXComm x $ map applyInArgs args
+      TeXCommS x -> let
+         ifthing = zeroArgMathCommands !? x
+         in case ifthing of
+            Just thing -> thing
+            Nothing -> TeXCommS x
       TeXMath kind x -> TeXMath kind $ TeXSeq (TeXRaw "I wonder if this will ever happen? ") $ worker x
       TeXLineBreak x y -> TeXLineBreak x y
       TeXBraces x -> TeXBraces $ worker x

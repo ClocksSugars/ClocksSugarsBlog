@@ -33,6 +33,14 @@ main = do
    hClose handle
 
 
+-- main :: IO ()
+-- main = do
+--    writeFile "test.html" $ R.renderHtml $ pageHTML "some bs im testing" $ do
+--       H.div ! class_ "definition" $ do
+--          H.div ! class_ "definitiontitle" $ "Definition 1: Test"
+--          p "here we would put some definition text etc etc"
+
+
 
 katexArgs :: Html
 katexArgs = "const katexargs = { delimiters: ["

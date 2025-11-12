@@ -16,6 +16,12 @@
   initial-value: 640px;
 }
 
+@property --def-color {
+ syntax: "<color>";
+ inherits: false;
+ initial-value: lightgreen;
+}
+
 h1 {
   color: grey;
 }
@@ -68,6 +74,21 @@ h1 {
    padding-bottom: 15px;
 }
 
+.definition {
+   border: 3px solid var(--def-color);
+   border-radius: 8px;
+   background-color: white;
+   padding: 5px;
+   display: flex;
+   flex-direction: column;
+}
+
+.definitiontitle {
+   background-color: var(--def-color);
+   border-radius: 5px;
+   padding: 5px;
+}
+
 figure {
    align-items: center;
 }
@@ -80,9 +101,8 @@ img.squareheight {
    height: var(--page-width);
 }
 
-
 body {
-   background-image: url(assets/tribackgrey.png);
+   background-image: url(./assets/tribackgrey.png);
    background-repeat: repeat;
 
 
