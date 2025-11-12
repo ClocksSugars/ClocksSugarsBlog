@@ -19,9 +19,17 @@ zeroArgMathCommands = let
 
 argMathCommands :: Map String ([TeXArg] -> LaTeX)
 argMathCommands = let
-   -- Eventually, functions go here
+   squotefunc :: [TeXArg] -> LaTeX
+   squotefunc args = case args of
+      [FixArg sometex] -> TeXSeq (TeXRaw "`") $ attachRightMostLaTeX sometex (TeXRaw "'")
+      _ -> TeXRaw "error occurred here"
+   dquotefunc :: [TeXArg] -> LaTeX
+   dquotefunc args = case args of
+      [FixArg sometex] -> TeXSeq (TeXRaw "``") $ attachRightMostLaTeX sometex (TeXRaw "\"")
+      _ -> TeXRaw "error occurred here"
    in fromList [
-      -- Eventually, functions go here
+      ("squote",squotefunc),
+      ("dquote",dquotefunc)
    ]
 
 applyMathCommands :: LaTeX -> LaTeX

@@ -12,5 +12,6 @@ data HtmlVers =
    |  ListItem [HtmlVers]
    |  Subheading Text -- <h2>
    |  Figure Text Text
+   |  BoxedSec String (Maybe Text) (Maybe [HtmlVers]) [HtmlVers]
    deriving ( Show )
 --   |  Env Text [HtmlVers]

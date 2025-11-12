@@ -19,7 +19,7 @@ import Data.Either.Utils
 
 main :: IO ()
 main = do
-   handle <- openFile "latexraw/anatomyRn/philofmath.tex" ReadMode
+   handle <- openFile "latexraw/anatomyRn/proptypes.tex" ReadMode
    xs <- hGetContents handle
    let doc = extractDocument . fromRight . parseLaTeX . fromString $ xs
    writeFile "inspect0.txt" $ show doc

@@ -29,7 +29,8 @@ import Text.Blaze.Html5 as H
 import Text.Blaze.Html5.Attributes as A
 import Data.ListLike (fromText)
 import Data.String
-import Data.Map.Strict (Map, empty)
+--import qualified Data.Map.Strict as Maps ((!))
+import Data.Map.Strict (Map, empty, insert, fromList)
 import Data.Text (Text)
 
 import Text.LaTeX.Base (LaTeX)
@@ -39,7 +40,7 @@ data IndexState = IndexState
    ,  figures     :: Int
    ,  expressions :: Int -- i.e. eq number
    ,  subsection  :: Int
-   ,  references  :: Map String Text
+   ,  references  :: Map Text [String] -- Need to change this once we reach the multi-doc stage to include link info
    }
 
 blankIndex = IndexState {
@@ -50,7 +51,15 @@ blankIndex = IndexState {
    ,  references  = empty
    }
 
-processThree :: Text -> [HtmlVers] -> IndexState -> (Html, IndexState)
+boxColorIndex :: Map String String
+boxColorIndex = fromList [
+   ("definition", "lightgreen")
+   ]
+
+
+-- BoxedSec String (Maybe Text) (Maybe [HtmlVers]) [HtmlVers]
+
+processThree :: String -> [HtmlVers] -> IndexState -> (Html, IndexState)
 processThree pagename content indexstate = let
    repeatCase :: [HtmlVers] -> IndexState -> (Html, IndexState)
    repeatCase [] ind = (Empty (), ind)
@@ -65,14 +74,16 @@ processThree pagename content indexstate = let
       RawText x -> (toHtml x, propind)
       Emphasize x -> (i $ toHtml x, propind)
       Bold x -> (b $ toHtml x, propind)
-      Subheading x -> let
-         newind = propind { subsection = subsection propind + 1 }
-         secnumber = subsection newind
-         in (h3 . toHtml $ show secnumber <> ". " <> fromText x, newind)
       ListItem xs -> passFirst li $ repeatCase xs propind
       Itemize xs -> passFirst ul $ repeatCase xs propind
       Enumerate _ xs -> passFirst ol $ repeatCase xs propind -- TODO change ol to (ol ! something) when order instructions available
       Paragraph xs -> passFirst p $ repeatCase xs propind
+
+      Subheading x -> let
+         newind = propind { subsection = subsection propind + 1 }
+         secnumber = subsection newind
+         in (h3 . toHtml $ show secnumber <> ". " <> fromText x, newind)
+
       Figure location thing -> let
          fignumber = figures propind
          newind = propind { figures = fignumber + 1 }
@@ -82,9 +93,34 @@ processThree pagename content indexstate = let
                   alt "A visual representation of the description above"
                figcaption . fromString . fromText $ ("Figure " <> (fromString . show $ fignumber) <> ": " <> thing)
          in (htmlelement, newind)
+
+      BoxedSec kind mlabel mtitle content -> let
+         (newind1, thmnum) = case mlabel of
+            Nothing -> let
+               thmnumt = theorems propind
+               ind = propind { theorems = thmnumt + 1 }
+               in (ind, thmnumt)
+            Just label -> let
+               thmnumt = theorems propind
+               ind = propind {
+                  theorems = thmnumt + 1,
+                  references = insert label [pagename, show thmnumt] $ references propind
+               }
+               in (ind, thmnumt)
+         (processedContent, newind2) = processThree pagename content newind1
+         htmlelement = do
+            H.div ! class_ (fromString kind) $ do
+               H.div ! class_ (fromString $ kind ++ "title") $ toHtml $ case mtitle of
+                  Just ttitle -> (>>) (toHtml ("Definition " ++ show thmnum)) $
+                     (H.span ! A.style "padding: 1em" $ "—") >>
+                        fst (processThree pagename (RawText "(" : ttitle ++ [RawText ")"]) propind)
+                        -- this is SERIOUSLY illustrating that i need an index-neutral [HtmlVers] -> Html function
+                  Nothing -> toHtml("Definition " ++ show thmnum)
+               processedContent
+         in (htmlelement, newind2)
    in case (content,indexstate) of
       ([], ind) -> (Empty (), ind)
-      (x:xs, ind) -> repeatCase xs ind
+      (xs, ind) -> repeatCase xs ind
 
-processLatexToHtml :: Text -> LaTeX -> IndexState -> (Html, IndexState)
+processLatexToHtml :: String -> LaTeX -> IndexState -> (Html, IndexState)
 processLatexToHtml pagename x = processThree pagename $ processOneTwo x

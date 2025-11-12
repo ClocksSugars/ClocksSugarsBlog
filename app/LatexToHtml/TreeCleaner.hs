@@ -57,6 +57,7 @@ data Htmllatexinter =
    |  Section Text
    |  List Text (Maybe [TeXArg]) [[Htmllatexinter]] -- instead of having items, we put item stuff in each element
    |  IFigure Text Text
+   |  IBoxedSec String (Maybe Text) (Maybe [Htmllatexinter]) [Htmllatexinter]
    |  LineBreak
    deriving (Eq, Show)
 
@@ -65,17 +66,22 @@ inlineCommands = ["emph","textbf"]
 
 processOne :: LaTeX -> [Htmllatexinter]
 processOne arg = let
+   handleLabeledBox :: String -> [TeXArg] -> LaTeX -> Htmllatexinter
+   handleLabeledBox kind xargs content = let
+      (itslabel,opttitle) = case xargs of
+         [OptArg x, FixArg (TeXRaw y)] -> (Just y, Just $ processOne x)
+         [FixArg (TeXRaw y)] -> (Just y, Nothing)
+         _ -> (Nothing, Just [RawPrint "Something went wrong here"])
+      in IBoxedSec kind itslabel opttitle $ processOne content
+   handleUnlabeledBox :: String -> [TeXArg] -> LaTeX -> Htmllatexinter
+   handleUnlabeledBox kind xargs content = let
+      opttitle = case xargs of
+         [OptArg x] -> Just $ processOne x
+         [] -> Nothing
+         _ -> Just [RawPrint "Something went wrong here"]
+      in IBoxedSec kind Nothing opttitle $ processOne content
    subprocess :: LaTeX -> Either [Htmllatexinter] Htmllatexinter
    subprocess (TeXRaw xs) = Right $ Prose xs
-   -- isWhiteSpace :: String -> Bool
-   -- isWhiteSpace [] = True
-   -- isWhiteSpace (' ':xs) = isWhiteSpace xs
-   -- isWhiteSpace ('\n':xs) = isWhiteSpace xs
-   -- isWhiteSpace ('\t':xs) = isWhiteSpace xs
-   -- isWhiteSpace _ = False
-   -- subprocess (TeXRaw xs) = if isWhiteSpace . fromText $ xs
-   --    then Left []
-   --    else Right (Prose xs)
    subprocess (TeXComment _) = Left []
    subprocess (TeXSeq exs1 exs2) = Left $ case (subprocess exs1, subprocess exs2) of
       (Left a, Left b) -> a ++ b
@@ -94,6 +100,12 @@ processOne arg = let
             -- must drop 1 bc content preceeding first \item should be ignored. we can also guarentee
             -- there is 2 since this should have compiled in latex thus having at least one \item
             map processOne (drop 1 $ splitByDelimiterLaTeX (TeXCommS "item") content)
+         ("label definition", _) -> Right $ handleLabeledBox "definition" texargs content
+         ("definition", _) -> Right $ handleUnlabeledBox "definition" texargs content
+         ("label theorem", _) -> Right $ handleLabeledBox "theorem" texargs content
+         ("theorem", _) -> Right $ handleUnlabeledBox "theorem" texargs content
+         ("label proof", _) -> Right $ handleLabeledBox "proof" texargs content
+         ("proof", _) -> Right $ handleUnlabeledBox "proof" texargs content
          (_, _) -> Right . RawPrint $ render (TeXEnv kind texargs content) -- This is under the assumption that it is a math env
    subprocess (TeXMath sign content) = Right . InLineEffect $
       TeXMath sign $ applyMathCommands content
@@ -132,6 +144,16 @@ addLineBreaks stuff = let
 --    - The beginning or end of a list item negates a linebreak but causes a paragraph to start
 --
 
+inLineTranslation :: Htmllatexinter -> HtmlVers
+inLineTranslation (InLineEffect (TeXComm "emph" [FixArg (TeXRaw content)])) = Emphasize content
+inLineTranslation (InLineEffect (TeXComm "textbf" [FixArg (TeXRaw content)])) = Bold content
+inLineTranslation (InLineEffect (TeXMath sign content)) = RawText . render $ TeXMath sign content
+inLineTranslation (InLineEffect otherwise) = RawText . render $ otherwise -- Just displays invalid commands so we can see
+inLineTranslation (Prose xs) = RawText xs
+inLineTranslation _ = RawText "failcase" -- this should NEVER HAPPEN since
+-- it is applied to the takeWhile in the below span which has as its
+-- condition that the constructor is Prose or InLineEffect
+
 processTwo :: [Htmllatexinter] -> [HtmlVers]
 processTwo [] = []
 processTwo ((RawPrint content):xs) = RawText content : processTwo xs
@@ -141,6 +163,9 @@ processTwo ((IFigure location content):xs) = Figure location content : processTw
 processTwo ((List kind margs items):xs) = case kind of
    "itemize" -> Itemize (map (ListItem . processTwo) items) : processTwo xs
    _ -> Paragraph [RawText "failed here"] : processTwo xs
+processTwo ((IBoxedSec kind mlabel mtitle content):xs) = BoxedSec kind mlabel (
+   fmap (map inLineTranslation) mtitle
+   ) (processTwo content) : processTwo xs
 processTwo arg = let
    paragraphRelevant :: Htmllatexinter -> Bool
    paragraphRelevant testitem = case testitem of
@@ -150,15 +175,6 @@ processTwo arg = let
       _ -> False
    cond :: Htmllatexinter -> Bool
    cond x= (x /= LineBreak)
-   inLineTranslation :: Htmllatexinter -> HtmlVers
-   inLineTranslation (InLineEffect (TeXComm "emph" [FixArg (TeXRaw content)])) = Emphasize content
-   inLineTranslation (InLineEffect (TeXComm "textbf" [FixArg (TeXRaw content)])) = Bold content
-   inLineTranslation (InLineEffect (TeXMath sign content)) = RawText . render $ TeXMath sign content
-   inLineTranslation (InLineEffect otherwise) = RawText . render $ otherwise -- Just displays invalid commands so we can see
-   inLineTranslation (Prose xs) = RawText xs
-   inLineTranslation _ = RawText "failcase" -- this should NEVER HAPPEN since
-   -- it is applied to the takeWhile in the below span which has as its
-   -- condition that the constructor is Prose or InLineEffect
    worker :: [Htmllatexinter] -> [HtmlVers]
    worker (LineBreak:xs) = worker xs
    worker [] = []
