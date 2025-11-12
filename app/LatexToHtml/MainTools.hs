@@ -51,11 +51,6 @@ blankIndex = IndexState {
    ,  references  = empty
    }
 
-boxColorIndex :: Map String String
-boxColorIndex = fromList [
-   ("definition", "lightgreen")
-   ]
-
 
 -- BoxedSec String (Maybe Text) (Maybe [HtmlVers]) [HtmlVers]
 
