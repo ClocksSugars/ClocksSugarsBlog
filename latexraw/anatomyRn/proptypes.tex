@@ -231,7 +231,92 @@ When $A\colon \mathtt{Type}$ and $P\colon A \to \mathtt{Type}$ is a family of pr
 as the propositional logic version of the $\Pi$-type, reading the symbol $\exists$ as \dquote{there exists} and the comma as \dquote{such that}. When there exists exactly one $a \colon A$  with a populated $P(a)$ type, we say that $\exists ! x \colon A, P(x)$, reading $\exists !$ as \dquote{there exists uniquely}.
 \end{notation}
 
+Together, the operations we have described above show how this dependent type theory, one that exists in computer programming languages with operations and objects $\to, \times, +, \top, \bot, \Pi, \Sigma$, has a one-to-one mapping with the logical operations used in mathematics, $\Rightarrow, \wedge, \vee$, true, false, $\forall, \exists$. This is a consequence of the Curry-Howard correspondance, often stated simply as \dquote{proofs are programs}.
+
 \subsection{Formal Theorems and De Morgan's Laws}
+
+The whole reason we are discussing type theory is to recontextualise what it means to prove a theorem; what we do in pure mathematics often has less in common with the deductions of a detective eliminating possible stories and more in common with a programming problem. That is, although we are certainly making deductions, the manner in which one does this in every day life can sometimes lead one to think logical statements can be weakened or strengthened with synonyms or by persuading oneself with some argumentative sleight of hand. Although for much of this text we will write proofs in the form of worded deductions, those deductions are written each as the application of some function that transforms a logical context.
+
+To that end, it helps to see propositions as not merely statements to be read as true or false, and theorems as statements which are conditionally true, but that propositions have witnesses, and those theorems \emph{act} on those witnesses and are incomplete if every single hypothesis is not proven. Moreover, we do not accept a statement merely because it seems like it should be true, but because we have a transformation of existing witnesses to propositions that produces a new witness that the statement is true. With addition to some core axioms, we hold ourselves to this high a standard in mathematics.
+
+This also means that everything you think you know to be true about the typical mathematical objects, rules like $a + (b + c) = (a + b) + c$ are, if not assumed, propositions that have explicit witnesses. It is no longer enough to expect that things \emph{should} be true, or \emph{ought} to be true of mathematical objects or objects which we intend to describe things in the real world. If they are true, then they have witnesses. This will expose certain things about how the mathematical mode of thought differs from the logical one, or rather, that many things one believes to be true about mathematics are not necessarily true but are in fact distinct choices we make about the system of logic we work in.
+
+Let us begin with some proofs of familiar concepts.
+
+\begin{theorem}[Transitivity of Equality]
+Let $A \colon \mathtt{Type}$ and $a, b ,c \colon A$. If $a \equiv b$ and $b \equiv c$ then $a \equiv c$, or \begin{gather*}
+\forall (a,b,c) \colon A \times A \times A, \hspace{0.4em} (a \equiv b) \Rightarrow (b \equiv c) \Rightarrow (a \equiv c)
+\end{gather*}
+has a witness.
+\end{theorem}
+\begin{my proof}
+We are to define a dependent function $f$ which takes a triple $(a,b,c) \colon A \times A \times A$ and then a witness of $a \equiv b$ and of $b \equiv c$. Presuming we are supplied an appropriate triple, we then need to define \begin{gather*}
+f(a,b,c) \colon (a \equiv b) \to (b \equiv c) \to (a \equiv c).
+\end{gather*}
+Presume also then that we are given a witness $p \colon (a \equiv b)$. Now we will \emph{pattern match} on the remaining argument, that is, since there is only one constructor for the equality type, we know that an argument of type $b \equiv c$ will be supplied as the witness $\mathtt{refl} \hspace{0.2em} b \colon (b \equiv b)$; this is only as appropriate, since equality types only have constructors, and thus are populated, when the left hand side of the equality \emph{is equal} to the right side. And if it were not so, then no witness would be supplied at all (this is indeed a power of the inductive type). In this way, by merely asking what constructor of $b \equiv c$ would be supplied, we have immediately shown that what we are proving could only be the following\begin{gather*}
+f(a,b,b) \colon (a \equiv b) \to (b \equiv b) \to (a \equiv b).
+\end{gather*}
+This is substantially easier job, since we may define $f$ as \begin{gather*}
+f\hspace{0.2em} (a,b,c) \hspace{0.3em} p \hspace{0.3em} (\mathtt{refl} \hspace{0.2em} b) = p
+\end{gather*}
+since, by requiring a witness of $b \equiv c$ and thus ensuring $c$ can only literally be $b$, our final output must be a witness $a \equiv b$ just as our first witness $p \colon (a \equiv b)$. \qed
+\end{my proof}
+
+This mode of reasoning also applies immediately to certain things about numbers. For instance, the idea that $m \equiv n$ implies $m + 1 \equiv n + 1$ is immediate in this manner: a function \begin{gather*}
+\forall (m, n) \colon \nats \times \nats, (m \equiv n) \Rightarrow (\mathbf{S}(m) \equiv \mathbf{S}(n))
+\end{gather*}
+has its witness easily since in the moment that we pattern match on $m \equiv n$, we see that the only constructor could have been $\mathtt{refl} \hspace{0.3em} n$, and thus the case we are proving is exactly \begin{gather*}
+(n \equiv n) \Rightarrow (\mathbf{S}(n) \equiv \mathbf{S}(n))
+\end{gather*}
+with witness given trivially by $\mathtt{refl} \hspace{0.3em} (\mathbf{S}(n))$.
+
+But our system can do much more than just make things we knew intuitively to be true much more burdensome to prove, it can make things which are often difficult for students to comprehend equally as concrete as those we knew to be obvious already. The famous \squote{proof by induction} is brought into crystal clarity by our technique, and in fact \emph{deduced}.
+
+%In this mode of reasoning, we see that the idea $a = b$ implies $a + 1 = b + 1$ is not even obvious either; where is our function $\forall (a,b) \colon A \times A, (a \equiv b) \Rightarrow (\mathbf{S}(a) \equiv \mathbf{S}(b))$? In fact, to show this we need \squote{proof by induction} in its fully formalized form, and indeed we are able to \emph{prove} that proof by induction is even possible.
+
+\begin{label theorem}[Proof by Induction for $\nats$]{ProofByInduction}
+Let $P\colon \nats \to \mathtt{Type}$ be a type family. If $P(\mathbf{Z})$ has witness and there is a function $\forall (n : \nats), P(n) \to P(\mathbf{S}(n))$, then we have proven $\forall (n : \nats), P(n)$. That is, there is a witness for \begin{gather*}
+\forall (P\colon \nats \to \mathtt{Type}), P(\mathbf{Z}) \to (\forall (n : \nats), P(n) \to P(\mathbf{S}(n))) \to \forall (n \colon \nats), P(n).
+\end{gather*}
+\end{label theorem}
+\begin{my proof}
+To complete this proof, we will need to speak of two functions: $f$, the witness of the theorem (type omitted for length) and $g\colon \forall (n : \nats), P(n) \to P(\mathbf{S}(n))$, the function we require that can propogate a proof of $P(n)$ to its successor $P(\mathbf{S}(n))$. Although it may not be obvious by the statement of the theorem, by the right-associativity of function types (yes, even dependent ones), we will also be able to provide $n \colon \nats$, defining our function $f$ by the final output of type $P(n)$ it produces.
+
+Let us pattern match on $n$: it must either be $\mathbf{Z}$ or $\mathbf{S}(m)$ for some $m \colon \nats$. In the first case, we are trying to produce a member of $P(n) = P(\mathbf{Z})$, for which an evidence is already provided as prerequisite. So we may define \begin{gather*}
+f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.3em} \mathbf{Z} = p
+\end{gather*}
+where $p \colon P(\mathbf{Z})$ and the other arguments are defined above. In the case of $\mathbf{S}(m)$, we write \begin{gather*}
+f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.3em} \mathbf{S}(m) = g \hspace{0.2em} m \hspace{0.3em} (f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.2em} m)
+\end{gather*}
+defining a recursive function just as we had done for addition. What we have done on the right hand side is this: since $g\colon \forall (n : \nats), P(n) \to P(\mathbf{S}(n))$, we provide it with $m \colon \nats$ so that we are discussing $g(m) \colon P(m) \to P(\mathbf{S}(m))$. To complete the proof, we need only hand $g(m)$ some proof of $P(m)$, which we hand off recursively to $f$ itself in its specialized form, $f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.2em} m \colon P(m)$ as we described above. In this way, we hand the obligation of actually proving something off through recursion until finally the tally marks are taken off and we are in fact proving $f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.3em} \mathbf{Z} \colon P(\mathbf{Z})$, which has witness $p$ as was provided. \qed
+\end{my proof}
+
+\begin{corollary}
+We can use proof by induction to extend our earlier observation that $a \equiv b$ implies $\mathbf{S}(a) \equiv \mathbf{S}(b)$ to a general form that $b \equiv c$ implies $b + a \equiv c + a$ for all $a \colon \nats$. That is, we find a witness of \begin{gather*}
+\forall a, \forall b, \forall c, (b \equiv c) \Rightarrow (b + a \equiv c + a)
+\end{gather*}
+by setting it as our $P\colon \nats \to \mathtt{Type}$ and performing induction on it. The case $a = \mathbf{Z}$ is covered immediately, recalling the inductive definition $\mathtt{add}(n, \mathbf{Z}) = n$, i.e. $P(\mathbf{Z})$ is in fact the type $\forall b, \forall c, (b \equiv c) \to (b \equiv c)$, proven trivially by passing the witness along. Next we need $\forall (n : \nats), P(n) \to P(\mathbf{S}(n))$, specialized to our case as \begin{gather*}
+\forall (n \colon \nats), \hspace{1em} 
+\forall b, \forall c, (b \equiv c) \Rightarrow (b + n \equiv c + n) 
+\hspace{1em} \Rightarrow
+\hspace{1em}
+\forall b, \forall c, (b \equiv c) \Rightarrow (b + \mathbf{S}(n) \equiv c + \mathbf{S}(n)).
+\end{gather*}
+But again we may apply our inductive definition of addition $\mathtt{add}(m, \mathbf{S}(n)) = \mathtt{add}(\mathbf{S}(m),n)$, and so the output proposition for this is in fact \begin{gather*}
+\forall b, \forall c, (b \equiv c) \Rightarrow (\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n).
+\end{gather*}
+Now recall our observation that $(m \equiv n) \Rightarrow (\mathbf{S}(m) \equiv \mathbf{S}(n))$, which we write in our case with witness function $g\colon \forall b, \forall c, (b \equiv c) \Rightarrow (\mathbf{S}(b) \equiv \mathbf{S}(c))$. Since our inductive function gives us as hypothesis, the witness $h \colon \forall b, \forall c, (b \equiv c) \Rightarrow (b + n \equiv c + n) $, we can now specialize that as $(h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c))) \colon (\mathbf{S}(b) \equiv \mathbf{S}(c)) \rightarrow (\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n)$. We can now chain these together \begin{gather*}
+h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \hspace{0.2em} (g \hspace{0.2em} b \hspace{0.2em} c) \colon (b \equiv c) \Rightarrow (\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n)
+\end{gather*}
+forming out inductive step. Then (and you should check this by looking at the proof by induction's form) we have satisfied the requirements for applying the theorem form of proof by induction, and we deduce $\forall a, \forall b, \forall c, (b \equiv c) \Rightarrow (b + a \equiv c + a)$.
+
+If we use $f$ to denote the inductive rule then the full proof can be read monolithically as \begin{gather*}
+f \hspace{0.2em} (\forall a, \forall b, \forall c, (b \equiv c) \Rightarrow (b + a \equiv c + a)) \hspace{0.2em} (b \mapsto c \mapsto p \mapsto p) \hspace{0.2em} (b \mapsto c \mapsto h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \hspace{0.2em} (g \hspace{0.2em} b \hspace{0.2em} c)).
+\end{gather*}
+\end{corollary}
+
+
+
 
 
 

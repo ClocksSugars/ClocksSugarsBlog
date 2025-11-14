@@ -4,6 +4,8 @@
 \usepackage{tcolorbox}
 \usepackage{amsthm}
 
+\tcbuselibrary{breakable}
+
 
 \makeatletter
 \newcommand{\@myifempty}[3]{\if\relax\detokenize{#1}\textnormal{#2}\else\textnormal{#3}\fi}
@@ -110,7 +112,8 @@
 		colframe=LightYellow,%
 		coltitle=black,%
 		title=Corollary \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
-		label=crl:#2%
+		label=crl:#2,%
+		breakable%
 	}
 
 \newtcolorbox[use counter=statements]%
@@ -119,9 +122,10 @@
 	[]
 	{%
 		colback=white,%
-		colframe=LightYellow,%
+		colframe=Khaki,%
 		coltitle=black,%
 		title=Corollary \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		breakable%
 	}
 	
 \newtcolorbox[use counter=statements]%
