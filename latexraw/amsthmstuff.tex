@@ -2,6 +2,8 @@
 \renewcommand{\thestatements}{\thesection.\arabic{statements}}
 
 \usepackage{tcolorbox}
+\usepackage{amsthm}
+
 
 \makeatletter
 \newcommand{\@myifempty}[3]{\if\relax\detokenize{#1}\textnormal{#2}\else\textnormal{#3}\fi}
@@ -36,7 +38,7 @@
 	[]%
 	{%
 		colback=white,%
-		colframe=LightRed,%
+		colframe=LightCoral,%
 		coltitle=black,%
 		title=Theorem \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 		label=thm:#2%
@@ -45,9 +47,10 @@
 \newtcolorbox[use counter=statements]%
 	{theorem}%
 	[1]%
+	[]
 	{%
 		colback=white,%
-		colframe=LightRed,%
+		colframe=LightCoral,%
 		coltitle=black,%
 		title=Theorem \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 	}
@@ -58,19 +61,19 @@
 	[Proof.]%
 	{%
 		colback=white,%
-		colframe=LightGrey,%
+		colframe=LightBlue,%
 		coltitle=black,%
 		title=#2,%
 		label=prf:#1%
 	}
 
 \newtcolorbox%
-	{proof}%
+	{my proof}%
 	[1]%
 	[Proof.]
 	{%
 		colback=white,%
-		colframe=LightGrey,%
+		colframe=LightBlue,%
 		coltitle=black,%
 		title=#1,%
 	}
@@ -90,6 +93,7 @@
 \newtcolorbox[use counter=statements]%
 	{lemma}%
 	[1]%
+	[]
 	{%
 		colback=white,%
 		colframe=LightPink,%
@@ -112,11 +116,35 @@
 \newtcolorbox[use counter=statements]%
 	{corollary}%
 	[1]%
+	[]
 	{%
 		colback=white,%
 		colframe=LightYellow,%
 		coltitle=black,%
-		title=#1 and \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		title=Corollary \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+	}
+	
+\newtcolorbox[use counter=statements]%
+	{label notation}%
+	[2]%
+	[]%
+	{%
+		colback=white,%
+		colframe=LightGrey,%
+		coltitle=black,%
+		title=Notation \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		label=crl:#2%
+	}
+
+\newtcolorbox[use counter=statements]%
+	{notation}%
+	[1]%
+	[]
+	{%
+		colback=white,%
+		colframe=LightGrey,%
+		coltitle=black,%
+		title=Notation \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 	}
 	
 \makeatother
