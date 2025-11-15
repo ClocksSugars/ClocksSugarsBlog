@@ -369,7 +369,7 @@ thus providing our fictitious element of $\bot$ and completing the theorem.
 
 Notice however that these four statements we prove are clearly not all the logical statements we tend to consider about negation. For instance, we cannot prove \squote{if not both then one is false} ($\neg (P \wedge Q) \Rightarrow \neg P \vee \neg Q$) because our system has hamstrung us. Or more interestingly, it has in fact revealed to us that there are things we believe to be true about logic that are not true \emph{a priori}.
 
-Consider for example, the concept of proof by contradiction. Since $\neg \neg P$ is read as \squote{not not P} you would be forgiven for thinking that it is true only when $P$ is true, but that is not the case. In fact, to believe $\neg \neg P \Rightarrow P$ is a strong statement, implying in particular that you believe all propositions are either true or false ($\forall (P \colon \mathtt{Type}), P \wedge \neg P$), a property called \squote{being \emph{decidable}}. In our every day life, this seems to reflect our experiences, and yet there are rare cases when question must be undecidable, as is famously the case in Alan Turing's solution to the Halting Problem.
+Consider for example, the concept of proof by contradiction. Since $\neg \neg P$ is read as \squote{not not P} you would be forgiven for thinking that it is true only when $P$ is true, but that is not the case. In fact, to believe $\neg \neg P \Rightarrow P$ is a strong statement, implying in particular that you believe all propositions are either true or false ($\forall (P \colon \mathtt{Type}), P \vee \neg P$), a property called \squote{being \emph{decidable}}. In our every day life, this seems to reflect our experiences, and yet there are rare cases when question must be undecidable, as is famously the case in Alan Turing's solution to the Halting Problem.
 
 In fact, to consider dependent type theory as the basis of logic would force one to accept a bizarre truth: that there is more than just true or false, but a secret third thing, the \emph{not false}. We can prove (and this is a fun exercise you are now well equipped to do) that $\neg \neg \neg P \to \neg P$, that is, \squote{not not not $P$ implies not $P$}, but we cannot do anything about $\neg \neg P$. So if we (circularly) think of $\bot = \neg \top$, then we must accept that there is in fact a third outcome, that of $\neg \bot = \neg \neg \top$ in a distinct and meaningful way where there is no fourth (since $\neg \neg \bot = \neg \neg \neg \top$ would be $\neg \top$ as above). We must ask ourselves, is this the system of logic we want to work within? Does this reflect our goals in mathematics?
 
@@ -416,9 +416,35 @@ Let $P,Q \colon \mathtt{Type}$ be \emph{decidable} types, that is, we have witne
 \end{itemize}
 \end{label theorem}
 
+Since this proof is quite long and largely an application of previously applied techniques, we by default minimize it in the web version. Please click it to expand.
+
 \begin{my proof}
 We have already shown some parts of these in theorem \ref{thm:IncompleteNegationRules}, so we only need to show the remaining parts. \begin{itemize}
-\item Assume we given $P$ and 
+\item We have already assumed by hypothesis $P \colon \mathtt{Type}$ and some witness $P \vee \neg P$, so let us pattern match on this witness. It is either $l \hspace{0.2em} p$ with $p \colon P$ or $r \hspace{0.2em} f$ with $f \colon P \to \bot$. In the former case, by right-associativity we are done since we may assign the function $\neg \neg P \Rightarrow P$ to be merely the constant function $p$. In the latter case, we must also be given an element of $\neg \neg P$, that is, some $g\colon (P \to \bot) \to \bot$. In this case, $g \hspace{0.2em} f \colon \bot$ produces the fictitious element of the empty type, allowing us to use the principle of explosion with trivial function $h \colon \bot \to P$. \begin{gather*}
+\mathtt{RAA} \hspace{0.2em} (l \hspace{0.2em} p) \hspace{0.2em} g = p \\
+\mathtt{RAA} \hspace{0.2em} (r \hspace{0.2em} f) \hspace{0.2em} g = h \hspace{0.2em} (g \hspace{0.2em} f)
+\end{gather*}
+\item Recall that $\Leftrightarrow$ merely means a pair of implications going in either direction. We have already shown $\neg P \vee \neg Q \Rightarrow \neg (P \wedge Q)$ so we need now to show in our context that $\neg (P \wedge Q) \Rightarrow \neg P \vee \neg Q$, or rather \begin{gather*}
+\big((P \times Q) \to \bot \big) \to \big( (P \to \bot) + (Q \to \bot) \big).
+\end{gather*}
+To show this, we will need to actively use our information that $P$ and $Q$ are decidable, so in fact, the above type as written may not have witnesses, nor are we trying to prove it in a general sense. Our full theorem, accounting for the desired context, is \begin{align*}
+f \colon \forall (P : \mathtt{Type}), \bigg( & P \vee \neg P \to \forall (Q : \mathtt{Type}), \Big( Q \vee \neg Q \to  \\
+& \big((P \times Q) \to \bot \big) \to \big( (P \to \bot) + (Q \to \bot) \big) \Big) \bigg)
+\end{align*}
+We must now pattern match on $P \vee \neg P$ and $Q \vee \neg Q$ with $p \colon P$ or $g_p \colon P \to \bot$ and $q \colon Q$ or $g_q \colon Q \to \bot$ respectively. Then let $h \colon (P \times Q) \to \bot$ be the next argument and $k \colon \bot \to \neg P \vee \neg Q$ be a trivial function. Our four cases become \begin{gather*}
+f \hspace{0.2em} P \hspace{0.2em} (l \hspace{0.2em} p) \hspace{0.2em} Q \hspace{0.2em} (l \hspace{0.2em} q) \hspace{0.2em} h = k \hspace{0.2em} \big(h \hspace{0.2em} (p,q) \big) \\
+f \hspace{0.2em} P \hspace{0.2em} (l \hspace{0.2em} p) \hspace{0.2em} Q \hspace{0.2em} (r \hspace{0.2em} g_q) \hspace{0.2em} h = r \hspace{0.2em} g_q \\
+f \hspace{0.2em} P \hspace{0.2em} (r \hspace{0.2em} g_p) \hspace{0.2em} Q \hspace{0.2em} (l \hspace{0.2em} q) \hspace{0.2em} h = l \hspace{0.2em} g_p \\
+f \hspace{0.2em} P \hspace{0.2em} (r \hspace{0.2em} g_p) \hspace{0.2em} Q \hspace{0.2em} (r \hspace{0.2em} g_q) \hspace{0.2em} h = l \hspace{0.2em} g_p
+\end{gather*}
+Notice that whenever either decidable proposition is decided false, we simply use that to form our witness of \dquote{not $P$ or not $Q$}. 
+
+\item We may reuse a lot of the previous reasoning. We already showed $\neg P \wedge \neg Q \Rightarrow \neg (P \vee Q)$ so now we must show $\neg (P \vee Q) \Rightarrow \neg P \wedge \neg Q$, and to do so we must once again pattern match on our decidability types. Let $f$ be our function as before with the same first four arguments, the fifth now being of type $h \colon (P + Q) \to \bot$ and our desired output type being $\neg P \wedge \neg Q$. This time, let us define $k_*$ denote our trivial function wild-card. That is, if we can prove false, let us say that anything desired is proven instead of defining a trivial function for each type. \begin{gather*}
+f \hspace{0.2em} P \hspace{0.2em} (l \hspace{0.2em} p) \hspace{0.2em} Q \hspace{0.2em} (l \hspace{0.2em} q) \hspace{0.2em} h = k_* \hspace{0.2em} \big(h \hspace{0.2em} (l \hspace{0.2em} p) \big) \\
+f \hspace{0.2em} P \hspace{0.2em} (l \hspace{0.2em} p) \hspace{0.2em} Q \hspace{0.2em} (r \hspace{0.2em} g_q) \hspace{0.2em} h = k_* \hspace{0.2em} \big(h \hspace{0.2em} (l \hspace{0.2em} p) \big) \\
+f \hspace{0.2em} P \hspace{0.2em} (r \hspace{0.2em} g_p) \hspace{0.2em} Q \hspace{0.2em} (l \hspace{0.2em} q) \hspace{0.2em} h = k_* \hspace{0.2em} \big(h \hspace{0.2em} (r \hspace{0.2em} q) \big) \\
+f \hspace{0.2em} P \hspace{0.2em} (r \hspace{0.2em} g_p) \hspace{0.2em} Q \hspace{0.2em} (r \hspace{0.2em} g_q) \hspace{0.2em} h = (g_p,g_q)
+\end{gather*}
 \end{itemize}
 \end{my proof}
 
