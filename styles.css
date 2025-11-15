@@ -22,6 +22,30 @@
  initial-value: lightgreen;
 }
 
+@property --thm-color {
+ syntax: "<color>";
+ inherits: false;
+ initial-value: lightcoral;
+}
+
+@property --prf-color {
+ syntax: "<color>";
+ inherits: false;
+ initial-value: lightblue;
+}
+
+@property --crl-color {
+ syntax: "<color>";
+ inherits: false;
+ initial-value: khaki;
+}
+
+@property --ntn-color {
+ syntax: "<color>";
+ inherits: false;
+ initial-value: lightgrey;
+}
+
 h1 {
   color: grey;
 }
@@ -74,17 +98,67 @@ h1 {
    padding-bottom: 15px;
 }
 
-.definition {
+.Definition {
    border: 3px solid var(--def-color);
    border-radius: 8px;
    background-color: white;
    padding: 5px;
-   display: flex;
-   flex-direction: column;
 }
 
-.definitiontitle {
+.Definitiontitle {
    background-color: var(--def-color);
+   border-radius: 5px;
+   padding: 5px;
+}
+
+.Theorem {
+   border: 3px solid var(--thm-color);
+   border-radius: 8px;
+   background-color: white;
+   padding: 5px;
+}
+
+.Theoremtitle {
+   background-color: var(--thm-color);
+   border-radius: 5px;
+   padding: 5px;
+}
+
+.Proof {
+   border: 3px solid var(--prf-color);
+   border-radius: 8px;
+   background-color: white;
+   padding: 5px;
+}
+
+.Prooftitle {
+   background-color: var(--prf-color);
+   border-radius: 5px;
+   padding: 5px;
+}
+
+.Corollary {
+   border: 3px solid var(--crl-color);
+   border-radius: 8px;
+   background-color: white;
+   padding: 5px;
+}
+
+.Corollarytitle {
+   background-color: var(--crl-color);
+   border-radius: 5px;
+   padding: 5px;
+}
+
+.Notation {
+   border: 3px solid var(--ntn-color);
+   border-radius: 8px;
+   background-color: white;
+   padding: 5px;
+}
+
+.Notationtitle {
+   background-color: var(--ntn-color);
    border-radius: 5px;
    padding: 5px;
 }

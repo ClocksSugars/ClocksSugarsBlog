@@ -109,7 +109,7 @@ Although it may not be obvious, the product type is exactly our $\mathtt{AND}$ o
 Using this as inspiration, we can immediately figure out that the analogous $\mathtt{OR}$ operation will also have a more general use, that is, injecting elements of two types into the one.
 
 \begin{definition}[Sum Type]
-For two types $A, B \colon Type$, define their \textbf{sum type} denoted $A + B$, to be the new type with constructors $l\colon A \to A + B$ and $r \colon B \to A + B$.
+For two types $A, B \colon \mathtt{Type}$, define their \textbf{sum type} denoted $A + B$, to be the new type with constructors $l\colon A \to A + B$ and $r \colon B \to A + B$ (often called \squote{in left} and \squote{in right}).
 \end{definition}
 
 These constructors, like all constructors, have no additional structure other than that stated. $l$ will take \emph{any} $a \colon A$ and merely dump it in $A + B$, just as $r$ will. In this way, if we have even one of $p \colon P$ \emph{or} $q \colon Q$, we will populate $A + B$; we could just as well have $Q$ be a type that is empty of witnesses and we will still have $l \hspace{1pt} p \colon A + B$ as witness. This is our logical $\mathtt{OR}$.
@@ -158,6 +158,8 @@ where $h \colon \bot \to Q$ is the trivial function. This can be interpretted as
 Then for any $P + Q$ we have constructed $f \colon P + Q \to \neg P \to Q$. \qed
 \end{my proof}
 
+Part of the power of using type theory is that, as discussed before but more obvious now, a function (and thus a theorem) is defined so long as one can account only for every constructor the function may receive. This case is simple, asking what constructors $P + Q$ could have and then taking any member of $\neg P$ absent a question about which constructor it is exactly, however as we will see going forward, theorems of arbitrary complexity will yield to this kind of case analysis since we are merely fulfilling our obligation to provide an output for every input. Thus the question \squote{which witnesses did we receive?} is merely to divide our sets of inputs/witnesses/circumstances into classes which may individually have easier proofs.
+
 Before moving on, note that we have introduced a split in the notation of constructive mathematics and classical mathematics: in type theory, propositions and their operations exist at the same level as objects, and use the same tools. As our intention here is to proceed, after this section, to classical mathematics, it would be better practice to give our operations appropriate aliases so that we are not confused in future.
 
 \begin{notation}
@@ -166,7 +168,7 @@ When they act on propositions, define the following symbols as aliases for their
 \item $\wedge := \times \hspace{0.5em}$ read as \squote{and},
 \item $\vee := + \hspace{0.5em}$ read as \squote{or},
 \item $\Rightarrow \hspace{4pt} := \hspace{4pt} \to \hspace{0.5em}$ read as \squote{implies}, e.g. $P \Rightarrow Q$ is the type of functions taking witnesses $p \colon P$ and producing some witness $q \colon Q$ , along with $(P \Leftarrow Q) = (Q \rightarrow P)$,
-\item $(P \Leftrightarrow Q) = (P \to Q) \times (Q \to P)$, that is, we say $P$ \squote{if and only if} $Q$ when we can find as witness a function $P \to Q$ as well as a function $Q \to P$ so that both propositions imply one another. 
+\item $(P \Leftrightarrow Q) := (P \to Q) \times (Q \to P)$, that is, we say $P$ \squote{if and only if} $Q$ when we can find as witness a function $P \to Q$ as well as a function $Q \to P$ so that both propositions imply one another. 
 \end{itemize}
 \end{notation}
 
@@ -233,7 +235,7 @@ as the propositional logic version of the $\Pi$-type, reading the symbol $\exist
 
 Together, the operations we have described above show how this dependent type theory, one that exists in computer programming languages with operations and objects $\to, \times, +, \top, \bot, \Pi, \Sigma$, has a one-to-one mapping with the logical operations used in mathematics, $\Rightarrow, \wedge, \vee$, true, false, $\forall, \exists$. This is a consequence of the Curry-Howard correspondance, often stated simply as \dquote{proofs are programs}.
 
-\subsection{Formal Theorems and De Morgan's Laws}
+\subsection{Formal Theorems}
 
 The whole reason we are discussing type theory is to recontextualise what it means to prove a theorem; what we do in pure mathematics often has less in common with the deductions of a detective eliminating possible stories and more in common with a programming problem. That is, although we are certainly making deductions, the manner in which one does this in every day life can sometimes lead one to think logical statements can be weakened or strengthened with synonyms or by persuading oneself with some argumentative sleight of hand. Although for much of this text we will write proofs in the form of worded deductions, those deductions are written each as the application of some function that transforms a logical context.
 
@@ -266,7 +268,7 @@ This mode of reasoning also applies immediately to certain things about numbers.
 \forall (m, n) \colon \nats \times \nats, (m \equiv n) \Rightarrow (\mathbf{S}(m) \equiv \mathbf{S}(n))
 \end{gather*}
 has its witness easily since in the moment that we pattern match on $m \equiv n$, we see that the only constructor could have been $\mathtt{refl} \hspace{0.3em} n$, and thus the case we are proving is exactly \begin{gather*}
-(n \equiv n) \Rightarrow (\mathbf{S}(n) \equiv \mathbf{S}(n))
+(n \equiv n) \Rightarrow \big(\mathbf{S}(n) \equiv \mathbf{S}(n) \big)
 \end{gather*}
 with witness given trivially by $\mathtt{refl} \hspace{0.3em} (\mathbf{S}(n))$.
 
@@ -276,11 +278,11 @@ But our system can do much more than just make things we knew intuitively to be 
 
 \begin{label theorem}[Proof by Induction for $\nats$]{ProofByInduction}
 Let $P\colon \nats \to \mathtt{Type}$ be a type family. If $P(\mathbf{Z})$ has witness and there is a function $\forall (n : \nats), P(n) \to P(\mathbf{S}(n))$, then we have proven $\forall (n : \nats), P(n)$. That is, there is a witness for \begin{gather*}
-\forall (P\colon \nats \to \mathtt{Type}), P(\mathbf{Z}) \to (\forall (n : \nats), P(n) \to P(\mathbf{S}(n))) \to \forall (n \colon \nats), P(n).
+\forall (P\colon \nats \to \mathtt{Type}), P(\mathbf{Z}) \Rightarrow \big(\forall (n : \nats), P(n) \Rightarrow P(\mathbf{S}(n)) \big) \Rightarrow \forall (n \colon \nats), P(n).
 \end{gather*}
 \end{label theorem}
 \begin{my proof}
-To complete this proof, we will need to speak of two functions: $f$, the witness of the theorem (type omitted for length) and $g\colon \forall (n : \nats), P(n) \to P(\mathbf{S}(n))$, the function we require that can propogate a proof of $P(n)$ to its successor $P(\mathbf{S}(n))$. Although it may not be obvious by the statement of the theorem, by the right-associativity of function types (yes, even dependent ones), we will also be able to provide $n \colon \nats$, defining our function $f$ by the final output of type $P(n)$ it produces.
+To complete this proof, we will need to speak of two functions: $f$, the witness of the theorem (type omitted for length) and $g\colon \forall (n : \nats), P(n) \Rightarrow P(\mathbf{S}(n))$, the function we require that can propogate a proof of $P(n)$ to its successor $P(\mathbf{S}(n))$. Although it may not be obvious by the statement of the theorem, by the right-associativity of function types (yes, even dependent ones), we will also be able to provide $n \colon \nats$, defining our function $f$ by the final output of type $P(n)$ it produces.
 
 Let us pattern match on $n$: it must either be $\mathbf{Z}$ or $\mathbf{S}(m)$ for some $m \colon \nats$. In the first case, we are trying to produce a member of $P(n) = P(\mathbf{Z})$, for which an evidence is already provided as prerequisite. So we may define \begin{gather*}
 f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.3em} \mathbf{Z} = p
@@ -288,35 +290,137 @@ f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.3em} \mathbf{Z} =
 where $p \colon P(\mathbf{Z})$ and the other arguments are defined above. In the case of $\mathbf{S}(m)$, we write \begin{gather*}
 f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.3em} \mathbf{S}(m) = g \hspace{0.2em} m \hspace{0.3em} (f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.2em} m)
 \end{gather*}
-defining a recursive function just as we had done for addition. What we have done on the right hand side is this: since $g\colon \forall (n : \nats), P(n) \to P(\mathbf{S}(n))$, we provide it with $m \colon \nats$ so that we are discussing $g(m) \colon P(m) \to P(\mathbf{S}(m))$. To complete the proof, we need only hand $g(m)$ some proof of $P(m)$, which we hand off recursively to $f$ itself in its specialized form, $f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.2em} m \colon P(m)$ as we described above. In this way, we hand the obligation of actually proving something off through recursion until finally the tally marks are taken off and we are in fact proving $f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.3em} \mathbf{Z} \colon P(\mathbf{Z})$, which has witness $p$ as was provided. \qed
+defining a recursive function just as we had done for addition. What we have done on the right hand side is this: since $g\colon \forall (n : \nats), P(n) \Rightarrow P(\mathbf{S}(n))$, we provide it with $m \colon \nats$ so that we are discussing $g(m) \colon P(m) \Rightarrow P(\mathbf{S}(m))$. To complete the proof, we need only hand $g(m)$ some proof of $P(m)$, which we hand off recursively to $f$ itself in its specialized form, $f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.2em} m \colon P(m)$ as we described above. In this way, we hand the obligation of actually proving something off through recursion until finally the tally marks are taken off and we are in fact proving $f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.3em} \mathbf{Z} \colon P(\mathbf{Z})$, which has witness $p$ as was provided. \qed
 \end{my proof}
 
 \begin{corollary}
 We can use proof by induction to extend our earlier observation that $a \equiv b$ implies $\mathbf{S}(a) \equiv \mathbf{S}(b)$ to a general form that $b \equiv c$ implies $b + a \equiv c + a$ for all $a \colon \nats$. That is, we find a witness of \begin{gather*}
 \forall a, \forall b, \forall c, (b \equiv c) \Rightarrow (b + a \equiv c + a)
 \end{gather*}
-by setting it as our $P\colon \nats \to \mathtt{Type}$ and performing induction on it. The case $a = \mathbf{Z}$ is covered immediately, recalling the inductive definition $\mathtt{add}(n, \mathbf{Z}) = n$, i.e. $P(\mathbf{Z})$ is in fact the type $\forall b, \forall c, (b \equiv c) \to (b \equiv c)$, proven trivially by passing the witness along. Next we need $\forall (n : \nats), P(n) \to P(\mathbf{S}(n))$, specialized to our case as \begin{gather*}
-\forall (n \colon \nats), \hspace{1em} 
-\forall b, \forall c, (b \equiv c) \Rightarrow (b + n \equiv c + n) 
-\hspace{1em} \Rightarrow
-\hspace{1em}
-\forall b, \forall c, (b \equiv c) \Rightarrow (b + \mathbf{S}(n) \equiv c + \mathbf{S}(n)).
-\end{gather*}
+by setting it as our $P\colon \nats \to \mathtt{Type}$ and performing induction on it. The case $a = \mathbf{Z}$ is covered immediately, recalling the inductive definition $\mathtt{add}(n, \mathbf{Z}) = n$, i.e. $P(\mathbf{Z})$ is in fact the type $\forall b, \forall c, (b \equiv c) \to (b \equiv c)$, proven trivially by passing the witness along. Next we need $\forall (n : \nats), P(n) \to P(\mathbf{S}(n))$, specialized to our case as \begin{align*}
+\forall (n \colon \nats), \hspace{1em} &
+\forall b, \forall c, (b \equiv c) \Rightarrow (b + n \equiv c + n) \\
+\Rightarrow
+\hspace{1em} & 
+\forall b, \forall c, (b \equiv c) \Rightarrow \big(b + \mathbf{S}(n) \equiv c + \mathbf{S}(n) \big).
+\end{align*}
 But again we may apply our inductive definition of addition $\mathtt{add}(m, \mathbf{S}(n)) = \mathtt{add}(\mathbf{S}(m),n)$, and so the output proposition for this is in fact \begin{gather*}
 \forall b, \forall c, (b \equiv c) \Rightarrow (\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n).
 \end{gather*}
-Now recall our observation that $(m \equiv n) \Rightarrow (\mathbf{S}(m) \equiv \mathbf{S}(n))$, which we write in our case with witness function $g\colon \forall b, \forall c, (b \equiv c) \Rightarrow (\mathbf{S}(b) \equiv \mathbf{S}(c))$. Since our inductive function gives us as hypothesis, the witness $h \colon \forall b, \forall c, (b \equiv c) \Rightarrow (b + n \equiv c + n) $, we can now specialize that as $(h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c))) \colon (\mathbf{S}(b) \equiv \mathbf{S}(c)) \rightarrow (\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n)$. We can now chain these together \begin{gather*}
-h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \hspace{0.2em} (g \hspace{0.2em} b \hspace{0.2em} c) \colon (b \equiv c) \Rightarrow (\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n)
+Now recall our observation that $(m \equiv n) \Rightarrow (\mathbf{S}(m) \equiv \mathbf{S}(n))$, which we write in our case with witness function $g\colon \forall b, \forall c, (b \equiv c) \Rightarrow (\mathbf{S}(b) \equiv \mathbf{S}(c))$. Since our inductive function gives us as hypothesis, the witness $h \colon \forall b, \forall c, (b \equiv c) \Rightarrow (b + n \equiv c + n) $, we can now specialize that as $\big(h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \big) \colon \big(\mathbf{S}(b) \equiv \mathbf{S}(c) \big) \rightarrow \big(\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n \big)$. We can now chain these together \begin{gather*}
+h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \hspace{0.2em} (g \hspace{0.2em} b \hspace{0.2em} c) \colon (b \equiv c) \Rightarrow \big(\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n \big)
 \end{gather*}
 forming out inductive step. Then (and you should check this by looking at the proof by induction's form) we have satisfied the requirements for applying the theorem form of proof by induction, and we deduce $\forall a, \forall b, \forall c, (b \equiv c) \Rightarrow (b + a \equiv c + a)$.
 
-If we use $f$ to denote the inductive rule then the full proof can be read monolithically as \begin{gather*}
-f \hspace{0.2em} (\forall a, \forall b, \forall c, (b \equiv c) \Rightarrow (b + a \equiv c + a)) \hspace{0.2em} (b \mapsto c \mapsto p \mapsto p) \hspace{0.2em} (b \mapsto c \mapsto h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \hspace{0.2em} (g \hspace{0.2em} b \hspace{0.2em} c)).
-\end{gather*}
+If we use $f$ to denote the inductive rule then the full proof can be read monolithically as \begin{align*}
+f \hspace{0.2em}
+& \big( \forall a, \forall b, \forall c, (b \equiv c) \Rightarrow (b + a \equiv c + a) \big) \\
+& (b \mapsto c \mapsto p \mapsto p) \\
+& \big(b \mapsto c \mapsto h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \hspace{0.2em} (g \hspace{0.2em} b \hspace{0.2em} c)\big).
+\end{align*}
 \end{corollary}
 
+In practice, we will rarely use this kind of reasoning in mathematics, since, while a useful tool for being absolutely certain no logical error has been made, we typically try to adjust our intuitions so that we can reason such steps automatically. That is not to say, in this moment at least, that the rigidity we expect of pure mathematics is any weaker, but that statements such as $a = b \Rightarrow a + c = b + c$ is one we train our intuitions on so that we know automatically how to make \emph{algebraic} deductions.
 
+When we lack such intuitions, or when we know our intuitions are at risk of failing us, this system or modes of reasoning like it are there to catch us. This is often the case when we speak about the various refactorings we can do to statements to make them easier to prove related to negation. It is a common mistake for students to set out to prove by contradiction, only to structure the negated form of the proposition incorrectly and make the proof trivial but wrong. With the benefit of this system, we will not be making such mistakes.
 
+\begin{label theorem}[Some of De Morgan's Laws]{IncompleteNegationRules}
+Let $P,Q \colon \mathtt{Type}$ be propositions, and let $A \colon \mathtt{Type}$ with $R\colon A \to \mathtt{Type}$ a type family. Then we have the following:\begin{itemize}
+\item $\neg P \vee \neg Q \Rightarrow \neg (P \wedge Q)$ i.e. \squote{if $P$ or $Q$ is false then they are not both true}
+\item $\neg P \wedge \neg Q \Rightarrow \neg (P \vee Q)$ i.e. \squote{if both are false then not one of them are true}
+\item $\neg (\exists (a \colon A), R(a)) \Rightarrow \forall (a \colon A), \neg R(a)$ i.e. \squote{if not one example, then for all false}
+\item $\forall (a \colon A), \neg R(a) \Rightarrow \neg (\exists (a \colon A), R(a))$ i.e. \squote{if for all false, then there does not exist an example}
+\end{itemize}
+\end{label theorem}
+
+\begin{my proof}
+\begin{itemize}
+\item Let us proceed as if $P,Q$ were normal types. Then we read $\neg P \vee \neg Q = (P \to \bot) + (Q \to \bot)$ and $\neg (P \wedge Q) = P \times Q \to \bot$. Together then, we must find a witness function of the type \begin{align*}
+(P \to \bot) + (Q \to \bot) \to (P \times Q \to \bot).
+\end{align*}
+Let us call this witness $f$. Then to pattern match $f$ for its argument in $(P \to \bot) + (Q \to \bot)$, we must define its procedure in when it receives either $l \hspace{0.2em} g$ where $g \colon P \to \bot$ or  $r \hspace{0.2em} h$ where $h \colon Q \to \bot$. In either case, recalling the right-associativity of $\to$, we may then define its behaviour as a function with output in $\bot$ if it receives an input $(p,q) \colon P \times Q$ thus solving in the counterfactual. Then, for example, we may extract the desired value $p$ and apply it to our function $g \colon P \to \bot$. Thus $f$ is defined \begin{gather*}
+f \hspace{0.2em} (l \hspace{0.2em} g) \hspace{0.2em} (p,q) = g \hspace{0.2em} p \\
+f \hspace{0.2em} (r \hspace{0.2em} h) \hspace{0.2em} (p,q) = h \hspace{0.2em} q
+\end{gather*}
+\item Once again, note that the desired statement is written fully as \begin{gather*}
+(P \to \bot) \times (Q \to \bot) \to (P + Q \to \bot).
+\end{gather*}
+with the benefit of familiarity with the previous proof, we must define the behaviour assuming we are given an argument $(g,h) \colon (P \to \bot) \times (Q \to \bot)$ and, using right-associativity, let us say we are also given an argument $P + Q$ which must be pattern matched as either $l \hspace{0.2em} p$ or $r \hspace{0.2em} q$ for $p \colon P$ or $q \colon Q$ respectively. Then we can define $f$ as \begin{gather*}
+f \hspace{0.2em} (g,h) \hspace{0.2em} (l \hspace{0.2em} p) = g \hspace{0.2em} p \\
+f \hspace{0.2em} (g,h) \hspace{0.2em} (r \hspace{0.2em} h) = h \hspace{0.2em} q
+\end{gather*}
+a near re-ordering of the previous proof.
+\item Despite the different symbols, this is remarkably similar to the previous proofs. First, observe what we want to prove is really \begin{gather*}
+\left( \sum_{a : A} R(a) \to \bot \right) \to (a : A) \to (R(a) \to \bot)
+\end{gather*}
+with $\sum_{a : A} R(a)$ the type of dependent pairs $(a,r)$ with $r \colon R(a)$. Then, once again providing our witness $f$ with arguments $g \colon \sum_{a : A} R(a) \to \bot$, $a \colon A$ and $r \colon R(a)$ just as in previous proofs, we define $f$ as \begin{gather*}
+f \hspace{0.2em} g \hspace{0.2em} a \hspace{0.2em} r = g \hspace{0.2em} (a,r)
+\end{gather*}
+since the pair $(a,r)$ is exactly the argument $g$ needs to produce an element of $\bot$, completing the counterfactual.
+\item Repeating our procedure, what we aim to prove is really \begin{gather*}
+\big( (a \colon A) \to ( R(a) \to \bot) \big) \to \left( \sum_{a : A} R(a) \to \bot \right).
+\end{gather*}
+So we will provide our proof $f$ with $g \colon (a \colon A) \to R(a) \to \bot$ and a pair $(a,r) \colon \sum_{a : A} R(a)$. We then have immediately \begin{gather*}
+f \hspace{0.2em} g \hspace{0.2em} (a,r) = g \hspace{0.2em} a \hspace{0.2em} r 
+\end{gather*}
+thus providing our fictitious element of $\bot$ and completing the theorem.
+\end{itemize}
+\end{my proof}
+
+Notice however that these four statements we prove are clearly not all the logical statements we tend to consider about negation. For instance, we cannot prove \squote{if not both then one is false} ($\neg (P \wedge Q) \Rightarrow \neg P \vee \neg Q$) because our system has hamstrung us. Or more interestingly, it has in fact revealed to us that there are things we believe to be true about logic that are not true \emph{a priori}.
+
+Consider for example, the concept of proof by contradiction. Since $\neg \neg P$ is read as \squote{not not P} you would be forgiven for thinking that it is true only when $P$ is true, but that is not the case. In fact, to believe $\neg \neg P \Rightarrow P$ is a strong statement, implying in particular that you believe all propositions are either true or false ($\forall (P \colon \mathtt{Type}), P \wedge \neg P$), a property called \squote{being \emph{decidable}}. In our every day life, this seems to reflect our experiences, and yet there are rare cases when question must be undecidable, as is famously the case in Alan Turing's solution to the Halting Problem.
+
+In fact, to consider dependent type theory as the basis of logic would force one to accept a bizarre truth: that there is more than just true or false, but a secret third thing, the \emph{not false}. We can prove (and this is a fun exercise you are now well equipped to do) that $\neg \neg \neg P \to \neg P$, that is, \squote{not not not $P$ implies not $P$}, but we cannot do anything about $\neg \neg P$. So if we (circularly) think of $\bot = \neg \top$, then we must accept that there is in fact a third outcome, that of $\neg \bot = \neg \neg \top$ in a distinct and meaningful way where there is no fourth (since $\neg \neg \bot = \neg \neg \neg \top$ would be $\neg \top$ as above). We must ask ourselves, is this the system of logic we want to work within? Does this reflect our goals in mathematics?
+
+\subsection{The Problem with Constructive Mathematics}
+
+To believe that all propositions are either true or false is in fact a distinct \textbf{axiom}, called the \emph{Law of Excluded Middle} (LEM) in this case, a statement which we consider to be true and do not question precisely because it is part of the foundation of our system of reasoning. To claim an axiom in one's reasoning is a profoundly dangerous step that must be exercised with caution; presume the wrong thing, and you will end up in a counterfactual, but axiomitise the wrong thing, and your entire logical system is vulnerable to the principle of explosion.
+
+And yet if it is dangerous to believe this axiom since it has clear contradictions, why is it that proof by contradiction is commonly accepted in mathematics?
+
+Here we meet the difference between mathematics and logic; there is a sense in which mathematicians are more interested in the metaphysical behaviour of the objects they study than the logical soundness of them. This is not to say that mathematicians are willing to accept contradictions (in fact they are repulsed by them!) but it is just not their primary concern. To a mathematician, the fact that almost every object they encounter is decidable is enough to consider these rare cases the exception to the rule, i.e. statements are decidable until proven or cautioned otherwise. 
+
+Moreover, this more metaphysical interest means that there are circumstances even when even mathematicians, looking at a statement that agrees with their metaphysical understanding of an object, will be tempted to say \squote{this seems true enough}. Such is famously the case with the \emph{axiom of choice}.
+
+This axiom is famously difficult to comprehend, and many on encountering it are unclear on why exactly it is an axiom which must be asserted rather than a straight forward logical operation. To us, with the benefit of type theory, we see the axiom of choice as a clear assertion of type \begin{gather*}
+\Big(\forall (a : A), \exists (b : B), P(a,b) \Big) \hspace{0.5em} \to \hspace{0.5em} \exists (f : A \to B), \forall (a : A), P(a,f(a))
+\end{gather*}
+given a family of types $P \colon A \to B \to \mathtt{Type}$. We read this statement as \dquote{if for all $a$ there exists a $b$ so that $P(a,b)$ is true, then there exists a \emph{choice} function $f$ which for all $a$ will choose the $b = f(a)$ satisfying $P(a,b)$}. Yet even here you may begin to see why such a statement makes one question why it is an axiom: if we know the $b$ exists, then surely it is right there, and we can just \emph{choose it}, right? But in fact, it can be shown that the axiom of choice implies the law of excluded middle. It is the nature of the mathematician (more particularly the naive one) to look at such a statement and be unconcerned with it; their attention is instead focused on the nature of the type or \emph{set} that they are choosing from. One might remark even in the other direction, that the great success of mathematics is not in spite of a blindness to logic but \emph{because} of their singleminded metaphysical curiosity. For much of the remainder of this text, we will embrace that curiosity, and the mindset of the mathematician.
+
+We may even point out a distinct failure of the system we have been working within. That is, while we can prove even quite sophisticated mathematical theorems in dependent type theory, we do so with a stipulation that is not the case in mathematics. A witness to the type $\exists (a : A), P(a)$ is not just evidence that it is true that there exists $a$ satisfying $P(a)$, it is an example of it being true $(a,p)$. The functional nature of our deductions means that we cannot merely prove an example exists, we must \emph{construct} it, hence the name \textbf{constructive mathematics}.
+
+This burden of proof is distinctly higher than necessary. There are valuable things we can say when we are able to prove examples or counter-examples exist where the example itself does not particularly matter. We can even reverse the accusatory finger; since constructive proofs are computational (indeed there are many languages that will run them), to expect all of mathematics to be fully constructive corresponds in some sense to an axiom itself, that the world we live in is a computable one. Does every question that has an answer have a procedure to find that answer? This is an assumption mathematicians do not make.
+
+\subsection{De Morgan's Laws and Proof Techniques}
+
+As I said many times before, the rules of dependent type theory remain valuable to us despite our disinterest in its strict adherence. Instead, we know now what it means exactly to presume something is true: treating our theorems as types and our proofs as functions, we can use our intuition to guide our steps and know what type-form a presumption might have, noting immediately if it is reasonable or in fact a much more dangerous statement.
+
+Accordingly, we can now give a more full set of rules for how to manipulate negations, paying off one of the uses of type theory that we will continue to return to throughout this text.
+
+\begin{label theorem}[De Morgan's Laws, Proof by Contradiction, etc.]{NegationRules}
+Let $P,Q \colon \mathtt{Type}$ be \emph{decidable} types, that is, we have witnesses of $P \vee \neg P$ and $Q \vee \neg Q$, and let $R \colon A \to \mathtt{Type}$ be a family of decidable types. Then we have the following: \begin{itemize}
+\item Proof by contradiction when a proposition is decidable, i.e. \emph{Reductio ad absurdum} \begin{gather*}
+\mathtt{RAA}\colon \forall (P : \mathtt{Type} ), P \vee \neg P \Rightarrow ( \neg \neg P \Rightarrow P)
+\end{gather*}
+\item $\neg(P \wedge Q) \Leftrightarrow \neg P \vee \neg Q$, i.e. \squote{not both, if and only if either is false}
+\item $\neg (P \vee Q) \Leftrightarrow \neg P \wedge \neg Q$ i.e. \squote{neither if and only if both are false}
+\item $\neg \big(\forall (a : A), R(a) \big) \Leftrightarrow \exists (a : A), \neg R(a)$ i.e. \squote{not all if and only if there exists a counter example}
+\item $\neg \big(\exists (a : A), R(a)\big) \Leftrightarrow \forall (a : A), \neg R(a)$ i.e. \squote{there does not exist an example if and only if for all it is false}
+\item Proof by contrapositive \begin{gather*}
+(P \Rightarrow Q) \Leftrightarrow (\neg Q \Rightarrow \neg P)
+\end{gather*}
+\item Negation of implication \begin{gather*}
+\neg (P \Rightarrow Q) \Leftrightarrow P \wedge \neg Q
+\end{gather*}
+\end{itemize}
+\end{label theorem}
+
+\begin{my proof}
+We have already shown some parts of these in theorem \ref{thm:IncompleteNegationRules}, so we only need to show the remaining parts. \begin{itemize}
+\item Assume we given $P$ and 
+\end{itemize}
+\end{my proof}
 
 
 

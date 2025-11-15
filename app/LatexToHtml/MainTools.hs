@@ -94,7 +94,9 @@ processThree pagename content indexstate = let
             Nothing -> let
                thmnumt = theorems propind
                ind = propind { theorems = thmnumt + 1 }
-               in (ind, thmnumt)
+               in case kind of
+                  "Proof" -> (propind, thmnumt)
+                  _ -> (ind, thmnumt)
             Just label -> let
                thmnumt = theorems propind
                ind = propind {
@@ -105,12 +107,14 @@ processThree pagename content indexstate = let
          (processedContent, newind2) = processThree pagename content newind1
          htmlelement = do
             H.div ! class_ (fromString kind) $ do
-               H.div ! class_ (fromString $ kind ++ "title") $ toHtml $ case mtitle of
-                  Just ttitle -> (>>) (toHtml ("Definition " ++ show thmnum)) $
+               H.div ! class_ (fromString $ kind ++ "title") $ toHtml $ case (mtitle, kind) of
+                  (Just ttitle, "Proof") -> fst $ processThree pagename ttitle propind
+                  (Just ttitle, _) -> (>>) (toHtml (kind ++ " " ++ show thmnum)) $
                      (H.span ! A.style "padding: 1em" $ "—") >>
                         fst (processThree pagename (RawText "(" : ttitle ++ [RawText ")"]) propind)
                         -- this is SERIOUSLY illustrating that i need an index-neutral [HtmlVers] -> Html function
-                  Nothing -> toHtml("Definition " ++ show thmnum)
+                  (Nothing, "Proof") -> "Proof."
+                  (Nothing, _) -> toHtml(kind ++ " " ++ show thmnum)
                processedContent
          in (htmlelement, newind2)
    in case (content,indexstate) of

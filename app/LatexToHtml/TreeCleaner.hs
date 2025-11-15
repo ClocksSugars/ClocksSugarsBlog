@@ -88,7 +88,7 @@ processOne arg = let
       (Left a, Right b) -> a ++ [b]
       (Right a, Left b) -> a:b
       (Right a, Right b) -> [a,b]
-   subprocess (TeXComm "section" [FixArg (TeXRaw title)]) = Right $ Section title
+   subprocess (TeXComm "subsection" [FixArg (TeXRaw title)]) = Right $ Section title
    subprocess (TeXComm "figuresvgwithcaption" [FixArg (TeXRaw location), FixArg (TeXRaw content)]) =
       Right $ IFigure (location <> ".svg") content
    subprocess (TeXComm "dquote" [FixArg dquotearg]) = subprocess $
@@ -97,15 +97,25 @@ processOne arg = let
       TeXSeq (TeXRaw "'") $ attachRightMostLaTeX dquotearg $ TeXRaw"'"
    subprocess (TeXEnv kind texargs content) = case (kind, texargs) of
          ("itemize", _) -> Right $ List "itemize" Nothing $
+            map processOne (drop 1 $ splitByDelimiterLaTeX (TeXCommS "item") content)
             -- must drop 1 bc content preceeding first \item should be ignored. we can also guarentee
             -- there is 2 since this should have compiled in latex thus having at least one \item
-            map processOne (drop 1 $ splitByDelimiterLaTeX (TeXCommS "item") content)
-         ("label definition", _) -> Right $ handleLabeledBox "definition" texargs content
-         ("definition", _) -> Right $ handleUnlabeledBox "definition" texargs content
-         ("label theorem", _) -> Right $ handleLabeledBox "theorem" texargs content
-         ("theorem", _) -> Right $ handleUnlabeledBox "theorem" texargs content
-         ("label proof", _) -> Right $ handleLabeledBox "proof" texargs content
-         ("proof", _) -> Right $ handleUnlabeledBox "proof" texargs content
+
+         ("gather*", _) -> Right . RawPrint . render $
+            TeXMath DoubleDollar $ TeXEnv kind texargs $ applyMathCommands content
+         ("align*", _) -> Right . RawPrint . render $
+            TeXMath DoubleDollar $ TeXEnv kind texargs $ applyMathCommands content
+
+         ("label definition", _) -> Right $ handleLabeledBox "Definition" texargs content
+         ("definition", _) -> Right $ handleUnlabeledBox "Definition" texargs content
+         ("label theorem", _) -> Right $ handleLabeledBox "Theorem" texargs content
+         ("theorem", _) -> Right $ handleUnlabeledBox "Theorem" texargs content
+         ("label proof", _) -> Right $ handleLabeledBox "Proof" texargs content
+         ("my proof", _) -> Right $ handleUnlabeledBox "Proof" texargs content
+         ("label corollary", _) -> Right $ handleLabeledBox "Corollary" texargs content
+         ("corollary", _) -> Right $ handleUnlabeledBox "Corollary" texargs content
+         ("label notation", _) -> Right $ handleLabeledBox "Notation" texargs content
+         ("notation", _) -> Right $ handleUnlabeledBox "Notation" texargs content
          (_, _) -> Right . RawPrint $ render (TeXEnv kind texargs content) -- This is under the assumption that it is a math env
    subprocess (TeXMath sign content) = Right . InLineEffect $
       TeXMath sign $ applyMathCommands content
@@ -150,6 +160,7 @@ inLineTranslation (InLineEffect (TeXComm "textbf" [FixArg (TeXRaw content)])) = 
 inLineTranslation (InLineEffect (TeXMath sign content)) = RawText . render $ TeXMath sign content
 inLineTranslation (InLineEffect otherwise) = RawText . render $ otherwise -- Just displays invalid commands so we can see
 inLineTranslation (Prose xs) = RawText xs
+inLineTranslation (RawPrint xs) = RawText xs
 inLineTranslation _ = RawText "failcase" -- this should NEVER HAPPEN since
 -- it is applied to the takeWhile in the below span which has as its
 -- condition that the constructor is Prose or InLineEffect
@@ -170,6 +181,7 @@ processTwo arg = let
    paragraphRelevant :: Htmllatexinter -> Bool
    paragraphRelevant testitem = case testitem of
       Prose _ -> True
+      RawPrint _ -> True
       LineBreak -> True
       InLineEffect _ -> True
       _ -> False
