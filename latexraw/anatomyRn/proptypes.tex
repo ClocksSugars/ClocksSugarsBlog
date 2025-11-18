@@ -38,12 +38,14 @@ It is a simple pragmatism that we decide (perhaps only as an arbitrary choice we
 
 But we have a problem that must be examined closely if we want to make this concept robust. What is it exactly that populates our types? Where does a counting number come from, and if we have two counting numbers, how should we know that they are distinct or the same? Are complex numbers really numbers? If them then why not every clifford algebra? This may seem pedantic but in fact it is the result of carelessness; we cannot say that a \emph{type} is \emph{of numbers} without being stuck in the problem of \squote{what is a number} with its own risk of sophistry. There is a simple solution at the cost of a much more arbitrary choice than to declare that functions' inputs have \emph{types}. We make a firm rule about \emph{where types come from} which is the following: a type is defined as having \emph{constructors}, which are \emph{function-like} objects which take an object of the correct type and return as their output a \emph{new} object that does not exist except as the output of this constructor when given that input. This means, among other things, that an object has \emph{only one type}. We now present the typical example.
 
-\begin{label definition}[Natural Numbers]{TypedNaturalNumbers}
+\begin{label definition}[Inductive Natural Numbers]{TypedNaturalNumbers}
 We define the \textbf{natural numbers}, denoted $\nats$, to be a type with the following constructors:\begin{gather*}
    \mathbf{Z}\colon \nats, \\
    \mathbf{S}\colon \nats \to \nats
 \end{gather*}
 which we call \emph{zero} and the \emph{successor} respectively. That is, $\mathbf{Z}$ can be thought of as a function that takes nothing and always produces the same result as a constructor, thus defining one single element of the type; $\mathbf{S}$ can also be thought of a function that takes any other member $n \colon \nats$ and uniquely defines a new member $\mathbf{S}(n) \colon \nats$. By unique, we mean that if $\mathbf{S}(a) = \mathbf{S}(b)$ then $a = b$ and vice versa.
+
+Outside of this section, we consider the natural numbers to start \emph{from one} not zero.
 \end{label definition}
 
 It is reasonable to see this and wonder how this definition of the natural numbers, defined ostensibly from only two rules, populates the entire set of counting numbers we know. The simple answer to this is that you would read $\mathbf{S}$ as a function $n \mapsto n + 1$, however instead of being a function, it is in this instance \emph{the definition} of what it means to count forward one number. What we have done, really, is to define the counting numbers distinctly as \squote{the first number} and \squote{the number we count after that}. What that means is that a number like $3$ would be written in its full form as $\mathbf{S}(\mathbf{S}(\mathbf{S}(\mathbf{Z})))$, and we would \squote{read} the number based on counting the successor functions, i.e. counting how many times we counted up one.
@@ -107,7 +109,9 @@ For two types $A \colon \mathtt{Type}$ and $B \colon \mathtt{Type}$, define thei
 
 This notation introduces an ambiguity, since we do not literally mean every comma we use in a formal context to be an element of the product type, but it has a value. That is, as a right-associative constructor, we have not only defined pair types but also triples, etc. since any $(a,b,c,d)$ is to be read as nested pairs $(a,(b,(c,d)))$. To avoid confusion however, we use brackets where possible.
 
-Although it may not be obvious, the product type is exactly our $\mathtt{AND}$ operation, since to form an element of $P \times Q$ we require some $p \colon P$ and $q \colon Q$ to form $(p,q) \colon P \times Q$. Thus if either fails to have a witness, we will be left stuck in producing such a pair; we do not have an element of the product type $A \times B$ with merely $(a,)$, even now that we can curry.
+The product type also allows us to now formalize what we mean when we say curried and uncurried functions are equivalent. That is, we can always turn a function $f \colon A \times B \to C$ into a function $g\colon A \to B \to C$ and vice versa, because we can set $f \hspace{0.2em} (a,b) = g \hspace{0.2em} a \hspace{0.2em} b$ or $g \hspace{0.2em} a \hspace{0.2em} b = f \hspace{0.2em} (x,y)$ respectively. 
+
+Although it may not be obvious, the product type is exactly our $\mathtt{AND}$ operation, since to form an element of $P \times Q$ we require some $p \colon P$ and $q \colon Q$ to form $(p,q) \colon P \times Q$. Thus if either fails to have a witness, we will be left stuck in producing such a pair; we do not have an element of the product type $A \times B$ with merely $(a,)$, even now that we can curry. Although, knowing what we do about currying, it will also sometimes be appropriate to read a function $P \to Q \to R$ as not just \squote{if $P$ then if $Q$ then $R$} but \squote{if $P$ and $Q$ then $R$}.
 
 Using this as inspiration, we can immediately figure out that the analogous $\mathtt{OR}$ operation will also have a more general use, that is, injecting elements of two types into the one.
 
@@ -189,10 +193,10 @@ If $A \colon \mathtt{Type}$ and $a,b \colon A$, then define by $a \equiv b$, rea
 \end{gather*}
 \end{definition}
 
-There are a number of peculiar things about this type, least of all how to interpret what it means. First, to avoid confusion, we have used the symbol $\equiv$ rather than $=$ in order to separate the rules of $\equiv$ from out existing notions of equivalence; instead we will deduce them. Second, its constructor doesn't look like a function in the way we are familiar, since now the type of output depends on the individual input rather than merely its type, i.e. $(\mathtt{refl} \hspace{3pt} a) \colon (a \equiv a)$ and $(\mathtt{refl} \hspace{3pt} b) \colon (b \equiv b)$ are members of separate, mutually incomparable types. The constructor we've given this represents the expectation that equality relations are \emph{reflexive}, so what we've really said is \squote{in the case where $b$ is both equal to $a$ and literally the symbol $a$, it has constructor $\mathtt{refl} \hspace{2pt} a$}.
+There are a number of peculiar things about this type, least of all how to interpret what it means. First, to avoid confusion, we have used the symbol $\equiv$ rather than $=$ in order to separate the rules of $\equiv$ from out existing notions of equivalence; instead we will deduce them. Second, its constructor doesn't look like a function in the way we are familiar, since now the type of output depends on the individual input rather than merely its type, i.e. $(\mathtt{refl} \hspace{3pt} a) \colon (a \equiv a)$ and $(\mathtt{refl} \hspace{3pt} b) \colon (b \equiv b)$ are members of separate, mutually incomparable types. The constructor we've given this represents the expectation that equality relations are \emph{reflexive}, so what we've really said is \squote{in the case where $b$ is both equal to $a$ and literally the symbol $a$, $a \equiv b$ has constructor $\mathtt{refl} \hspace{2pt} a$}.
 
 %theres something weird about this sentence
-But we cannot use this yet; the issue that constructors for this type have a bizarre dependency of their output \emph{type} on their input \emph{element} is also necessary for any theorem that speaks about equality. Otherwise, more than just having to make each equality type one at a time, we'd have to define a new version of each theorem for each equality type used. We must generalize this concept of dependent function types.
+But we cannot use this yet; the same issue that constructors for this type have, a bizarre dependency of their output \emph{type} on their input \emph{element}, is also necessary for any theorem that speaks about equality. Otherwise, more than just having to make each equality type one at a time, we'd have to define a new version of each theorem for each equality type used. We must generalize this concept of dependent function types.
 
 \begin{definition}[$\Pi$-Types, or Dependent Functions]
 Let $A \colon \mathtt{Type}$ and let $B$ be some family of types, a collection of types each with roughly the same constructors which each use some $a \colon A$ as a parameter. In that case, we write $B \colon A \to \mathtt{Type}$ and define the $\Pi$-type as the \emph{dependent function} type, written \begin{gather*}
@@ -201,13 +205,15 @@ Let $A \colon \mathtt{Type}$ and let $B$ be some family of types, a collection o
 where $\Pi$ is the capital greek letter \squote{pi}. In practice, let us also write what is on the right hand side of this definition to denote the dependent function type.
 \end{definition}
 
-This may seem abstract, but in fact the reason we are discussing it in the first place is because it concretizes a much more natural concept; when $Q \colon \nats \to \mathtt{Type}$ is a family of propositions depending on a natural number, we would say \squote{for all $n \colon \nats$, we have $Q(n)$}. Such a form of statement is vital in statements like, for example, \dquote{for all $n$, there exists a prime number $p$ which is greater than $n$}. In fact, this concept is so ubiquitous in mathematics that there will be very few sections of this text which do not refer to it literally or implicitly.
+This may seem abstract, but in fact the reason we are discussing it in the first place is because it concretizes a much more natural concept; when $P \colon \nats \to \mathtt{Type}$ is a family of propositions depending on a natural number, we can speak of $n \colon \nats$ where $P(n)$ is true; this is the type theoretic form of a \emph{condition} on $n$. This allows us to do two things very interesting things with respect to functions. We can speak of a function of type $(n \colon \nats) \to P(n) \to Q(n)$ which, since it takes a witness of $P(n)$ as an argument, is a statement of the form \squote{when $P$ is true for $n$ then $Q$ is true for $n$}. If instead we have a function of form $(n \colon \nats) \to P(n)$ then we have promised that we can reliably produce a witness that condition $P$ is true for any $n$ we give; we have said \squote{for all $n \colon \nats$, $P(n)$ is true}.
+
+In effect, we have gained the ability to speak about propositions in generalities. To say that \squote{in an entire class of circumstances, it remains true that...}. This concept is so ubiquitous in mathematics that there will be very few sections of this text which do not refer to it literally or implicitly.
 
 \begin{notation}[For All]
 When $A\colon \mathtt{Type}$ and $P\colon A \to \mathtt{Type}$ is a family of proposition types, define the notation \begin{gather*}
 \forall x : A, P(x) := \prod_{x : A} P(x)
 \end{gather*}
-as the propositional logic version of the $\Pi$-type, reading the symbol $\forall$ as \dquote{for all}. 
+as the propositional logic version of the $\Pi$-type, reading the symbol $\forall$ as \dquote{for all}. It is also called in some settings the \dquote{universal quantifier}.
 \end{notation}
 
 Here, the deeper value of the type theory metaphor for propositional logic begins to show itself. In mathematics, we tend to use $\Pi$ in a similar way as above to denote large repetative multiplications, which we sometimes call \squote{product notation}. This is in fact entirely apt as a choice of notation against the backdrop of our other names. Consider what it means to have a \emph{function} with a dependent output type: we require of a function that for every input there is an output, and so, what it means to have found a witness for a dependent function \emph{proposition} type is that we have a member of \emph{every} type in the type family $P\colon A \to \mathtt{Type}$.
@@ -225,16 +231,23 @@ where $\Sigma$ is the capital greek \squote{sigma}, to be the type of all pairs 
 \end{gather*}
 \end{definition}
 
-It is of course possible to set $B \colon A \to \mathtt{Type}$ to be some constant family, say, a type $C \colon \mathtt{Type}$, in which case the $\Sigma$-type trivializes back down to the standard pair, $A \times C$.
+It is of course possible to set $B \colon A \to \mathtt{Type}$ to be some constant family, say, a type $C \colon \mathtt{Type}$, in which case the $\Sigma$-type trivializes back down to the standard pair, $A \times C$. This is important however; as we discussed earlier about currying, a pair argument $(a,b)$ for a function $A \times B \to C$ is the same as a curried function $A \to B \to C$. But then we defined dependent functions that could be $(a \colon A) \to P(a) \to Q(a)$; can we uncurry those? With the dependent pair, we can try writing $\sum_{a : A} P(a) \to Q(a)$ but this would be very bad practice. The natural currying of dependent functions allows us to speak of $(a \colon A) \to P(a) \to Q(a)$ as a dependent function where indeed the family of types $A \to \mathtt{Type}$ is $P(a) \to Q(a)$, or $\prod_{a : A} \big(P(a) \to Q(a)\big)$ with the entire function type as dependent on $a$; if we hide this $a$ in a dependent pair, it is not reasonable to say that it suddenly starts behaving as a dependent function argument later.
 
-In propositional logic, the $\Sigma$-type $\sum_{x : A} B(x)$ describes the quantifier \squote{exists}, the same one as in \dquote{for all $n$, there exists a prime number $p$ which is greater than $n$}. In fact, pending a definition of $>$ (greater than) and letting $P(n)$ be the proposition that $n$ is prime, we could now describe that proposition literally by the type $\prod_{n : \nats} \sum_{p : \nats} P(p) \wedge (p > n)$. Such a pattern of pairing \squote{for all} with \squote{there exists} is a common one, however, it is usually written with the following notation.
+The principle is however, sound in a sense. It is reasonable to desire that in the way $P \to Q \to R$ can be read as \squote{if $P$ and $Q$ then $R$} via currying, that we might use dependent pairs to speak of $\sum_{n : \nats} P(n)$ as \squote{we have a number $n$ and we know that $P(n)$}. In fact, if we have $(a \colon A) \to P(a) \to Q$ where $Q$ is merely a proposition rather than a family of propositions, we can in fact uncurry this to \squote{if we have a number $n$ and $P(n)$ is true then $Q$}. This should be peculiar in a sense; if $Q$ does not depend on a choice of $n$, then we are saying that $Q$ is implied true merely because there exists a $n \colon \nats$ which satisfies the condition $P$, without care of which number $n$ is. This an extremely useful concept.
+
+In propositional logic, the $\Sigma$-type $\sum_{x : A} B(x)$ describes the quantifier \squote{exists}, the same one as in statements like \dquote{for all $n$, there exists a prime number $p$ which is greater than $n$}. In fact, pending a definition of $>$ (greater than) and letting $P(n)$ be the proposition that $n$ is prime, we could now describe that proposition literally by the type $\prod_{n : \nats} \sum_{p : \nats} P(p) \wedge (p > n)$. Such a pattern of pairing \squote{for all} with \squote{there exists} is a common one, however, it is usually written with the following notation.
 
 \begin{notation}[There Exists]
 When $A\colon \mathtt{Type}$ and $P\colon A \to \mathtt{Type}$ is a family of proposition types, define the notation \begin{gather*}
 \exists x : A, P(x) := \sum_{x : A} P(x)
 \end{gather*}
-as the propositional logic version of the $\Pi$-type, reading the symbol $\exists$ as \dquote{there exists} and the comma as \dquote{such that}. When there exists exactly one $a \colon A$  with a populated $P(a)$ type, we say that $\exists ! x \colon A, P(x)$, reading $\exists !$ as \dquote{there exists uniquely}.
+as the propositional logic version of the $\Pi$-type, reading the symbol $\exists$ as \dquote{there exists} and the comma as \dquote{such that}. When there exists exactly one $a \colon A$  with a populated $P(a)$ type, we say that $\exists ! x \colon A, P(x)$, reading $\exists !$ as \dquote{there exists uniquely}. $\exists$ is also called in some settings the \dquote{existential quantifier}.
 \end{notation}
+
+It should also be mentioned at least briefly that although in type theory, all objects must belong only to one type, dependent pairs give us the closest thing we have to a subtype. Consider for example, the type \begin{gather*}
+\sum_{n : \nats} \exists (m \colon \nats) \hspace{0.2em} (n \equiv m + m)
+\end{gather*}
+The use of $\Sigma$ here together with $\exists$ is a purely notational choice (indeed, the symbols are intended to be equivalent as just defined) but we write it this way because we are in fact interested in the particular $n \colon \nats$. Then in fact all $n \colon \nats$ for which there exists a pair of type $\exists (m \colon \nats) (n \equiv m + m)$ must be the \emph{even numbers}, since we will be unable to form such pairs if $n$ is odd, and thus no $m$ with $2m = n$ exists. That is, our closest notion of a subtype of all $a \colon A$ that satisfy a proposition family $P\colon A \to \mathtt{Type}$ is exactly the dependent pairs of $a \colon A$ together with the evidence that they satisfy $P$.
 
 Together, the operations we have described above show how this dependent type theory, one that exists in computer programming languages with operations and objects $\to, \times, +, \top, \bot, \Pi, \Sigma$, has a one-to-one mapping with the logical operations used in mathematics, $\Rightarrow, \wedge, \vee$, true, false, $\forall, \exists$. This is a consequence of the Curry-Howard correspondance, often stated simply as \dquote{proofs are programs}.
 
@@ -254,7 +267,14 @@ Let $A \colon \mathtt{Type}$ and $a, b ,c \colon A$. If $a \equiv b$ and $b \equ
 \end{gather*}
 has a witness.
 \end{theorem}
-\begin{my proof}
+
+Let us digress briefly to discuss how the statements of theorems correspond to their propositional counter parts. In mathematics we will often see statements of this form, in particular \squote{Let $a,b,c$ be of type $A$. If $a \equiv b$ and $b \equiv c$ then $a \equiv c$}. Obviously the proposition \squote{if $a \equiv b$ and $b \equiv c$ then $a \equiv c$} doesn't make a lot of sense on its own since we must specify what $a,b,c$ we are talking about, and this is done by \squote{let $a,b,c$} and interpretted as $\forall (a,b,c) \colon A \times A \times A$.
+
+But since most theorems do not have their propositional forms written symbolically, we must be able to read which parts of the theorems are contextualised and which are not. For instance, when we say $a,b,c \colon A$, we do this only after we have said \squote{let $A \colon \mathtt{Type}$}. Perhaps then it would be more appropriate to first write $\forall (A \colon \mathtt{Type})$ but this would be superfluous since we can't even state the theorem without a choice of type in the first place. Similarly, we may then only write the theorem as $(a \equiv b) \Rightarrow (b \equiv c) \Rightarrow (a \equiv c)$ since we have already contextualised that $a,b,c$ must be of the same type.
+
+It is common in mathematics to drop conditions from statements of the form \squote{if ... then ...} and instead propose them first as statements \squote{let ...}; since our theorem can only be applied in a relevant context anyway, our \emph{let} statements turn arguments into contextual requirements for purely notational clarity. While there exists a broader study of logical context, its rules and manipulations (and if you are interested in this, look into the \emph{turnstile}), this study exists to split more hairs than even dependent type theory. Contextual manipulations are, as far as we are concerned, equivalent to additional \squote{for all} arguments.
+
+\begin{my proof}{}
 We are to define a dependent function $f$ which takes a triple $(a,b,c) \colon A \times A \times A$ and then a witness of $a \equiv b$ and of $b \equiv c$. Presuming we are supplied an appropriate triple, we then need to define \begin{gather*}
 f(a,b,c) \colon (a \equiv b) \to (b \equiv c) \to (a \equiv c).
 \end{gather*}
@@ -267,17 +287,15 @@ f\hspace{0.2em} (a,b,c) \hspace{0.3em} p \hspace{0.3em} (\mathtt{refl} \hspace{0
 since, by requiring a witness of $b \equiv c$ and thus ensuring $c$ can only literally be $b$, our final output must be a witness $a \equiv b$ just as our first witness $p \colon (a \equiv b)$. \qed
 \end{my proof}
 
-This mode of reasoning also applies immediately to certain things about numbers. For instance, the idea that $m \equiv n$ implies $m + 1 \equiv n + 1$ is immediate in this manner: a function \begin{gather*}
+The mode of reasoningin this proof also applies immediately to certain things about numbers. For instance, the idea that $m \equiv n$ implies $m + 1 \equiv n + 1$ is immediate in this manner: a function \begin{gather*}
 \forall (m, n) \colon \nats \times \nats, (m \equiv n) \Rightarrow (\mathbf{S}(m) \equiv \mathbf{S}(n))
 \end{gather*}
 has its witness easily since in the moment that we pattern match on $m \equiv n$, we see that the only constructor could have been $\mathtt{refl} \hspace{0.3em} n$, and thus the case we are proving is exactly \begin{gather*}
 (n \equiv n) \Rightarrow \big(\mathbf{S}(n) \equiv \mathbf{S}(n) \big)
 \end{gather*}
-with witness given trivially by $\mathtt{refl} \hspace{0.3em} (\mathbf{S}(n))$.
+with witness given trivially by $\mathtt{refl} \hspace{0.3em} (\mathbf{S}(n))$. This is the extended utility of the \emph{inductive type}. The mere fact of saying that a function is defined if we know what output to assign to every case of constructor inputs is equivalent also to eliminating the cases where our prerequisite propositions were untrue. In this instance, the only way we could say the relatively trivial solution $\mathtt{refl} \hspace{0.3em} (\mathbf{S}(n))$ fails to be a solution is if our final type were not $\mathbf{S}(m) \equiv \mathbf{S}(n)$. And yet it must be that type since evidence of $n \equiv m$ was supplied, and the only form that evidence could have been was $\mathtt{refl} \hspace{0.2em} n$, meaning $n \equiv m$ must have been $n \equiv n$.
 
-But our system can do much more than just make things we knew intuitively to be true much more burdensome to prove, it can make things which are often difficult for students to comprehend equally as concrete as those we knew to be obvious already. The famous \squote{proof by induction} is brought into crystal clarity by our technique, and in fact \emph{deduced}.
-
-%In this mode of reasoning, we see that the idea $a = b$ implies $a + 1 = b + 1$ is not even obvious either; where is our function $\forall (a,b) \colon A \times A, (a \equiv b) \Rightarrow (\mathbf{S}(a) \equiv \mathbf{S}(b))$? In fact, to show this we need \squote{proof by induction} in its fully formalized form, and indeed we are able to \emph{prove} that proof by induction is even possible.
+But our system can do much more than just make things we knew intuitively to be true much more burdensome to prove, it can make things which are often difficult for students to comprehend become equally as concrete as those we knew to be obvious already. The famous \squote{proof by induction} is brought into crystal clarity by our technique, and in fact \emph{deduced}.
 
 \begin{label theorem}[Proof by Induction for $\nats$]{ProofByInduction}
 Let $P\colon \nats \to \mathtt{Type}$ be a type family. If $P(\mathbf{Z})$ has witness and there is a function $\forall (n : \nats), P(n) \to P(\mathbf{S}(n))$, then we have proven $\forall (n : \nats), P(n)$. That is, there is a witness for \begin{gather*}
@@ -323,7 +341,7 @@ f \hspace{0.2em}
 \end{align*}
 \end{corollary}
 
-In practice, we will rarely use this kind of reasoning in mathematics, since, while a useful tool for being absolutely certain no logical error has been made, we typically try to adjust our intuitions so that we can reason such steps automatically. That is not to say, in this moment at least, that the rigidity we expect of pure mathematics is any weaker, but that statements such as $a = b \Rightarrow a + c = b + c$ is one we train our intuitions on so that we know automatically how to make \emph{algebraic} deductions.
+In practice, we will rarely reason about mathematical objects themselves at the type constructor level. While it is a useful tool for being absolutely certain no logical error has been made, we typically try to adjust our intuitions so that we can reason such steps automatically. That is not to say, in this moment at least, that the rigidity we expect of pure mathematics is any weaker, but that statements such as $a = b \Rightarrow a + c = b + c$ is one we train our intuitions on so that we know automatically how to make \emph{algebraic} deductions.
 
 When we lack such intuitions, or when we know our intuitions are at risk of failing us, this system or modes of reasoning like it are there to catch us. This is often the case when we speak about the various refactorings we can do to statements to make them easier to prove related to negation. It is a common mistake for students to set out to prove by contradiction, only to structure the negated form of the proposition incorrectly and make the proof trivial but wrong. With the benefit of this system, we will not be making such mistakes.
 
@@ -587,6 +605,8 @@ We are finally done.
 
 \end{my proof}
 
+It is worth noting that this also pays off our earlier mention of universal quantifiers generalizing \emph{and} statements and existential quantifiers generalizing \emph{or} statements. The generalized De Morgan's laws show that the way a \emph{for all} statement negates with respect to a \emph{there exists} statement is indeed the same relationship we see between \emph{and} and \emph{or}. For instance, we have both \squote{not both, if and only if either is false} and \squote{not for all if and only if there exists a counter example}.
+
 %We must also discuss, at least briefly, the flexibility and dangers of proof by contradiction. Proof by contradiction, once again, is the idea that \squote{not not $P$ implies $P$}, which is only true when $P$ is strictly either true or false. If we are trying to prove $P \Rightarrow Q \Rightarrow R$ by contradiction, then by right associativity, we may instead show any of \begin{gather*}
 %\neg \neg (P \Rightarrow Q \Rightarrow R), \\
 %P \Rightarrow \neg \neg (Q \Rightarrow R), \\
@@ -607,8 +627,12 @@ This system of deductions will remain close with us. It is not strictly that the
 
 In the context of dependent type theory, an axiom can be thought of as insisting a witness of some proposition or theorem exists with no way to define it or find it. Once we add even one axiom, we are in the non-constructive regime, since if theorems are functions, our axioms are functions with no procedure to execute them. Computers can still check such theorems however, and they do this at the level that a computer program merely checks to see that there are no type errors; the lack of a procedure does not change the fact that if such a procedure existed, the theorem would then run \emph{without error}.
 
-But as we move forward, we will be doing more than merely making our theorems non-constructive with our axioms. We, as mathematicians, are \emph{not} logicians. There will be times when we strike off one of our axioms and insist that it does not apply in the case we are in. We will even do this without strict rules, but by reasoning about our system, or simply by a known counter-example. That is, as mathematicians, we can know an inconsistency exists somewhere in our system, and simply choose to avoid it as a false branch of conclusions. We do not, for instance, use solutions to Russel's paradox to avoid even the slightest risk of error, we simply avoid the mechanism that causes Russel's paradox to occur.
+But as we move forward, we will be doing more than merely making our theorems non-constructive with our axioms. We, as mathematicians, are \emph{not} logicians. There will be times when we strike off one of our axioms and insist that it does not apply in the case we are in. We will even do this without strict rules, but by reasoning about our system, or simply by a known counter-example. That is, as mathematicians, we can know an inconsistency exists somewhere in our system, and simply choose to avoid it as a false branch of conclusions. We do not, for instance, neurotically emphasize solutions to Russel's paradox to avoid even the slightest risk of paradox, we simply avoid the mechanism that causes Russel's paradox to occur as implicitly solving the paradox.
 
-Of course we are not pleased 
+That is neither to say that we merely allow the risk of paradoxes due to our axioms. Due to over a century of knit-picking out of concern for this exact problems, we know what our axioms are in mathematics, and just as in our proof of De Morgan's laws we wrote axioms not as functions that were merely available in context, but as specific conditions, we can simply fail to provide those conditions in the situations where they are not true.
+
+Dependent type theory, with the appropriate asterisks, will form a scoffold by which we continue to reason about logic, and by which we intuit what behaviours we might desire from other structures. For instance, moving forward, we largely put the idea of constructive numbers behind us, but we know that we \emph{can} construct inductive natural numbers, and thus we can do proof by induction on them. Moreover, seemingly qualitative statements can now be made quantitative by interpretting our conditions for when they are true as \emph{constructors}, by our so called \emph{universal} and \emph{existential} quantifiers.
+
+
 
 \end{document}

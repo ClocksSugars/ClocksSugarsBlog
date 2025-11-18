@@ -28,7 +28,7 @@ main = do
    let part2 = processTwo part1
    writeFile "inspect2.txt" $ show part2
    let (part3, index) = processThree "proptypes" part2 blankIndex
-   writeFile "test.html" $ R.renderHtml $ pageHTML "Nascent's Philosophy of Mathematics" part3
+   writeFile "test.html" $ R.renderHtml $ pageHTML "Propositional Logic: A Constructive Approach" part3 --"Nascent's Philosophy of Mathematics" part3
    writeFile "CumulativeReferences.txt" $ show . references $ index
    hClose handle
 

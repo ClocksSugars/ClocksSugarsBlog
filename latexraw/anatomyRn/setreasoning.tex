@@ -1,0 +1,59 @@
+\documentclass[11pt]{article}
+    \title{\textbf{Default Doc}}
+    \date{\the\day/\the\month/\the\year}
+
+\input{../pdf.tex}
+\input{../webmacros.tex}
+\input{../amsthmstuff.tex}
+
+
+\begin{document}
+
+%	notes for how to write the next section:
+%	-	use zfc as a scaffold
+%	-	mathematical objects just kind of exist when declared, with identity
+%		defined by some random fuck equivalence relation
+%	-	this makes set based mathematics more general and easier to
+%		work with but way more annoying if you want to imagine math as 'things'
+%	-	not all too fond of formal set theory
+%
+%	
+%
+%
+
+Despite the problems and difficulties with constructive mathematics that we discussed in the previous chapter, I felt it necessary to first ground the idea of what mathematics could be in a more concrete context before we do set reasoning. Set theoretic mathematics does not have many of these problems, principly because most of the people concerned using it are not literally writing something even a computer could understand. Most mathematics is intended to be human readable, the deductions reasoned (although rigorous) and thus steps skipped over when they are obvious. We can split hairs with set theory, but everyone who wants to split hairs that badly have better tools to do that with.
+
+Most of foundational mathematics as it is an extended theory around sets was laid out in the late 19th century and early 20th century, principly to resolve contradictions and concerns that mathematics was poorly founded. This was before the time of computers, and certainly before the time that the reasoning of computers had come to so profoundly alter our expectations about how we should think. It was when I first tried to read a serious algebra book when I first discovered this; I found myself repeatedly asking how  we were supposed to reason about a mathematical object when we had no idea what it was or what it was made of. In the previous section I mentioned that the idea of a \squote{type of all numbers} was profoundly dangerous since it forces one to ask \squote{what is a number}, and indeed it can feel like set theoretic reasoning expects us to do this.
+
+And yet set theoretic reasoning is radically successful as a foundation for mathematics, at the core of almost every mathematical concept that you would have heard of by happenstance. It is not at all a bad core for such reasoning either, \emph{if} you understand what it expects to explain and what it explicitly chooses not to. The more cognitively tactile concept of an inductive type with its constructors can be very pleasing, but add a level of rigidity that mean (in broader constructive mathematics efforts) that significant overhead is needed to recover the versatility of set reasoning. Because set theoretic reasoning is founded at its core on what we \emph{expect to be true} and it was formalized so that we could expect these things and describe the world we had seen and described symbolically in rigorous terms. So in this section we will trade knowledge of what a thing \emph{is} for what the thing \emph{does}.
+
+Importantly this is \emph{not} intended as a description of set theory. As above, much of the elaboration of set theory, as it was a formal theory intended to make mathematics rigorous, was the previous century's best tech for splitting hairs in mathematics. We have better methods for that now, and we have discussed them in the previous chapter. Instead, we will focus here on sets as a tool that we intend to use, and the ways to think about them so they are more useful.
+
+\subsection{ZFC Axioms}
+
+In the same way that I said at the end of the previous section that dependent type theory, with some axioms, remains a good model at least for reasoning about propositions, I must now specify that in that lens, we will interpret set theory as a superset of type theoretic reasoning. That is, we think of everything we did in the previous section as being a special case of sets, and set reasoning as being \emph{broader}.
+
+Defining what a set is then is relatively difficult without quickly sounding silly, and indeed a few books I looked at do walk directly into the notion of a 'set of people on earth' or a 'set of numbers'. Instead, we'll just put all of the Zermelo–Fraenkel set theory axioms here and then we can discuss what they mean, and what they tell us about sets.
+
+\begin{label definition}[Zermelo-Fraenkel Set Theory Axioms + Choice]{ZFC}
+Consider a set to be a collection of objects with a notion of equivalence between those objects and a propositional relation written $\in$ which is true when an object $x$ is \emph{in} a set $A$ (and thus read $\in$ as \squote{in} or \squote{is an element of}). Inherit the notion of a proposition or a condition (i.e. loosely in the sense of a family of types) from the previous section along with logical operations.
+
+Then sets are defined to obey the following. \begin{enumerate}
+\item (Axiom of Extensionality) Two sets $A$ and $B$ are equal if they have the same elements. \begin{gather*}
+\big(\forall a, (a \in A) \wedge (a \in B) \big) \Rightarrow A = B
+\end{gather*}
+\item (Axiom of Pairing) For all objects $a$ and $b$ there exists a set ${a,b}$ that contains exactly and only $a$ and $b$. \begin{gather*}
+\forall a, \forall b, \exists A, \big( \forall x, (x \in A) \Leftrightarrow (x = a \vee x = b) \big)
+\end{gather*}
+\item (Axiom of Comprehension) Let $P$ be a condition and $A$ be a set. There exists a set $B$ such that $x \in B$ if and only if $x \in A$ and $P(a)$. \begin{gather*}
+\forall P,\forall A, \exists B, \big(\forall x, (x \in B) \Leftrightarrow (x \in A) \wedge P(a) \big)
+\end{gather*}
+\item (Axiom of Union) Let $\mathcal{A}$ be a set which contains sets. There exists $A$ such that for all sets $X$ and all objects $x$, if $x \in X$ and $X \in \mathcal{A}$ then $x \in A$. \begin{gather*}
+\forall \mathcal{A}, \exists A, \forall X, \forall x, \big( (x \in X) \wedge (X \in \mathcal{A}) \big) \Leftrightarrow (x \in A)
+\end{gather*}
+\item 
+\end{enumerate}
+\end{label definition}
+
+
+\end{document}
