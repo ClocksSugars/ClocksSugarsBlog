@@ -1,0 +1,614 @@
+\documentclass[11pt]{article}
+    \title{\textbf{Default Doc}}
+    \date{\the\day/\the\month/\the\year}
+
+\input{../pdf.tex}
+\input{../webmacros.tex}
+\input{../amsthmstuff.tex}
+
+%% NOTES:
+%%	explain how treating P \to \bot as an argument you can provide is like doing a proof by contradiction on the negative of a statement
+%%	emphasize that this is actually a good way to think about theorems
+
+\begin{document}
+
+Highschool is usually the first place people encounter any form of mathematics, and along with this setting comes some inappropriate expectations about what lies ahead in mathematics. I might go as far as to say that highschool mathematics and even first year undergraduate mathematics approaches the topic primarily from the perspective of an engineer or experimental physicist; that is mainly to say that you wouldn't call highschool mathematics even particularly \squote{mathematical} in the ways that a mathematician is actually concerned with the topics studied.
+
+I myself only discovered the seriousness of this discrepency in my first real analysis class. I had lamented at the time that it felt like I was being \squote{expected to do math as a lawyer who writes computer compileable legalese}. However, as time has gone on, not only have I grown to embrace that description, I've also come to understand that the other classes I was taking at the time (with which I did not have this grievance) were more about applying a physicist's reasoning to geometry and calculus than true mathematics.
+
+This \squote{true mathematics} is the programmatic legalese. In mathematics, we care very deeply about strict conditions and labels that tell us with certainty under what circumstances our tools will \emph{always work}. A peer once even said to me that the mathematics was not in symbols, but in all of the words around them.
+
+To that end, we will not spend this chapter discussing mathematics either; recalling the notion that mathematics sits in between logic and physics on an axis of rigor, we will swing all the way to the left and discuss a description of formal logic. In particular we are going to discuss formal logic in the context of type theory, which will allow us draw on programming metaphors which our society's culture has become much more familiar with in recent years.
+
+However I must confess that the programming metaphor has a special value to me, and I hope also soon to you. As I was first coming to understand that mathematics was inseparable from its legalese, the pattern of theorems and proofs in particular (and also due in part to my double major in physics), I had a notion that one does not truly understand a proof unless one sees clearly how the steps of the proof intuitively mean that the theorem must be obvious. I now see this as wrong, or at least far too physicist-brained. There was a period in my education when I was very ill, and although feeling like I had lost half my brain, I realised that as long as you are doing pure mathematics, you only need half a brain.
+
+The job in solving the puzzle is to connect all of the hypotheses, like pipes or belts in a factory, to the relevant machines (other theorems) that transform them into whatever they need to be to satisfy the proof obligations. Proving a theorem is then no different than \emph{playing Factorio} or \emph{programming}. For most jobs, the high level understanding of the whole system is completely subserviant to the low level understanding where you merely know how to correctly plug pipes into ports. If you can do that, then with sufficient effort and an open mind to understand your objects/items/constructions and use your tools/machines/theorems, you can \emph{do mathematics}. It is this, among other experiences, that makes me so confident that anyone can follow this text, provided I have explained myself well enough.
+
+\subsection{Types, Functions, and Arguments}
+
+First I must belabor about some of the basic constructions of programming. You may of course see fit to skip this part, and that would be reasonable if you are familiar with the languages Rust or Haskell, or a similar language with a robust type system. Otherwise, or even in spite of this, it will be valuable to examine what a type is or what we might want it to be, along with what we might expect of functions or arguments.
+
+First, what is a function? There are so many things we could say about this, but first, let us say that a function is a black box that takes an \emph{input} (or an \emph{argument}) and gives us back an \emph{output}, in such a way that we will always get the same output if we use the same input. This could be a function like $x \mapsto x + 1$ which takes a number $x$ and adds to it one before returning it; this notation with the $\mapsto$ symbol (read as \squote{maps to}, and distinct from $\to$) defines a function in terms of what an output looks like assuming a given input.
+
+But a function need not be defined by the \emph{procedure} we take to calculate its output; if you draw a circle of radius one, draw a straight line through its center, and then for some angle off of that straight line draw a ray, the distance perpendicular to our line to where the ray intersects the circle would be the \emph{sine} of the angle. While methods to calculate this exist, what the \emph{function} is here is the relationship between an input to an output, not necessarily a sequence of arithmetic operations. A function could be a pair of lists, $[1,2,3]$ and $[5,2,3]$ such that for an input, we find its position in the first list and take the number at the matching position in the second list, $1 \mapsto 5$, $2 \mapsto 2$ and $3 \mapsto 3$; we just as soon make the lists uncountably infinite, the outputs seemingly random, and we still have a function, and for this reason we also call a function a \emph{map}. The \emph{function} is defined by its repeatability and no more. This ambiguity about \emph{how} we take a function is not a failure of the abstraction but a \emph{feature}: much later on it will allow us to study functions for which we only have partial information, and perhaps even discover from that information how to calculate them.
+
+But in each of these cases, even the most arbitrary, we have declared either implicitly or explicitly, a prerequisite condition for an input. For instance, with possible exception to the final example, we could not give any of these functions as an input, say, a letter of the alphabet. The procedure $x \mapsto x + 1$ does not admit addition of a letter, the relationship between an angle and its sine does not admit non-angles, and yet we can just as well define a function that takes a letter and sends it to its opposite letter in the alphabet $a \mapsto z$ or a word to itself interspersed with some symbol $\dquote{hello} \mapsto \dquote{h.e.l.l.o}$, so the fault is not in the concept of a letter or a word. In fact, one might even conceive of a function which we define to take both numbers and letters, which maps a number $x \mapsto x + 1$ or a letter to its next letter $a \mapsto b$, $b \mapsto c$, selecting whether to be a function of letters or numbers be based on its input. In this case one might even say that we have \emph{extended} the function to letters by treating them as numbers, using $+1$ to move from one number to the next. But what of $+27$? What is the sine of a letter? Our naive extensions break down.
+
+It is a simple pragmatism that we decide (perhaps only as an arbitrary choice we make now then cling to dearly) that operations such as addition, or relationships that define things like the sine or cosine, fall into classes or \emph{types} of what they take as inputs. We can have the type of counting numbers $\nats$, the type of letters, etc. or the type of functions such as $f\colon n \mapsto n + 1$ which we might write as $f\colon \nats \to \nats$ to symbolize that it is a \emph{function-type} with input type $\nats$ and output type $\nats$, and that this type $\nats \to \nats$ has as a member $f$. We would equally write $5 \colon \nats$ in this scheme, to say that $5$, as a counting number, has type $\nats$, of the counting number.
+
+But we have a problem that must be examined closely if we want to make this concept robust. What is it exactly that populates our types? Where does a counting number come from, and if we have two counting numbers, how should we know that they are distinct or the same? Are complex numbers really numbers? If them then why not every clifford algebra? This may seem pedantic but in fact it is the result of carelessness; we cannot say that a \emph{type} is \emph{of numbers} without being stuck in the problem of \squote{what is a number} with its own risk of sophistry. There is a simple solution at the cost of a much more arbitrary choice than to declare that functions' inputs have \emph{types}. We make a firm rule about \emph{where types come from} which is the following: a type is defined as having \emph{constructors}, which are \emph{function-like} objects which take an object of the correct type and return as their output a \emph{new} object that does not exist except as the output of this constructor when given that input. This means, among other things, that an object has \emph{only one type}. We now present the typical example.
+
+\begin{label definition}[Natural Numbers]{TypedNaturalNumbers}
+We define the \textbf{natural numbers}, denoted $\nats$, to be a type with the following constructors:\begin{gather*}
+   \mathbf{Z}\colon \nats, \\
+   \mathbf{S}\colon \nats \to \nats
+\end{gather*}
+which we call \emph{zero} and the \emph{successor} respectively. That is, $\mathbf{Z}$ can be thought of as a function that takes nothing and always produces the same result as a constructor, thus defining one single element of the type; $\mathbf{S}$ can also be thought of a function that takes any other member $n \colon \nats$ and uniquely defines a new member $\mathbf{S}(n) \colon \nats$. By unique, we mean that if $\mathbf{S}(a) = \mathbf{S}(b)$ then $a = b$ and vice versa.
+\end{label definition}
+
+It is reasonable to see this and wonder how this definition of the natural numbers, defined ostensibly from only two rules, populates the entire set of counting numbers we know. The simple answer to this is that you would read $\mathbf{S}$ as a function $n \mapsto n + 1$, however instead of being a function, it is in this instance \emph{the definition} of what it means to count forward one number. What we have done, really, is to define the counting numbers distinctly as \squote{the first number} and \squote{the number we count after that}. What that means is that a number like $3$ would be written in its full form as $\mathbf{S}(\mathbf{S}(\mathbf{S}(\mathbf{Z})))$, and we would \squote{read} the number based on counting the successor functions, i.e. counting how many times we counted up one.
+
+You could reasonably ask now \squote{but what is $\mathbf{Z}$?} or \squote{but what does $\mathbf{S}$ do?} in a deeper sense of what they \emph{are} rather than merely what we intend these symbols to mean. The answer to that, as in a similar fashion we will keep encountering, is \emph{whatever works}. You could define a notion of natural numbers such as these in python using the notion of a list, or an array in other languages, defining $\mathbf{Z} = \mathtt{[]}$ the empty list, and $\mathbf{S}(n) = \mathtt{[n]}$ as the numeral contained in a list, such that $3 = \mathtt{[[[[]]]]}$, an empty list contained in a list, repeated three times. You could do a similar thing with nested pairs so that $2 = \mathtt{([],([],[]))}$. The instantiation of these constructors does not matter, and they can correspond \squote{really} (insofar as one rationalizes that there is something \emph{real} about the constructs of programming languages or stories about what a CPU does with those constructs) to anything you like as long as you are able and willing to \emph{read} that function as symbolizing what we intend it to mean.
+
+In fact, this is almost literally the idea of Alonzo Church, the famous \emph{Church Numerals} as they have come to be known. In his construction, constructors were literally functions, but merely functions which we commit to never defining a way to compute. In such a way, you would read ${f \circ f \circ f = x \mapsto f(f(f(x)))}$ (we read $\circ$ as \squote{of} or \squote{compose} meaning to take the output of the second function as the input of the first, $f$ of $f$) as merely $f \circ f \circ f$ and no more, since there is nothing to be \emph{done} with the expression, and thus choose to read $f \circ f \circ f$ as $3$. However the idea to define natural numbers as a starting number followed by an operation to count forward is attributed to Giuseppe Peano, and typically considered a presentation of the \emph{Peano Axioms}, although in his day the language of type theory was in the hands of Bertrand Russel, the commonly referred to originator of type theory of \emph{Russel's Paradox} fame. In truth, its origins stretch further back than even Russel's predecessor on the topic, Gottlob Frege, and has been a gradual progression in the development of logic. The school of thought we draw on in this section is downstream of that of the \emph{Intuitionists}, attributed to Martin-Löf and his various colleagues and successors.
+
+This framework has certain powers which we will appreciate soon. One often calls the kind of natural numbers we have defined an \emph{inductive type}, and it enables a suite of logical tools for which the famous \squote{proof by induction} is only one. However there is a general mental rule here that sums up its powers up here quite well: once a type has been defined as nothing but a collection of constructors, anything we want to do with that type need only be defined in terms of those few constructors. This introduces powers such as proof by induction, and indeed a more general form of it which apply to \emph{all} other inductive types, as well as some unfamiliar responsibilities.
+
+That is, okay, we have our natural numbers and we have confined ourselves to a relatively rigid system, that of \emph{types}, to do so. Can we \emph{do} anything with these natural numbers, or do we have to drop this rather laborious system just after we have defined it and return to intuitive, poorly defined notions of arithmetic? The answer is of course we can do things with these natural numbers, however to do so, almost every operation we do will appear as a recursive function. Let me give you an example.
+
+\begin{label definition}[Addition]{TypedNaturalAddition}
+We define the function $\mathtt{add}\colon \nats \to \nats \to \nats$, which we also write as $m + n$ for two natural numbers $m, n \colon \nats$, by the following procedure: if $n = \mathbf{Z}$ then output $m + n = m$ immediately, but if $n = \mathbf{S}(p)$, where $p \colon \nats$ is some other number, then we output the result of $\mathbf{S}(m) + p$. We write these rules by \textbf{pattern matching} on the different possible forms of $n$ which we are checking for, and so the same definition is written \begin{gather*}
+   \mathtt{add}(m,\mathbf{Z}) = m, \\
+   \mathtt{add}(m, \mathbf{S}(p)) = \mathtt{add}(\mathbf{S}(m),p).
+\end{gather*}
+\end{label definition}
+
+What we have done then is to define addition in terms of the notion of counting upwards, just as we defined natural numbers in terms of counting upwards. Where a natural number can be thought of a tally of each successor function applied to a zero, we define addition to move each of these tally marks from the right hand side to the left hand side, until we are left with zero on the right and the sum on the left. Only then does our recursion terminate, with all \squote{plus one}s moved to one number. Cumbersome as it may seem to define addition in such a way, the upshot is that now everything we could hope to do with a counting number is now almost exactly that hard, including some much more complicated operations.
+
+I have slipped something by you however: we have not yet discussed formally what it means for a function to take more than one input, and instead I have merely presented one to you with the nebulous function type $\nats \to \nats \to \nats$ with no explanation. This is not a notation that we will see in the rest of mathematics (in fact, in spite of all the sense it could make, mathematicians generally invent new notations just to not need to use this one), and is usually reserved for the purer functional programming languages such as Haskell, however it exposes certain questions and concepts that are valuable to us here. In a programming language, it is common to write $f(x,y,z)$ to use a function, and in many languages (and indeed to us now) it is reasonable to speak of $f$ as a function alone, but then what is $(x,y,z)$ exactly?
+
+Most programming languages have a notion of a \emph{tuple} related to this, a generalization of an \emph{ordered pair} to as many terms as necessary, allowing one to combine objects into one without forcing them to interact or relate to one another; $x$ and $y$ could be different types entirely and this is fine. We also have a variety of similar notions in mathematics, chiefly the \emph{Cartesian Product} which we invoke when we say $(2,3)$ is a coordinate on a 2D plane combined of two mere numbers. It will also be necessary for us to define the notion of a \emph{Product type}, the type theory equivalent to the tuple which solves this problem by defining functions such as $\mathtt{add}$ as of type $(\nats,\nats) \to \nats$, however I pose to you that this is not, at this stage, necessary.
+
+But how then will we pass a second input into a function, if not to force it to ride in a pair with the first input? The answer lies in how one should read $\nats \to \nats \to \nats$. That is, what does the $\to$ operation do exactly? Let us for a moment compare it to our addition function, which also is written in the form $m + n$; then one might say that $\to$ is itself a function with two inputs, except that these inputs are not \emph{elements of a type}, they \emph{are types}, and it produces a function type. But if the function type it produces is to be thought of as \emph{new}, then by the rules we have established, $\to$ is not a function but a constructor!
+
+\begin{definition}[Function Type]
+We define the symbol $\to$ to be a right-associative constructor of form $\mathtt{Type} \to \mathtt{Type} \to \mathtt{Type}$. It takes two types, $A, B \colon \mathtt{Type}$ and constructs the type of functions between them $A \to B$.
+\end{definition}
+
+This does not resolve our problem of how to read types of form $A \to B \to C$ however; instead that is done by our insistence that the operation is defined \emph{right-associative}. Consider, if $\to$ takes only \emph{two} types and produces another type, then absent all other reasoning, you could immediately place brackets to attempt to make this form sensible, considering either $(A \to B) \to C$ or $A \to (B \to C)$. However, consider the form of the former: we know that $A \to B$ must be a function type, taking inputs of type $A$ and producing outputs of type $B$, which means a type $(A \to B) \to C$ takes \emph{functions} of type $A \to B$ and somehow turns these functions into elements of $C$. A function is however, itself, a single value, and so we have not constructed a function of multiple inputs as desired. The latter, $A \to (B \to C)$ considers a function that takes an element of type $A$ and outputs a function $B \to C$; consider, this output which is a function could now have an input passed to it! This is the meaning of a \emph{right-associative} operation, one where there are implicit brackets making the right-most operation be performed first. \begin{gather*}
+A \to B \to C \to D \to E \\
+= \\
+A \to (B \to (C \to (D \to E)))
+\end{gather*}
+
+Right-associativity is perhaps poorly named, as it is distinctly \emph{non-associative}. Usually in mathematics we only care about whether an operation is equivalent no matter where you put the brackets (associative, or equivalently right-associative \emph{and} left-associative) or not (non-associative), and certainly in common mathematics almost every binary operation you have encountered is associative (addition, multiplication) at its core (since subtraction and division are inversions of addition and multiplication, they are fundamentally associative, but as written they are not, hence the common memes about disagreeing calcuators) with exception to the cross product. Here however, right-associativity of function types enables us to do something special.
+
+It is of course possible merely to replace functions of form $A \to B \to C$ with those of form $(A,B) \to C$, but consider the latter, it requires that the inputs come \emph{as a pair} prepared and packaged in one single input. Do inputs need to come prepared as a collection? If we write $5+$, is this object meaningless, or have we invented a function? The right-associative notation $\to$ would imply the latter, since $\nats \to (\nats \to \nats)$ is still a function with one input and one output, and with one input (five), that output will be of type $\nats \to \nats$, an operation that adds $5$ to its input. That is, a side effect of this notation is that it allows us to postpone this process of providing inputs; in the same way that a function exists without any inputs, and exists with all of its inputs as its final output, now it exists with only some of its inputs. This is called \emph{Currying} for Haskell B. Curry, and is common in languages such as Haskell (sharing a namesake) although it existed in this form as early as Church's lambda calculus. Such a concept is exceedingly common in algebra under a different presentation (and different historical lineage), although mathematicians have relatively clumsy notation to do this at best and use it only very conservatively, an error on both counts in my opinion.
+
+Since currying is so natural to the functional mode of operation, they dispense with the $f(x,y,z)$ notation of function application entirely and often write $f \hspace{1pt} x \hspace{1pt} y \hspace{1pt} z$, since then it is equally natural to write $f \hspace{1pt} x \hspace{1pt} y$ meaning the curried form defined $z \mapsto f \hspace{1pt} x \hspace{1pt} y \hspace{1pt} z$. In this frame, one provides an input $x$ to $f$, at which point we say that \squote{$x$ has become an \emph{argument} of $f$}, and then when we later provide $y$, we have $(f \hspace{1pt} x) \colon y \mapsto (f \hspace{1pt} x \hspace{1pt} y)$ where $x$ has become a \emph{parameter}. The distinction between these terms is thus: an argument is what is provided in the moment of a function's \emph{application}, and a parameter is some value that exists fixed in an expression that defines a function's \emph{output}. In our example, $x$ appears as a parameter at the time that $y$ is an argument, due to our currying; if instead we had $(x,y,z) \mapsto f(x,y,z)$ then we might call each of $x,y,z$ arguments at the same time. Equally, you would say that a \emph{function} $x \mapsto x + 1$ has as a parameter $1$, since one could imagine this is also the function $(+1)$ curried. This distinction might seem moot now, but later we will see that while the notion of an argument is a formalism, the notion of a parameter is deeply tied up with scientific notions of independent and dependent variables, chiefly as those held \emph{fixed} in an experiment.
+
+\subsection{Proposition Types and Basic Propositional Logic}
+
+We are now ready to use type theory for its principle purpose in this chapter, bringing home multiple threads we have left open in the previous subsection. First, let us discuss basic logic so we can in some sense define our conceptual targets, what our theory of types must model in order to describe logic.
+
+We have notions of true and false, which we denote $\top$ and $\bot$ respectively, and we have, famously three atomic logical operations we can do with them: $\mathtt{AND}$, $\mathtt{OR}$, and $\mathtt{NOT}$. In many programming languages, these are written $\mathtt{\&\&}$, $\mathtt{||}$ and $\mathtt{!}$, however in formal logic they are written $\wedge$, $\vee$ and $\neg$. Then if we have two propositions $P,Q$ (you can think of these as representing something like \dquote{the ground is wet} or \dquote{I'm holding up three fingers}) then famously, their rules are: \begin{itemize}
+\item $P \wedge Q = \top$ only if both $P= \top$ \emph{and} $Q = \top$, otherwise $P \wedge Q = \bot$.
+\item $P \vee Q = \top$ if either $P = \top$ \emph{or} $Q = \top$ otherwise $P \vee Q = \bot$ (or equivalently $P \vee Q = \bot$ if $P = \bot$ \emph{and} $Q = \bot$ otherwise $P \vee Q = \top$)
+\item $\neg P = \bot$ if $P = \top $ and $\neg P = \top$ if $P = \bot$
+\end{itemize}
+
+In order to define propositions as types, we will need to consider, just like the counting numbers type $\nats$ is populated with the counting numbers themselves, what is it that populates a proposition? We call these elements of the proposition type \squote{witnesses} or \squote{evidence}; you might think of the members of the proposition type \dquote{is the ground wet} as testimony that \dquote{I went outside and touched the grass and it made my hand wet}, however a proposition's witness is never considered in doubt unlike real witnesses. 
+
+If we think of propositions as types which are populated (or indeed may not be if they are \emph{false} and thus have no witnesses) then we know some things about what our logical operations have to be. $\mathtt{AND}$ must create a new type which has witnesses only when both of its argument types have witnesses, $\mathtt{OR}$ must have the witnesses of both types so that it is true if either is true, and $\mathtt{NOT}$ must be a type that somehow has witnesses when its argument type has no witnesses. In fact, we have actually already discussed one of these!
+
+\begin{definition}[Product Type]
+For two types $A \colon \mathtt{Type}$ and $B \colon \mathtt{Type}$, define their \textbf{product type} denoted $A \times B$, to be a new type with the right-associative constructor $\mathtt{,} \hspace{1pt}\colon A \to B \to A \times B$, the comma. In this way, elements $a \colon A$ and $b \colon B$ form an element $(a,b) \colon A \times B$. We also define the \emph{projection operators} $\mathtt{pr}_1 \colon A \times B \to A$ and $\mathtt{pr}_2 \colon A \times B \to B$ which are $\mathtt{pr}_1 (a,b) = a$ and $\mathtt{pr}_2 (a,b) = b$.
+\end{definition}
+
+This notation introduces an ambiguity, since we do not literally mean every comma we use in a formal context to be an element of the product type, but it has a value. That is, as a right-associative constructor, we have not only defined pair types but also triples, etc. since any $(a,b,c,d)$ is to be read as nested pairs $(a,(b,(c,d)))$. To avoid confusion however, we use brackets where possible.
+
+Although it may not be obvious, the product type is exactly our $\mathtt{AND}$ operation, since to form an element of $P \times Q$ we require some $p \colon P$ and $q \colon Q$ to form $(p,q) \colon P \times Q$. Thus if either fails to have a witness, we will be left stuck in producing such a pair; we do not have an element of the product type $A \times B$ with merely $(a,)$, even now that we can curry.
+
+Using this as inspiration, we can immediately figure out that the analogous $\mathtt{OR}$ operation will also have a more general use, that is, injecting elements of two types into the one.
+
+\begin{definition}[Sum Type]
+For two types $A, B \colon \mathtt{Type}$, define their \textbf{sum type} denoted $A + B$, to be the new type with constructors $l\colon A \to A + B$ and $r \colon B \to A + B$ (often called \squote{in left} and \squote{in right}).
+\end{definition}
+
+These constructors, like all constructors, have no additional structure other than that stated. $l$ will take \emph{any} $a \colon A$ and merely dump it in $A + B$, just as $r$ will. This is the general case of the example we discussed earlier in which a function has an input type defined of \squote{either numbers or letters}. In this way, if we have even one of $p \colon P$ \emph{or} $q \colon Q$, we will populate $P + Q$; we could just as well have $Q$ be a type that is empty of witnesses and we will still have $l \hspace{1pt} p \colon P + Q$ as witness. This is our logical $\mathtt{OR}$.
+
+To proceed to $\mathtt{NOT}$, let us reflect on what we have done so far. The primary thing we are trying to move around, given that a proposition type's members are witnesses, is the case where a type has no witnesses and is thus false. This prompts us to codify something we had not said earlier, which is the following:
+
+\begin{definition}
+Define the type $\top$ to have the constructor $* \colon \top$ which takes no arguments, and the type $\bot$ to be the type with no constructors. We call these the \textbf{unit type} and the \textbf{empty type}.
+\end{definition}
+
+Our archetypal false type is explicitly the type that is empty, identified with all other types when they are empty, and thus we can say things like $P \times Q = \bot$ when $Q = \bot$. It is not necessarily so simple when a proposition is true however, since there are often multiple witnesses to a true proposition, and the unit proposition only has one constructor. Regardless, with this codified, we may now ask a question: what does $\to$ do to an empty type?
+
+Consider our responsibilities when defining a function: a function is a \emph{map} which assigns to every valid input a valid output. So for a type $A$, the function type $\bot \to A$ is populated with what exactly? There are no valid inputs, and so we say that there exists immediately a \emph{trivial function} $f \colon \bot \to A$. It is common to be confused when seeing this, but consider that from what we know about functions, we have no grounds with which to argue $f$ is not a function; it \emph{does its job} as a function, since in this case \emph{it has no job to do}. This has another consequence, which is that all functions $\bot \to A$ are indistinguishable but for any intrinsic properties you choose to assign to types such as their name or identifier. In fact, what we have described is the type theory version of the \squote{principle of explosion}, often stated as \squote{if \emph{false} then \emph{anything}}, with the trivial function as its witness.
+
+The reverse is equally interesting: for a type $A$, just as $\bot \to A$ is \emph{always} populated with the trivial function, $A \to \bot$ is \emph{never} populated so long as $A$ is populated. In this case, we have inputs for which we must find valid outputs, but no such outputs exist. The only way we can short circuit this is if indeed we are discussing $\bot \to \bot$, in which case there is still the trivial function. In fact, this function-type is our $\mathtt{NOT}$ operator.
+
+\begin{definition}[Logical Negation]
+For a type $A\colon \mathtt{Type}$, define the \emph{function} $\neg \colon \mathtt{Type} \to \mathtt{Type}$ by \begin{gather*}
+\neg A \mapsto (A \to \bot).
+\end{gather*}
+\end{definition}
+
+Unlike our other logical operations, strictly speaking we have not defined a new type here; that was done back when we formally discussed $\to$. This is merely a function on types, in fact it is a shorthand for the curried $(\to \bot)$, rather than a constructor. It works as logical negation, as discussed earlier, since $\neg P$ is populated with the trivial function only when $P = \bot$ since if we have a witness $p \colon P$, we will have no outputs to assign for a function $f \colon P \to \bot$, thus falsifiying the function and leaving $P \to \bot$ empty.
+
+This now makes it possible to discuss certain basic deductions of logic, the most basic \emph{theorems}, and see that these will take the form of functions. It is my intention that above all else, what you take away from this section is the ability to read a mathematical theorem as a kind of function, and so we have a preliminary example.
+
+\begin{theorem}
+Let $P,Q \colon \mathtt{Type}$ be proposition types. Then \dquote{if $P$ or $Q$, then if not $P$, then $Q$}, or \begin{gather*}
+P + Q \to \neg P \to Q
+\end{gather*}
+\end{theorem}
+
+\begin{my proof}
+Let $f$ denote the witness of type $P + Q \to \neg P \to Q$ that we construct. It has as its input a member of $P + Q$ and outputs a function of type $\neg P \to Q$, or $(P \to \bot) \to Q$. Since $P + Q$ has two constructors, let us define $f$ for both: if the constructor passed to $f$ is $r \colon Q \to P + Q$ then it must have been passed $q \colon Q$ as $r \hspace{2pt} q$. In that case, we have our witness of $Q$ and may pass it directly, defining \begin{gather*}
+f \hspace{2pt} (r \hspace{2pt} q) = (g \mapsto q)
+\end{gather*}
+where $g\colon \neg P$ is the evidence that $P = \bot$.
+
+Perhaps counter-intuitively, we must now consider the case where $f$ is given as its input $l\hspace{2pt} p$ for some $p \colon P$ and then some $g \colon P \to \bot$ as well, the self contradicting case where both $P$ and $\neg P$ are true, which we call the \emph{counterfactual} (meaning roughly \squote{the case that was not true}). That is, we are above all defining a \emph{function}, and so no matter our intuitions about logic, we must put them aside and say \emph{what the function does}. This is not a problem for us however.
+
+The $\bot$ type is empty, however since we are in a case that should never happen, we now have evidence of \emph{false} and can prove anything we like, including our proof goal. We write this as \begin{gather*}
+f \hspace{2pt} (l \hspace{2pt} p) \hspace{2pt} g = h \hspace{2pt} (g \hspace{2pt} p)
+\end{gather*}
+where $h \colon \bot \to Q$ is the trivial function. This can be interpretted as \dquote{If $P$ or $Q$ via $P$, and $P$ implies \emph{false}, then since we know $P$, imply \emph{false}. Since \emph{false} implies anything, imply $Q$}. In the process of this we have momentarily allowed there to be a fictitious element of the \emph{empty} type, as is natural in the counterfactual case.
+
+Then for any $P + Q$ we have constructed $f \colon P + Q \to \neg P \to Q$. \qed
+\end{my proof}
+
+Part of the power of using type theory is that, as discussed before but more obvious now, a function (and thus a theorem) is defined so long as one can account only for every constructor the function may receive. This case is simple, asking what constructors $P + Q$ could have and then taking any member of $\neg P$ absent a question about which constructor it is exactly, however as we will see going forward, theorems of arbitrary complexity will yield to this kind of case analysis since we are merely fulfilling our obligation to provide an output for every input. Thus the question \squote{which witnesses did we receive?} is merely to divide our sets of inputs/witnesses/circumstances into classes which may individually have easier proofs.
+
+Before moving on, note that we have introduced a split in the notation of constructive mathematics and classical mathematics: in type theory, propositions and their operations exist at the same level as objects, and use the same tools. As our intention here is to proceed, after this section, to classical mathematics, it would be better practice to give our operations appropriate aliases so that we are not confused in future.
+
+\begin{notation}
+When they act on propositions, define the following symbols as aliases for their non-propositional counterparts:
+\begin{itemize}
+\item $\wedge := \times \hspace{0.5em}$ read as \squote{and},
+\item $\vee := + \hspace{0.5em}$ read as \squote{or},
+\item $\Rightarrow \hspace{4pt} := \hspace{4pt} \to \hspace{0.5em}$ read as \squote{implies}, e.g. $P \Rightarrow Q$ is the type of functions taking witnesses $p \colon P$ and producing some witness $q \colon Q$ , along with $(P \Leftarrow Q) = (Q \rightarrow P)$,
+\item $(P \Leftrightarrow Q) := (P \to Q) \times (Q \to P)$, that is, we say $P$ \squote{if and only if} $Q$ when we can find as witness a function $P \to Q$ as well as a function $Q \to P$ so that both propositions imply one another. 
+\end{itemize}
+\end{notation}
+
+\subsection{Dependent Types and Example Proposition Types}
+
+We have of course not yet given an example of a real proposition type with its own constructors yet, and the reason for that is this: while we have the tools to discuss a proposition type now, we don't have the tools to discuss \emph{whole classes} of propositions, and thus to deduce anything that could actually have generality or be useful. The unit type and empty type are technically examples of propositions, and yet they do not \emph{say} anything.
+
+Since we are preparing to speak about mathematics, most often of all, the things we will have to \emph{say} with a proposition is to speak of equality, this equals that. And yet equality is not useful if we must manually define a new type for every pair of items we want to claim are equal. We can of course make functions between types, as seen by $\to$, but, consider for equality of natural numbers, we need something of the form $\nats \to \nats \to \mathtt{Type}$. And yet even in that case, we will certainly need constructors that are somehow dependent on the arguments, lest we populate a proposition type that says any random pair of numbers is equal.
+
+Let us think then about what properties equality has that could found its type. In mathematics, we say that a \squote{relation} in general describes an equivalence when it has three properties: every thing is equal to itself (reflexivity), an equality is the same backwards as it is forwards (symmetry), and equalities can be chained together to make new equalities (transitivity). A broader discussion of equivalence relations will appear in the following section, however for now, one of these does indeed look like a constructor.
+
+\begin{definition}[Equivalence Type]
+If $A \colon \mathtt{Type}$ and $a,b \colon A$, then define by $a \equiv b$, read as \squote{$a$ equals $b$}, a new type with constructor \begin{gather*}
+\mathtt{refl} \colon (a \colon A) \to (a \equiv a).
+\end{gather*}
+\end{definition}
+
+There are a number of peculiar things about this type, least of all how to interpret what it means. First, to avoid confusion, we have used the symbol $\equiv$ rather than $=$ in order to separate the rules of $\equiv$ from out existing notions of equivalence; instead we will deduce them. Second, its constructor doesn't look like a function in the way we are familiar, since now the type of output depends on the individual input rather than merely its type, i.e. $(\mathtt{refl} \hspace{3pt} a) \colon (a \equiv a)$ and $(\mathtt{refl} \hspace{3pt} b) \colon (b \equiv b)$ are members of separate, mutually incomparable types. The constructor we've given this represents the expectation that equality relations are \emph{reflexive}, so what we've really said is \squote{in the case where $b$ is both equal to $a$ and literally the symbol $a$, it has constructor $\mathtt{refl} \hspace{2pt} a$}.
+
+%theres something weird about this sentence
+But we cannot use this yet; the issue that constructors for this type have a bizarre dependency of their output \emph{type} on their input \emph{element} is also necessary for any theorem that speaks about equality. Otherwise, more than just having to make each equality type one at a time, we'd have to define a new version of each theorem for each equality type used. We must generalize this concept of dependent function types.
+
+\begin{definition}[$\Pi$-Types, or Dependent Functions]
+Let $A \colon \mathtt{Type}$ and let $B$ be some family of types, a collection of types each with roughly the same constructors which each use some $a \colon A$ as a parameter. In that case, we write $B \colon A \to \mathtt{Type}$ and define the $\Pi$-type as the \emph{dependent function} type, written \begin{gather*}
+\prod_{x : A} B(x) := (x \colon A) \to B(x)
+\end{gather*}
+where $\Pi$ is the capital greek letter \squote{pi}. In practice, let us also write what is on the right hand side of this definition to denote the dependent function type.
+\end{definition}
+
+This may seem abstract, but in fact the reason we are discussing it in the first place is because it concretizes a much more natural concept; when $Q \colon \nats \to \mathtt{Type}$ is a family of propositions depending on a natural number, we would say \squote{for all $n \colon \nats$, we have $Q(n)$}. Such a form of statement is vital in statements like, for example, \dquote{for all $n$, there exists a prime number $p$ which is greater than $n$}. In fact, this concept is so ubiquitous in mathematics that there will be very few sections of this text which do not refer to it literally or implicitly.
+
+\begin{notation}[For All]
+When $A\colon \mathtt{Type}$ and $P\colon A \to \mathtt{Type}$ is a family of proposition types, define the notation \begin{gather*}
+\forall x : A, P(x) := \prod_{x : A} P(x)
+\end{gather*}
+as the propositional logic version of the $\Pi$-type, reading the symbol $\forall$ as \dquote{for all}. 
+\end{notation}
+
+Here, the deeper value of the type theory metaphor for propositional logic begins to show itself. In mathematics, we tend to use $\Pi$ in a similar way as above to denote large repetative multiplications, which we sometimes call \squote{product notation}. This is in fact entirely apt as a choice of notation against the backdrop of our other names. Consider what it means to have a \emph{function} with a dependent output type: we require of a function that for every input there is an output, and so, what it means to have found a witness for a dependent function \emph{proposition} type is that we have a member of \emph{every} type in the type family $P\colon A \to \mathtt{Type}$.
+
+Said another way, imagine a type family dependent on the unit type, $Q \colon \top \to \mathtt{Type}$. Since $\top$ only has one element, the $*$ element, there is only one type $Q(*)$ in the type family, and so $\prod_{* : \top} \hspace{0.05em} Q(*)$ is still a type of functions, but with no real \emph{dependency} left. Nonetheless, an element $f \colon (* : \top) \to Q(*)$ still selects an element of $Q(*)$ to be its output, $q = f(*)$. Then the \emph{data}, the information that could be said to be contained in $f$, the choices required to define it, lie only in the choice of $f(*) \colon Q(*)$. What we have done in finding a member $f \colon \prod_{* : \top} \hspace{0.05em} Q(*)$ is merely to find a member $q \colon Q(*)$. Now consider, for a type, let's call it $\mathtt{Bool}$ with only two members $\mathtt{on}\colon \mathtt{Bool}$ and $\mathtt{off} \colon \mathtt{Bool}$; then the dependent type $\prod_{b : \mathtt{Bool}} P(b)$ contains functions that still assign an output to every input, and so it finds a witness for both $P(\mathtt{on})$ and $P(\mathtt{off})$. The data required to define a function $f \colon \prod_{b : \mathtt{Bool}} P(b)$ is then contained in each element of $P(\mathtt{on}) \times P(\mathtt{off})$, since each $(p_{\mathtt{on}},p_{\mathtt{off}}) \colon P(\mathtt{on}) \times P(\mathtt{off})$ corresponds to a possible $f$ which is defined $f(\mathtt{on}) = p_{\mathtt{on}}$ and $f(\mathtt{off}) =  p_{\mathtt{off}}$. If extended, the conclusion one reaches is that $\forall (n \colon \nats), P(n)$ is to be read as $P(0) \times P(1) \times P(2) \times ...$, i.e. \dquote{for all $n$, we have $P(n)$} is an identical statement to \dquote{$P(0)$ and $P(1)$ and $P(2)$ and ...}. In fact, this interpretation is ostensibly correct, and the intuitions garnered from it generalize.
+
+Holding that thought for a moment, we must first complete our suite of tools. If we are to think of the $\Pi$-type as generalizing the notion of a product type to entire families of types, then can we generalize the sum type to an entire family of types? Let us think for a moment: if a dependent function generalizes the product type since there must exist an output in each type of the type family to correspond to an input, then to generalize the sum type means to say there exists at least one type with a witness amongst an entire family of types. The tool we are looking for is a \emph{dependent pair} type.
+
+\begin{definition}[$\Sigma$-Type, or Dependent Pairs]
+Let $A \colon \mathtt{Type}$ and $B \colon A \to \mathtt{Type}$ be a family of types, each which take a member $a \colon A$ as a parameter. We define the $\Sigma$-type as the \emph{dependent pair} type, written \begin{gather*}
+\sum_{x : A} B(x),
+\end{gather*}
+where $\Sigma$ is the capital greek \squote{sigma}, to be the type of all pairs $(a,b)$ where $a\colon A$ and $b \colon B(a)$, with the type of the second term depending on the individual choice of element of the first in $A$. Analogously to the product type, we have the comma constructor \begin{gather*}
+, \colon (a \colon A) \to B(a) \to \sum_{x : A} B(x).
+\end{gather*}
+\end{definition}
+
+It is of course possible to set $B \colon A \to \mathtt{Type}$ to be some constant family, say, a type $C \colon \mathtt{Type}$, in which case the $\Sigma$-type trivializes back down to the standard pair, $A \times C$.
+
+In propositional logic, the $\Sigma$-type $\sum_{x : A} B(x)$ describes the quantifier \squote{exists}, the same one as in \dquote{for all $n$, there exists a prime number $p$ which is greater than $n$}. In fact, pending a definition of $>$ (greater than) and letting $P(n)$ be the proposition that $n$ is prime, we could now describe that proposition literally by the type $\prod_{n : \nats} \sum_{p : \nats} P(p) \wedge (p > n)$. Such a pattern of pairing \squote{for all} with \squote{there exists} is a common one, however, it is usually written with the following notation.
+
+\begin{notation}[There Exists]
+When $A\colon \mathtt{Type}$ and $P\colon A \to \mathtt{Type}$ is a family of proposition types, define the notation \begin{gather*}
+\exists x : A, P(x) := \sum_{x : A} P(x)
+\end{gather*}
+as the propositional logic version of the $\Pi$-type, reading the symbol $\exists$ as \dquote{there exists} and the comma as \dquote{such that}. When there exists exactly one $a \colon A$  with a populated $P(a)$ type, we say that $\exists ! x \colon A, P(x)$, reading $\exists !$ as \dquote{there exists uniquely}.
+\end{notation}
+
+Together, the operations we have described above show how this dependent type theory, one that exists in computer programming languages with operations and objects $\to, \times, +, \top, \bot, \Pi, \Sigma$, has a one-to-one mapping with the logical operations used in mathematics, $\Rightarrow, \wedge, \vee$, true, false, $\forall, \exists$. This is a consequence of the Curry-Howard correspondance, often stated simply as \dquote{proofs are programs}.
+
+\subsection{Formal Theorems}
+
+The whole reason we are discussing type theory is to recontextualise what it means to prove a theorem; what we do in pure mathematics often has less in common with the deductions of a detective eliminating possible stories and more in common with a programming problem. That is, although we are certainly making deductions, the manner in which one does this in every day life can sometimes lead one to think logical statements can be weakened or strengthened with synonyms or by persuading oneself with some argumentative sleight of hand. Although for much of this text we will write proofs in the form of worded deductions, those deductions are written each as the application of some function that transforms a logical context.
+
+To that end, it helps to see propositions as not merely statements to be read as true or false, and theorems as statements which are conditionally true, but that propositions have witnesses, and those theorems \emph{act} on those witnesses and are incomplete if every single hypothesis is not proven. Moreover, we do not accept a statement merely because it seems like it should be true, but because we have a transformation of existing witnesses to propositions that produces a new witness that the statement is true. With addition to some core axioms, we hold ourselves to this high a standard in mathematics.
+
+This also means that everything you think you know to be true about the typical mathematical objects, rules like $a + (b + c) = (a + b) + c$ are, if not assumed, propositions that have explicit witnesses. It is no longer enough to expect that things \emph{should} be true, or \emph{ought} to be true of mathematical objects or objects which we intend to describe things in the real world. If they are true, then they have witnesses. This will expose certain things about how the mathematical mode of thought differs from the logical one, or rather, that many things one believes to be true about mathematics are not necessarily true but are in fact distinct choices we make about the system of logic we work in.
+
+Let us begin with some proofs of familiar concepts.
+
+\begin{theorem}[Transitivity of Equality]
+Let $A \colon \mathtt{Type}$ and $a, b ,c \colon A$. If $a \equiv b$ and $b \equiv c$ then $a \equiv c$, or \begin{gather*}
+\forall (a,b,c) \colon A \times A \times A, \hspace{0.4em} (a \equiv b) \Rightarrow (b \equiv c) \Rightarrow (a \equiv c)
+\end{gather*}
+has a witness.
+\end{theorem}
+\begin{my proof}
+We are to define a dependent function $f$ which takes a triple $(a,b,c) \colon A \times A \times A$ and then a witness of $a \equiv b$ and of $b \equiv c$. Presuming we are supplied an appropriate triple, we then need to define \begin{gather*}
+f(a,b,c) \colon (a \equiv b) \to (b \equiv c) \to (a \equiv c).
+\end{gather*}
+Presume also then that we are given a witness $p \colon (a \equiv b)$. Now we will \emph{pattern match} on the remaining argument, that is, since there is only one constructor for the equality type, we know that an argument of type $b \equiv c$ will be supplied as the witness $\mathtt{refl} \hspace{0.2em} b \colon (b \equiv b)$; this is only as appropriate, since equality types only have constructors, and thus are populated, when the left hand side of the equality \emph{is equal} to the right side. And if it were not so, then no witness would be supplied at all (this is indeed a power of the inductive type). In this way, by merely asking what constructor of $b \equiv c$ would be supplied, we have immediately shown that what we are proving could only be the following\begin{gather*}
+f(a,b,b) \colon (a \equiv b) \to (b \equiv b) \to (a \equiv b).
+\end{gather*}
+This is substantially easier job, since we may define $f$ as \begin{gather*}
+f\hspace{0.2em} (a,b,c) \hspace{0.3em} p \hspace{0.3em} (\mathtt{refl} \hspace{0.2em} b) = p
+\end{gather*}
+since, by requiring a witness of $b \equiv c$ and thus ensuring $c$ can only literally be $b$, our final output must be a witness $a \equiv b$ just as our first witness $p \colon (a \equiv b)$. \qed
+\end{my proof}
+
+This mode of reasoning also applies immediately to certain things about numbers. For instance, the idea that $m \equiv n$ implies $m + 1 \equiv n + 1$ is immediate in this manner: a function \begin{gather*}
+\forall (m, n) \colon \nats \times \nats, (m \equiv n) \Rightarrow (\mathbf{S}(m) \equiv \mathbf{S}(n))
+\end{gather*}
+has its witness easily since in the moment that we pattern match on $m \equiv n$, we see that the only constructor could have been $\mathtt{refl} \hspace{0.3em} n$, and thus the case we are proving is exactly \begin{gather*}
+(n \equiv n) \Rightarrow \big(\mathbf{S}(n) \equiv \mathbf{S}(n) \big)
+\end{gather*}
+with witness given trivially by $\mathtt{refl} \hspace{0.3em} (\mathbf{S}(n))$.
+
+But our system can do much more than just make things we knew intuitively to be true much more burdensome to prove, it can make things which are often difficult for students to comprehend equally as concrete as those we knew to be obvious already. The famous \squote{proof by induction} is brought into crystal clarity by our technique, and in fact \emph{deduced}.
+
+%In this mode of reasoning, we see that the idea $a = b$ implies $a + 1 = b + 1$ is not even obvious either; where is our function $\forall (a,b) \colon A \times A, (a \equiv b) \Rightarrow (\mathbf{S}(a) \equiv \mathbf{S}(b))$? In fact, to show this we need \squote{proof by induction} in its fully formalized form, and indeed we are able to \emph{prove} that proof by induction is even possible.
+
+\begin{label theorem}[Proof by Induction for $\nats$]{ProofByInduction}
+Let $P\colon \nats \to \mathtt{Type}$ be a type family. If $P(\mathbf{Z})$ has witness and there is a function $\forall (n : \nats), P(n) \to P(\mathbf{S}(n))$, then we have proven $\forall (n : \nats), P(n)$. That is, there is a witness for \begin{gather*}
+\forall (P\colon \nats \to \mathtt{Type}), P(\mathbf{Z}) \Rightarrow \big(\forall (n : \nats), P(n) \Rightarrow P(\mathbf{S}(n)) \big) \Rightarrow \forall (n \colon \nats), P(n).
+\end{gather*}
+\end{label theorem}
+\begin{my proof}
+To complete this proof, we will need to speak of two functions: $f$, the witness of the theorem (type omitted for length) and $g\colon \forall (n : \nats), P(n) \Rightarrow P(\mathbf{S}(n))$, the function we require that can propogate a proof of $P(n)$ to its successor $P(\mathbf{S}(n))$. Although it may not be obvious by the statement of the theorem, by the right-associativity of function types (yes, even dependent ones), we will also be able to provide $n \colon \nats$, defining our function $f$ by the final output of type $P(n)$ it produces.
+
+Let us pattern match on $n$: it must either be $\mathbf{Z}$ or $\mathbf{S}(m)$ for some $m \colon \nats$. In the first case, we are trying to produce a member of $P(n) = P(\mathbf{Z})$, for which an evidence is already provided as prerequisite. So we may define \begin{gather*}
+f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.3em} \mathbf{Z} = p
+\end{gather*}
+where $p \colon P(\mathbf{Z})$ and the other arguments are defined above. In the case of $\mathbf{S}(m)$, we write \begin{gather*}
+f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.3em} \mathbf{S}(m) = g \hspace{0.2em} m \hspace{0.3em} (f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.2em} m)
+\end{gather*}
+defining a recursive function just as we had done for addition. What we have done on the right hand side is this: since $g\colon \forall (n : \nats), P(n) \Rightarrow P(\mathbf{S}(n))$, we provide it with $m \colon \nats$ so that we are discussing $g(m) \colon P(m) \Rightarrow P(\mathbf{S}(m))$. To complete the proof, we need only hand $g(m)$ some proof of $P(m)$, which we hand off recursively to $f$ itself in its specialized form, $f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.2em} m \colon P(m)$ as we described above. In this way, we hand the obligation of actually proving something off through recursion until finally the tally marks are taken off and we are in fact proving $f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.3em} \mathbf{Z} \colon P(\mathbf{Z})$, which has witness $p$ as was provided. \qed
+\end{my proof}
+
+\begin{corollary}
+We can use proof by induction to extend our earlier observation that $a \equiv b$ implies $\mathbf{S}(a) \equiv \mathbf{S}(b)$ to a general form that $b \equiv c$ implies $b + a \equiv c + a$ for all $a \colon \nats$. That is, we find a witness of \begin{gather*}
+\forall a, \forall b, \forall c, (b \equiv c) \Rightarrow (b + a \equiv c + a)
+\end{gather*}
+by setting it as our $P\colon \nats \to \mathtt{Type}$ and performing induction on it. The case $a = \mathbf{Z}$ is covered immediately, recalling the inductive definition $\mathtt{add}(n, \mathbf{Z}) = n$, i.e. $P(\mathbf{Z})$ is in fact the type $\forall b, \forall c, (b \equiv c) \to (b \equiv c)$, proven trivially by passing the witness along. Next we need $\forall (n : \nats), P(n) \to P(\mathbf{S}(n))$, specialized to our case as \begin{align*}
+\forall (n \colon \nats), \hspace{1em} &
+\forall b, \forall c, (b \equiv c) \Rightarrow (b + n \equiv c + n) \\
+\Rightarrow
+\hspace{1em} & 
+\forall b, \forall c, (b \equiv c) \Rightarrow \big(b + \mathbf{S}(n) \equiv c + \mathbf{S}(n) \big).
+\end{align*}
+But again we may apply our inductive definition of addition $\mathtt{add}(m, \mathbf{S}(n)) = \mathtt{add}(\mathbf{S}(m),n)$, and so the output proposition for this is in fact \begin{gather*}
+\forall b, \forall c, (b \equiv c) \Rightarrow (\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n).
+\end{gather*}
+Now recall our observation that $(m \equiv n) \Rightarrow (\mathbf{S}(m) \equiv \mathbf{S}(n))$, which we write in our case with witness function $g\colon \forall b, \forall c, (b \equiv c) \Rightarrow (\mathbf{S}(b) \equiv \mathbf{S}(c))$. Since our inductive function gives us as hypothesis, the witness $h \colon \forall b, \forall c, (b \equiv c) \Rightarrow (b + n \equiv c + n) $, we can now specialize that as $\big(h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \big) \colon \big(\mathbf{S}(b) \equiv \mathbf{S}(c) \big) \rightarrow \big(\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n \big)$. We can now chain these together \begin{gather*}
+h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \hspace{0.2em} (g \hspace{0.2em} b \hspace{0.2em} c) \colon (b \equiv c) \Rightarrow \big(\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n \big)
+\end{gather*}
+forming out inductive step. Then (and you should check this by looking at the proof by induction's form) we have satisfied the requirements for applying the theorem form of proof by induction, and we deduce $\forall a, \forall b, \forall c, (b \equiv c) \Rightarrow (b + a \equiv c + a)$.
+
+If we use $f$ to denote the inductive rule then the full proof can be read monolithically as \begin{align*}
+f \hspace{0.2em}
+& \big( \forall a, \forall b, \forall c, (b \equiv c) \Rightarrow (b + a \equiv c + a) \big) \\
+& (b \mapsto c \mapsto p \mapsto p) \\
+& \big(b \mapsto c \mapsto h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \hspace{0.2em} (g \hspace{0.2em} b \hspace{0.2em} c)\big).
+\end{align*}
+\end{corollary}
+
+In practice, we will rarely use this kind of reasoning in mathematics, since, while a useful tool for being absolutely certain no logical error has been made, we typically try to adjust our intuitions so that we can reason such steps automatically. That is not to say, in this moment at least, that the rigidity we expect of pure mathematics is any weaker, but that statements such as $a = b \Rightarrow a + c = b + c$ is one we train our intuitions on so that we know automatically how to make \emph{algebraic} deductions.
+
+When we lack such intuitions, or when we know our intuitions are at risk of failing us, this system or modes of reasoning like it are there to catch us. This is often the case when we speak about the various refactorings we can do to statements to make them easier to prove related to negation. It is a common mistake for students to set out to prove by contradiction, only to structure the negated form of the proposition incorrectly and make the proof trivial but wrong. With the benefit of this system, we will not be making such mistakes.
+
+\begin{label theorem}[Some of De Morgan's Laws]{IncompleteNegationRules}
+Let $P,Q \colon \mathtt{Type}$ be propositions, and let $A \colon \mathtt{Type}$ with $R\colon A \to \mathtt{Type}$ a type family. Then we have the following:\begin{itemize}
+\item $\neg P \vee \neg Q \Rightarrow \neg (P \wedge Q)$ i.e. \squote{if $P$ or $Q$ is false then they are not both true}
+\item $\neg P \wedge \neg Q \Rightarrow \neg (P \vee Q)$ i.e. \squote{if both are false then not one of them are true}
+\item $\neg (P \vee Q) \Rightarrow \neg P \wedge \neg Q$ i.e. \squote{if not either then both false}
+\item $\neg (\exists (a \colon A), R(a)) \Rightarrow \forall (a \colon A), \neg R(a)$ i.e. \squote{if not one example, then for all false}
+\item $\forall (a \colon A), \neg R(a) \Rightarrow \neg (\exists (a \colon A), R(a))$ i.e. \squote{if for all false, then there does not exist an example}
+\item $ \exists (a : A), \neg R(a) \Rightarrow \neg (\forall (a : A) \to R(a))$ i.e. \squote{if counterexample then not for all}
+\end{itemize}
+\end{label theorem}
+
+Many of the proofs for this theorem will depend on applying right-associativity, since if the final type we want to show is of form $\to \neg P$, then this is the same as $\to P \to \bot$. Just like in our previous proofs involving negation, we can indulge a counterfactual case, however proofs ending in negation are special in a certain respect. That is, when we engage the counterfactual, we do not need to apply the principle of explosion (the trivial function) in order to obtain any proposition we want, because our final proposition type is $\bot$. Said another way, we can reinterpret $\to \neg P$ as $\to P \to \bot$ and supply a witness $p \colon P$, and this is equivalent to saying \dquote{$P$ is false and we will show it's false by showing absurdity is derived from it being true}. This is a very specific form of proof by contradiction.
+
+This proof will be the longest we've ever seen before, a record to be almost immediately broken again. For that reason, it is on the website displayed as a minimized box by default. I do recommend looking over this proof, so please click it.
+
+\begin{my proof}{m}
+\begin{itemize}
+
+\item Let us proceed as if $P,Q$ were normal types. Then we read $\neg P \vee \neg Q = (P \to \bot) + (Q \to \bot)$ and $\neg (P \wedge Q) = P \times Q \to \bot$. Together then, we must find a witness function of the type
+\begin{align*}
+(P \to \bot) + (Q \to \bot) \to (P \times Q \to \bot).
+\end{align*}
+Let us call this witness $f$. Then to pattern match $f$ for its argument in $(P \to \bot) + (Q \to \bot)$, we must define its procedure in when it receives either $l \hspace{0.2em} g$ where $g \colon P \to \bot$ or  $r \hspace{0.2em} h$ where $h \colon Q \to \bot$. In either case, recalling the right-associativity of $\to$, we may then define its behaviour as a function with output in $\bot$ if it receives an input $(p,q) \colon P \times Q$ thus solving in the counterfactual. Then, for example, we may extract the desired value $p$ and apply it to our function $g \colon P \to \bot$. Thus $f$ is defined \begin{gather*}
+f \hspace{0.2em} (l \hspace{0.2em} g) \hspace{0.2em} (p,q) = g \hspace{0.2em} p \\
+f \hspace{0.2em} (r \hspace{0.2em} h) \hspace{0.2em} (p,q) = h \hspace{0.2em} q
+\end{gather*}
+
+
+\item Once again, note that the desired statement is written fully as \begin{gather*}
+(P \to \bot) \times (Q \to \bot) \to (P + Q \to \bot).
+\end{gather*}
+with the benefit of familiarity with the previous proof, we must define the behaviour assuming we are given an argument $(g,h) \colon (P \to \bot) \times (Q \to \bot)$ and, using right-associativity, let us say we are also given an argument $P + Q$ which must be pattern matched as either $l \hspace{0.2em} p$ or $r \hspace{0.2em} q$ for $p \colon P$ or $q \colon Q$ respectively. Then we can define $f$ as \begin{gather*}
+f \hspace{0.2em} (g,h) \hspace{0.2em} (l \hspace{0.2em} p) = g \hspace{0.2em} p \\
+f \hspace{0.2em} (g,h) \hspace{0.2em} (r \hspace{0.2em} h) = h \hspace{0.2em} q
+\end{gather*}
+a near re-ordering of the previous proof.
+
+\item This statement is written as \begin{gather*}
+((P + Q) \to \bot) \to (P \to \bot) \times (Q \to \bot).
+\end{gather*}
+Its witness, which we once again call $f$, will take as an argument $g \colon P + Q \to \bot$. Our output must be a pair of functions that take some $p\colon P$ to $\bot$ and some $q \colon Q$ to $\bot$. Since we can inject either into $P+Q$ with $l$ or $r$, this is simple. \begin{gather*}
+f \hspace{0.2em} g = \Big( \big( p \mapsto g \hspace{0.2em} (l \hspace{0.2em} p) \big), \big(q \mapsto g \hspace{0.2em} (r \hspace{0.2em} q) \big)\Big)
+\end{gather*}
+
+\item Despite the different symbols, this is remarkably similar to the previous proofs. First, observe what we want to prove is really \begin{gather*}
+\left( \sum_{a : A} R(a) \to \bot \right) \to (a : A) \to (R(a) \to \bot)
+\end{gather*}
+with $\sum_{a : A} R(a)$ the type of dependent pairs $(a,r)$ with $r \colon R(a)$. Then, once again providing our witness $f$ with arguments $g \colon \sum_{a : A} R(a) \to \bot$, $a \colon A$ and $r \colon R(a)$ just as in previous proofs, we define $f$ as \begin{gather*}
+f \hspace{0.2em} g \hspace{0.2em} a \hspace{0.2em} r = g \hspace{0.2em} (a,r)
+\end{gather*}
+since the pair $(a,r)$ is exactly the argument $g$ needs to produce an element of $\bot$, completing the counterfactual.
+
+
+\item Repeating our procedure, what we aim to prove is really \begin{gather*}
+\big( (a \colon A) \to ( R(a) \to \bot) \big) \to \left( \sum_{a : A} R(a) \to \bot \right).
+\end{gather*}
+So we will provide our proof $f$ with $g \colon (a \colon A) \to R(a) \to \bot$ and a pair $(a,r) \colon \sum_{a : A} R(a)$. We then have immediately \begin{gather*}
+f \hspace{0.2em} g \hspace{0.2em} (a,r) = g \hspace{0.2em} a \hspace{0.2em} r 
+\end{gather*}
+thus providing our fictitious element of $\bot$ and completing the theorem.
+
+\item The non-propositional form is \begin{gather*}
+f\colon \left( \sum_{a : A} R(a) \to \bot \right) \to \big((a : A) \to R(a) \big) \to \bot
+\end{gather*}
+so presume the arguments are supplied $(a , g)$ with $a \colon A$ and $g \colon R(a) \to \bot$ and $h \colon (a : A) \to R(a)$. We need simply specialise $h$ on $a$ to obtain an element of $R(a)$, which we can then apply to $g$ to obtain a member of $\bot$. \begin{gather*}
+f \hspace{0.2em} (a,g) \hspace{0.2em} h =  g \hspace{0.2em} (h \hspace{0.2em} a).
+\end{gather*}
+\end{itemize}
+\qed
+\end{my proof}
+
+Notice however that these four statements we prove are clearly not all the logical statements we tend to consider about negation. For instance, we cannot prove \squote{if not both then one is false} ($\neg (P \wedge Q) \Rightarrow \neg P \vee \neg Q$) because our system has hamstrung us. Or more interestingly, it has in fact revealed to us that there are things we believe to be true about logic that are not true \emph{a priori}.
+
+Consider for example, the concept of proof by contradiction. Since $\neg \neg P$ is read as \squote{not not P} you would be forgiven for thinking that it is true only when $P$ is true, but that is not the case. In fact, to believe $\neg \neg P \Rightarrow P$ is a strong statement, implying in particular that you believe all propositions are either true or false ($\forall (P \colon \mathtt{Type}), P \vee \neg P$), a property called \squote{being \emph{decidable}}. In our every day life, this seems to reflect our experiences, and yet there are rare cases when a question must be undecidable, as is famously the case in Alan Turing's solution to the Halting Problem.
+
+In fact, to consider dependent type theory as the basis of logic would force one to accept a bizarre truth: that there is more than just true or false, but a secret third thing, the \emph{not false}. We can prove (and this is a fun exercise you are now well equipped to do) that $\neg \neg \neg P \to \neg P$, that is, \squote{not not not $P$ implies not $P$}, but we cannot do anything about $\neg \neg P$. So if we (circularly) think of $\bot = \neg \top$, then we must accept that there is in fact a third outcome, that of $\neg \bot = \neg \neg \top$ in a distinct and meaningful way where there is no fourth (since $\neg \neg \bot = \neg \neg \neg \top$ would be $\neg \top$ as above). We must ask ourselves, is this the system of logic we want to work within? Does this reflect our goals in mathematics?
+
+\subsection{The Problem with Constructive Mathematics}
+
+To believe that all propositions are either true or false is in fact a distinct \textbf{axiom}, called the \emph{Law of Excluded Middle} (LEM) in this case, a statement which we consider to be true and do not question precisely because it is part of the foundation of our system of reasoning. To claim an axiom in one's reasoning is a profoundly dangerous step that must be exercised with caution; presume the wrong thing, and you will end up in a counterfactual, but axiomitise the wrong thing, and your entire logical system is vulnerable to the principle of explosion.
+
+And yet if it is dangerous to believe this axiom since it has clear contradictions, why is it that proof by contradiction is commonly accepted in mathematics?
+
+Here we meet the difference between mathematics and logic; there is a sense in which mathematicians are more interested in the metaphysical behaviour of the objects they study than the logical soundness of them. This is not to say that mathematicians are willing to accept contradictions (in fact they are repulsed by them!) but it is just not their primary concern. To a mathematician, the fact that almost every object they encounter is decidable is enough to consider these rare cases the exception to the rule, i.e. statements are decidable until proven or cautioned otherwise. 
+
+Moreover, this more metaphysical interest means that there are circumstances when even mathematicians, looking at a statement that agrees with their metaphysical understanding of an object, will be tempted to say \squote{this seems true enough}. Such is famously the case with the \emph{axiom of choice}.
+
+This axiom is famously difficult to comprehend, and many on encountering it are unclear on why exactly it is an axiom which must be asserted rather than a straight forward logical operation. To us, with the benefit of type theory, we see the axiom of choice as a clear assertion of type \begin{gather*}
+\Big(\forall (a : A), \exists (b : B), P(a,b) \Big) \hspace{0.5em} \to \hspace{0.5em} \exists (f : A \to B), \forall (a : A), P(a,f(a))
+\end{gather*}
+given a family of types $P \colon A \to B \to \mathtt{Type}$. We read this statement as \dquote{if for all $a$ there exists a $b$ so that $P(a,b)$ is true, then there exists a \emph{choice} function $f$ which for all $a$ will choose the $b = f(a)$ satisfying $P(a,b)$}. Yet even here you may begin to see why such a statement makes one question why it is an axiom: if we know the $b$ exists, then surely it is right there, and we can just \emph{choose it}, right? But in fact, it can be shown that the axiom of choice implies the law of excluded middle. It is the nature of the mathematician (more particularly the naive one) to look at such a statement and be unconcerned with it; their attention is instead focused on the nature of the type or \emph{set} that they are choosing from. One might remark even in the other direction, that the great success of mathematics is not in spite of a blindness to logic but \emph{because} of their singleminded metaphysical curiosity. For much of the remainder of this text, we will embrace that curiosity, and the mindset of the mathematician.
+
+We may even point out a distinct failure of the system we have been working within. That is, while we can prove quite sophisticated mathematical theorems in dependent type theory, we do so with a stipulation that is not the case in mathematics. A witness to the type $\exists (a : A), P(a)$ is not just evidence that it is true that there exists $a$ satisfying $P(a)$, it is an example of it being true $(a,p)$. The functional nature of our deductions means that we cannot merely prove an example exists, we must \emph{construct} it, hence the name \textbf{constructive mathematics}.
+
+This burden of proof is distinctly higher than necessary. There are valuable things we can say when we are able to prove examples or counter-examples exist where the example itself does not particularly matter. We can even reverse the accusatory finger; since constructive proofs are computational (indeed there are many languages that will run them), to expect all of mathematics to be fully constructive corresponds in some sense to an axiom itself, that the world we live in is a computable one. Does every question that has an answer have a procedure to find that answer? This is an assumption mathematicians do not make.
+
+\subsection{De Morgan's Laws and Proof Techniques}
+
+As I said many times before, the rules of dependent type theory remain valuable to us despite our disinterest in its strict adherence. Instead, we know now what it means exactly to presume something is true: treating our theorems as types and our proofs as functions, we can use our intuition to guide our steps and know what type-form a presumption might have, noting immediately if it is reasonable or in fact a much more dangerous statement.
+
+Accordingly, we can now give a more full set of rules for how to manipulate negations, paying off one of the uses of type theory that we will continue to return to throughout this text.
+
+\begin{label theorem}[De Morgan's Laws, Proof by Contradiction, etc.]{NegationRules}
+Let $P,Q \colon \mathtt{Type}$ be \emph{decidable} types, that is, we have witnesses of $P \vee \neg P$ and $Q \vee \neg Q$. Then we have the following: \begin{itemize}
+
+\item \textbf{Proof by Contradiction} or \emph{Reductio ad absurdum}, i.e. \squote{if $P$ is true or false, then if $P$ were false there would be a logical inconsistency, so take $P$ to be true since that must be consistent}
+\begin{gather*}
+\mathtt{RAA}\colon \forall (P : \mathtt{Type} ), P \vee \neg P \Rightarrow ( \neg \neg P \Rightarrow P)
+\end{gather*}
+
+\item $\neg(P \wedge Q) \Leftrightarrow \neg P \vee \neg Q$, i.e. \squote{not both, if and only if either is false}
+
+\item $\neg (P \vee Q) \Leftrightarrow \neg P \wedge \neg Q$ i.e. \squote{neither, if and only if both are false}
+
+\item \textbf{Proof by Contrapositive} i.e. \squote{the rain must wet the ground if and only if knowing the ground is not wet tells us that it did not rain}
+\begin{gather*}
+\mathtt{PBC} \colon (P \Rightarrow Q) \Leftrightarrow (\neg Q \Rightarrow \neg P)
+\end{gather*}
+
+\item \textbf{Negation of implication} i.e. \squote{$P$ does not cause $Q$ if and only if there are examples of $P$ happening but not $Q$}
+\begin{gather*}
+\neg (P \Rightarrow Q) \Leftrightarrow P \wedge \neg Q
+\end{gather*}
+\end{itemize}
+Additionally, let $R \colon A \to \mathtt{Type}$ be a family of types with $A \colon \mathtt{Type}$ a non-empty type. Moreover, allow that $R(a)$ and its derivative types are decidable as necessary, such as $\forall (a:A), R(a)$, $\exists (a : A), \neg R(a)$, etc. Then we also have:
+\begin{itemize}
+\item $\neg \big(\forall (a : A), R(a) \big) \Leftrightarrow \exists (a : A), \neg R(a)$ i.e. \squote{not for all if and only if there exists a counter example }
+\item $\neg \big(\exists (a : A), R(a)\big) \Leftrightarrow \forall (a : A), \neg R(a)$ i.e. \squote{there does not exist an example if and only if for all it is false}
+\end{itemize}
+\end{label theorem}
+
+This is the promised even-longer proof, so we have minimized it on the web. I do recommend taking a look however, particularly in the last thing we prove.
+
+\begin{my proof}{m}
+We have already shown some parts of these in theorem \ref{thm:IncompleteNegationRules}, so we only need to show the remaining parts.
+
+\begin{itemize}
+
+\item We have already assumed by hypothesis $P \colon \mathtt{Type}$ and some witness $P \vee \neg P$, so let us pattern match on this witness. It is either $l \hspace{0.2em} p$ with $p \colon P$ or $r \hspace{0.2em} f$ with $f \colon P \to \bot$. In the former case, by right-associativity we are done since we may assign the function $\neg \neg P \Rightarrow P$ to be merely the constant function $p$. In the latter case, we must also be given an element of $\neg \neg P$, that is, some $g\colon (P \to \bot) \to \bot$. In this case, $g \hspace{0.2em} f \colon \bot$ produces the fictitious element of the empty type, allowing us to use the principle of explosion with trivial function $h \colon \bot \to P$. \begin{gather*}
+\mathtt{RAA} \hspace{0.2em} (l \hspace{0.2em} p) \hspace{0.2em} g = p \\
+\mathtt{RAA} \hspace{0.2em} (r \hspace{0.2em} f) \hspace{0.2em} g = h \hspace{0.2em} (g \hspace{0.2em} f)
+\end{gather*}
+
+
+\item Recall that $\Leftrightarrow$ merely means a pair of implications going in either direction. We have already shown $\neg P \vee \neg Q \Rightarrow \neg (P \wedge Q)$ so we need now to show in our context that $\neg (P \wedge Q) \Rightarrow \neg P \vee \neg Q$, or rather \begin{gather*}
+\big((P \times Q) \to \bot \big) \to \big( (P \to \bot) + (Q \to \bot) \big).
+\end{gather*}
+To show this, we will need to actively use our information that $P$ and $Q$ are decidable, so in fact, the above type as written may not have witnesses, nor are we trying to prove it in a general sense. Our full theorem, accounting for the desired context, is \begin{align*}
+f \colon P \vee \neg P \to & Q \vee \neg Q \to \big((P \times Q) \to \bot \big) \\
+& \to \big( (P \to \bot) + (Q \to \bot) \big)
+\end{align*}
+We must now pattern match on $P \vee \neg P$ and $Q \vee \neg Q$ with $p \colon P$ or $g_p \colon P \to \bot$ and $q \colon Q$ or $g_q \colon Q \to \bot$ respectively. Then let $h \colon (P \times Q) \to \bot$ be the next argument and $k \colon \bot \to \neg P \vee \neg Q$ be a trivial function. Our four cases become \begin{gather*}
+f \hspace{0.2em} (l \hspace{0.2em} p) \hspace{0.2em} (l \hspace{0.2em} q) \hspace{0.2em} h = k \hspace{0.2em} \big(h \hspace{0.2em} (p,q) \big) \\
+f \hspace{0.2em} (l \hspace{0.2em} p) \hspace{0.2em} (r \hspace{0.2em} g_q) \hspace{0.2em} h = r \hspace{0.2em} g_q \\
+f \hspace{0.2em} (r \hspace{0.2em} g_p) \hspace{0.2em} (l \hspace{0.2em} q) \hspace{0.2em} h = l \hspace{0.2em} g_p \\
+f \hspace{0.2em} (r \hspace{0.2em} g_p) \hspace{0.2em} (r \hspace{0.2em} g_q) \hspace{0.2em} h = l \hspace{0.2em} g_p
+\end{gather*}
+Notice that whenever either decidable proposition is decided false, we simply use that to form our witness of \dquote{not $P$ or not $Q$}. 
+
+
+\item Both $\neg P \vee \neg Q \Rightarrow \neg (P \wedge Q)$ and $\neg (P \wedge Q) \Rightarrow \neg P \vee \neg Q$ have been proven in theorem \ref{thm:IncompleteNegationRules}, so their pair forms $\neg (P \vee Q) \Leftrightarrow \neg P \wedge \neg Q$. 
+
+\item The implication of the contrapositive form of a proposition $(P \Rightarrow Q) \Rightarrow (\neg Q \Rightarrow \neg P)$ can be proven without assuming decidability. In fact, reading the type as \begin{gather*}
+(P \to Q) \to (Q \to \bot) \to P \to \bot
+\end{gather*}
+we can supply our proof $f_1$ with three arguments $g \colon P \to Q$, $h \colon Q \to \bot$ and $p \colon P$, immediately solving this form as \begin{gather*}
+f \hspace{0.2em} g \hspace{0.2em} h \hspace{0.2em} p = h \hspace{0.2em} (g \hspace{0.2em} p)
+\end{gather*}
+by using $g$ to turn $p$ into a member of $Q$ and then using $h$ to turn that member of $Q$ into a member of $\bot$.
+
+In the other direction, we require decidability of $Q$, so let us extend the type as we did in the previous proof which we used decidability in. \begin{align*}
+f_2 \colon Q \vee \neg Q \to (\neg Q \to \neg P ) \to (P \to Q)
+\end{align*}
+Similarly to the last proof which used decidability, our proof in fact looks the same so long as $Q$ is true, since by right-associativity, we may simply ignore the rest of the arguments and say that $P \Rightarrow Q$ since no matter $P$, we have $q \colon Q$ as a constant function. This means, for other cases, we assume $Q$ to be false. In that case, with argument $h \colon \neg Q \to \neg P$, we may read $\neg P = P \to \bot$ and supply the final $p \colon P$ argument from the end of the type $P \to Q$ (i.e. we are applying right-associativity) to obtain an element of $\bot$, then apply the trivial function $k \colon \bot \to Q$.
+\begin{gather*}
+f_2 \hspace{0.2em} (l \hspace{0.2em} q) \hspace{0.2em} h \hspace{0.2em} p = q \\
+f_2 \hspace{0.2em} (r \hspace{0.2em} g) \hspace{0.2em} h \hspace{0.2em} p = k \hspace{0.2em} (h \hspace{0.2em} g \hspace{0.2em} p)
+\end{gather*}
+Our complete proof is then the pair $\mathtt{PBC} = (f_1,f_2)$. 
+
+\item To show the form of negation of implications, once again we prove two forms \begin{gather*}
+f_1 \colon P \vee \neg P \to Q \vee \neg Q \to \neg (P \to Q) \Rightarrow P \wedge \neg Q \\
+f_2 \colon P \vee \neg P \to Q \vee \neg Q \to (P \wedge \neg Q) \Rightarrow \neg (P \to Q) 
+\end{gather*}
+where $f_2$ turns out to be substantially easier to prove, and in fact can be done without decidability. For that reason, let us provide it the dummy arguments $x \colon P \vee \neg P$ and $y \colon Q \vee \neg Q$ and the pair $(p, g) \colon P \times \neg Q$ where $p \colon P$ and $g \colon Q \to \bot$. Finally, we once again apply right-associativity to provide the argument $h \colon P \to Q$ changing our goal type to $\bot$. In this case our proof is merely \begin{gather*}
+f_2 \hspace{0.2em} x \hspace{0.2em} y \hspace{0.2em} (p , g) \hspace{0.2em} h = g \hspace{0.2em} (h \hspace{0.2em} p).
+\end{gather*}
+The reverse will prove to be the most complicated non-dependent proof we've done so far, and will involve reusing our proof of contrapositive which we named so we could use it now, $\mathtt{PBC}$. In particular, we will need to extract its second form \begin{gather*}
+(\mathtt{pr}_2 \hspace{0.2em} \mathtt{PBC}) \colon Q \vee \neg Q \to (\neg Q \to \neg P ) \to (P \to Q)
+\end{gather*}
+with the projection operator $\mathtt{pr}_2$ which we use for extracting the second item in a pair. We will also need two different trivial functions $k_1,k_2$, and so we will name their types shortly; the more important thing to recognise is that whenever we see a trivial function used, it is because we are in a false case.
+
+Now consider, since $P$ and $Q$ are decidable by hypothesis, they are either true or false. First let us pattern match on the decidability of $Q$, and indeed the truth of $P$ will not matter if $Q$ is true, so we'll need a dummy variable symbol $x$, and a few others $y,z$. Recalling the form we want to show \begin{gather*}
+f_1 \colon P \vee \neg P \to Q \vee \neg Q \to \neg (P \to Q) \Rightarrow P \wedge \neg Q,
+\end{gather*}
+we also take as an argument $g \colon \neg (P \to Q)$. In the case where $Q$ is true, our evidence $q \colon Q$ allows us to define a constant function $(y \mapsto q) \colon P \to Q$, and this can be fed to $g$ to produce $\bot$. If $P$ is true and $Q$ is false, we are in exactly the situation desired and may provide $p \colon P$ and $h \colon \neg Q$ as output $(p,h) \colon P \wedge \neg Q$.
+
+If however both $P$ and $Q$ are false, let us say that we have $h_p \colon P \to \bot$ and $h_q \colon Q \to \bot$. Since $h_q \colon \neg Q$, we can pass it to $(\mathtt{pr}_2 \hspace{0.2em} \mathtt{PBC})$ as our proof that $Q$ is decidable and thus witness that contrapositive applies. This gets us \begin{gather*}
+(\mathtt{pr}_2 \hspace{0.2em} \mathtt{PBC}) \hspace{0.2em} h_q \colon (\neg Q \to \neg P ) \to (P \to Q).
+\end{gather*}
+To use this, we'll need a function of type $\neg Q \to \neg P$, however we have $h_p \colon \neg P$, which is enough to define a constant function $(z \mapsto h_p) \colon \neg Q \to \neg P$. Once fed to $(\mathtt{pr}_2 \hspace{0.2em} \mathtt{PBC}) \hspace{0.2em} h_q$, we obtain now a function of type $P \to Q$. Recall now that we have the argument $g \colon (P \to Q) \to \bot$, which can eat $(\mathtt{pr}_2 \hspace{0.2em} \mathtt{PBC}) \hspace{0.2em} h_q \hspace{0.2em} (z \mapsto h_p)$ to give us our element of $\bot$. Finally we can apply the trivial function $k_2 \colon \bot \to P \wedge \neg Q$.
+
+All together, these three cases are written \begin{gather*}
+f_1 \hspace{0.2em} x \hspace{0.2em} (l \hspace{0.2em} q) \hspace{0.2em} g \hspace{0.2em} = k_1 \big( g \hspace{0.2em} (y \mapsto q) \big) \\
+f_1 \hspace{0.2em} (l \hspace{0.2em} p) \hspace{0.2em} (r \hspace{0.2em} h) \hspace{0.2em} g = (p, h) \\
+f_1 \hspace{0.2em} (r \hspace{0.2em} h_p) \hspace{0.2em} (r \hspace{0.2em} h_q) \hspace{0.2em} g = k_2 \Big( g \hspace{0.2em} \big((\mathtt{pr}_2 \hspace{0.2em} \mathtt{PBC}) \hspace{0.2em} h_q \hspace{0.2em} (z \mapsto h_p) \big) \Big)
+\end{gather*}
+with $k_1 \colon \bot \to P \wedge \neg Q$.
+
+\end{itemize}
+
+We proceed now to the dependent statements. In theorem \ref{thm:IncompleteNegationRules} we showed both directions of $\neg \big(\exists (a : A), R(a)\big) \Leftrightarrow \forall (a : A), \neg R(a)$. So we set our attention on $\neg \big(\forall (a : A), R(a) \big) \Leftrightarrow \exists (a : A), \neg R(a)$, for which we have also proven the direction $\exists (a : A), \neg R(a) \Rightarrow \neg (\forall (a : A) \to R(a))$ without decidability.
+
+The other direction will prove substantially more difficult, requiring helper functions as well as decidability of all $R(a)$ and of the dependent pair type $\sum_{a : A} \neg R (a)$. We also need an example of $a$ so we are sure the family $R$ is non-empty. Then we will need dependent trivial functions $\phi_a \colon \bot \to R(a)$ (spoken as \squote{phi}, consider this if you like to be $(a : A) \to \bot \to R(a)$ with the argument $a$ given in the subscript) and $\psi_a \colon \bot \to \neg R(a)$.
+
+Our goal is then \begin{align*}
+f \colon A \to & \big((a : A) \to R(a) \vee \neg R(a) \big) \to \\
+& \left( \sum_{a:A} \neg R(a) \right) \vee \neg \left( \sum_{a:A} \neg R(a) \right) \to \\
+& \Big( \big((a : A) \to R(a) \big) \to \bot \Big) \to \sum_{a : A} \neg R(a)
+\end{align*}
+consisting of four arguments, \begin{align*}
+& b \colon A, \\
+& g \colon (a : A) \to R(a) \vee \neg R(a), \\
+\text{either}\hspace{0.5em} & (l \hspace{0.2em} e_1) \hspace{0.5em} \text{or} \hspace{0.5em} (r \hspace{0.2em} e_2) \hspace{0.5em} \text{pattern matched}\\
+\text{with}\hspace{0.5em} & e_1 \colon \exists (a : A), \neg R(a) \hspace{0.5em} \text{or} \hspace{0.5em} e_2 \colon \big( \exists (a : A), \neg R(a) \big) \to \bot \\
+\text{and finally} \hspace{0.5em}& h \colon \big((a : A) \to R(a) \big) \to \bot
+\end{align*}
+We will also need helper functions alpha and beta 
+\begin{gather*}
+\alpha \colon (a : A) \to R(a) \vee \neg R(a) \to R(a) \\
+\beta \colon (a : A) \to R(a)
+\end{gather*}
+which will exist only in this context in the case with $e_2$ and as a consequence of it. You may think of them as effectively a notational sugar-coat for readability.
+
+Proceed in the case with $e_1$. This is the case where we imagine that decidability of $\exists (a : A), \neg R(a)$ is true; in this case our proof is exactly this example. \begin{gather*}
+f \hspace{0.2em} b \hspace{0.2em} g \hspace{0.2em} (l \hspace{0.2em} e_1) \hspace{0.2em} h = e_1
+\end{gather*} 
+In the other case, we can and must first define $\alpha$ and $\beta$. The statement of $\alpha$ is effectively \squote{for all $a \colon A$ with $R(a)$ true or false, we have $R(a)$ true}. This obviously does not make sense in general, but in this specific case we have $e_2$ which one can consider to be the statement \squote{there are no counter-examples to $\forall (a : A), R(a)$} (read the type of $e_2$ carefully to get this). The other reason we define $\alpha$ is so that we can pattern-match on $(g \hspace{0.2em} b) \colon R(b) \vee \neg R(b)$.
+
+Thus our $\alpha$ takes two arguments with two cases, one where it takes $c\colon A$ and $(l \hspace{0.2em} p)$ with $p \colon R(c)$ and one where it takes instead $(r \hspace{0.2em} q)$ with $q \colon R(c) \to \bot$. Recalling we defined the trivial function $\phi_a \colon \bot \to R(a)$, we can now write \begin{gather*}
+\alpha \hspace{0.2em} c \hspace{0.2em} (l \hspace{0.2em} p) = p \\
+\alpha \hspace{0.2em} c \hspace{0.2em} (r \hspace{0.2em} q) = \phi_c \hspace{0.2em} \big( e_2 \hspace{0.2em} (c , q)\big)
+\end{gather*}
+i.e. evidence of decidability of $R(c)$ must always give us evidence that it is true since we have $e_2$ to tell us there exists no counter examples. If we try to say there exists $q \colon R(c) \to \bot$ then we get a contradiction.
+
+This is nearly the form we need, that of $\forall (a : A), R(a)$, which will allow us to apply $h \colon \big((a : A) \to R(a) \big) \to \bot$ to say that $e_2$ itself causes a contradiction. To do that though, we need to find some way to get rid of the dependence on proof of decidability as an argument. Since, in our context, we already have $g$ which takes some $a : A$ and tells us if its $R(a)$ is decidable, we don't need to take that as an argument; in this context it can be taken as a constant. Thus we define \begin{gather*}
+\beta \hspace{0.2em} c \hspace{0.2em} = \alpha \hspace{0.2em} c \hspace{0.2em} (g \hspace{0.2em} c)
+\end{gather*}
+which is merely $\alpha$ with decidability of $R(c)$ provided externally by $(g \hspace{0.2em} c)$.
+
+Finally we provide $\beta$ to $h$, obtaining a contradiction, and then applying our trivial function $\psi_a \colon \bot \to R(a)$ to eliminate the counterfactual. \begin{gather*}
+f \hspace{0.2em} b \hspace{0.2em} g \hspace{0.2em} (l \hspace{0.2em} e_1) \hspace{0.2em} h = \big(b, \psi_b \hspace{0.2em} (h \hspace{0.2em} \beta) \big)
+\end{gather*}
+
+We are finally done.
+
+\qed
+
+\end{my proof}
+
+%We must also discuss, at least briefly, the flexibility and dangers of proof by contradiction. Proof by contradiction, once again, is the idea that \squote{not not $P$ implies $P$}, which is only true when $P$ is strictly either true or false. If we are trying to prove $P \Rightarrow Q \Rightarrow R$ by contradiction, then by right associativity, we may instead show any of \begin{gather*}
+%\neg \neg (P \Rightarrow Q \Rightarrow R), \\
+%P \Rightarrow \neg \neg (Q \Rightarrow R), \\
+%P \Rightarrow Q \Rightarrow \neg \neg R
+%\end{gather*}
+%by supplying arguments $p \colon P$ and $q \colon Q$ into our context to change our proof goal, then using proof by contradiction on that new goal. But consider the following: if it should be true that $P \Leftrightarrow Q$, then we could proceed by proving $P \Rightarrow \neg \neg (Q \Rightarrow R)$ and find there is a way to prove the theorem even if it is false.
+
+%That is, we can read this form of the theorem as \begin{gather*}
+%P \Rightarrow \neg (Q \Rightarrow R)  \Rightarrow \bot
+%\end{gather*}
+%and apply the proof by contrapositive to change $\neg (Q \Rightarrow R)$ into $ \neg R \Rightarrow \neg Q$. But since $P \Leftrightarrow Q$, our $g \colon (R \to \bot) \to Q \to \bot$ can be given the second argument $p$ (taking $p \colon Q$ as shorthand since $P \Leftrightarrow Q$) and with some mild rearranging, we obtain the statement $(x \mapsto g \hspace{0.2em} x \hspace{0.2em} p) \colon \neg R \to \bot$ or $\neg \neg R$. Then by the proof by contradiction, we have deduced $R$ is true.
+
+%Except that we don't know anything about $R$. We could rewrite this theorem to have any $R$, entirely unrelated to $P$ or $Q$ and deduce whatever we wanted, even setting $R = \bot$. This is of course a danger of the law of excluded middle, but in my experience, one rarely walks oneself into such a mistake in mathematics merely by thinking statements are true or false. This is not even the case with proof by contrapositive. It is the step of involving the proof by contradiction that seems to direct one down paths such as these. However we can easily avoid them if we exercise but the slightest bit of caution.
+
+\subsection{Into \emph{Mathematics}}
+
+This system of deductions will remain close with us. It is not strictly that the system of dependent type theory is a bad one for logic, but merely that it does not automatically provide a great model for our interests in mathematics. This is largely solved by augmenting our system with the axioms we insist to be true.
+
+In the context of dependent type theory, an axiom can be thought of as insisting a witness of some proposition or theorem exists with no way to define it or find it. Once we add even one axiom, we are in the non-constructive regime, since if theorems are functions, our axioms are functions with no procedure to execute them. Computers can still check such theorems however, and they do this at the level that a computer program merely checks to see that there are no type errors; the lack of a procedure does not change the fact that if such a procedure existed, the theorem would then run \emph{without error}.
+
+But as we move forward, we will be doing more than merely making our theorems non-constructive with our axioms. We, as mathematicians, are \emph{not} logicians. There will be times when we strike off one of our axioms and insist that it does not apply in the case we are in. We will even do this without strict rules, but by reasoning about our system, or simply by a known counter-example. That is, as mathematicians, we can know an inconsistency exists somewhere in our system, and simply choose to avoid it as a false branch of conclusions. We do not, for instance, use solutions to Russel's paradox to avoid even the slightest risk of error, we simply avoid the mechanism that causes Russel's paradox to occur.
+
+Of course we are not pleased 
+
+\end{document}

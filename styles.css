@@ -1,0 +1,200 @@
+ @property --page-aesth {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: lightblue;
+}
+
+@property --margin-size {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 15px;
+}
+
+@property --page-width {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 640px;
+}
+
+@property --def-color {
+ syntax: "<color>";
+ inherits: false;
+ initial-value: lightgreen;
+}
+
+@property --thm-color {
+ syntax: "<color>";
+ inherits: false;
+ initial-value: lightcoral;
+}
+
+@property --prf-color {
+ syntax: "<color>";
+ inherits: false;
+ initial-value: lightblue;
+}
+
+@property --crl-color {
+ syntax: "<color>";
+ inherits: false;
+ initial-value: khaki;
+}
+
+@property --ntn-color {
+ syntax: "<color>";
+ inherits: false;
+ initial-value: lightgrey;
+}
+
+h1 {
+  color: grey;
+}
+
+.bar-one {
+   display: flex;
+}
+
+.marginless {
+   margin-top: 0px;
+   margin-bottom: 0px;
+}
+
+.marginsmall {
+   margin-top: 3px;
+   margin-bottom: 3px;
+}
+
+.margin15 {
+   margin-top: 15px;
+   margin-bottom: 15px;
+}
+
+.bar-two {
+   border-radius: 5px;
+   background-color: var(--page-aesth);
+   padding: 5px;
+}
+
+.flex-row {
+   display: flex;
+   flex-direction: row;
+}
+
+.flex-col {
+   display: flex;
+   flex-direction: column;
+}
+
+.pagebound {
+   border-radius: 5px;
+   background: white;
+   background-color: white;
+   max-width: var(--page-width);
+   margin-left: auto;
+   margin-right: auto;
+   text-align: justify;
+   padding-right: var(--margin-size);
+   padding-left: var(--margin-size);
+   padding-bottom: 15px;
+}
+
+.Definition {
+   border: 3px solid var(--def-color);
+   border-radius: 8px;
+   background-color: white;
+   padding: 5px;
+}
+
+.Definitiontitle {
+   background-color: var(--def-color);
+   border-radius: 5px;
+   padding: 5px;
+}
+
+.Theorem {
+   border: 3px solid var(--thm-color);
+   border-radius: 8px;
+   background-color: white;
+   padding: 5px;
+}
+
+.Theoremtitle {
+   background-color: var(--thm-color);
+   border-radius: 5px;
+   padding: 5px;
+}
+
+.Proof {
+   border: 3px solid var(--prf-color);
+   border-radius: 8px;
+   background-color: white;
+   padding: 5px;
+}
+
+.Prooftitle {
+   background-color: var(--prf-color);
+   border-radius: 5px;
+   padding: 5px;
+}
+
+.Corollary {
+   border: 3px solid var(--crl-color);
+   border-radius: 8px;
+   background-color: white;
+   padding: 5px;
+}
+
+.Corollarytitle {
+   background-color: var(--crl-color);
+   border-radius: 5px;
+   padding: 5px;
+}
+
+.Notation {
+   border: 3px solid var(--ntn-color);
+   border-radius: 8px;
+   background-color: white;
+   padding: 5px;
+}
+
+.Notationtitle {
+   background-color: var(--ntn-color);
+   border-radius: 5px;
+   padding: 5px;
+}
+
+figure {
+   align-items: center;
+}
+
+img {
+   width: var(--page-width);
+}
+
+img.squareheight {
+   height: var(--page-width);
+}
+
+body {
+   background-image: url(./assets/tribackgrey.png);
+   background-repeat: repeat;
+
+
+   /* animation: backgroundroll 5s linear infinite; */
+   /*
+   background-color: var(--page-aesth);
+   background: var(--page-aesth);
+   */
+}
+
+/*
+@keyframes backgroundroll {
+  from{
+      background-position-x: 0px;
+      background-position-y: 0px;
+  }
+  to{
+     background-position-x: 99px;
+     background-position-y: 342px;
+  }
+}*/

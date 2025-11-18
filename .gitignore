@@ -1,0 +1,7 @@
+ExamplePage.html
+dist-newstyle/
+assets/tribackraw.kra
+*.swp
+*.aux
+*.dvi
+*.log

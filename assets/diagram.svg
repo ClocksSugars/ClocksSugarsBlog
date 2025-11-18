@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<svg width="600" height="600" viewBox="0 0 600 600" class="bg-white" xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <circle cx="150" cy="150" r="80" fill="none" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4 2"></circle>
+    <line x1="150" y1="150" x2="230" y2="150" stroke="#000" stroke-width="1.5"></line>
+    <text x="180" y="145" fill="#000" font-size="16" font-style="italic"> ε </text>
+    <circle cx="19.321680782419122" cy="126.86502313318564" r="3" fill="#ef4444"></circle>
+    <circle cx="59.55209806713411" cy="215.22622188125476" r="3" fill="#ef4444"></circle>
+    <circle cx="136.59071688419817" cy="241.17925600881085" r="3" fill="#ef4444"></circle>
+    <circle cx="195.413182289307" cy="209.24698856919375" r="3" fill="#8b5cf6"></circle>
+    <circle cx="208.58043015216322" cy="156.87435182017376" r="3" fill="#8b5cf6"></circle>
+    <circle cx="185.02331416811728" cy="121.49300866030659" r="3" fill="#8b5cf6"></circle>
+    <circle cx="152.9030062729606" cy="116.94964907388801" r="3" fill="#8b5cf6"></circle>
+    <circle cx="134.94005097530237" cy="132.56327050810535" r="3" fill="#8b5cf6"></circle>
+    <circle cx="135.27954455404088" cy="149.13923823067427" r="3" fill="#8b5cf6"></circle>
+    <circle cx="143.8837615658147" cy="155.60256180476347" r="3" fill="#8b5cf6"></circle>
+    <circle cx="149.89235888098852" cy="153.6848281302522" r="3" fill="#8b5cf6"></circle>
+    <circle cx="150.64208490333434" cy="150.661115373373" r="3" fill="#8b5cf6"></circle>
+
+    <text x="27.321680782419122" y="131.86502313318564" font-size="14"> a <tspan font-size="10" dy="3"> 1 </tspan>
+    </text>
+    <text x="67.55209806713411" y="220.22622188125476" font-size="14"> a <tspan font-size="10" dy="3"> 2 </tspan>
+    </text>
+    <text x="144.59071688419817" y="246.17925600881085" font-size="14"> a <tspan font-size="10" dy="3"> 3 </tspan>
+    </text>
+
+    <text x="165" y="214.24698856919375" font-size="14" fill="#8b5cf6">N=4</text>
+    <circle cx="150" cy="150" r="4" fill="#000"></circle>
+  </g>
+
+  <g>
+    <ellipse cx="450" cy="150" rx="104" ry="80" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="4 2" transform="rotate(25 450 150)"></ellipse>
+    <circle cx="319.3216807824191" cy="126.86502313318564" r="3" fill="#ef4444"></circle>
+    <circle cx="359.5520980671341" cy="215.22622188125476" r="3" fill="#ef4444"></circle>
+    <circle cx="436.5907168841982" cy="241.17925600881085" r="3" fill="#ef4444"></circle>
+    <circle cx="495.413182289307" cy="209.24698856919375" r="3" fill="#8b5cf6"></circle>
+    <circle cx="508.5804301521632" cy="156.87435182017376" r="3" fill="#8b5cf6"></circle>
+    <circle cx="485.0233141681173" cy="121.49300866030659" r="3" fill="#8b5cf6"></circle>
+    <circle cx="452.9030062729606" cy="116.94964907388801" r="3" fill="#8b5cf6"></circle>
+    <circle cx="434.94005097530237" cy="132.56327050810535" r="3" fill="#8b5cf6"></circle>
+    <circle cx="435.2795445540409" cy="149.13923823067427" r="3" fill="#8b5cf6"></circle>
+    <circle cx="443.88376156581467" cy="155.60256180476347" r="3" fill="#8b5cf6"></circle>
+    <circle cx="449.8923588809885" cy="153.6848281302522" r="3" fill="#8b5cf6"></circle>
+    <circle cx="450.64208490333436" cy="150.661115373373" r="3" fill="#8b5cf6"></circle>
+
+    <text x="327.3216807824191" y="131.86502313318564" font-size="14">a <tspan font-size="10" dy="3">1</tspan>
+    </text>
+    <text x="367.5520980671341" y="220.22622188125476" font-size="14">a <tspan font-size="10" dy="3">2</tspan>
+    </text>
+    <text x="444.5907168841982" y="246.17925600881085" font-size="14">a <tspan font-size="10" dy="3">3</tspan>
+    </text>
+
+    <text x="503.413182289307" y="214.24698856919375" font-size="14" fill="#8b5cf6">N=4</text>
+    <text x="385" y="120" font-size="14" fill="#10b981">U ⊂ <tspan font-family="serif" font-style="italic">ℝ</tspan>
+    </text>
+  </g>
+
+  <g>
+    <ellipse cx="80" cy="480" rx="40" ry="50" fill="none" stroke="#f59e0b" stroke-width="2" transform="rotate(-15 80 480)" stroke-dasharray="4 2"></ellipse>
+    <ellipse cx="220" cy="420" rx="65" ry="80" fill="none" stroke="#6366f1" stroke-width="2" transform="rotate(10 220 420)" stroke-dasharray="4 2"></ellipse>
+    <ellipse cx="215" cy="410" rx="40" ry="50" fill="rgba(251, 191, 36, 0.2)" stroke="#fbbf24" stroke-width="2" transform="rotate(20 215 410)" stroke-dasharray="4 2"></ellipse>
+    <defs>
+      <marker id="arrowhead3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <polygon points="0 0, 10 3, 0 6" fill="#000"></polygon>
+      </marker>
+    </defs>
+    <path d="M 95 475 Q 120 410, 210 415" fill="none" stroke="#000" stroke-width="2" marker-end="url(#arrowhead3)"></path>
+    <text x="125" y="415" font-size="16" font-style="italic">f</text>
+    <text x="60" y="500" font-size="14" fill="#f59e0b">U ⊂ <tspan font-family="serif" font-style="italic">ℝ</tspan>
+    </text>
+    <text x="195" y="395" font-size="14" fill="#fbbf24">f(U) ⊂ V</text>
+    <text x="200" y="485" font-size="14" fill="#6366f1">V ⊂ <tspan font-family="serif" font-style="italic">ℝ</tspan>
+    </text>
+    <circle cx="80" cy="480" r="4" fill="#000"></circle>
+    <text x="80" y="470" font-size="14" fill="#000">p</text>
+    <circle cx="220" cy="420" r="4" fill="#000"></circle>
+    <text x="228" y="425" font-size="14" fill="#000">L</text>
+  </g>
+
+  <g>
+    <circle cx="380" cy="480" r="45" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 2"></circle>
+    <circle cx="520" cy="420" r="75" fill="none" stroke="#6366f1" stroke-width="2" stroke-dasharray="4 2"></circle>
+    <ellipse cx="515" cy="410" rx="38" ry="48" fill="rgba(251, 191, 36, 0.2)" stroke="#fbbf24" stroke-width="2" transform="rotate(20 515 410)" stroke-dasharray="4 2"></ellipse>
+    <line x1="380" y1="480" x2="380" y2="435" stroke="#000" stroke-width="1.5"></line>
+    <text x="385" y="460" fill="#000" font-size="16" font-style="italic">δ</text>
+    <line x1="520" y1="420" x2="595" y2="420" stroke="#000" stroke-width="1.5"></line>
+    <text x="560" y="410" fill="#000" font-size="16" font-style="italic">ε</text>
+    <defs>
+      <marker id="arrowhead4" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <polygon points="0 0, 10 3, 0 6" fill="#000"></polygon>
+      </marker>
+    </defs>
+    <path d="M 400 465 Q 445 400, 500 415" fill="none" stroke="#000" stroke-width="2" marker-end="url(#arrowhead4)"></path>
+    <text x="430" y="420" font-size="16" font-style="italic">f</text>
+    <text x="355" y="500" font-size="14" fill="#f59e0b">U ⊂ <tspan font-family="serif" font-style="italic">ℝ</tspan>
+    </text>
+    <text x="490" y="400" font-size="14" fill="#fbbf24">f(U) ⊂ V</text>
+    <text x="505" y="485" font-size="14" fill="#6366f1">V ⊂ <tspan font-family="serif" font-style="italic">ℝ</tspan>
+    </text>
+    <circle cx="380" cy="480" r="4" fill="#000"></circle>
+    <circle cx="520" cy="420" r="4" fill="#000"></circle>
+    <text x="390" y="480" font-size="14" fill="#000">p</text>
+    <text x="495" y="435" font-size="14" fill="#000">L</text>
+  </g>
+</svg>
