@@ -29,31 +29,131 @@ And yet set theoretic reasoning is radically successful as a foundation for math
 
 Importantly this is \emph{not} intended as a description of set theory. As above, much of the elaboration of set theory, as it was a formal theory intended to make mathematics rigorous, was the previous century's best tech for splitting hairs in mathematics. We have better methods for that now, and we have discussed them in the previous chapter. Instead, we will focus here on sets as a tool that we intend to use, and the ways to think about them so they are more useful.
 
-\subsection{ZFC Axioms}
+\subsection{ZFC Axioms: What they \emph{do} say}
 
 In the same way that I said at the end of the previous section that dependent type theory, with some axioms, remains a good model at least for reasoning about propositions, I must now specify that in that lens, we will interpret set theory as a superset of type theoretic reasoning. That is, we think of everything we did in the previous section as being a special case of sets, and set reasoning as being \emph{broader}.
 
 Defining what a set is then is relatively difficult without quickly sounding silly, and indeed a few books I looked at do walk directly into the notion of a 'set of people on earth' or a 'set of numbers'. Instead, we'll just put all of the Zermelo–Fraenkel set theory axioms here and then we can discuss what they mean, and what they tell us about sets.
 
-\begin{label definition}[Zermelo-Fraenkel Set Theory Axioms + Choice]{ZFC}
-Consider a set to be a collection of objects with a notion of equivalence between those objects and a propositional relation written $\in$ which is true when an object $x$ is \emph{in} a set $A$ (and thus read $\in$ as \squote{in} or \squote{is an element of}). Inherit the notion of a proposition or a condition (i.e. loosely in the sense of a family of types) from the previous section along with logical operations.
+\begin{label definition}[Zermelo-Fraenkel Set Theory Axioms]{ZFAxioms}
+Inherit the notion of a proposition or a condition (i.e. loosely in the sense of a family of types) from the previous section along with logical operations. Consider a set to be a collection of objects with a notion of equivalence between those objects and a propositional relation written $\in$ which is true when an object $x$ is \emph{in} a set $A$ (and thus read $\in$ as \squote{in} or \squote{is an element of}).
 
 Then sets are defined to obey the following. \begin{enumerate}
+
 \item (Axiom of Extensionality) Two sets $A$ and $B$ are equal if they have the same elements. \begin{gather*}
-\big(\forall a, (a \in A) \wedge (a \in B) \big) \Rightarrow A = B
+\big(\forall x, (x \in A) \Leftrightarrow (x \in B) \big) \Rightarrow A = B
 \end{gather*}
+
 \item (Axiom of Pairing) For all objects $a$ and $b$ there exists a set ${a,b}$ that contains exactly and only $a$ and $b$. \begin{gather*}
 \forall a, \forall b, \exists A, \big( \forall x, (x \in A) \Leftrightarrow (x = a \vee x = b) \big)
 \end{gather*}
-\item (Axiom of Comprehension) Let $P$ be a condition and $A$ be a set. There exists a set $B$ such that $x \in B$ if and only if $x \in A$ and $P(a)$. \begin{gather*}
-\forall P,\forall A, \exists B, \big(\forall x, (x \in B) \Leftrightarrow (x \in A) \wedge P(a) \big)
+
+\item (Axiom of Comprehension) Let $P$ be a condition and $A$ be a set. There exists a set $B$ such that $x \in B$ if and only if $x \in A$ and $P(x)$. \begin{gather*}
+\forall P,\forall A, \exists B, \big(\forall x, (x \in B) \Leftrightarrow (x \in A) \wedge P(x) \big)
 \end{gather*}
+Then we write $B$ using the \emph{set comprehension} notation \begin{gather*}
+B = \{x \in A | P(x)\}.
+\end{gather*}
+
+\item (Axiom of Power Set) For every set $A$ there exists a set $\powerset(A)$ of subsets of $A$. \begin{gather*}
+\forall A, \exists B, \forall C, \big( (\forall x, x\in C \Rightarrow x \in A) \Leftrightarrow C \in B \big)
+\end{gather*}
+When $B \in \powerset(A)$ then we write $B \subseteq A$.
+
 \item (Axiom of Union) Let $\mathcal{A}$ be a set which contains sets. There exists $A$ such that for all sets $X$ and all objects $x$, if $x \in X$ and $X \in \mathcal{A}$ then $x \in A$. \begin{gather*}
 \forall \mathcal{A}, \exists A, \forall X, \forall x, \big( (x \in X) \wedge (X \in \mathcal{A}) \big) \Leftrightarrow (x \in A)
 \end{gather*}
-\item 
+Then we write $A$ using the \emph{union notation}, which is either $A = B \cup C$ when $\mathcal{A} = \{B, C\}$ or more generally \begin{gather*}
+A = \bigcup_{X \in \mathcal{A}} X.
+\end{gather*}
+
+\item (Axiom of Replacement) Let $A$ be a set and $f$ be a function for which $f(x)$ is meaningful when $x \in A$. Then there exists a set $B = f(A) := \{f(x) | x \in A\}$, extending the \emph{set comprehension} notation. To state this formally, let $P$ be the relation such that $P(x,y)$ is true when we say $y = f(x)$, and in this sense let $P$ define $f$.
+\begin{align*}
+\forall P, & \big( \forall x \forall y \forall z ( P(x,y) \wedge P(x,z) \Rightarrow y = z) \\
+& \Rightarrow \exists B (\forall y, y \in B \Leftrightarrow \exists x, P(x,y)\big)
+\end{align*}
+We then call $B$ the \emph{image} of $f$ or its \emph{range}.
+
+\item (Axiom of Foundation) Every set $A$ which is non-empty contains an element $B$ with which it is disjoint. \begin{gather*}
+\forall A, \big( (\exists a, a \in A) \Rightarrow \exists B, (B \in A) \wedge \neg \exists b, (b \in B \wedge b \in A) \big)
+\end{gather*}
+
+\item (Axiom of Infinity) There exists a set containing infinitely many objects \begin{gather*}
+\forall A \exists S, \big( \{ x \in A| \bot\} \in S \wedge (\forall x, x \in S \Rightarrow x \cup \{x\} \in S)\big).
+\end{gather*}
+
 \end{enumerate}
 \end{label definition}
+
+We must note before anything else that none of our statements about objects in abstract are typed anymore. Set theory does not make claim to \squote{where objects come from}. It instead assumes mostly through other mechanisms or as prescribed later by the mathematician, that there \emph{are objects}. One might even say that set theory specifically exists in a perspective where all objects that could exist do exist already, which we then draw on. It is then our responsibility to pick and choose from these objects by appropriately setting conditions, propositions, etc. This \emph{obviously} causes problems, which these axioms then carefully skirt around.
+
+This means that our notions of propositions as families of types, involving a function from a type to the type of types, must be modified. Moreover, our notion of a function in general must be modified as we will see when we discuss the axiom of replacement. It will still mostly make sense to think of propositions as types however, and in particular the way we think about $\wedge,\vee,\neg, \forall, \exists$ as being $\times,+,(\to \bot), \Pi, \Sigma$, but our notions of the relationship to a type must change. For instance, we say $x \in A$ is a proposition. This means that we can also speak of the proposition $\neg (x \in A)$, which we write $x \notin A$. The analogous statement does not make sense in the context of types; if $a \colon A$, it is \emph{of type A}, and it doesn't make sense to say otherwise because $a$ is \emph{constructed} in accordance of the rules of the type $A$. Objects have no such loyalty in set theory. 
+
+Let us now take these axioms as they are and pay attention to what they do say rather than what they don't. After that, we will discuss additional matters of interpretation that are not mentioned above in condensed form.
+
+First, the axiom of extensionality. Since the place where objects come from is not particularly discussed, it is unclear how or when we might speak about those objects being equal to one another, or when any notion of mathematical structure might arise. We will discuss that problem in general later, but this axiom solves that problem in the specific case of sets by saying that two sets are equal when they share members. Specifically, the reading of the formal form is \squote{if for all objects $x$, to say $x$ is a member of $A$ is the same as saying it is a member of $B$, then we are speaking of the same set}. We are to take from this that a set contains no information other than what objects it contains, including notions of an order or a multiplicity (i.e. sets are not lists and they never contain objects twice).
+
+The axiom of pairing, in some sense, states that it is possible to form small sets of specifically chosen objects regardless of the nature of those objects. The reading of its formal form is \squote{for all objects $a$ and all objects $b$, there exists a set $A$ for which, for any object $x$ that we find to be an element of $A$, it must either be $x = a$ or $x = b$}, thus implying the set contains only $a$ and $b$ alone. This also means we can, in one set, put a number and a letter, or a set and a set containing sets, etc. A set is not itself an object with type, and it does not discriminate on any basis whatsoever when accepting members.
+
+The axiom of comprehension, in one framing, can be stated as \squote{sets are propositions}. That is, a set can be defined specifically to be containing the objects that satisfy a proposition or condition. This comes with a specific asterisk however, relating to Russel's paradox. For instance, we cannot speak of a set containing all sets, or more specifically a set containing all sets which do not contain themself, lest we ask whether this set contains itself. Moreover, such a concept is in contradiction with the axiom of foundation. This problem is solved by defining a set comprehension as requiring a \emph{base set} from which to draw its elements. We then state the axiom as \squote{for all conditions $P$ and all sets $A$, there exists a set $B$ which contains the elements of $A$ which satisfy $P$}.
+
+The axiom of power set extends this notion. We say next that it is not merely that for each set there exists sets containing fewer members where each satisfies a proposition, but in fact that every \emph{subset} that could exist does exist, and populates a new set which we call the power set. Consequently, every set comprehension, since it is a subset by condition of some $P$, is also a member of the power set. This axiom is profoundly important for moving from the countable regime to the uncountable regime since it says that one can pack \emph{every} subset into a single set. Although it is a bit of a stretch, one could in a sense blame this axiom, together with the axiom of infinity, for the continuity of real numbers. Going forward, we use $B \subseteq A$ to denote that $B$ is either a subset or equal to the set $A$. This is expressed formally within the statement of the powerset, in particular $\forall C$ (that is, any set we propose as a subset) $\forall x$ we have that $x \in C$ implies $x \in A$, so all elements of $C$ are elements of $A$. We also use the symbol $\subset$ to speak of a \emph{proper subset} where there exists some $x$ for which $x \in A$ but $x \notin B$, or $B \subseteq A$ \emph{and} $A \neq B$.
+
+The axiom of union then says things about cardinality as well as adding an escape hatch for our previously reductive axioms. That is, the axiom of power set and the axiom of comprehension give us ways to speak of subsets, but so far only the axiom of pairing allows us to make new sets which are \emph{larger} than what we had before. Even then it does so under the requirement that these new elements are packed in their own sets, and the resulting set is a set of two contained sets. If the axiom of comprehension were unconstricted, we would not need the axiom of union since we could say \begin{gather*}
+A = \left\{ x \mid \exists X, X \in \mathcal{A} \wedge x \in X \right\}
+\end{gather*}
+or simply $A = \left\{ x \mid x \in B \vee x \in C\right\}$ when $\mathcal{A} = \{B,C\}$, but this would cause paradoxes. So we have the axiom of union, which says that \squote{for all sets $\mathcal{a}$, there exists a set $A$ such that for all sets $X$ and all objects $x$, $x$ is a member of $X$ and $X$ is a member of $\mathcal{A}$ if and only if $x$ is a member of $A$}. Or \squote{there exists a set $A$ which contains a every member of every set contained in $\mathcal{A}$}. This procedure can also be thought of as flattening $\mathcal{A}$ down a level, taking its set of sets and flattening them into one set.
+
+The axiom of replacement forces us to redefine what it is we meant by a function. In the previous section we defined functions by their relationship to programming and types, where they take an input and produce an output. This intuition holds, but since we do not have types, the strict manner which we define a function is different. Now, a function is a condition $P$ on two objects $x,y$, which is true if $y$ is the output corresponding to the input $x$. As we see in the formal definition of the axiom of replacement, we also require of this condition that the property of \emph{being an output} is unique. In particular, if $P(x,y)$ and $P(x,z)$ then we expect that $y=z$, which is the formal statement of what we emphasized in the previous section, that functions are defined as a concept almost exclusively by their \emph{consistency}. This is now brought to primacy, since the concept of types are gone for the moment, it seems as though functions need not even assign an output to every input, since the inputs we consider are now unindexed and undescribable (in fact the set $A$ we mention is \emph{nowhere to be found} in the formal statement!); all that is left to say about a function is that it is consistent. The axiom of replacement then says, fundamentally, that if we can define a function $f$, then we have a set of all outputs which \emph{do} exist. This makes it meaningful to speak of \emph{transformations of sets} and allows us to extend set comprehension notation so long as we can define a function and input set.
+
+And still it will be valuable to give some structure to functions. In fact, the structure that is appropriate for functions in mathematics general does not necessarily line up with what formal set theory prepares for us here. So we will have to \emph{overrule} these axioms in some sense, and define functions in the following way.
+
+\begin{label definition}[Set Functions or \emph{Set Morphisms}]{SetFunctions}
+A function $f$ amongst sets is a condition $P$ on two objects together with two sets $\text{Dom} \hspace{0.2em} f$ and $\text{Cod} \hspace{0.2em} f$ called the \textbf{domain} and \textbf{codomain}. These must satisfy the following: \begin{gather*}
+\forall x\forall y \forall z, P(x,y) \wedge P(x,z) \Rightarrow y = z \\
+\forall x, x \notin \text{Dom} \hspace{0.2em} f \Rightarrow \neg \exists y, P(x,y)\\
+f\big(\text{Dom} \hspace{0.2em} f\big) \subseteq \text{Cod} \hspace{0.2em} f
+\end{gather*}
+read as \dquote{functions are consistent}, \dquote{$f$ never acts on $x$ unless it is in the domain} and \dquote{the image of a function is a subset of its codomain}. When all these are true, we write $f(x) = y$ when $P(x,y)$ and \begin{gather*}
+f \colon \text{Dom} \hspace{0.2em} f \to \text{Cod} \hspace{0.2em} f.
+\end{gather*}
+
+%We also define the following terminology for functions:
+%\begin{itemize}
+%\item (\textbf{Injective}) A function is called injective or \emph{one-to-one} if $f(x) = f(y)$ implies $x=y$, i.e. relations between 
+%\end{itemize}
+\end{label definition}
+
+Importantly a codomain is very strictly \emph{not the whole image}, it is the same as if not larger than the image set. It allows us to, in many contexts, recover a semblance of our notion of typed inputs and outputs from earlier. We will return to this thread later.
+
+The axiom of foundation largely exists to iron out potential problems. In my reading, it appears primarily to imply that sets do not contain themselves. The prerequisite $\exists a, a \in A$ is merely to say that $A$ is a non-empty set (i.e. there exists an object contained in $A$); we can also say this by defining the notation $\emptyset = \{x | \bot\}$ which represents a set with no members and saying $A \neq \emptyset$. Once established, we can also reformulate other parts of the statement; using a set comprehension, the statement $b \in B \wedge b \in A$ discusses the members shared by both sets, and this is called the \emph{intersection} and denoted $A\cap B = \{x \in A | x \in B\}$. The statement then becomes the following \begin{gather*}
+\forall A, A \neq \emptyset \Rightarrow \exists B, B \in A \wedge A \cap B = \emptyset
+\end{gather*}
+or \dquote{every set which is not the empty set contains an object it is disjoint with}, disjointness referring to sharing no members. Personally this is not an axiom I make the slightest attempt to remember.
+
+Finally, the axiom of infinity can be read as an embedding of the Peano axioms (the natural numbers we spoke of in the previous chapter) into the context of sets. That is, it defines a zero $\mathbf{Z} = \emptyset$ and a succession $\mathbf{S}(n) = n \cup \{n\}$ so that numbers become $2 = \{\{\},\{\{\}\}\}$ and consequently a set of all natural numbers made in this way. I personally find this to be rather contrived (indeed the nesting of empty sets is simply to give each one some uniqueness since they are no longer equal by the axiom of extensionality. But this axiom is valuable nontheless, since by the axiom of replacement, we can construct functions from this set of natural numbers, thus establishing that even infinite sets of objects may exist in a single set. As you may be much more familiar with the consequences of this axiom, this is one you can forget as we move forward.
+
+Together, these axioms establish formally what it is that we expect sets to do and what we do not expect them to do. They can be infinite, they can be empty, they can be finite, they can be flattened or combined, they can be propositions, they can be the outputs of functions, they contain no data other than their memberships (such as ordering or type), and they can not contain themselves.
+
+\subsection{What They Don't Say: Object Identity}
+
+The axioms given above make frequent reference to the equivalence of objects contained within them, and yet, in general, gives no description of what that might mean. If we interpret the construction we see in the axiom of infinity to be the natural numbers, then we can apply the axiom of extensionality and say that $\mathbf{Z} = \mathbf{Z}$ since $\mathbf{Z} = \emptyset$ and the axiom of extensionality says $\emptyset = \emptyset$, and subsequently do this for every nested-set integer. But the moment we declare that the natural numbers we use are some other object which is not itself a set but are contained in a set via the axiom of replacement (i.e. defining the \emph{set} of typed natural numbers as the image of a function relating the two sets of counting numbers) we have to import our own notion of equality.
+
+This is actually common. It is natural for definitions of many constructions to either \emph{declare} that a set of objects obeying certain rules exist, or \emph{assume} by hypothesis that a set of such objects exist. This is similar to putting a giant $\forall P, ...$ before every proposition we then actually discuss, since we are saying \dquote{for all [systems where a construction like the one we want exists], we deduce...} where $P$ then stands for the \squote{axioms} of a construction. This is also why it is important that we define natural numbers not just as a first number and a counting operation, but with a rule that two numbers are equivalent either when they are either both the first number, or the number that they count forward from is the same.
+
+This is troublesome in smaller cases however, because it will frequently be that some proof or theorem says \dquote{let $A$ be a set containing ...} without explicit reference to a broader system of constructions. In fact, it will often be the case that we actively abstain from referencing a broader system of constructions in order to make a theory more general. But then how are we to reason about equality? What rules do we have to say that two things are equal or not equal?
+
+Let us study an example from type theory to ground ourselves. In most systems of constructive mathematics it is considered necessary to either derive from axioms or suppose explicitly what is called \emph{function extensionality}. This axiom or rule says effectively that two functions are equal if and only if they both assign the same outputs to the same inputs. \begin{gather*}
+\forall (f,g \colon A \to B), f = g \Leftrightarrow \big( \forall (a \colon A), f(a) = g(a) \big)
+\end{gather*}
+This is similar to our set theory extensionality, that said that sets also hold no data other than their membership. Consider what it would mean if we did not suppose function extensionality. Then it would be true that functions contain some data in addition to their map between inputs and outputs. Since functions are defined with no additional information in type theory, the only thing left to say that they are different when they share inputs and outputs is their \emph{symbol}. To say that $f \neq g$ specifically because $f$ is written $f$ and not $g$.
+
+This is a valuable proposition: since we explicitly claim no knowledge unless stated otherwise about members of sets, in effect, they have untold amounts of identifying data. When we say \squote{let $A$ be a set and $a,b \in A$}, there is potentially infinite information held behind those symbols; that potential for infinite information in fact does not go away when we say something like \squote{let $\nats$ be a set containing a number $1$ and an operation $\mathbf{S}\colon n \mapsto n+1$}. It only goes away at the point that we add a \emph{natural number extensionality} and say \squote{$1 = 1$ for every $1 \in \nats$ and $\mathbf{S}(n) = \mathbf{S}(n)$ for every $n \in \nats$} that we have successfully papered over that additional information, rendering it irrelevant.
+
+This is a power of set theory, the power to define or construct a set and give it a rule for what is equal or what is not equal a-priori, a power that does not exist quite so simply in type theory. We can, just as we papered over what could have been untold infinite information held in the objects that we write as $1$ or $2$, paper over information that we \emph{did} know about.
+
+
+
 
 
 \end{document}
