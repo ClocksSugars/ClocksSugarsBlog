@@ -126,7 +126,7 @@ Before we proceed to $\mathtt{NOT}$, we must notice two things. First, that ther
 Second, we must think more about what it means for a proposition to be false. The primary thing we are trying to manouver around, given that a proposition type's members are witnesses, is the case where a type has no witnesses and is thus false. This prompts us to codify something we had not said earlier, which is the following:
 
 \begin{definition}
-Define the type $\top$ to have the constructor $* \colon \top$ which takes no arguments, and the type $\bot$ to be the type with no constructors. We call these the \textbf{unit type} and the \textbf{empty type}.
+Define the type $\top$ to have the constructor $* \colon \top$ which takes no arguments, and the type $\bot$ to be the type with no constructors. We call these the \textbf{unit type} and the \textbf{empty type}. We may also at times call these the \emph{true type} and \emph{false type}.
 \end{definition}
 
 Our archetypal false type is explicitly the type that is empty, identified with all other types when they are empty, and thus we can say things like $P \times Q = \bot$ when $Q = \bot$. It is not necessarily so simple when a proposition is true however, since there are often multiple witnesses to a true proposition, and the unit proposition only has one constructor. Regardless, with this codified, we may now ask a question: what does $\to$ do to an empty type, i.e. what does it mean to imply false or derive from it? Let us examine this as removed from analogies for a moment.
