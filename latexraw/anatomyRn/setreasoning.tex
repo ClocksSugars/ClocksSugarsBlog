@@ -18,8 +18,14 @@
 %	-	not all too fond of formal set theory
 %
 %	
-%
-%
+%	edit notes
+%	-	it was a mistake to center this on set theory
+%	-	this should be restyled to a chapter on 'equational reasoning' with 'equation
+%			intended to mean not simply equations but all symbolic rewrites,
+%			including orderings such as > < and subset relations
+%	-	since this is the first time we introduce a concept by its axioms, we should
+%			discuss what it means to do that
+
 
 Despite the problems and difficulties with constructive mathematics that we discussed in the previous chapter, I felt it necessary to first ground the idea of what mathematics could be in a more concrete context before we do set reasoning. Set theoretic mathematics does not have many of these problems, principly because most of the people concerned using it are not literally writing something even a computer could understand. Most mathematics is intended to be human readable, the deductions reasoned (although rigorous) and thus steps skipped over when they are obvious. We can split hairs with set theory, but everyone who wants to split hairs that badly have better tools to do that with.
 
@@ -198,11 +204,22 @@ we say that they are equal. Then we call $\integers$ the set of \textbf{integers
 
 This is the standard construction of integers in mathematics. If by counting numbers we mean numbers that are strictly greater than or equal to one (this is the standard in mathematics as well, not starting from zero) then we invent negative numbers in this way. From the perspective of already having negative numbers, one easily manipulates this equation to see that it is read $a - b = x - y$, but this is invalid on natural numbers. But if we speak only of positive numbers, then we avoid the problems of asking what $a-b$ is when $b > a$ and instead speak of larger numbers rather than smaller ones.
 
-The technique we have utilized to do this does not exist without significant effort in type theory; over there, constructors with some set of parameters are \emph{unique}, and one cannot weaken this. So what they do is to define integers similarly to $\nats + \nats$ with a $l$ in-left constructor for negatives, a $r$ in-right constructor for positives, and a constructor $\mathbf{Z}$ for zero. To construct rational numbers which are much more obviously pairs, fractions such as $1/1$ and $2/2$ are equal, and so they must put in substantial work to reduce create a sigma type which is a pair of $\integers \times \integers$ along with a witness that it is simplified.
+The technique we have utilized to do this does not exist without significant effort in type theory; over there, constructors with some set of parameters are \emph{unique}, and one cannot weaken this. So what they do is to define integers similarly to $\nats + \nats$ with a $l$ in-left constructor for negatives, a $r$ in-right constructor for positives, and a constructor $\mathbf{Z}$ for zero. To construct rational numbers which are much more obviously pairs, fractions such as $1/1$ and $2/2$ are equal, and so they must put in substantial work to reduce create a sigma type which is a pair of $\integers \times \integers$ along with a witness that it is in simplified form.
 
 In our case however, one might be concerned about such an aggressive tactic as erasing identifying information out of an object. Surely we are not saying that all pairs of natural numbers $(m,n)$ are integers, right? Integers are supposed to be at the same standing as natural numbers, or real numbers. Enabling different operations of course, but still distinct kinds of objects themselves.
 
-This is in part our expectations about types creeping in, and set theory has two answers to these grievances: the partition, and the class.
+This is in part our expectations about types creeping in, but these are not exactly bad expectations to have. The set theorists, prior to a similar popularity of type theory as we enjoy today, saw fit to try to formalize what we have done above. Thus we have the formal notion of a partition, equivalence relation, and equivalence class, as well as the less formal notion of a class.
+
+To explore this, we will need to formally investigate some terms that were mentioned briefly in the previous section.
+
+\begin{definition}[Equivalence Relation]
+An equivalence relation can be considered to be a set of pair-sets $A$. When a pair $\{a,b\} \in A$ then we write $a \sim b$ and either say that $a$ is \emph{similar} to $b$ or that $a$ is \emph{equivalent} to $b$ under $\sim$. Let $B = \cup A$, the set of all items that $\sim$ relates to one another. Then in order to be an equivalence relation, $\sim$ must satisfy the following: \begin{itemize}
+\item (Reflexivity) For all $a \in B$, we have $a \sim a$ since a thing must be equal to itself
+\item (Symmetry) For all $a,b \in B$, if we have $a \sim b$ then we have $b \sim a$ since equality (or similarity) is not an ordered property; this is automatically satisfied if we think of $\sim$ as defined by a set of pair-sets rather than a set of ordered pairs.
+\item (Transitivity) For all $a,b,c \in B$, if we have $a \sim b$ and we have $b \sim c$ then we have $a \sim c$, since if $b$ is the same as both $a$ and $c$ then they must be the same as one another as well.
+\end{itemize}
+These three properties, capturing what we expect of the notion of \squote{sameness}, formalize our notion of what it means for something to describe a kind of equivalence.
+\end{definition}
 
 
 

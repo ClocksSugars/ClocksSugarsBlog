@@ -1,0 +1,71 @@
+\documentclass[11pt]{article}
+    \title{\textbf{Default Doc}}
+    \date{\the\day/\the\month/\the\year}
+
+\input{../pdf.tex}
+\input{../webmacros.tex}
+\input{../amsthmstuff.tex}
+
+
+\begin{document}
+
+%	notes for how to write the next section:
+%	-	use zfc as a scaffold
+%	-	mathematical objects just kind of exist when declared, with identity
+%		defined by some random fuck equivalence relation
+%	-	this makes set based mathematics more general and easier to
+%		work with but way more annoying if you want to imagine math as 'things'
+%	-	not all too fond of formal set theory
+%
+%	
+%	edit notes
+%	-	it was a mistake to center this on set theory
+%	-	this should be restyled to a chapter on 'equational reasoning' with 'equation
+%			intended to mean not simply equations but all symbolic rewrites,
+%			including orderings such as > < and subset relations
+%	-	since this is the first time we introduce a concept by its axioms, we should
+%			discuss what it means to do that
+%	-	discuss sets first as 'set of things' and 'sets as comprehensions' and use
+%			that to lead into russel's paradox.
+
+Despite the problems with constructive mathematics that we discussed previously, I think it is necessary to first see mathematics as a much more rigid system. The two topics of this section, set reasoning and relational reasoning, while both formal studies, are at their best when one simply develops an intuition for them. Going from no mathematical training to having these intuitions is perhaps the hardest part, the barrier that makes people think that math is hard, and it is made significantly worse by the lack of structure at the bottom of the reasoning.
+
+That is, set theory is not a constructive theory in the slightest. It cannot exist in a vacuum and provides a very poor pedagogical lens since it was invented for existing mathematicians to better understand their craft. It does not say anything about where an object comes from or what it fundamentally is, but rather assumes an object could be \emph{anything} and then whittles that \emph{anything} down to something which can be reasoned about. It appears as a top down theory rather than a bottom up theory, like type theory is.
+
+And while (pure) mathematics has evolved into an especially symbolic field, it did not begin that way; the symbols are merely a way to help us formalize our thoughts but the thoughts themselves have historical roots in logical \emph{statements}, reasoned about just as one reasons about in philosophy. Mathematics has moved less from those roots than people realize, thus the great friction between computer readable mathematics and human readable mathematics; human readable mathematics involves \emph{context} and it skips steps where they are \emph{obvious}. Nonetheless, we have (quite nervously) formalized into rules whatever we can to ensure that our \emph{reasoning} is not merely elaborate sophistry, and to move the foundation of our thought further down.
+
+It is because mathematics is merely a formalized discipline of human reasoning that it is significantly broader than any one system we have invented within it. This is what it means when we say something like that type theory is a system of reasoning built up within set theory (or rather that it can be). Not because sets are themselves the perfect abstraction, but because as an abstraction, they were made to model the broadest reasoning that consistently made sense to us rather than narrowing reasoning to something a computer could follow.
+
+%	in this chapter we consider set theory and some basic notions of term rewriting to handle equations and inequalities
+%	we trade knowing what a thing is for knowing what it does
+
+So in this section we aim to explore some of the cognitive primitives of mathematics, namely our relationship to relations themselves, the mathematician's notion of a set, and what it means for an object or theory to be founded on axioms. To do this, we will touch on the notion of a rewriting system and the Zermelo-Fraenkel-Choice axioms, discussing how an axiomatic system works. We will see in this section that, although in broader mathematics we can often say very little about what a thing \emph{is} (in the same way that we have constructors in type theory), we trade this knowledge for an increased focus on what a thing \emph{does}.
+
+\subsection{Symbolic Reasoning}
+
+Consider what is meant when we write the abstract symbol $x$. If you were comfortable with the previous section you could imagine that it could be an element of a type, or even breaking convention, perhaps a type itself. As we enter into non-constructive mathematics, the rule will be that a symbol is essentially any possible thing until otherwise constrained (perhaps by context) to some set of rules. As we will discuss more when we get into set theory, classical mathematics does not have types or constructors, it has only rules, and sets of things that obey those rules. We have the set of natural numbers, the set of integers, etc. Not because those sets are themselves types, or because the members they contain are \emph{necessarily} fundamentally different from one another, but merely because it is a collection of \emph{abstract things} which happen to obey conditions.
+
+This is a clean break from our notion of types; just as we had constructed a type of natural numbers, we could also construct a type of integers (counting numbers with negatives) but this type would have its own constructors. It would be reasonable to create a function that sends a natural number to its corresponding integer in the integer type, but this is not the same as saying that \squote{all natural numbers are also integers}. In type theory, a natural number can \emph{become} an integer but in classical mathematics one may say that members of what should be a type, \emph{are} also members of another type.
+
+This creates a problem in some modes of thinking; if we can say that some integers are natural numbers (the positive ones), and some real numbers are integers (the whole numbers), etc. etc., can we say that there is some \emph{true thing} that each of these systems of numbers \emph{are}? Not only is the answer no, the question would probably illicit some laughter from a mathematician. The lack of knowing what a number \emph{is} is in fact a feature which allows our tools to be general. When we say that \squote{integers can be added, subtracted, multiplied, and in some cases divided}, we do not mean that we are referring to some fundamental object that \emph{exists}. We mean that we are referring to a collection of objects, the extent of which we do not know and do not care of, which we can describe \emph{in general}. We are studying the nature of \emph{anything} which is counted whole with positives and negatives when we study integers.
+
+This creates a different problem too, for if we are discussing \emph{all things} that our rules describe, then how are we to intuit what we should do with a problem? One might imagine this like an actor being told to display a certain emotion in front of a green screen, only to watch the movie themselves and discover that an entirely different performance would be more appropriate in that scene. Or like being handed a simple puzzle interface and being told to solve puzzles, only to discover that you were in fact designing the electrical grid for a nation. Surely it is appropriate to know the material nature of a problem so that you can better approach it, right? To a (pure) mathematician, the answer is no. In fact, it is of great value to the pure mathematician that someone else can make formal the rules of the game we are playing so that we may merely play a game.
+
+And this is entirely appropriate for the mathematician. While it is certainly true that knowing more about a material setting allows us extra information to deduce more things, there is a value in knowing everything there is to be known about the general case. Moreover, the way that we investigate this general case is by rejecting all other information about the system other than the symbolic rules we have been given and merely monkeying around with them.
+
+An example is in order, if for no other reason than to explain what it means to reject information and settle for deduction by rules. Consider the equation $x^2 - 4 = 0$, although do not consider it so much as to be afraid; we will step through this example very slowly. To a mathematician, a problem such as this is examined as an algebraic one, and is thus attacked with algebraic tools. If we want to find the real number values of $x$ that solve the equation, we consider some things we know about algebraic numbers. We know about addition and multiplication. We know that for every addition there exists a number which, when added reverses the addition (the negative). We know that for every multiplication (except zero) there exists a number which reverses the multiplication (the inverse). We would write these rules as follows: \begin{gather*}
+\forall x \in \reals, \exists y \in \reals, (x + y = 0) \\
+\forall x \in \reals, \forall y \in \reals, (x + y = 0) \Leftrightarrow (x = -y) \\
+\forall x \in \reals \setminus \{0\}, \exists y \in \reals, (x y = 1) \\
+\forall x \in \reals \setminus \{0\}, \forall y \in \reals \setminus \{0\}, 
+\end{gather*}
+Now, it is common when reasoning about equalities to think of alterations as \dquote{surely this implies that} or \dquote{this is equal to that}. While this mode of reasoning is helpful, on this occasion we reject it entirely.
+
+Instead, we will think in terms of \emph{rewrites}. Which is to say, when we see terms of a certain form, we do not need to ask what they are other than the relevant \emph{rules}, and we \emph{replace symbols}. In this case, we see the second rule we wrote above, that $x + y = 0$ implies $x = -y$ and vice versa for all $x,y$, and we \emph{perform a rewrite}. In this case, the only symbol in the expression which is fixed is \emph{zero}, and the equality itself. So can we see a zero and an equality in $x^2 - 4 = 0$? Yes we can, and identify $x$ in our general expression as $x^2$ in our specific expression, likewise with $y$ and $-4$, and we rewrite to $x^2 = 4$. We do this without any particular reasoning about this equals that, but rather on the basis of a \emph{rule} that is known about real number algebra. It is only at the point that we are \emph{stuck} (i.e. no rewrites apply) that we try to reason, not about the equation itself exactly, but about what other rules may apply.
+
+This mindset radically simplifies 
+
+
+
+
+\end{document}
