@@ -10,6 +10,12 @@
 %%	explain how treating P \to \bot as an argument you can provide is like doing a proof by contradiction on the negative of a statement
 %%	emphasize that this is actually a good way to think about theorems
 
+
+%% use example i told amor fati for pi types:
+%%		another example. say the input type was A, the letters of the alphabet. i could have a normal function A -> W where w is words, and we just send a to apple, b to banana, etc.  but a dependent function can do something like send a to a *particular apple* of type APPLES, or b to a *particular banana* of type BANANAS. the dependent function is sending different inputs to different types
+
+%% a careful revision of all proofs appears to be very necessary
+
 \begin{document}
 
 Highschool is usually the first place people encounter any form of mathematics, and along with this setting comes some inappropriate expectations about what lies ahead in mathematics. I might go as far as to say that highschool mathematics and even first year undergraduate mathematics approaches the topic primarily from the perspective of an engineer or experimental physicist; that is mainly to say that you wouldn't call highschool mathematics even particularly \squote{mathematical} in the ways that a mathematician is actually concerned with the topics studied.
@@ -331,10 +337,15 @@ by setting it as our $P\colon \nats \to \mathtt{Type}$ and performing induction 
 But again we may apply our inductive definition of addition $\mathtt{add}(m, \mathbf{S}(n)) = \mathtt{add}(\mathbf{S}(m),n)$, and so the output proposition for this is in fact \begin{gather*}
 \forall b, \forall c, (b \equiv c) \Rightarrow (\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n).
 \end{gather*}
-Now recall our observation that $(m \equiv n) \Rightarrow (\mathbf{S}(m) \equiv \mathbf{S}(n))$, which we write in our case with witness function $g\colon \forall b, \forall c, (b \equiv c) \Rightarrow (\mathbf{S}(b) \equiv \mathbf{S}(c))$. Since our inductive function gives us as hypothesis, the witness $h \colon \forall b, \forall c, (b \equiv c) \Rightarrow (b + n \equiv c + n) $, we can now specialize that as $\big(h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \big) \colon \big(\mathbf{S}(b) \equiv \mathbf{S}(c) \big) \rightarrow \big(\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n \big)$. We can now chain these together \begin{gather*}
-h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \hspace{0.2em} (g \hspace{0.2em} b \hspace{0.2em} c) \colon (b \equiv c) \Rightarrow \big(\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n \big)
+Now recall our observation that $(m \equiv n) \Rightarrow (\mathbf{S}(m) \equiv \mathbf{S}(n))$, which we write in our case with witness function $g\colon \forall b, \forall c, (b \equiv c) \Rightarrow (\mathbf{S}(b) \equiv \mathbf{S}(c))$. Since our inductive function gives us as hypothesis, the witness $h \colon \forall b, \forall c, (b \equiv c) \Rightarrow (b + n \equiv c + n) $ (i.e. this is the $P(n)$ from which we must show $P(\mathbf{S}(n))$, we can now specialize that as $\big(h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \big) \colon \big(\mathbf{S}(b) \equiv \mathbf{S}(c) \big) \rightarrow \big(\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n \big)$. We can now chain these together
+\begin{gather*}
+\Big(
+	h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \hspace{0.2em} (g \hspace{0.2em} b \hspace{0.2em} c)
+\Big)
+\colon (b \equiv c)
+\Rightarrow \big(\mathbf{S}(b) + n \equiv \mathbf{S}(c) + n \big)
 \end{gather*}
-forming out inductive step. Then (and you should check this by looking at the proof by induction's form) we have satisfied the requirements for applying the theorem form of proof by induction, and we deduce $\forall a, \forall b, \forall c, (b \equiv c) \Rightarrow (b + a \equiv c + a)$.
+forming our \emph{inductive step}. Then (and you should check this by looking at the proof by induction's form) we have satisfied the requirements for applying the theorem form of proof by induction, and we deduce $\forall a, \forall b, \forall c, (b \equiv c) \Rightarrow (b + a \equiv c + a)$.
 
 If we use $f$ to denote the inductive rule then the full proof can be read monolithically as \begin{align*}
 f \hspace{0.2em}
@@ -453,7 +464,7 @@ Accordingly, we can now give a more full set of rules for how to manipulate nega
 \begin{label theorem}[De Morgan's Laws, Proof by Contradiction, etc.]{NegationRules}
 Let $P,Q \colon \mathtt{Type}$ be \emph{decidable} types, that is, we have witnesses of $P \vee \neg P$ and $Q \vee \neg Q$. Then we have the following: \begin{itemize}
 
-\item \textbf{Proof by Contradiction} or \emph{Reductio ad absurdum}, i.e. \squote{if $P$ is true or false, then if $P$ were false there would be a logical inconsistency, so take $P$ to be true since that must be consistent}
+\item \textbf{Proof by Contradiction} or \emph{Reductio ad absurdum}, i.e. \squote{if $P$ is true or false, then if we can show that $P$ being false is logically inconsistent, then $P$ must be true since it is either true or false and can not be false}
 \begin{gather*}
 \mathtt{RAA}\colon \forall (P : \mathtt{Type} ), P \vee \neg P \Rightarrow ( \neg \neg P \Rightarrow P)
 \end{gather*}
@@ -472,7 +483,7 @@ Let $P,Q \colon \mathtt{Type}$ be \emph{decidable} types, that is, we have witne
 \neg (P \Rightarrow Q) \Leftrightarrow P \wedge \neg Q
 \end{gather*}
 \end{itemize}
-Additionally, let $R \colon A \to \mathtt{Type}$ be a family of types with $A \colon \mathtt{Type}$ a non-empty type. Moreover, allow that $R(a)$ and its derivative types are decidable as necessary, such as $\forall (a:A), R(a)$, $\exists (a : A), \neg R(a)$, etc. Then we also have:
+Additionally, let $R \colon A \to \mathtt{Type}$ be a family of types with $A \colon \mathtt{Type}$ a non-empty type. Moreover, allow that $R(a)$ and its derivative types are decidable as necessary, such as $\forall (a:A), R(a)$, or $\exists (a : A), \neg R(a)$, etc. Then we also have:
 \begin{itemize}
 \item $\neg \big(\forall (a : A), R(a) \big) \Leftrightarrow \exists (a : A), \neg R(a)$ i.e. \squote{not for all if and only if there exists a counter example }
 \item $\neg \big(\exists (a : A), R(a)\big) \Leftrightarrow \forall (a : A), \neg R(a)$ i.e. \squote{there does not exist an example if and only if for all it is false}
@@ -634,7 +645,7 @@ But as we move forward, we will be doing more than merely making our theorems no
 
 That is neither to say that we merely allow the risk of paradoxes due to our axioms. Due to over a century of knit-picking out of concern for this exact problems, we know what our axioms are in mathematics, and just as in our proof of De Morgan's laws we wrote axioms not as functions that were merely available in context, but as specific conditions, we can simply fail to provide those conditions in the situations where they are not true.
 
-Dependent type theory, with the appropriate asterisks, will form a scoffold by which we continue to reason about logic, and by which we intuit what behaviours we might desire from other structures. For instance, moving forward, we largely put the idea of constructive numbers behind us, but we know that we \emph{can} construct inductive natural numbers, and thus we can do proof by induction on them. Moreover, seemingly qualitative statements can now be made quantitative by interpretting our conditions for when they are true as \emph{constructors}, by our so called \emph{universal} and \emph{existential} quantifiers.
+Dependent type theory, with the appropriate asterisks, will form a scaffold by which we continue to reason about logic, and by which we intuit what behaviours we might desire from other structures. For instance, moving forward, we largely put the idea of constructive numbers behind us, but we know that we \emph{can} construct inductive natural numbers, and thus we can do proof by induction on them. Moreover, seemingly qualitative statements can now be made quantitative by interpretting our conditions for when they are true as \emph{constructors}, by our so called \emph{universal} and \emph{existential} quantifiers.
 
 
 
