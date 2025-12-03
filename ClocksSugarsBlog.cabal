@@ -70,6 +70,7 @@ executable ClocksSugarsBlog
                      LatexToHtml.ProcessingTypes,
                      LatexToHtml.NewCommand,
                      LatexToHtml.Utils,
+                     LatexToHtml.PageTemplate,
                      SiteStructure.Manifest
 
     -- LANGUAGE extensions used by modules in this package.

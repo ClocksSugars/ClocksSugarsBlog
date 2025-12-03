@@ -23,6 +23,10 @@ import LatexToHtml.TreeCleaner (
    processOneTwo,
    inlineCommands
    )
+import LatexToHtml.Utils (
+   myShow
+   )
+import LatexToHtml.PageTemplate
 
 import Text.Blaze.Internal (MarkupM(Empty))
 import Text.Blaze.Html5 as H
@@ -52,6 +56,40 @@ blankIndex = IndexState {
    ,  subsection  = 0 -- it is common to have a section 0 preamble so this must start at zero
    ,  references  = empty
    }
+
+
+writePage :: String -> String -> LaTeX -> IndexState -> (Html, IndexState, [String])
+writePage pagetitle pagename pagecontents indstate = let
+   inspect0 = myShow pagecontents
+   part1 = processOne pagecontents
+   inspect1 = show part1
+   part2 = processTwo part1
+   inspect2 = show part2
+   (part3, newindstate) = processThree pagename
+   inspect3 = show part3
+   logs = [inspect0,inspect1,inspect2,inspect3]
+   thepage = pageHTML pagetitle part3
+   in (thepage, newindstate, logs)
+
+
+-- main :: IO ()
+-- main = do
+--    handle <- openFile "latexraw/anatomyRn/proptypes.tex" ReadMode
+--    xs <- hGetContents handle
+--    let doc = extractDocument . fromRight . parseLaTeX . fromString $ xs
+--    writeFile "inspect0.txt" $ show doc
+--    let part1 = processOne doc
+--    writeFile "inspect1.txt" $ show part1
+--    let part2 = processTwo part1
+--    writeFile "inspect2.txt" $ show part2
+--    let (part3, index) = processThree "proptypes" part2 blankIndex
+--    writeFile "test.html" $ R.renderHtml $ pageHTML "Propositional Logic: A Constructive Approach" part3 --"Nascent's Philosophy of Mathematics" part3
+--    writeFile "CumulativeReferences.txt" $ show . references $ index
+--    hClose handle
+
+
+processLatexToHtml :: String -> LaTeX -> IndexState -> (Html, IndexState)
+processLatexToHtml pagename x = processThree pagename $ processOneTwo x
 
 
 -- BoxedSec String (Maybe Text) (Maybe [HtmlVers]) [HtmlVers]
@@ -147,6 +185,3 @@ processThree pagename content indexstate = let
    in case (content,indexstate) of
       ([], ind) -> (Empty (), ind)
       (xs, ind) -> repeatCase xs ind
-
-processLatexToHtml :: String -> LaTeX -> IndexState -> (Html, IndexState)
-processLatexToHtml pagename x = processThree pagename $ processOneTwo x
