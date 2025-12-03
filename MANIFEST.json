@@ -1,0 +1,44 @@
+{
+   "texts": [
+      {
+         "name": "appliuni",
+         "title": "Application Unification",
+         "format": "book"
+         "contents": {
+            "chapters": [
+               {
+                  "name": "prelims"
+                  "title": "Preliminaries",
+                  "sections": [
+                     {
+                        "name": "philofmath",
+                        "title": "Nascent's Philosophy of Mathematics",
+                        "description": "description goes here",
+                        "depends": [
+                           "bentcylinder.svg"
+                        ]
+                     },
+                     {
+                        "name": "proptypes"
+                        "title": "Propositional Logic: A Programming Inspired Approach",
+                        "description": "description goes here x2",
+                        "depends": []
+                     }
+                  ]
+               },
+               {
+                  "name": "anatomyRn"
+                  "title": "Anatomy of $\\reals^n$",
+                  "sections": [
+                     // {
+                     //    "name": "Real Numbers from Axioms",
+                     //    "description": "description goes here x3",
+                     //    "depends": []
+                     // }
+                  ]
+               }
+            ]
+         }
+      }
+   ]
+}

@@ -70,7 +70,7 @@ executable ClocksSugarsBlog
                      LatexToHtml.ProcessingTypes,
                      LatexToHtml.NewCommand,
                      LatexToHtml.Utils,
-                  -- HtmlProcessingTypes,
+                     SiteStructure.Manifest
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -86,7 +86,8 @@ executable ClocksSugarsBlog
                      MissingH,
                      text,
                      ListLike,
-                     containers
+                     containers,
+                     aeson
 
 
     -- Directories containing source files.
