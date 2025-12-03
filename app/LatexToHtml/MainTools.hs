@@ -1,17 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 module LatexToHtml.MainTools (
-   processLatexToHtml,
-   processThree,
+   -- processLatexToHtml,
+   -- processThree,
    IndexState(IndexState),
    references,
    blankIndex,
    extractDocument,
-   processOne,
-   processTwo,
+   -- processOne,
+   -- processTwo,
    Htmllatexinter,
-   processOneTwo,
+   -- processOneTwo,
    inlineCommands,
    -- HtmlVers,
+   writePage
 ) where
 
 import LatexToHtml.ProcessingTypes
@@ -70,22 +71,6 @@ writePage pagetitle pagename pagecontents indstate = let
    logs = [inspect0,inspect1,inspect2,inspect3]
    thepage = pageHTML pagetitle part3
    in (thepage, newindstate, logs)
-
-
--- main :: IO ()
--- main = do
---    handle <- openFile "latexraw/anatomyRn/proptypes.tex" ReadMode
---    xs <- hGetContents handle
---    let doc = extractDocument . fromRight . parseLaTeX . fromString $ xs
---    writeFile "inspect0.txt" $ show doc
---    let part1 = processOne doc
---    writeFile "inspect1.txt" $ show part1
---    let part2 = processTwo part1
---    writeFile "inspect2.txt" $ show part2
---    let (part3, index) = processThree "proptypes" part2 blankIndex
---    writeFile "test.html" $ R.renderHtml $ pageHTML "Propositional Logic: A Constructive Approach" part3 --"Nascent's Philosophy of Mathematics" part3
---    writeFile "CumulativeReferences.txt" $ show . references $ index
---    hClose handle
 
 
 processLatexToHtml :: String -> LaTeX -> IndexState -> (Html, IndexState)

@@ -27,6 +27,8 @@ data WrittenWorkBook = WrittenWorkBook {
    chapters :: [Chapter]
 }
 
+
+--- This should all be moved to a json file later!!
 tempappliuni = WrittenWorkBook {
    name = "appliuni",
    title = "Application Unification",

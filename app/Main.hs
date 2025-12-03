@@ -14,6 +14,7 @@ import System.Directory
 
 import LatexToHtml.MainTools
 import LatexToHtml.Utils
+import SiteStructure.Manifest
 import Text.LaTeX.Base.Parser
 import Data.Either.Utils
 
