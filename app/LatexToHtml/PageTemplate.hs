@@ -1,6 +1,14 @@
-module LatexToHtml.PageTemplate where (
+{-# LANGUAGE OverloadedStrings #-}
+
+module LatexToHtml.PageTemplate (
    pageHTML
-)
+) where
+
+import Data.Text (Text)
+
+import Text.Blaze.Html5 as H
+import Text.Blaze.Html5.Attributes as A
+import Text.Blaze.Internal (MarkupM(Empty))
 
 katexArgs :: Html
 katexArgs = "const katexargs = { delimiters: ["

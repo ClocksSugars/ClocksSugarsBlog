@@ -71,7 +71,9 @@ executable ClocksSugarsBlog
                      LatexToHtml.NewCommand,
                      LatexToHtml.Utils,
                      LatexToHtml.PageTemplate,
-                     SiteStructure.Manifest
+                     SiteStructure.Manifest,
+                     SiteStructure.IndexPage,
+                     SiteStructure.MainTools
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

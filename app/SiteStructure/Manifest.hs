@@ -2,7 +2,12 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 --{-# LANGUAGE DeriveGeneric #-}
 
-module SiteStructure.Manifest where
+module SiteStructure.Manifest (
+   tempappliuni,
+   SubChapter(..),
+   Chapter(..),
+   WrittenWorkBook(..)
+   ) where
 
 --import GHC.Generics
 --import aeson
@@ -29,6 +34,7 @@ data WrittenWorkBook = WrittenWorkBook {
 
 
 --- This should all be moved to a json file later!!
+tempappliuni :: WrittenWorkBook
 tempappliuni = WrittenWorkBook {
    name = "appliuni",
    title = "Application Unification",

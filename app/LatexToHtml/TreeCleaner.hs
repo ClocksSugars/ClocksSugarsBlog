@@ -136,6 +136,8 @@ processOne arg = let
          ("definition", _) -> Right $ handleUnlabeledBox "Definition" texargs content
          ("label theorem", _) -> Right $ handleLabeledBox "Theorem" texargs content
          ("theorem", _) -> Right $ handleUnlabeledBox "Theorem" texargs content
+         ("label proposition", _) -> Right $ handleLabeledBox "Proposition" texargs content
+         ("proposition", _) -> Right $ handleUnlabeledBox "Proposition" texargs content
          ("label proof", _) -> Right $ handleProof texargs content
          ("my proof", _) -> Right $ handleProof texargs content
          ("label corollary", _) -> Right $ handleLabeledBox "Corollary" texargs content

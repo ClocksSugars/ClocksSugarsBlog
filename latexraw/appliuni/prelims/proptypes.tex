@@ -296,7 +296,7 @@ f\hspace{0.2em} (a,b,c) \hspace{0.3em} p \hspace{0.3em} (\mathtt{refl} \hspace{0
 since, by requiring a witness of $b \equiv c$ and thus ensuring $c$ can only literally be $b$, our final output must be a witness $a \equiv b$ just as our first witness $p \colon (a \equiv b)$. \qed
 \end{my proof}
 
-The mode of reasoningin this proof also applies immediately to certain things about numbers. For instance, the idea that $m \equiv n$ implies $m + 1 \equiv n + 1$ is immediate in this manner: a function \begin{gather*}
+The mode of reasoning in this proof also applies immediately to certain things about numbers. For instance, the idea that $m \equiv n$ implies $m + 1 \equiv n + 1$ is immediate in this manner: a function \begin{gather*}
 \forall (m, n) \colon \nats \times \nats, (m \equiv n) \Rightarrow (\mathbf{S}(m) \equiv \mathbf{S}(n))
 \end{gather*}
 has its witness easily since in the moment that we pattern match on $m \equiv n$, we see that the only constructor could have been $\mathtt{refl} \hspace{0.3em} n$, and thus the case we are proving is exactly \begin{gather*}
@@ -323,7 +323,7 @@ f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.3em} \mathbf{S}(m
 defining a recursive function just as we had done for addition. What we have done on the right hand side is this: since $g\colon \forall (n : \nats), P(n) \Rightarrow P(\mathbf{S}(n))$, we provide it with $m \colon \nats$ so that we are discussing $g(m) \colon P(m) \Rightarrow P(\mathbf{S}(m))$. To complete the proof, we need only hand $g(m)$ some proof of $P(m)$, which we hand off recursively to $f$ itself in its specialized form, $f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.2em} m \colon P(m)$ as we described above. In this way, we hand the obligation of actually proving something off through recursion until finally the tally marks are taken off and we are in fact proving $f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.3em} \mathbf{Z} \colon P(\mathbf{Z})$, which has witness $p$ as was provided. \qed
 \end{my proof}
 
-\begin{corollary}
+\begin{proposition}
 We can use proof by induction to extend our earlier observation that $a \equiv b$ implies $\mathbf{S}(a) \equiv \mathbf{S}(b)$ to a general form that $b \equiv c$ implies $b + a \equiv c + a$ for all $a \colon \nats$. That is, we find a witness of \begin{gather*}
 \forall a, \forall b, \forall c, (b \equiv c) \Rightarrow (b + a \equiv c + a)
 \end{gather*}
@@ -353,7 +353,7 @@ f \hspace{0.2em}
 & (b \mapsto c \mapsto p \mapsto p) \\
 & \big(b \mapsto c \mapsto h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \hspace{0.2em} (g \hspace{0.2em} b \hspace{0.2em} c)\big).
 \end{align*}
-\end{corollary}
+\end{proposition}
 
 In practice, we will rarely reason about mathematical objects themselves at the type constructor level. While it is a useful tool for being absolutely certain no logical error has been made, we typically try to adjust our intuitions so that we can reason such steps automatically. That is not to say, in this moment at least, that the rigidity we expect of pure mathematics is any weaker, but that statements such as $a = b \Rightarrow a + c = b + c$ is one we train our intuitions on so that we know automatically how to make \emph{algebraic} deductions.
 

@@ -2,7 +2,7 @@
 module LatexToHtml.MainTools (
    -- processLatexToHtml,
    -- processThree,
-   IndexState(IndexState),
+   RefIndexState(RefIndexState),
    references,
    blankIndex,
    extractDocument,
@@ -32,6 +32,7 @@ import LatexToHtml.PageTemplate
 import Text.Blaze.Internal (MarkupM(Empty))
 import Text.Blaze.Html5 as H
 import Text.Blaze.Html5.Attributes as A
+import Text.Blaze.Html.Renderer.String (renderHtml)
 import Data.ListLike (fromText)
 import Data.String
 import Data.List (intercalate)
@@ -41,7 +42,7 @@ import Data.Text (Text, drop)
 
 import Text.LaTeX.Base (LaTeX)
 
-data IndexState = IndexState
+data RefIndexState = RefIndexState
    {  theorems    :: Int
    ,  figures     :: Int
    ,  expressions :: Int -- i.e. eq number
@@ -49,8 +50,8 @@ data IndexState = IndexState
    ,  references  :: Map Text [String] -- Need to change this once we reach the multi-doc stage to include link info
    }
 
-blankIndex :: IndexState
-blankIndex = IndexState {
+blankIndex :: RefIndexState
+blankIndex = RefIndexState {
       theorems    = 1
    ,  figures     = 1
    ,  expressions = 1
@@ -59,37 +60,36 @@ blankIndex = IndexState {
    }
 
 
-writePage :: String -> String -> LaTeX -> IndexState -> (Html, IndexState, [String])
-writePage pagetitle pagename pagecontents indstate = let
+writePage :: Text -> String -> String -> LaTeX -> RefIndexState -> (String, RefIndexState, [String])
+writePage pagetitle pagename pageaddress pagecontents indstate = let
    inspect0 = myShow pagecontents
    part1 = processOne pagecontents
    inspect1 = show part1
    part2 = processTwo part1
    inspect2 = show part2
-   (part3, newindstate) = processThree pagename
-   inspect3 = show part3
-   logs = [inspect0,inspect1,inspect2,inspect3]
-   thepage = pageHTML pagetitle part3
-   in (thepage, newindstate, logs)
+   (part3, newindstate) = processThree pagename part2 indstate
+   logs = [inspect0,inspect1,inspect2]
+   thepage = pageHTML pagetitle pageaddress part3
+   in (renderHtml thepage, newindstate, logs)
 
 
-processLatexToHtml :: String -> LaTeX -> IndexState -> (Html, IndexState)
+processLatexToHtml :: String -> LaTeX -> RefIndexState -> (Html, RefIndexState)
 processLatexToHtml pagename x = processThree pagename $ processOneTwo x
 
 
 -- BoxedSec String (Maybe Text) (Maybe [HtmlVers]) [HtmlVers]
 
-processThree :: String -> [HtmlVers] -> IndexState -> (Html, IndexState)
+processThree :: String -> [HtmlVers] -> RefIndexState -> (Html, RefIndexState)
 processThree pagename content indexstate = let
-   repeatCase :: [HtmlVers] -> IndexState -> (Html, IndexState)
+   repeatCase :: [HtmlVers] -> RefIndexState -> (Html, RefIndexState)
    repeatCase [] ind = (Empty (), ind)
    repeatCase (x:xs) ind = let
       (resultx, newind) = worker x ind
       (resultxs, finind) = repeatCase xs newind
       in (resultx >> resultxs, finind)
-   passFirst :: (Html -> Html) -> (Html, IndexState) -> (Html, IndexState)
+   passFirst :: (Html -> Html) -> (Html, RefIndexState) -> (Html, RefIndexState)
    passFirst func (x,y) = (func x, y)
-   boxInfoHandler :: String -> Maybe Text -> IndexState -> (Int, IndexState)
+   boxInfoHandler :: String -> Maybe Text -> RefIndexState -> (Int, RefIndexState)
    boxInfoHandler kind mlabel propind = let
       (newind, thmnum) = case mlabel of
          Nothing -> let
@@ -106,7 +106,7 @@ processThree pagename content indexstate = let
             }
             in (ind, thmnumt)
       in (thmnum, newind)
-   worker :: HtmlVers -> IndexState -> (Html, IndexState)
+   worker :: HtmlVers -> RefIndexState -> (Html, RefIndexState)
    worker stuff propind = case stuff of
       RawText x -> (toHtml x, propind)
       Emphasize x -> (i $ toHtml x, propind)

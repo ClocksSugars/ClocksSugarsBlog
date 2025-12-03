@@ -61,6 +61,31 @@
 		title=Theorem \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 	}
 	
+\newtcolorbox[use counter=statements]%
+	{label proposition}%
+	[2]%
+	[]%
+	{%
+		breakable,%
+		colback=white,%
+		colframe=Violet,%
+		coltitle=black,%
+		title=Proposition \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		label=pro:#2%
+	}
+
+\newtcolorbox[use counter=statements]%
+	{proposition}%
+	[1]%
+	[]
+	{%
+		breakable,%
+		colback=white,%
+		colframe=Violet,%
+		coltitle=black,%
+		title=Proposition \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+	}
+
 \newtcolorbox%
 	{label proof}%
 	[3]%

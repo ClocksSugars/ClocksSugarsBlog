@@ -46,6 +46,12 @@
  initial-value: lightgrey;
 }
 
+@property --pro-color {
+ syntax: "<color>";
+ inherits: false;
+ initial-value: violet;
+}
+
 h1 {
   color: grey;
 }
@@ -159,6 +165,19 @@ h1 {
 
 .Notationtitle {
    background-color: var(--ntn-color);
+   border-radius: 5px;
+   padding: 5px;
+}
+
+.Proposition {
+   border: 3px solid var(--pro-color);
+   border-radius: 8px;
+   background-color: white;
+   padding: 5px;
+}
+
+.Propositiontitle {
+   background-color: var(--pro-color);
    border-radius: 5px;
    padding: 5px;
 }
