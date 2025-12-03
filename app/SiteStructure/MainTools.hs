@@ -1,11 +1,12 @@
-{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE OverloadedRecordDot #-}
 module SiteStructure.MainTools where
 
 import System.IO
-import Data.Either.Utils
+import System.Directory (copyFile)
+-- import Data.Either.Utils
+import Data.String
 
-import SiteStructure.IndexPage (IndexedSection(IndexedSection))
-import SiteStructure.Manifest (SubChapter(..))
+import SiteStructure.RecordTypes
 import LatexToHtml.MainTools
 
 import Text.LaTeX.Base (LaTeX)
@@ -16,9 +17,11 @@ import Text.LaTeX.Base.Parser (parseLaTeX)
 --    to act as a location that is relative both for the input files
 --    (the latexraw files) and the output files (public). There should
 --    also be an output target for logs.
+--- Moreover the design here is not to actually output anything here.
+--    Most of the work here is in turning the manifest into a big IO
+--    monad program that will only at the end do anything.
 
--- writePage :: String -> String -> LaTeX -> IndexState -> (Html, IndexState, [String])
--- writePage pagetitle pagename pagecontents indstate = let
+
 
 parseSubChapter ::
    String ->
@@ -28,36 +31,71 @@ parseSubChapter ::
       IndexedSection
    )
 parseSubChapter address subchapter = let
-   docaddress = address <> (name subchapter)
-   theindex = IndexedSection {
-      address = "public/" <> docaddress <> ".html",
-      title = title subchapter,
-      description = description subchapter
-   }
+   docaddress = address <> subchapter.name
+   theindex :: IndexedSection
+   theindex = IndexedSection
+         ("public/" <> docaddress <> ".html")
+         subchapter.title
+         subchapter.description
+   theprogram :: RefIndexState -> IO (Maybe RefIndexState)
    theprogram refinds = let
+      copyassets :: [String] -> IO ()
+      copyassets [] = return ()
+      copyassets (x:xs) = (>>) (do
+            copyFile ("latexraw/" <> address <> x) ("public/" <> address <> x)
+            ) $ copyassets xs
       parseSuccessCase :: LaTeX -> IO RefIndexState
       parseSuccessCase doc = do
          let (thepage,newrefs,logs) = writePage
-               $  title subchapter
-               $  name subchapter
-               $  docaddress
-               $  extractDocument doc
-               $  refinds
+               subchapter.title
+               subchapter.name
+               docaddress
+               (extractDocument doc)
+               refinds
          writeFile ("public/" <> docaddress <> ".html") thepage
          writeFile ("logs/" <> docaddress <> "0.txt") (logs !! 0)
          writeFile ("logs/" <> docaddress <> "1.txt") (logs !! 1)
          writeFile ("logs/" <> docaddress <> "2.txt") (logs !! 2)
+         copyassets subchapter.depends
          return newrefs
       in do
-      handle <- openFile ("latexraw/" <> docaddress <> ".tex")
+      handle <- openFile ("latexraw/" <> docaddress <> ".tex") ReadMode
       xs <- hGetContents handle
-      outc <- case (parseLatex . fromString $ xs) of
-         Left _ -> do return Nothing
-         Right doc -> lift Just parseSuccessCase
+      outc <- case (parseLaTeX . fromString $ xs) of
+         Left _ -> do {putStrLn ("Failure on " <> docaddress); return Nothing}
+         Right doc -> Just <$> parseSuccessCase doc
       hClose handle
-      outc
+      return outc
    in (theprogram, theindex)
 
+parseChapter ::
+   String ->
+   Chapter ->
+   (
+      RefIndexState -> IO (Maybe RefIndexState),
+      IndexedChapter
+   )
+parseChapter address chapter = let
+   chapaddress = address <> chapter.name
+   theindex :: [IndexedSection] -> IndexedChapter
+   theindex = IndexedChapter
+         ("public/" <> chapaddress)
+         chapter.title
+         chapter.description
+   sectionWorker :: [SubChapter] -> (RefIndexState -> IO (Maybe RefIndexState), [IndexedSection])
+   sectionWorker [] = (\ x -> do {return (Just x)}, [])
+   sectionWorker (x:xs) = let
+      (programhead, indexedsechead) = parseSubChapter chapaddress x
+      (programtail, indexedsectail) = sectionWorker xs
+      theprogram :: RefIndexState -> IO (Maybe RefIndexState)
+      theprogram refstate = do
+         mayberefs <- programhead refstate
+         case mayberefs of
+            Nothing -> do {putStrLn "Exiting chapter"; return Nothing}
+            Just refout -> do {programtail refout}
+      in (theprogram , indexedsechead:indexedsectail)
+   (theprogram, listofindexsections) = sectionWorker chapter.sections
+   in (theprogram, theindex listofindexsections)
 
 
 

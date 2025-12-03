@@ -71,6 +71,7 @@ executable ClocksSugarsBlog
                      LatexToHtml.NewCommand,
                      LatexToHtml.Utils,
                      LatexToHtml.PageTemplate,
+                     SiteStructure.RecordTypes,
                      SiteStructure.Manifest,
                      SiteStructure.IndexPage,
                      SiteStructure.MainTools
@@ -90,7 +91,8 @@ executable ClocksSugarsBlog
                      text,
                      ListLike,
                      containers,
-                     aeson
+                     aeson,
+                     directory
 
 
     -- Directories containing source files.

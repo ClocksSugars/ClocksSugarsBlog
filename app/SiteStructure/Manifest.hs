@@ -4,33 +4,12 @@
 
 module SiteStructure.Manifest (
    tempappliuni,
-   SubChapter(..),
-   Chapter(..),
-   WrittenWorkBook(..)
    ) where
 
 --import GHC.Generics
 --import aeson
+import SiteStructure.RecordTypes
 import Data.Text (Text)
-
-data SubChapter = SubChapter {
-   name :: String,
-   title :: Text,
-   description :: Text,
-   depends :: [String]
-}
-
-data Chapter = Chapter {
-   name :: String,
-   title :: Text,
-   sections :: [SubChapter]
-}
-
-data WrittenWorkBook = WrittenWorkBook {
-   name :: String,
-   title :: Text,
-   chapters :: [Chapter]
-}
 
 
 --- This should all be moved to a json file later!!
@@ -42,6 +21,7 @@ tempappliuni = WrittenWorkBook {
       Chapter {
          name = "prelims",
          title = "Preliminaries",
+         description = "chapter description here",
          sections = [
             SubChapter {
                name = "philofmath",
