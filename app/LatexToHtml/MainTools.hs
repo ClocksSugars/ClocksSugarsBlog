@@ -60,7 +60,7 @@ blankIndex = RefIndexState {
    }
 
 
-writePage :: Text -> String -> String -> LaTeX -> RefIndexState -> (String, RefIndexState, [String])
+writePage :: Text -> String -> Html -> LaTeX -> RefIndexState -> (String, RefIndexState, [String])
 writePage pagetitle pagename pageaddress pagecontents indstate = let
    inspect0 = myShow pagecontents
    part1 = processOne pagecontents
@@ -69,7 +69,7 @@ writePage pagetitle pagename pageaddress pagecontents indstate = let
    inspect2 = show part2
    (part3, newindstate) = processThree pagename part2 indstate
    logs = [inspect0,inspect1,inspect2]
-   thepage = pageHTML pagetitle pageaddress part3
+   thepage = subchapterPageHtml pagetitle pageaddress part3
    in (renderHtml thepage, newindstate, logs)
 
 

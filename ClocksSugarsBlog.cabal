@@ -71,9 +71,12 @@ executable ClocksSugarsBlog
                      LatexToHtml.NewCommand,
                      LatexToHtml.Utils,
                      LatexToHtml.PageTemplate,
+                     SiteStructure.DefaultPage,
                      SiteStructure.RecordTypes,
+                     SiteStructure.AddressManagement,
                      SiteStructure.Manifest,
-                     SiteStructure.IndexPage,
+                     SiteStructure.ContentsPage,
+                     SiteStructure.WorkHorse,
                      SiteStructure.MainTools
 
     -- LANGUAGE extensions used by modules in this package.
@@ -92,7 +95,8 @@ executable ClocksSugarsBlog
                      ListLike,
                      containers,
                      aeson,
-                     directory
+                     directory,
+                     filepath
 
 
     -- Directories containing source files.

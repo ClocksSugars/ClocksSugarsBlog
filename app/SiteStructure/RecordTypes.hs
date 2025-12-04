@@ -1,5 +1,4 @@
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE OverloadedRecordDot #-}
 module SiteStructure.RecordTypes (
    IndexedSection(..),
    IndexedChapter(..),
