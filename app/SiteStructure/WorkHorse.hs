@@ -6,6 +6,7 @@ import System.Directory (copyFile)
 -- import Data.Either.Utils
 import Data.String
 
+import SiteStructure.AddressManagement
 import SiteStructure.RecordTypes
 import LatexToHtml.MainTools
 
@@ -24,17 +25,17 @@ import Text.LaTeX.Base.Parser (parseLaTeX)
 
 
 parseSubChapter ::
-   String ->
+   FolderPath ->
    SubChapter ->
    (
       RefIndexState -> IO (Maybe RefIndexState),
       IndexedSection
    )
 parseSubChapter address subchapter = let
-   docaddress = address <> subchapter.name
+   docaddress = (subchapter.name : address)
    theindex :: IndexedSection
    theindex = IndexedSection
-         ("public/" <> docaddress <> ".html")
+         ("public/" <> folderPathRender docaddress <> ".html")
          subchapter.title
          subchapter.description
    theprogram :: RefIndexState -> IO (Maybe RefIndexState)
@@ -42,44 +43,44 @@ parseSubChapter address subchapter = let
       copyassets :: [String] -> IO ()
       copyassets [] = return ()
       copyassets (x:xs) = (>>) (do
-            copyFile ("latexraw/" <> address <> x) ("public/" <> address <> x)
+            copyFile ("latexraw/" <> folderPathRender address <> x) ("public/" <> folderPathRender address <> x)
             ) $ copyassets xs
       parseSuccessCase :: LaTeX -> IO RefIndexState
       parseSuccessCase doc = do
          let (thepage,newrefs,logs) = writePage
                subchapter.title
                subchapter.name
-               docaddress
+               (addressListHtml docaddress)
                (extractDocument doc)
                refinds
-         writeFile ("public/" <> docaddress <> ".html") thepage
-         writeFile ("logs/" <> docaddress <> "0.txt") (logs !! 0)
-         writeFile ("logs/" <> docaddress <> "1.txt") (logs !! 1)
-         writeFile ("logs/" <> docaddress <> "2.txt") (logs !! 2)
+         writeFile ("public/" <> folderPathRender docaddress <> ".html") thepage
+         writeFile ("logs/" <> folderPathRender docaddress <> "0.txt") (logs !! 0)
+         writeFile ("logs/" <> folderPathRender docaddress <> "1.txt") (logs !! 1)
+         writeFile ("logs/" <> folderPathRender docaddress <> "2.txt") (logs !! 2)
          copyassets subchapter.depends
          return newrefs
       in do
-      handle <- openFile ("latexraw/" <> docaddress <> ".tex") ReadMode
+      handle <- openFile ("latexraw/" <> folderPathRender docaddress <> ".tex") ReadMode
       xs <- hGetContents handle
       outc <- case (parseLaTeX . fromString $ xs) of
-         Left _ -> do {putStrLn ("Failure on " <> docaddress); return Nothing}
+         Left _ -> do {putStrLn ("Failure on " <> folderPathRender docaddress); return Nothing}
          Right doc -> Just <$> parseSuccessCase doc
       hClose handle
       return outc
    in (theprogram, theindex)
 
 parseChapter ::
-   String ->
+   FolderPath ->
    Chapter ->
    (
       RefIndexState -> IO (Maybe RefIndexState),
       IndexedChapter
    )
 parseChapter address chapter = let
-   chapaddress = address <> chapter.name
+   chapaddress = chapter.name : address
    theindex :: [IndexedSection] -> IndexedChapter
    theindex = IndexedChapter
-         ("public/" <> chapaddress)
+         ("public/" <> folderPathRender chapaddress)
          chapter.title
          chapter.description
    sectionWorker :: [SubChapter] -> (RefIndexState -> IO (Maybe RefIndexState), [IndexedSection])
@@ -99,7 +100,7 @@ parseChapter address chapter = let
 
 parseBook :: WrittenWorkBook -> (RefIndexState -> IO (Maybe RefIndexState), ChapterIndex)
 parseBook book = let
-   address = book.name
+   address = [book.name]
    chapterWorker :: [Chapter] -> (RefIndexState -> IO (Maybe RefIndexState), [IndexedChapter])
    chapterWorker [] = (\ x -> do {return (Just x)}, [])
    chapterWorker (x:xs) = let
