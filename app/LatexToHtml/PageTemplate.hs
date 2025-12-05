@@ -14,6 +14,7 @@ import SiteStructure.DefaultPage
 
 subchapterPageHtml :: Text -> Html -> Html -> Html
 subchapterPageHtml pageTitle pageaddress pageContent = defaultPageHTML
+      "../../styles.css"
       "Application Unification"
       "Application Unification"
       "A Serialized Online Textbook by ClocksSugars"

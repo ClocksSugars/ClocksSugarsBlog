@@ -1,44 +1,53 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE OverloadedRecordDot #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module SiteStructure.ContentsPage (
-   makeChapterIndex
+   makeChapterIndexPage
 ) where
 
-import Data.Text (Text)
 import Data.String
-import System.OsPath (makeRelative)
-
-import Text.Blaze.Html5 as H
-import Text.Blaze.Html5.Attributes as A
-import Text.Blaze.Internal (MarkupM(Empty))
-
-import SiteStructure.RecordTypes
+import Data.Text (Text)
 import LatexToHtml.PageTemplate (subchapterPageHtml)
 import SiteStructure.AddressManagement
+import SiteStructure.RecordTypes
+import SiteStructure.DefaultPage
+import System.OsPath (makeRelative)
+import Text.Blaze.Html5 as H
+import Text.Blaze.Html5.Attributes as A
+import Text.Blaze.Internal (MarkupM (Empty))
 
 --- Aim: Make a function thateats type ChapterIndex and spits out
 --    a HTML corresponding to pageContents for a list with linked
 --    pages and toggleable descriptions
 
+makeChapterIndexPage :: ChapterIndex -> Html -> Html
+makeChapterIndexPage chapterindex pageaddress = defaultPageHTML
+      "../styles.css"
+      "Application Unification"
+      "Application Unification"
+      "A Serialized Online Textbook by ClocksSugars"
+      "Table of Contents"
+      pageaddress
+      (makeChapterIndex chapterindex)
+
 makeChapterIndex :: ChapterIndex -> Html
 makeChapterIndex chapterindex = let
-   secsWorker :: [IndexedSection] -> [Html]
-   secsWorker [] = []
-   secsWorker (x:xs) = (\y -> y:secsWorker xs) . li $ do
-      H.a ! href (fromString x.address) $ toHtml x.title
-      H.p $ toHtml x.description -- make this toggleable later
-   chapWorker :: [IndexedChapter] -> [Html]
-   chapWorker [] = []
-   chapWorker (x:xs) = (\y -> y:chapWorker xs) . li $ do
-      H.a ! href (fromString x.address) $ toHtml x.title
-      H.p $ toHtml x.description -- make this toggleable later
-      ul $ foldr (>>) (Empty ()) (secsWorker x.sections)
+      secsWorker :: [IndexedSection] -> [Html]
+      secsWorker [] = []
+      secsWorker (x : xs) = (\y -> y : secsWorker xs) . li $ do
+        H.a ! href (fromString x.address) $ toHtml x.title
+        H.p $ toHtml x.description -- make this toggleable later
+      chapWorker :: [IndexedChapter] -> [Html]
+      chapWorker [] = []
+      chapWorker (x : xs) = (\y -> y : chapWorker xs) . li $ do
+        -- H.a ! href (fromString x.address) $ toHtml x.title
+        toHtml x.title -- if this were a link, nowhere to point to yet
+        H.p $ toHtml x.description -- make this toggleable later
+        ul $ foldr (>>) (Empty ()) (secsWorker x.sections)
    in ol $ foldr (>>) (Empty ()) (chapWorker chapterindex.chapters)
 
-
-
+--- example of what we're aiming for
 
 -- docTypeHtml $ do
 --    H.head $ do

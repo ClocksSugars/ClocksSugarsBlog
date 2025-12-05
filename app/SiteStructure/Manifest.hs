@@ -11,6 +11,7 @@ module SiteStructure.Manifest (
 import SiteStructure.RecordTypes
 import Data.Text (Text)
 
+--- make this file turn a json into the structure below!
 
 --- This should all be moved to a json file later!!
 tempappliuni :: WrittenWorkBook
@@ -35,6 +36,12 @@ tempappliuni = WrittenWorkBook {
                name = "proptypes",
                title = "Propositional Logic: A Programming Inspired Approach",
                description = "description goes here x2",
+               depends = []
+               },
+            SubChapter {
+               name = "maththink",
+               title = "Rewrites and Sets: The Cognitive Weapons of Math",
+               description = "description goes here x3",
                depends = []
                }
             ]

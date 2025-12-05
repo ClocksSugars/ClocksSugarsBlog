@@ -4,10 +4,12 @@ module SiteStructure.AddressManagement where
 
 import Data.String
 import Data.List (intercalate)
+import System.Directory
+import System.IO
 
 import Text.Blaze.Html5 as H
 import Text.Blaze.Html5.Attributes as A
--- import Text.Blaze.Internal (MarkupM(Empty))
+import Text.Blaze.Internal (MarkupM(Empty))
 
 
 targetHomePage :: String
@@ -20,6 +22,14 @@ outputfolder = "public"
 type FolderPath = [String] -- stored backwards.
 -- also intended to treat last object as a folder to which a file extension
 --    can be added but really we should just set up index.html things
+
+writeFileMakePath :: FolderPath -> String -> String -> IO ()
+writeFileMakePath [] _ _ = putStrLn "was told to write file with no address"
+writeFileMakePath (x:y:fxs) fileext xs = do
+   createDirectoryIfMissing True (folderPathRender $ y:fxs)
+   writeFile (folderPathRender (x:y:fxs) ++ fileext) xs
+writeFileMakePath (x:[]) fileext xs = writeFile (x ++ fileext) xs
+
 
 folderPathRender :: FolderPath -> String
 folderPathRender fpath = intercalate "/" $ reverse fpath
@@ -34,9 +44,9 @@ addressListHtml fpath = let
    makeEachLink (_:_) = makeEachLink []
    reversedaddresses = case fpath of
       [] -> [] --[do {a ! href "/" $ "Home"}]
-      x:xs -> toHtml x : makeEachLink xs
+      x:xs -> toHtml x : makeEachLink (x:xs)
    assembleAddressLine :: [Html] -> Html
-   assembleAddressLine [] = do {a ! href "/" $ "Home"}
+   assembleAddressLine [] = Empty ()
    assembleAddressLine (x:xs) = (>>) x $ (>>) "/" $ assembleAddressLine xs
    in assembleAddressLine (reverse reversedaddresses)
 

@@ -35,15 +35,18 @@ parseSubChapter address subchapter = let
    docaddress = (subchapter.name : address)
    theindex :: IndexedSection
    theindex = IndexedSection
-         ("public/" <> folderPathRender docaddress <> ".html")
+         ("/" <> folderPathRender docaddress <> ".html")
          subchapter.title
          subchapter.description
    theprogram :: RefIndexState -> IO (Maybe RefIndexState)
    theprogram refinds = let
+      resetAllButReferences = blankIndex {references = refinds.references}
       copyassets :: [String] -> IO ()
       copyassets [] = return ()
       copyassets (x:xs) = (>>) (do
-            copyFile ("latexraw/" <> folderPathRender address <> x) ("public/" <> folderPathRender address <> x)
+            copyFile
+               ("latexraw/" <> folderPathRender address <> "/" <> x)
+               ("public/" <> folderPathRender address <> "/" <> x)
             ) $ copyassets xs
       parseSuccessCase :: LaTeX -> IO RefIndexState
       parseSuccessCase doc = do
@@ -52,18 +55,22 @@ parseSubChapter address subchapter = let
                subchapter.name
                (addressListHtml docaddress)
                (extractDocument doc)
-               refinds
-         writeFile ("public/" <> folderPathRender docaddress <> ".html") thepage
-         writeFile ("logs/" <> folderPathRender docaddress <> "0.txt") (logs !! 0)
+               resetAllButReferences
+         writeFileMakePath (docaddress ++ ["public"]) ".html" thepage
+         writeFileMakePath (docaddress ++ ["logs"]) "0.txt" (logs !! 0)
          writeFile ("logs/" <> folderPathRender docaddress <> "1.txt") (logs !! 1)
          writeFile ("logs/" <> folderPathRender docaddress <> "2.txt") (logs !! 2)
          copyassets subchapter.depends
          return newrefs
       in do
-      handle <- openFile ("latexraw/" <> folderPathRender docaddress <> ".tex") ReadMode
+      handle <- openFile
+         ("latexraw/" <> folderPathRender docaddress <> ".tex")
+         ReadMode
       xs <- hGetContents handle
       outc <- case (parseLaTeX . fromString $ xs) of
-         Left _ -> do {putStrLn ("Failure on " <> folderPathRender docaddress); return Nothing}
+         Left _ -> do
+            putStrLn ("Failure on " <> folderPathRender docaddress)
+            return Nothing
          Right doc -> Just <$> parseSuccessCase doc
       hClose handle
       return outc
@@ -80,10 +87,11 @@ parseChapter address chapter = let
    chapaddress = chapter.name : address
    theindex :: [IndexedSection] -> IndexedChapter
    theindex = IndexedChapter
-         ("public/" <> folderPathRender chapaddress)
+         ("/" <> folderPathRender chapaddress)
          chapter.title
          chapter.description
-   sectionWorker :: [SubChapter] -> (RefIndexState -> IO (Maybe RefIndexState), [IndexedSection])
+   sectionWorker :: [SubChapter] ->
+      (RefIndexState -> IO (Maybe RefIndexState), [IndexedSection])
    sectionWorker [] = (\ x -> do {return (Just x)}, [])
    sectionWorker (x:xs) = let
       (programhead, indexedsechead) = parseSubChapter chapaddress x
@@ -98,10 +106,12 @@ parseChapter address chapter = let
    (endprogram, listofindexsections) = sectionWorker chapter.sections
    in (endprogram, theindex listofindexsections)
 
-parseBook :: WrittenWorkBook -> (RefIndexState -> IO (Maybe RefIndexState), ChapterIndex)
+parseBook :: WrittenWorkBook ->
+   (RefIndexState -> IO (Maybe RefIndexState), ChapterIndex)
 parseBook book = let
    address = [book.name]
-   chapterWorker :: [Chapter] -> (RefIndexState -> IO (Maybe RefIndexState), [IndexedChapter])
+   chapterWorker :: [Chapter] ->
+      (RefIndexState -> IO (Maybe RefIndexState), [IndexedChapter])
    chapterWorker [] = (\ x -> do {return (Just x)}, [])
    chapterWorker (x:xs) = let
       (programhead, indexedchaphead) = parseChapter address x

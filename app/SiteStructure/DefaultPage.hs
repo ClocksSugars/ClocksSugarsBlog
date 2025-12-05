@@ -6,6 +6,7 @@ module SiteStructure.DefaultPage (
 ) where
 
 import Data.Text (Text)
+import Data.String
 
 import Text.Blaze.Html5 as H
 import Text.Blaze.Html5.Attributes as A
@@ -26,8 +27,9 @@ katexArgs = "const katexargs = { delimiters: ["
    <> "{left: \"\\[\", right: \"\\]\", display: true}"
    <> "], throwOnError : false}"
 
-defaultPageHTML :: String -> Text -> Text -> Text -> Html -> Html -> Html
+defaultPageHTML :: String -> String -> Text -> Text -> Text -> Html -> Html -> Html
 defaultPageHTML
+   whereCSS
    pagetitle
    pageh1
    undertitletext
@@ -39,7 +41,7 @@ defaultPageHTML
       meta ! charset "utf-8"
       meta ! name "viewport" ! content "width=device-width"
       link ! rel "stylesheet" ! href "https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css"
-      link ! rel "stylesheet" ! href "styles.css"
+      link ! rel "stylesheet" ! href (fromString whereCSS)
       script ! defer "" ! src "https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" $ Empty ()
       script katexArgs
       script ! defer "" ! src "https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js"

@@ -12,7 +12,8 @@ module LatexToHtml.MainTools (
    -- processOneTwo,
    inlineCommands,
    -- HtmlVers,
-   writePage
+   writePage,
+   subchapterPageHtml
 ) where
 
 import LatexToHtml.ProcessingTypes
@@ -134,7 +135,7 @@ processThree pagename content indexstate = let
          newind = propind { figures = fignumber + 1 }
          htmlelement = do
             H.figure ! class_ "flex-col" $ do
-               img ! (src . fromString $ ("latexraw/anatomyRn/" ++ fromText location)) !
+               img ! (src . fromString $ (fromText location)) !
                   alt "A visual representation of the description above"
                figcaption . fromString . fromText $ ("Figure " <> (fromString . show $ fignumber) <> ": " <> thing)
          in (htmlelement, newind)
