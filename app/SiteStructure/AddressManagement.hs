@@ -39,7 +39,7 @@ addressListHtml fpath = let
    makeEachLink :: FolderPath -> [Html] -- this will come out backwards. also skips first item on purpose
    makeEachLink [] = [do {a ! href "/" $ "Home"}]
    makeEachLink (_:y:xs) =
-      [H.a ! href (fromString $ folderPathRender (y:xs)) $ toHtml y]
+      [H.a ! href (fromString $ "/" <> folderPathRender (y:xs)) $ toHtml y]
          <> makeEachLink (y:xs)
    makeEachLink (_:_) = makeEachLink []
    reversedaddresses = case fpath of
