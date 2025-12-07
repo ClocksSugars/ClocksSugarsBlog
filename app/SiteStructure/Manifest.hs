@@ -41,10 +41,23 @@ tempappliuni = WrittenWorkBook {
             SubChapter {
                name = "maththink",
                title = "Rewrites and Sets: The Cognitive Weapons of Math",
-               description = "in progress, better if you dont read it yet as i will be changing it a lot",
+               description = "in draft 1.5 stage. a mostly philosophical engagement on mathematical thinking + some basic set theory and what we mean by equivalence in a non-constructive world",
                depends = []
                }
             ]
-         }
+         },
+         Chapter {
+            name = "prelims",
+            title = "Preliminaries",
+            description = "chapter description here",
+            sections = [
+               SubChapter {
+                  name = "realnumsaxioms",
+                  title = "Real Numbers from Axioms: Why $\\mathbb{R^n}$ is Weirder Than You Thought, Part 1",
+                  description = "A discussion of the properties of real numbers as derived by rewrites on their axioms, as well as our earliest focus on the concerns and mentality of real analysis.",
+                  depends = []
+                  }
+               ]
+            }
       ]
    }

@@ -114,7 +114,8 @@ processThree pagename content indexstate = let
       Bold x -> (b $ toHtml x, propind)
       ListItem xs -> passFirst li $ repeatCase xs propind
       Itemize xs -> passFirst ul $ repeatCase xs propind
-      Enumerate _ xs -> passFirst ol $ repeatCase xs propind -- TODO change ol to (ol ! something) when order instructions available
+      Enumerate listkind xs -> passFirst (ol ! A.type_ (fromString $ fromText listkind)) $ repeatCase xs propind
+      -- TODO MAKE THE OL TYPE MORE ROBUST
       Paragraph xs -> passFirst p $ repeatCase xs propind
 
       ReferenceNum reflabel -> let

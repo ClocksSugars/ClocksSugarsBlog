@@ -106,7 +106,7 @@ As such, our reading of the Zermelo-Fraenkel axioms will start from the axioms t
 \begin{label definition}[Zermelo-Fraenkel Set Theory Axioms]{ZFAxioms}
 Inherit the notion of a proposition or a condition (i.e. loosely in the sense of a family of types) from the previous section along with logical operations. Consider a set to be a collection of objects with a notion of equivalence between those objects and a propositional relation written $\in$ which is true when an object $x$ is \emph{in} a set $A$ (and thus read $\in$ as \squote{in} or \squote{is an element of}).
 
-Then sets are defined to obey the following. \begin{enumerate}
+Then sets are defined to obey the following. \begin{itemize}
 
 \item (Axiom of Extensionality) Two sets $A$ and $B$ are equal if they have the same elements. \begin{gather*}
 \big(\forall x, (x \in A) \Leftrightarrow (x \in B) \big) \Rightarrow A = B
@@ -150,7 +150,7 @@ We then call $B$ the \emph{image} of $f$ or its \emph{range}.
 \forall A \exists S, \big( \{ x \in A| \bot\} \in S \wedge (\forall x, x \in S \Rightarrow x \cup \{x\} \in S)\big).
 \end{gather*}
 
-\end{enumerate}
+\end{itemize}
 \end{label definition}
 
 Once again, we must emphasize a change in the way that we write propositions. That is, none of our objects (and thus none of our \emph{conditions} or families of propositions) are typed anymore. Set theory does not make claim to \squote{where objects come from}. It instead assumes mostly through other mechanisms or as prescribed later by the mathematician, that there \emph{are objects}. One might even say that set theory specifically exists in a perspective where all objects that could exist do exist already, which we then draw on. It is then our responsibility to pick and choose from these objects by appropriately setting conditions, propositions, etc. This, on its own, obviously creates problems such as the one we mentioned earlier, of Russel's paradox, but these axioms carefully skirt around those. 
@@ -273,7 +273,7 @@ This is the standard construction of integers in mathematics, the various conver
 
 The technique we have utilized to do this does not exist without significant effort in type theory; over there, constructors with some set of parameters are \emph{unique}, and one cannot weaken this. So what they do is to define integers similarly to $\nats + \nats$ with a $l$ in-left constructor for negatives, a $r$ in-right constructor for positives, and a constructor $\mathbf{Z}$ for zero. To construct rational numbers which are much more obviously pairs, fractions such as $1/1$ and $2/2$ are equal, and so they must put in substantial work to reduce create a sigma type which is a pair of $\integers \times \integers$ along with a witness that it is in simplified form.
 
-It may be valid to protest however, just as type theoretic constructions are too restrictive about equality, the above notion of equality is perhaps dangerously forgiving. Surely we are not saying that all pairs of natural numbers $(m,n)$ are integers, right? Integers are supposed to be at the same standing as natural numbers, or real numbers. Enabling different operations of course, but still distinct kinds of objects themselves.
+It may be valid to protest however, just as type theoretic constructions are too restrictive about equality, the above notion of equality is perhaps dangerously forgiving. Surely we are not saying that all pairs of natural numbers $(m,n)$ are literally always integers, right? Integers are supposed to be at the same standing as natural numbers, or real numbers. Enabling different operations of course, but still distinct kinds of objects themselves.
 
 This is in part our expectations about types creeping in, but these are not exactly bad expectations to have. The set theorists, prior to a similar popularity of type theory as we enjoy today, saw fit to try to formalize what we have done above. Thus we have the formal notion of a partition, equivalence relation, and equivalence class. In such a way, we can say that what we did above was not true equality (and thus not overwriting the properties of pairs nor natural numbers) but a different notion of equivalence, thus indicating the existence of a different set of which objects obey that equivalence natively.
 
@@ -316,8 +316,8 @@ First, we must return to our notion of functions, or set morphisms as we describ
 Let $A$, $B$ and $C$ be sets, and $f\colon A \to B$ be a function $f$ with domain $A$ and codomain $B$, likewise $g\colon B \to C$. Then: \begin{itemize}
 \item we call $f$ \textbf{injective} or \textbf{one-to-one} if for all $x_1,x_2 \in A$ we have $f(x_1) = f(x_2)$ if and only if $x_1 = x_2$. That is, $f$ is injective if every unique input has a unique output. An injective function is invertible but only on the subset of its codomain which is its image.
 \item we call $f$ \textbf{surjective} or \textbf{onto} if for all $y \in B$ there exists some $x \in A$ such that $f(x) = y$. That is, $f$ is surjective if we can find an input for every possible output, or that the set of $f$'s outputs \emph{fills} the codomain. A surjective function can find an inverse for every output but there may be more than one inverse, in which case we describe the function as \emph{many-to-one}.
-\item as mentioned in the previous section, the $\circ$ operation takes two functions and \textbf{composes} them so that the output of one is the input of the other. When two functions $f$ and $g$ have the property that the domain of one is the codomain of the other ($B$ in this case), then we can compose them and write $g \circ f \colon A \to C$. For any $x \in A$ it is defined $g \circ f(x) = g(f(x))$.
-\item we call $f$ \textbf{isomorphic} if it is both injective and surjective. In this case, since we can find an input for every output, and that input is unique, we can establish a mapping \emph{from} the output \emph{to} the input, an \textbf{inverse} map which we call $f^\inv \colon B \to A$ with domain and codomain reversed. It has the properties that $f \circ f^\inv \colon B \to B$ and $f^\inv \circ f \colon A \to A$ are \textbf{identity functions}, meaning they send every input to itself and change nothing. 
+\item as mentioned in the previous section, the $\circ$ operation takes two functions and \textbf{composes} them so that the output of one is the input of the other. When two functions $f$ and $g$ have the property that the domain of one is the codomain of the other ($B$ in this case), then we can compose them and write $g \circ f \colon A \to C$. For any $x \in A$ it is defined $g \circ f(x) = g(f(x))$. We can also do this when the codomain of $f$ is a subset of the domain of $g$.
+\item we call $f$ \textbf{isomorphic} if it is both injective and surjective. In this case, since we can find an input for every output, and that input is unique, we can establish a mapping \emph{from} the output \emph{to} the input, an \textbf{inverse} map which we call $f^\inv \colon B \to A$ with domain and codomain reversed. It has the properties that $f \circ f^\inv \colon B \to B$ and $f^\inv \circ f \colon A \to A$ are \textbf{identity functions}, meaning they send every input to itself and change nothing. When an isomorphism exists between two sets $A$ and $B$ then we may write $A \cong B$ to mean that they are \textbf{isomorphic}.
 \end{itemize}
 Additionally, we write $f(A)$ to mean the image of a set, the set of its outputs; if $f$ is surjective then $f(A) = B$. Even when $f$ is not isomorphic and thus not invertible, we may at times speak of $f^\inv (D)$ if $D$ is a subset of the image of $f$, to mean \begin{gather*}
 f^\inv(D) = \left\{ x \in A \mid f(x) \in D \right\}
@@ -325,8 +325,79 @@ f^\inv(D) = \left\{ x \in A \mid f(x) \in D \right\}
 which we call the \textbf{preimage} of $D$. 
 \end{label definition}
 
-Sometimes when there 
+Sometimes when there exists an isomorphism between two sets, we may say that the sets themselves are isomorphic, and sometimes we may even then say that they represent the same underlying set and treat them as equal. This will be something to discuss later but treating sets as equal when they are isomorphic is a strong claim that will at times be appropriate and most of the time not be (I expect a full discussion of this to appear in chapter 3).
 
+Now that we have formally discussed relation properties, we should also collect into one place the various rules that a binary operation can have, such as $\circ$, $+$ or $\div$.
+
+\begin{definition}[Properties of Binary Relations]
+Let $+ \colon A \times A \to A$ represent a binary operation, taking two members of $A$ to another member of $A$. Let $a,b,c \in A$. Then there are three rules that it may or may not have that are important to remember. \begin{itemize}
+\item (\textbf{Associativity}) the operation is associative if $(a + b) + c = a + (b + c)$, so the order in which we calculate individual pairs does not matter
+\item (\textbf{Commutativity}) the operation is commutative if $a + b = b + a$ so that individual pairs may be flipped without changing their value
+\item (\textbf{Identity}) the operation has an identity if there is some $e \in A$ for which $e + a = a$ and $a + e = a$, that is, an object which does nothing to the other object when the operation acts. If it satisfies only $e + a = a$ then we call it a \emph{left-identity} and if it satisfies only $a + e = a$ then we call it a \emph{right-identity}.
+\end{itemize}
+\end{definition}
+
+Many binary operations we have seen so far obey these, but notably operations such as subtraction or division which are simply operations composed with an inverse are not. Here some are listed: \begin{itemize}
+\item Addition $(+)$ is associative and commutative with identity zero.
+\item Multiplication ($\times$ or $\cdot$) is associative and commutative with identity one.
+\item Logical-And ($\wedge$) is associative and commutative with identity $\top$ the true proposition.
+\item Logical-Or ($\vee$) is associative and commutative with identity $\bot$ the false proposition.
+\item Set Union ($\cup$) is associative and commutative with identity $\emptyset$ the empty set.
+\item Set Intersection ($\cap$) is associative and commutative, and when it exists in the context of some total-set $X$ (as is often the case when discussing subsets of a \emph{space}) then it has identity $X$.
+\item Cartesian Product ($\times$) is in practice associative since we are generally unconcerned with finer structure beyond the creation of tuples, so $(A \times B) \times C$ is treated as equal to $A \times (B \times C)$ since we only care that their members are triples $(a,b,c)$ with $a \in A$, $b\in B$ and $c \in C$. If enforce that cartesian products only make pairs, i.e. $A \times (B\times C)$ has elements $(a , (b,c))$ then it is not associative. It is also not commutative since $A \times B$ has members $(a,b)$ but not members $(b,a)$. It does in a sense have an identity however, since any set $\{z\}$ with only one element will produce a set of pairs $(a,z) \in A \times \{z\}$ which is isomorphic to $A$ via $(a,z) \mapsto a$ and $a \mapsto (a,z)$, however this is the sort of thing that we care about contextually.
+\end{itemize}
+
+There also exists a notion of subtraction on sets, which we call \emph{set minus} and denote by the backwards slash $\setminus$. The set $A \setminus B$ is then the set containing all elements which are in $A$ but not in $B$. Consequently you might write \begin{gather*}
+A \setminus B = \big\{ a \in A \hspace{0.2em}\big| \hspace{0.2em} a \notin B \big\}.
+\end{gather*}
+
+Finally, we must discuss notations relating to sequential patterns, starting with \emph{big operator notation}. Once in a while this notation makes rounds on the internet as \squote{just being a for loop} and half that time that description is quite apt. When we have a binary operator such as $+$ or $\times$ which is associative and commutative, it is meaningful to simply take a list of values and say \squote{simply apply the binary operator to all of them, in any order} since, as commutativity and associativity describe, ordering really does not matter. In this case, we may write \begin{gather*}
+\sum_{i = 1}^n f(i) = f(1) + f(2) + f(3) + ... + f(n)
+\end{gather*}
+which we call \textbf{summation} notation. The rule with this pattern is that we have an expression on the right hand side of the capital greek sigma $\Sigma$ involving a variable $i$ which we declare below it (this can be some other variable such as $n$ or $k$ or $j$) and we add the expression repeatedly, going through each counting number starting with the number we set $i$ equal to, 1 in this case, upwards until we reach $n$. We can also as necessary start with a negative number, in which case it is understood that we are counting upwards in the integers. A matching notation exists for multiplication, called the \textbf{product notation} \begin{gather*}
+\prod_{i=1}^n f(i) = f(1) \times f(2) \times f(3) \times ... \times f(n)
+\end{gather*}
+in which we use capital Pi $\Pi$ with the same system. In situations we discuss later, it may even become appropriate to write infinity in the top instead of $n$ to mean summing or multiplying the expression over all counting numbers.
+
+This notation is a special case of a more general notation in which we do an operation over an entire set. That is, when we write $i=1$ on the bottom and $n$ on the top, the more general notation would be to write $A = \{1,2,3,...,n\}$ and then \begin{gather*}
+\sum_{i \in A} f(i) = f(1) + f(2) + f(3) + ... + f(n)
+\end{gather*}
+meaning that we perform the operation over all members of the set $A$. At times also we can, when it is well enough communicated, write a short proposition on the bottom of a big-operator notation to describe the operation applying over values which are true. In such a fashion, we can rewrite the above as \begin{gather*}
+\sum_{1\le i \le n} f(i) = f(1) + f(2) + f(3) + ... + f(n)
+\end{gather*}
+as long as we have some reasonable assumption that it is implied $i \in \nats$. We can also stack these big operators together to do many more sums, for instance \begin{gather*}
+\sum_{i = 1}^n \sum_{j=1}^n i j = 1 \times 1 + 1 \times 2 + ... 1 \times n + 2 \times 1 + 2 \times 2 + ... + n \times n
+\end{gather*}
+or it may instead be appropriate to put these values together in order to add an extra condition, such as in \begin{gather*}
+\sum_{1 \le i < j \le n} f(i,j) = f(1,2) + f(1,3) + ... + f(1,n) + f(2,3) + ... + f(n-1,n)
+\end{gather*}
+in which the structure of the proposition only adds terms corresponding to pairs $(i,j)$ when $i$ is less than $j$.
+
+We may circumstancially apply these big operators when the operation they describe is not associative or commutative, so long as we define exactly what we mean by this. For instance, while it will rub many mathematicians the wrong way, for a collection of indexed functions $f_1,f_2,..., f_n$ we can compose them all if as long as we say first that we mean composition to act in order from left to right or right to left. For instance, we would then write \begin{gather*}
+\bigcirc_{i=1}^n f_i = f_1 \circ f_2 \circ f_3 \circ ... \circ f_n
+\end{gather*}
+if we are specifying that it starts leftmost with the first choice of $i$ and counts upwards to the right.
+
+We must also mention the symbol $...$ itself. Obviously this is meant to describe the full extension of a pattern, but it will sometimes be used so frequently that it almost constitutes a symbol itself. As such I should specify the general practice with $...$, the \textbf{ellipsis}, that we generally begin the sequence with enough items to establish a pattern and then end it with a final term if indeed there is a final term. See above that in each time we have used it we have used two or three examples of the pattern before the ellipsis and then completed its final element. For illustrative purposes, it may at times be appropriate to write two or three examples at the end of the pattern, especially when we want to do something with one of those examples for the purposes of a mathematical manipulation. When we are pressed for space and the pattern has already been well established, only then will we write $f(1) + ... + f(n)$, always buffered on each side by the appropriate operation.
+
+In a case where for some reason we are adding to infinity (a concept which we will need to strictly define later) then it may become appropriate to not write a final term \begin{gather*}
+\sum_{n = 1}^\infty f(n) = f(1) + f(2) + f(3) + ...
+\end{gather*}
+
+These notations also extend to union and intersection, so a sequence of sets may have \begin{gather*}
+\bigcup_{i=1}^n A_i = A_1 \cup A_2 \cup A_3 \cup ... \cup A_n \\
+\bigcap_{1\le i < j \le n} A_{i,j} = A_{1,2} \cap A_{1,3} \cap ... \cap A_{1,n} \cap A_{2,3} \cap ... \cap A_{n-1,n}
+\end{gather*}
+
+We will often reuse symbols such as $+$ or $\times$ or indeed our big operators $\Sigma$ or $\Pi$ to mean different things when we have defined other concepts which we consider analogous to addition or multiplication. For instance, while we have $\int$ to represent integrals in calculus, the same way integration can be thought of as a sum over an area, there is an analogous notion of a product over an area which is generally denoted with product notation for lack of a better symbol (when it is not denoted $\exp(\int \log f(x) dx)$ instead or something of the sort), or a large number of multiplications in the sense of group theory may also use big $\Pi$.
+
+\subsection{On to Chapter Two}
+
+If you are still reading, congratulations and thank you. You have made it through the hurdle of learning the rules of mathematical writing and most of the unwritten rules of mathematical thought. 
+
+In the following chapter, we will start doing some real math in all its symbolic glory, now that we have seen, hopefully, that symbolic manipulation is much less scary than it looks, and moreover mainly a proxy for intuitive although strict reasoning. We will develop that reasoning over the next chapter as we study the properties of real numbers and space as thought of as real numbers.
+
+Thank you again for following along, and I hope this text proves useful and insightful to you.
 
 
 

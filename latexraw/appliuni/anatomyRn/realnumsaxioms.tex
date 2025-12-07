@@ -1,0 +1,83 @@
+\documentclass[11pt]{article}
+    \title{\textbf{Default Doc}}
+    \date{\the\day/\the\month/\the\year}
+
+\input{../pdf.tex}
+\input{../webmacros.tex}
+\input{../amsthmstuff.tex}
+
+
+
+
+\begin{document}
+
+As I have said in the previous chapter, real analysis usually proves a novel difficulty for the newly interested mathematician, since they are generally practiced on the intuitions of physics dressed up for the purposes of analytic geometry. This can make foundational statements about the real numbers appear tautological since it is unclear how one applies \squote{strict rigor} when we are unsure what rules we have and which we do not, thus returning us to the potholes of a more naive intuition's reasoning.
+
+My sense about this is that it is most easily remedied by simply working within the rules proper from the very beginning. One discovers on meeting real analysis, for the first time, that they did not truly know what a real number really was. Natural numbers, integers, rational numbers, each have strict rules for where new instances come from, either by counting rules, or extending subtraction or division as necessary, but this is not so immediately true for the real numbers, not in any useful way anyway. It could equally be said inversely that real numbers are so easy to create that it is hard to understand how exhaustive (or indeed restrictive, if you have been convinced that $dx$ is a number) the reals are.
+
+So we will continue, in some sense, our discussion from the previous chapter into this one, and describe the real numbers as a set defined with objects that obey certain symbolic rules. In this way, a real number will be no more and no less than the totality of these rules to us than their consequences and reinterpretations.
+
+\subsection{The Real Number Axioms}
+
+There are of course multiple axiomitizations of the real numbers, but to avoid confusing you, we will use these fourteen, most of which are borrowed from other constructions. That is, the set of real numbers is a \emph{complete ordered field}, meaning that it is first an algebraic field defined with addition and multiplication, subtraction and division, and other appropriate rules; it has an ordering so every number can be compared to one another, and it is complete in a way we will discuss shortly. Short of completeness, these axioms in fact describe the rational numbers, and in fact each of those terms, completeness, orderedness, or an algebraic field, are important and relevant on their own. For our purposes, by the time we meet many of these concepts formally, we will think of them in many ways as \squote{real numbers but without} some property. 
+
+\begin{label definition}[Real Number Axioms]{RealNumberAxioms}
+Denote by $\reals$ the set which is an ordered field for which all subsets have a least upper bound. That is: \begin{itemize}
+\item (Algebraic Field) $\reals$ is a set with a binary operation called addition and a binary operation called multiplication. For elements $a,b \in \reals$, we denote addition as $a + b$ and multiplication as $a b$ or sometimes $a \cdot b$, rarely $a \times b$. For any $a,b,c \in \reals$ these operations satisfy \begin{itemize}
+		\item (RNFA1) addition is associative, meaning $(a+b) + c = a + (b + c)$.
+		\item (RNFA2) addition is commutative, meaning $a+b = b+a$.
+		\item (RNFA3) addition has an identity $z_+$, satisfying $a + z_+ = a$ and $z_+ + a = a$.
+		\item (RNFA4) addition is invertible, so for all $a \in \reals$ there exists a unique $w$ such that $a + w = z_+$ leaving only the additive identity.
+		\item (RNFA5) multiplication is associative, meaning $(ab)c = a(bc)$.
+		\item (RNFA6) multiplication is commutative, meaning $ab = ba$.
+		\item (RNFA7) multiplication has an identity $z_\times$, satisfying $a z_\times = a$ and $z_\times a = a$\
+		\item (RNFA8) multiplication is almost always invertible, so for any $a \in \reals \setminus \{z_+\}$, that is, any number $a$ which is not the additive identity, there exists some $w$ such that $a w = z_\times$ and $w a = z_\times$.
+		\item (RNFA9) multiplication is \textbf{distributive}, meaning that $a(b + c) = a b + a c$.
+	\end{itemize}
+\item (Ordered) $\reals$ is a set with a binary relation $<$. For all $a,b,c \in \reals$ it satisfies \begin{itemize}
+		\item (RNOA1) the relation forms a \emph{trichotomy}, so either $a < b$ or $a = b$ or $b < a$, but there is no fourth option and exactly one of the three is always true.
+		\item (RNOA2) the relation is transitive, so if $a < b$ and $b < c$ then $a < c$.
+		\item (RNOA3) translations preserve orderings, so if $a < b$ then $a + c < b + c$.
+		\item (RNOA4) positive dilations preserve orderings, so if $a < b$ and $z_+ < c$ then $a c < b c$.
+	\end{itemize}
+\item (Completeness) For all nonempty sets $A \subset \reals$ which have an \textbf{upper bound}, that is, some number $b \in \reals$ such that $a < b$ or $a = b$ (i.e. $a \le b$) for all $a \in A$, there must exist some \textbf{least upper bound} called the \textbf{supremum}, which we write $\sup(A) \in \reals$. The least upper bound must simultaneously satisfy that $a \le \sup(A)$ for all $a \in A$, the property of an upper bound, and that for all upper bounds $b$ of $A$, it is $\sup(A) \le b$.
+\end{itemize}
+\end{label definition}
+
+You may immediately deduce the way that your understanding of the real numbers maps onto this description. That is, although wrapped up in symbols, $z_+ = 0$ and $z_\times = 1$, and that the additive inverse for some $a \in \reals$ is $-a$ while the multiplicative inverse is $1/a$. However I must emphasize that notions such as these, of writing a negative sign in front of a number to denote its additive inverse is merely a notation, and the idea that the inverse of a number is one divided by it is yet to be proven. Indeed, even the statement $z_+ = 0$ and $z_\times = 1$ is a choice that defines how we write the real numbers, fixing its scale by saying that the quantity $z_\times - z_+$ will be written by us as 1.
+
+This collection of fourteen axioms combines three different things that we tend to want from a \squote{number system} that could enable us to speak on matters of geometry and algebra simultaneously. It is an \emph{algebraic field}, in the sense of a number system with addition, subtraction, multiplication, division, a zero that adds nothing, and a one that multiplies nothing. These properties are also satisfied by the complex numbers, the rational numbers, and indeed the binary field which is composed of only the elements $\{0,1\}$ where computer science is concerned. It is ordered in the way we need it to be in order to \emph{measure} things and compare those measurements on one strict axis, like the counting numbers, the integers, and the rationals; it enables us to say that one thing is greater than another or smaller or equal but never incomparable.
+
+But then the real numbers have one other strange property which I might argue enables it to be useful in matters of geometry, which is that it is \emph{complete}. The axis created by the order axioms cannot ever be partitioned in such a way that there are two non-overlapping sets with no element between them, because \emph{there are no gaps} since $\reals$ is complete. In fact all of the axioms stated, up until the condition of completeness, describes the rational numbers which are not themselves complete. To state a collection of axioms for the reals is significantly easier than it is to construct the real numbers in any type theoretic sense precisely because of the axiom of completeness. The description I just gave, of real numbers as a real ordered set \emph{with no gaps} corresponds to the \squote{Dedekind cut} construction of the real numbers, where every number is uniquely identified by a point you can split the real number line in two at leaving a point in the middle.
+
+While the nuances of constructing the real numbers is far beyond the scope of this section, it is valuable to understand for later that real numbers are not nearly as easily discussed or pointed at as one might think. Indeed, we will discuss later in this chapter how almost all real numbers are effectively impossible to discuss. But it is our job for the majority of this chapter, so long as we wear the hats of \squote{real analysts} that we remain uninterested in the various difficulties of that construction; the study of real numbers has many much more interesting things to tell us even with that put aside.
+
+A series of obvious constructions must follow, along with some less obvious ones. Given the ordering $<$, we have the dual ordering $>$ in which $a < b$ if and only if $b > a$, as well as the partial order $a\le b$ which can be treated as the proposition $a < b \vee a = b$, with its dual $\ge$.
+
+Let us show some well known facts in order to explore how we arrive at common intuitions from these pure symbolic rules. This will begin our promised elaboration of math as simply a list of rewrite rules; we are in some sense rejecting a pursuit of \emph{truth} to demonstrate the power of truth-as-process, since all we know about our real numbers is these fourteen symbolic rules.
+
+\begin{proposition}
+Let $a,b,c \in \reals$. \begin{enumerate}
+\item If $a+c=0$ then $c = -1(a)$, or rather, if $a + c = z_+$ then $c = w a$ where $w + z_\times = 0$. In effect, $-a$ is the additive inverse of $a$.
+\item If $a < b$ then we may write $- b < -a$
+\item If $c < 0$ then if $a < b$, we have $b c < a c$ (by comparison to RNOA4 which required $0 < c$).
+\end{enumerate}
+\end{proposition}
+
+\begin{my proof}{}
+First let us show part a. Pose abstractly the question what value $w \in \reals$ has the property that $c = wa$ for all $a \in \reals$ recalling that $c$ is $a$'s additive inverse. First, case split on $a = 0$; if $a = 0$ then $c = 0$ and any $w$ applies, so without loss of generality, assume $a \neq 0$. Then assert the property $c = w a$ and solve for $w$.
+
+Dividing both sides of $c = w a$ by $a$, we obtain $c/a = w$. Add the multiplicative identity to both sides. Then by RNFA8, apply $1 = z_\times = a/a$ to obtain \begin{align*}
+w + 1 &= c/a + 1 \\
+&= c/a + a/a
+\end{align*}
+Since division by $a$, $/a$, is shorthand for multiplication by $a$'s unique inverse, we may write this in the following way and then apply distributivity (RNFA9) \begin{align*}
+w+ 1 &= \frac{1}{a} \cdot c + \frac{1}{a} \cdot a \\
+&= \frac{1}{a}(c + a) = \frac{c + a}{a}
+\end{align*}
+applying commutativity of addition (RNFA2), $c+a = a + c$ but since $c$ is $a$'s additive inverse, this is zero. So what we have shown is that $w + 1 = 0$, or $w + z_\times = 0$ as desired. We may now treat $-a$ as the additive inverse of $a$.
+\end{my proof}
+
+
+
+\end{document}

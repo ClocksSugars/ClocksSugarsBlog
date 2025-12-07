@@ -126,6 +126,8 @@ processOne arg = let
             map processOne (drop 1 $ splitByDelimiterLaTeX (TeXCommS "item") content)
             -- must drop 1 bc content preceeding first \item should be ignored. we can also guarentee
             -- there is 2 since this should have compiled in latex thus having at least one \item
+         ("enumerate", _) -> Right $ List "enumerate" Nothing $
+            map processOne (drop 1 $ splitByDelimiterLaTeX (TeXCommS "item") content)
 
          ("gather*", _) -> Right . RawPrint . render $
             TeXMath DoubleDollar $ TeXEnv kind texargs $ applyMathCommands content
@@ -203,6 +205,10 @@ processTwo ((IFigure location content):xs) = Figure location content : processTw
 -- processTwo ((IReference reference):xs) = ReferenceNum reference : processTwo xs
 processTwo ((List kind margs items):xs) = case kind of
    "itemize" -> Itemize (map (ListItem . processTwo) items) : processTwo xs
+   "enumerate" -> (\x -> Enumerate x (map (ListItem . processTwo) items) : processTwo xs) $
+      case margs of
+         Just [FixArg (TeXRaw x)] -> x
+         _ -> "a"
    _ -> Paragraph [RawText "failed here"] : processTwo xs
 processTwo ((IBoxedSec kind mlabel mtitle content):xs) = BoxedSec kind mlabel (
    fmap (map inLineTranslation) mtitle

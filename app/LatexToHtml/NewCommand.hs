@@ -14,11 +14,11 @@ zeroArgMathCommands :: Map String LaTeX
 zeroArgMathCommands = let
    natsfunc = TeXComm "mathbb" [FixArg (TeXRaw "N")]
    powersetfunc = TeXComm "mathcal" [FixArg (TeXRaw "P")]
-   invfunc = TeXRaw "-1"
    in fromList [
       ("nats", natsfunc),
       ("powerset",powersetfunc),
-      ("inv",invfunc)
+      ("inv",TeXRaw "-1"),
+      ("integers", TeXComm "mathbb" [FixArg (TeXRaw "Z")])
       ]
 
 argMathCommands :: Map String ([TeXArg] -> LaTeX)

@@ -6,13 +6,6 @@
 \input{../webmacros.tex}
 \input{../amsthmstuff.tex}
 
-%% NOTES:
-%%	explain how treating P \to \bot as an argument you can provide is like doing a proof by contradiction on the negative of a statement
-%%	emphasize that this is actually a good way to think about theorems
-
-
-%% use example i told amor fati for pi types:
-%%		another example. say the input type was A, the letters of the alphabet. i could have a normal function A -> W where w is words, and we just send a to apple, b to banana, etc.  but a dependent function can do something like send a to a *particular apple* of type APPLES, or b to a *particular banana* of type BANANAS. the dependent function is sending different inputs to different types
 
 %% a careful revision of all proofs appears to be very necessary
 
@@ -213,6 +206,8 @@ Let $A \colon \mathtt{Type}$ and let $B$ be some family of types, a collection o
 \end{gather*}
 where $\Pi$ is the capital greek letter \squote{pi}. In practice, let us also write what is on the right hand side of this definition to denote the dependent function type.
 \end{definition}
+
+This construction allows us to do something we really have not been able to before. Before, for instance, we could speak of a function which takes letters of the alphabet to words that start with that letter, like $a \mapsto \text{Apple}$ or $b \mapsto \text{Banana}$, and in that way, functions have always \emph{depended} on their inputs. But now, we can speak of a function that maps $a$ to a \emph{particular} apple in the type $\mathtt{Apple}$ or $b$ to a particular banana in the type $\mathtt{Banana}$. It is called a dependent function precisely because the \emph{type} of the output now changes depending on the particular input given. To map that onto the formalization above, we might say that $A$ is the type of alphabetic letters, and $B$ is a family of types of foods which each start with a different letter of the alphabet.
 
 This may seem abstract, but in fact the reason we are discussing it in the first place is because it concretizes a much more natural concept; when $P \colon \nats \to \mathtt{Type}$ is a family of propositions depending on a natural number, we can speak of $n \colon \nats$ where $P(n)$ is true; this is the type theoretic form of a \emph{condition} on $n$. This allows us to do two things very interesting things with respect to functions. We can speak of a function of type $(n \colon \nats) \to P(n) \to Q(n)$ which, since it takes a witness of $P(n)$ as an argument, is a statement of the form \squote{when $P$ is true for $n$ then $Q$ is true for $n$}. If instead we have a function of form $(n \colon \nats) \to P(n)$ then we have promised that we can reliably produce a witness that condition $P$ is true for any $n$ we give; we have said \squote{for all $n \colon \nats$, $P(n)$ is true}.
 
