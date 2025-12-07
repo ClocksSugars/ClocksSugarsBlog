@@ -27,7 +27,7 @@ tempappliuni = WrittenWorkBook {
             SubChapter {
                name = "philofmath",
                title = "Nascent's Philosophy of Mathematics",
-               description = "description goes here",
+               description = "A philosophical discussion of what a theory does for us, what mathematical thought is as a category for theories, and how to read the language of mathematical texts.",
                depends = [
                   "bentcylinder.svg"
                   ]
@@ -35,13 +35,13 @@ tempappliuni = WrittenWorkBook {
             SubChapter {
                name = "proptypes",
                title = "Propositional Logic: A Programming Inspired Approach",
-               description = "description goes here x2",
+               description = "An introduction to dependent type theory and a basic discussion of proofs-as-programs, illustrating the reasoning style of propositional logic in a programmatic way.",
                depends = []
                },
             SubChapter {
                name = "maththink",
                title = "Rewrites and Sets: The Cognitive Weapons of Math",
-               description = "description goes here x3",
+               description = "in progress, better if you dont read it yet as i will be changing it a lot",
                depends = []
                }
             ]
