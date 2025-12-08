@@ -52,6 +52,12 @@
  initial-value: violet;
 }
 
+@property --lem-color {
+ syntax: "<color>";
+ inherits: false;
+ initial-value: lightpink;
+}
+
 h1 {
   color: grey;
 }
@@ -182,16 +188,40 @@ h1 {
    padding: 5px;
 }
 
+.Lemma {
+   border: 3px solid var(--lem-color);
+   border-radius: 8px;
+   background-color: white;
+   padding: 5px;
+}
+
+.Lemmatitle {
+   background-color: var(--lem-color);
+   border-radius: 5px;
+   padding: 5px;
+}
+
 figure {
    align-items: center;
 }
 
 img {
-   width: var(--page-width);
+   width: 100%;/*var(--page-width);*/
 }
 
 img.squareheight {
    height: var(--page-width);
+}
+
+.katex {
+    font-size: 1.1em;
+}
+
+.katex-display {
+   font-size: 1.15em;
+   /*max-width:100%;
+   width:fit-content;
+   transform: scale();*/
 }
 
 body {

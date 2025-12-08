@@ -160,11 +160,11 @@ processThree pagename content indexstate = let
       MProofBox isopen mlabel mtitle content -> let
          (thmnum, newind1) = boxInfoHandler "Proof" mlabel propind
          (processedContent, newind2) = processThree pagename content newind1
-         summarybox = H.summary ! class_ (fromString $ "Prooftitle") ! (A.id . fromString . show $ thmnum)
-         summaryboxopen = if isopen then summarybox ! A.open "" else summarybox
+         detailsbox = H.details ! class_ (fromString "Proof")
+         detailsboxopen = if isopen then detailsbox ! A.open "" else detailsbox
          htmlelement = do
-            H.details ! class_ (fromString "Proof") $ do
-               summaryboxopen $ toHtml $ case mtitle of
+            detailsboxopen $ do
+               H.summary ! class_ (fromString $ "Prooftitle") ! (A.id . fromString . show $ thmnum) $ toHtml $ case mtitle of
                   Just ttitle -> fst $ processThree pagename ttitle propind
                   Nothing -> "Proof."
                processedContent

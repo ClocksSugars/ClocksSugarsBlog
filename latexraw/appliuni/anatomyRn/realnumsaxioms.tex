@@ -15,7 +15,7 @@ As I have said in the previous chapter, real analysis usually proves a novel dif
 
 My sense about this is that it is most easily remedied by simply working within the rules proper from the very beginning. One discovers on meeting real analysis, for the first time, that they did not truly know what a real number really was. Natural numbers, integers, rational numbers, each have strict rules for where new instances come from, either by counting rules, or extending subtraction or division as necessary, but this is not so immediately true for the real numbers, not in any useful way anyway. It could equally be said inversely that real numbers are so easy to create that it is hard to understand how exhaustive (or indeed restrictive, if you have been convinced that $dx$ is a number) the reals are.
 
-So we will continue, in some sense, our discussion from the previous chapter into this one, and describe the real numbers as a set defined with objects that obey certain symbolic rules. In this way, a real number will be no more and no less than the totality of these rules to us than their consequences and reinterpretations.
+So we will continue, in some sense, our discussion from the previous chapter into this one, and describe the real numbers as a set defined with member objects that obey certain symbolic rules. In this way, a real number will be no more and no less than the totality of these rules to us than their consequences and reinterpretations.
 
 \subsection{The Real Number Axioms}
 
@@ -31,7 +31,7 @@ Denote by $\reals$ the set which is an ordered field for which all subsets have 
 		\item (RNFA5) multiplication is associative, meaning $(ab)c = a(bc)$.
 		\item (RNFA6) multiplication is commutative, meaning $ab = ba$.
 		\item (RNFA7) multiplication has an identity $z_\times$, satisfying $a z_\times = a$ and $z_\times a = a$\
-		\item (RNFA8) multiplication is almost always invertible, so for any $a \in \reals \setminus \{z_+\}$, that is, any number $a$ which is not the additive identity, there exists some $w$ such that $a w = z_\times$ and $w a = z_\times$.
+		\item (RNFA8) multiplication is almost always invertible, so for any $a \in \reals \setminus \{z_+\}$, that is, any number $a$ which is not the additive identity, there exists a unique $w$ such that $a w = z_\times$ and $w a = z_\times$.
 		\item (RNFA9) multiplication is \textbf{distributive}, meaning that $a(b + c) = a b + a c$.
 	\end{itemize}
 \item (Ordered) $\reals$ is a set with a binary relation $<$. For all $a,b,c \in \reals$ it satisfies \begin{itemize}
@@ -44,7 +44,7 @@ Denote by $\reals$ the set which is an ordered field for which all subsets have 
 \end{itemize}
 \end{label definition}
 
-You may immediately deduce the way that your understanding of the real numbers maps onto this description. That is, although wrapped up in symbols, $z_+ = 0$ and $z_\times = 1$, and that the additive inverse for some $a \in \reals$ is $-a$ while the multiplicative inverse is $1/a$. However I must emphasize that notions such as these, of writing a negative sign in front of a number to denote its additive inverse is merely a notation, and the idea that the inverse of a number is one divided by it is yet to be proven. Indeed, even the statement $z_+ = 0$ and $z_\times = 1$ is a choice that defines how we write the real numbers, fixing its scale by saying that the quantity $z_\times - z_+$ will be written by us as 1.
+You may immediately deduce the way that your understanding of the real numbers maps onto this description. That is, although wrapped up in symbols, $z_+ = 0$ and $z_\times = 1$, and that the additive inverse for some $a \in \reals$ is $-a$ while the multiplicative inverse is $1/a$. However I must emphasize that notions such as these, the idea that the inverse of a number is one divided by it is a notation, and writing a negative sign in front of a number to denote its additive inverse (via $(-1) \cdot a$) is yet to be validated. Indeed, even the statement $z_+ = 0$ and $z_\times = 1$ is a choice that defines how we write the real numbers, fixing its scale by saying that the quantity $z_\times - z_+$ will be written by us as 1.
 
 This collection of fourteen axioms combines three different things that we tend to want from a \squote{number system} that could enable us to speak on matters of geometry and algebra simultaneously. It is an \emph{algebraic field}, in the sense of a number system with addition, subtraction, multiplication, division, a zero that adds nothing, and a one that multiplies nothing. These properties are also satisfied by the complex numbers, the rational numbers, and indeed the binary field which is composed of only the elements $\{0,1\}$ where computer science is concerned. It is ordered in the way we need it to be in order to \emph{measure} things and compare those measurements on one strict axis, like the counting numbers, the integers, and the rationals; it enables us to say that one thing is greater than another or smaller or equal but never incomparable.
 
@@ -52,31 +52,177 @@ But then the real numbers have one other strange property which I might argue en
 
 While the nuances of constructing the real numbers is far beyond the scope of this section, it is valuable to understand for later that real numbers are not nearly as easily discussed or pointed at as one might think. Indeed, we will discuss later in this chapter how almost all real numbers are effectively impossible to discuss. But it is our job for the majority of this chapter, so long as we wear the hats of \squote{real analysts} that we remain uninterested in the various difficulties of that construction; the study of real numbers has many much more interesting things to tell us even with that put aside.
 
-A series of obvious constructions must follow, along with some less obvious ones. Given the ordering $<$, we have the dual ordering $>$ in which $a < b$ if and only if $b > a$, as well as the partial order $a\le b$ which can be treated as the proposition $a < b \vee a = b$, with its dual $\ge$.
+First, since I had promised that this chapter would explore the practical implementation of rewriting reasoning with real numbers, let us write explicitly some rules which are not written above since they are a combined consequence of the real numbers and the properties of equality. This will begin our promised elaboration of math as simply a list of rewrite rules; we are in some sense rejecting a pursuit of \emph{truth} to demonstrate the power of truth-as-process, since all we know about our real numbers is these fourteen symbolic rules.
 
-Let us show some well known facts in order to explore how we arrive at common intuitions from these pure symbolic rules. This will begin our promised elaboration of math as simply a list of rewrite rules; we are in some sense rejecting a pursuit of \emph{truth} to demonstrate the power of truth-as-process, since all we know about our real numbers is these fourteen symbolic rules.
+\begin{label lemma}[Real Number Algebra Rewrite Rules]{RealNumsAlgebraRewrites}
+Let $a,b,c \in \reals$ be real numbers and let $f \colon \reals \to \reals$. Then the following rewrites are conditionally valid. \begin{enumerate}
+\item $a = c$ if and only if $a + b = c + b$
+\item if $b \neq 0$ then $a = c$ if and only if $a b = c b$
+\item if $a = c$ then $f(a) = f(c)$
+\item if $f$ is injective then $f(a) = f(c)$ if and only if $a = c$
+\end{enumerate}
+\end{label lemma}
 
-\begin{proposition}
-Let $a,b,c \in \reals$. \begin{enumerate}
-\item If $a+c=0$ then $c = -1(a)$, or rather, if $a + c = z_+$ then $c = w a$ where $w + z_\times = 0$. In effect, $-a$ is the additive inverse of $a$.
-\item If $a < b$ then we may write $- b < -a$
-\item If $c < 0$ then if $a < b$, we have $b c < a c$ (by comparison to RNOA4 which required $0 < c$).
+\begin{my proof}{mo}
+Recall that equality is reflexive, %%% add reference here!!
+meaning that for all symbols $x$, we have $x = x$. For part a of the lemma, this means that both $a = a$ and $a + b = a + b$. Since equality implies a rewrite rule, we can rewrite $a + b$ to $c + b$ on the right hand side, obtaining $a + b = c + b$. For the reverse direction, take $d \in \reals$ to be the additive inverse of $b$, so that $b + d = 0$. Apply the rule once more to obtain \begin{gather*}
+a + b + d = c + b + d
+\end{gather*}
+followed by applying associativity of addition (RNFA1) to place brackets \begin{gather*}
+a + (b + d) = c + (b + d)
+\end{gather*} and then applying the additive inverse property (RNFA4, i.e. rewrite $b + d$ to $0$) followed by the identity property (RNFA3) to eliminate zeroes via $x + 0 = x$.
+\begin{align*}
+a + 0 &= c + 0 \\
+a & = c
+\end{align*}
+Thus $a + b = c + b$ also implies $a = c$.
+
+
+We can repeat this process also for multiplication, saying that $a b = a b$ by reflexivity of equality, and then rewriting $a b$ on the right hand side to $c b$. Once more, obtain the reverse direction by assigning $d$ the multiplicative inverse to $b$ satisfying $bd = 1$ and applying the rule once more \begin{align*}
+a b d &= c b d \\
+a (b d) &= c (b d) \\
+a (1) &= c (1) \\
+a &= c
+\end{align*}
+applying this time RNFA5, RNFA8 and then RNFA7 to repeat the steps mentioned before for multiplication instead of addition. 
+
+Once again, we do not do this by thinking about what \emph{is true}, we do this on the basis of the rules that we have, those being reflexivity and rewrite under equality.
+
+For part c this is even simpler, taking $f(a) = f(a)$ by reflexivity and rewriting the right hand side to $f(c)$ and obtaining $f(a) = f(c)$. In general, the reverse direction does not hold unless $f$ is injective, in which case we move to part d.
+
+For part d, recall the definition of injectivity. A function $f$ is injective when it satisfies the rules that $f(x_1) = f(x_2)$ if and only if $x_1 = x_2$. In this case, our $x_1$ is $a$ and our $x_2 = c$, so if $f(a) = f(c)$, we notice that what we are trying to prove is the literal definition of injectivity, so we are done.
+
+\qed
+\end{my proof}
+
+These rewrite rules will be taken as trivial from now on and exercised simply by saying \squote{we [do a thing] to both sides}. In fact if one thinks of $f(x) = x + b$ or $f(x) = x b$ then both parts a and b's forward implications were merely special cases of part c; this means as well that the rule extends to subtraction and division. In fact we never particularly used the property that $f$ was a function on real numbers either, so in fact these \emph{algebraic rewrites} remain valid on any system of numbers for which we have a valid function $f$.
+
+A series of obvious constructions must follow, along with some less obvious ones. Given the ordering $<$, we have the dual ordering $>$ in which $a < b$ if and only if $b > a$, as well as the partial order $a\le b$ which can be treated as the proposition $a < b \vee a = b$, with its dual $\ge$. We also consider subtraction to be the operation of taking a number's additive inverse and adding it instead, likewise for division multiplying a number's multiplicative inverse. This can be stated as saying, literally, that $a - b = c$ is \emph{defined} as the solution $c$ to $c + b = a$, and $a/b = c$ is defined as the solution $c$ to $b c = a$. It is preferable at this stage however, since these definitions correspond to unique solutions, to simply consider these inverses as functions which we will do shortly.
+
+Let us show some well known facts in order to explore how we arrive at common intuitions from these pure symbolic rules. 
+
+\begin{label proposition}{RealNumInverses}
+Let $a,b,c \in \reals$. For the purposes of notation, let $I_+\colon \reals \to \reals$ be a function that maps each real number to its unique additive inverse, i.e. $a + I(a) = z_+ = 0$ for all $a \in \reals$. Likewise, define $I_\times \colon \reals \setminus \{0\} \to \reals \setminus \{0\}$ be the multiplicative inverse which sends each number that is not zero to its unique multiplicative inverse, so that $a \cdot I(a) = z_\times = 1$. Given our above description of subtraction and division, this means that we read $x - y$ as $x + I_+(y)$ and $x/y$ as $ x \cdot I_\times(y)$ and take these as rewrite rules. Then the following hold.\begin{enumerate}
+\item $I_+(I_+(a)) = a$ and $I_\times(I_\times(a)) = a$.
+\item If $a c = 1$ then $c = 1/a$ which we also write $c = a^\inv$. In effect, $I_\times(a) = 1/a$.
+\item Any number multiplied by zero is zero, i.e. $z_+ \cdot a = z_+$.
+\item If $a+c=0$ then $c = (-1)a$, or rather, in general $I_+(a) = I_+ (z_\times) a$. In effect, $I_+(a) = -a$ where $-a$ is shorthand for $(-1)a$.
+\end{enumerate}
+\end{label proposition}
+
+\begin{my proof}{mo}
+First let us show part a. This is the statement that for all real numbers, for both addition and multiplication, the inverse of a number's inverse is itself. For addition we can apply the property that $x + I_+(x) = 0$ with $x = I_+(a)$ to obtain \begin{gather*}
+I_+(a) + I_+\big(I_+(a)\big) = 0
+\end{gather*}
+Applying commutativity of addition (RNFA2) we can swap the sides of the addition and obtain \begin{gather*}
+I_+\big(I_+(a)\big) + I_+(a) = 0
+\end{gather*}
+
+As stated above, this matches the form of subtraction, $x + I_+(y) = x - y$, where $x = I_+\big(I_+(a)\big)$ and $y = a$. This means that we are considering \begin{gather*}
+I_+(I_+(a)) - a = 0
+\end{gather*}
+But we had said earlier that subtraction is defined $x - y = z$ by being the $z$ that solves $z + y = x$, so this may be rewritten as \begin{gather*}
+I_+(I_+(a)) = 0 + a.
+\end{gather*}
+Finally applying RNFA3 to eliminate zeroes, we obtain $I_+(I_+(a)) = a$. The process of the proof is the same for multiplication, except that at the end we apply RNFA7 to eliminate $z_\times$, the one's. 
+
+Part b is significantly easier, as it is basically tautological. Recall the definition of division as above, that is, $x/y = w$ has $w$ that solves $wy = x$, presuming that no symbols are zero. Set $x = 1 = z_\times$ and $y = a$; then $w a = z_\times$. But by RNFA8 this $w$ must be the unique multiplicative inverse of $a$, $w= I_\times(a)$. Rewriting the original division, we then have $1/a = I_\times(a)$.
+
+For part c, we apply RNFA3 in reverse to turn $z_+$ into $z_+ + z_+$, adding a zero. Thus $z_+ a$ is also \begin{align*}
+z_+ a &= (z_+ + z_+) a \\
+&= z_+ a + z_+ a
+\end{align*}
+by distributivity (RNFA9). Subtracting $z_+(a)$ from both sides (or rather adding $I_+(z_+ a)$) we obtain via RNFA4 and RNFA3 \begin{align*}
+(z_+ a) + I_+\big(z_+(a)\big) &= (z_+ a) + (z_+ a) + I_+\big(z_+(a)\big)  \\
+z_+ &=  z_+ a 
+\end{align*}
+showing that zero multiplied by anything is zero.
+
+Part d consists of proving $I_+(a) = I_+(z_\times)a$. Begin from reflexivity of equivalence, writing $I_+(a)/a = I_+(a)/a$, a number's additive inverse divided by itself. Set $w = I_+(a)/a$ and then add one to both sides, obtaining \begin{gather*}
+w + 1 = \frac{I_+(a)}{a} + 1
+\end{gather*}
+Now by RNFA8, we replace $1 = a I_\times(a) = a/a$ and write \begin{gather*}
+w + 1 = \frac{I_+(a)}{a} + \frac{a}{a}
+\end{gather*}
+These divisions by $a$ are of course shorthands for multiplying by $I_\times(a)$, so we may apply distributivity (RNFA9) and rewrite the right hand side to $\frac{1}{a}(I_+(a) + a)$. \begin{gather*}
+w + 1 = \frac{I_+(a) + a}{a}
+\end{gather*}
+But now by RNFA4, the top of the fraction must be zero since we are adding a number with its additive inverse. This also means that the entire right hand side is zero by part c of the lemma, since anything ($I_\times(a)$ in this case) multiplied by zero is zero. So that means \begin{gather*}
+w + 1 = z_+
+\end{gather*}
+implying that $w$ is the unique additive inverse to $1 = z_\times$ by RNFA8. Thus $w = I_+(z_\times)$ is the value we had in $w = I_+(a)/a$. Displaying this division in its alternate form with $w = I_+(z_\times)$ substituted, this is finally \begin{gather*}
+I_+(a) = I_+(z_\times) a
+\end{gather*}
+\end{my proof}
+
+At this stage, we have effectively demonstrated what the inverse operation is for addition and multiplication, specifically that $I_\times(a) = 1/a$ and $I_+(a) = - a$. We can now, with complete certainty, take these notations as proven to be consistent within our number system. As we prove more such statements as these, statements which we might normally take to be obvious, our list of rewrite rules will grow until they begin to form something like an intuition, or at least a feel for the game we have created for ourselves.
+
+Our next stop in making this game easier for ourselves will be to fill out some of our intuitions about how ordering operations work. As you may have seen above, we take as axioms that orderings obey translations and dilations (i.e. they remain true under additions and multiplications) even though we did not take this as an axiom for equivalence (where we had to derive these rewrite rules as in lemma \ref{lem:RealNumsAlgebraRewrites}). This is in part because we've never seen a formal ordering before, and we are in some sense defining simultaneously what an ordering \emph{does}.
+
+In fact, we have not said anything at all about what it \emph{means} to write $a < b$, or any of these operations so far within a formal context. Of course we know the symbol $<$ to mean \textbf{less than} but the point in some sense is that its meaning here will appear not from what we name it but from what properties it has. Only having chosen those properties well, as is the case with these axioms, will we know for sure that this symbol and its properties reflects the intuition we wish it to match with.
+
+\begin{proposition}[Ordering Rules for Negatives]
+Let $a,b,c \in \reals$ and let $a < b$.
+\begin{enumerate}
+\item Then we may write $- b < -a$, reversing the order on the number's negatives.
+\item If $c < 0$ then we have $b c < a c$ (by comparison to RNOA4 which required $0 < c$ and implied $a c < b c$).
 \end{enumerate}
 \end{proposition}
-
 \begin{my proof}{}
-First let us show part a. Pose abstractly the question what value $w \in \reals$ has the property that $c = wa$ for all $a \in \reals$ recalling that $c$ is $a$'s additive inverse. First, case split on $a = 0$; if $a = 0$ then $c = 0$ and any $w$ applies, so without loss of generality, assume $a \neq 0$. Then assert the property $c = w a$ and solve for $w$.
-
-Dividing both sides of $c = w a$ by $a$, we obtain $c/a = w$. Add the multiplicative identity to both sides. Then by RNFA8, apply $1 = z_\times = a/a$ to obtain \begin{align*}
-w + 1 &= c/a + 1 \\
-&= c/a + a/a
+Begin with the hypothesis $a < b$. By RNOA3 we may translate by the value $-a - b$.
+\begin{gather*}
+a + (-a - b) < b + ( -a - b)
+\end{gather*}
+From there, it will be necessary to apply associativity of addition (RNFA1) and commutativity of addition to rearrange terms (RNFA2),\begin{align*}
+a + (-a - b) &< b + ( -a - b) \\
+(a - a) - b &< b + (- b -a)  \\
+0 + (- b) &< (b - b) - a \\
+&< 0 + (- a)
+\end{align*} followed finally by RNFA3 to eliminate zeros. \begin{gather*}
+-b < -a.
+\end{gather*}
+For part b we will need to use part a and proposition \ref{pro:RealNumInverses} in the following manner. By part $a$, we have that $c < 0$ implies $0 < -c$ (that is, when $c$ is a negative number), which means $-c$ satisfies the requirement for RNOA4 to rewrite $a < b$ to \begin{gather*}
+a (-c) < b(-c).
+\end{gather*}
+Applying proposition \ref{pro:RealNumInverses}, we know that these negatives (or rather additive inverses) are simply numbers multiplied by $-1$, so applying commutativity of multiplication (RNFA6) we have \begin{align*}
+a (-1) c &< b (-1) c \\
+(-1) a c &< (-1) b c \\
+-a c &< - b c
 \end{align*}
-Since division by $a$, $/a$, is shorthand for multiplication by $a$'s unique inverse, we may write this in the following way and then apply distributivity (RNFA9) \begin{align*}
-w+ 1 &= \frac{1}{a} \cdot c + \frac{1}{a} \cdot a \\
-&= \frac{1}{a}(c + a) = \frac{c + a}{a}
+Applying part a of proposition \ref{pro:RealNumInverses}, $I_+(I_+(a)) = a$ or in this case $-(-a) = a$, together with part a of this proposition, we use $-a c < - b c$ to imply \begin{align*}
+-(- b c) &< - (-a c) \\
+b c &< a c
 \end{align*}
-applying commutativity of addition (RNFA2), $c+a = a + c$ but since $c$ is $a$'s additive inverse, this is zero. So what we have shown is that $w + 1 = 0/a = 0$, or $w + z_\times = 0$ as desired. We may now treat $-a$ as the additive inverse of $a$.
+as desired.
 \end{my proof}
+
+Now that we have seen some examples of demonstrating things that we already intuit to be true using strict axiomatic rewrites, we are in a position to demonstrate some things we might not know with equal certainty. In particular, we are ready to demonstrate that real numbers do not contain infinitessimals.
+
+Why infinitessimals might be real numbers at all is largely a confusion born of the tricks used in physics courses and earlier studies of calculus, often by looking at derivatives written $\frac{df}{dx}$ and thinking that $df$ and $dx$ are themselves values. In fact there is a sense in which this is true, or at least, that there are formalisms within which we can speak of $df$ and $dx$ as being mathematical objects with distinct algebraic rules similar to that of a number. But for the sake of a discussion of real numbers, it is important to emphasize that these objects, whatever they may be, are \emph{not} real numbers. Real numbers obey something called the \emph{Archimedian property} which forbids the notion of infinitessimal numbers.
+
+There are many ways to express the Archimedian property, each focusing on various aspects of it. Here, we will write the Archimidean property specifically as the property that there are no such thing as infinitessimal reals, and \emph{because} there are no infinitessimal reals, any two real numbers are non-equal if and only if have some number between them. Expressing this statement poses a difficulty however; if there \emph{were} infinitessimal real numbers, then they would of course lay on the number line just as any other number and we would have difficulty distinguishing them from other non-infinitessimal real numbers. So instead, in this context, we will think of the idea of an infinitessimal number as one that is smaller than all \emph{positive rational numbers}, that is, all $q \in \rationals$ which are $q > 0$, the set of positive rational numbers $\rationals^+$. 
+
+\begin{label theorem}[Archimedian Property]{RealArchimedianProperty}
+There are no elements $h \in \reals$ which are $h > 0$ and also $h < q$ for all positive rational numbers $q \in \rationals^+ \subset \reals$.
+\end{label theorem}
+
+\begin{my proof}[Proof. $\hspace{0.5em}$ (Adapted from the proof on Wikipedia)]{mo}
+We proceed with a proof by contradiction. Accordingly, assume for the sake of contradiction that there did exist a real number $h \in \reals$ which were both $h > 0$ and also $h < q$ for all $q \in \rationals^+$. Then there would exist a set of all infinitessimal numbers \begin{gather*}
+Z = \big\{ h\in \reals \hspace{0.2em}\big| \hspace{0.2em} \forall q\in \rationals^+, (h < q) \wedge (h > 0) \big\}
+\end{gather*}
+and since we are assuming such an infinitessimal real number exists, we are insisting that $Z \neq \emptyset$, that this set of all infinitessimals is non-empty. By the axiom of completeness for $\reals$, since the set has any positive rational number as an upper bound, it must have a least upper bound $c = \sup(Z)$.
+
+Consider now that $c$ must dominate all would-be infinitessimals, that is, $z \le c$ for all $z \in Z$, and that any number larger than $c$ must not be in $Z$ since $c$ \emph{bounds} $Z$. Then we can say with certainty that $2c$ is \emph{not} an infinitessimal because $c < 2c$ (which we deduce by adding $c$ to both sides of $0 < c$). Since $2c \notin Z$ and $2c > 0$, in order to have avoided being a member of $Z$ there must have existed some $k \in \rationals^+$ which is $k \le 2c$.
+
+On the other side, $c / 2$ is small enough that it should be an infinitessimal, since $c$ is the \emph{least} (smallest) upper bound of $Z$, so whether or not $c$ itself is in $Z$, anything smaller than $c$ but greater than zero is less than all $q \in Q^+$ and thus must be in $Z$. Since $c$ is a least upper bound of $Z$ and $Z$ is defined by its elements being greater than zero, we know that any $x$ which satisfies $0 < x < c$ must be $x \in Z$. Moreover this means that any $x$ which satisfies $0< c/4 < x < c/2 < c$ is an infinitessimal.
+
+Now, there must exist some $k \in \rationals^+$ which is $c \le k \le 2c$ or else any other number between $c$ and $2c$, say $\frac32 c$, would be an infinitessimal thus violating $c$'s \emph{least} upper bound property. But since such a rational number exists, we may simply divide the transitive inequality by four, obtaining $c/4 < k/4 < c/2$. As discussed earlier, any number satisfying that property must be infinitessimal, but at the same time, $k/4$ is a rational number divided by another rational number and thus a rational number itself. Since it is smaller than $c/2$, its existence implies that $c/2$ was not an infinitessimal, but that would also mean that $c/2$ bounds the infinitessimals, making it a lesser bound than $c$ which was supposed to be the least upper bound.
+
+This provides the contradiction which implies $Z$ must be empty.
+\end{my proof}
+
+As a corollary, this property may be used to show that numbers such as $0.999$ repeating are equal to the number they infinitely approximate. 
+
 
 
 

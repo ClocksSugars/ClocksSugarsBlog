@@ -22,7 +22,7 @@ tempappliuni = WrittenWorkBook {
       Chapter {
          name = "prelims",
          title = "Preliminaries",
-         description = "chapter description here",
+         description = "This chapter acts as an introduction to every concept that mathematicians intrinsically know but never say out loud that I could think of. The ultimate goal of this chapter is that you should come out the other side with enough awareness of what mathematicians are doing that you could read a math book, namely, my math book.",
          sections = [
             SubChapter {
                name = "philofmath",
@@ -47,9 +47,9 @@ tempappliuni = WrittenWorkBook {
             ]
          },
          Chapter {
-            name = "prelims",
-            title = "Preliminaries",
-            description = "chapter description here",
+            name = "anatomyRn",
+            title = "Anatomy of $\\mathbb{R}^n$: A Brief Introduction to Real Analysis",
+            description = "In this chapter we discuss some topics from real analysis with a focus on how these topics reflect on the nature of $\\mathbb{R}^n$ as a space and its deeper, stranger, properties. Throughout the chapter, we develop tools to study mathematical objects in $\\mathbb{R}^n$ as well as increasingly describing properties you'd never thought to point out, and discussing what happens in a space without that property. In this way, we slowly build up what the real numbers are from what they would be if they were not.",
             sections = [
                SubChapter {
                   name = "realnumsaxioms",

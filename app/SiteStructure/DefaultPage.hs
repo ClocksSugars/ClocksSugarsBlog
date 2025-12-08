@@ -24,7 +24,7 @@ katexArgs = "const katexargs = { delimiters: ["
    <> "{left: \"\\begin{gather}\", right: \"\\end{gather}\", display: true},"
    <> "{left: \"\\begin{gathered}\", right: \"\\end{gathered}\", display: true},"
    <> "{left: \"\\begin{CD}\", right: \"\\end{CD}\", display: true},"
-   <> "{left: \"\\[\", right: \"\\]\", display: true}"
+   -- <> "{left: \"\\[\", right: \"\\]\", display: true}"
    <> "], throwOnError : false}"
 
 defaultPageHTML :: String -> String -> Text -> Text -> Text -> Html -> Html -> Html

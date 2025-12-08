@@ -12,13 +12,12 @@ import Text.LaTeX.Base.Syntax
 
 zeroArgMathCommands :: Map String LaTeX
 zeroArgMathCommands = let
-   natsfunc = TeXComm "mathbb" [FixArg (TeXRaw "N")]
-   powersetfunc = TeXComm "mathcal" [FixArg (TeXRaw "P")]
    in fromList [
-      ("nats", natsfunc),
-      ("powerset",powersetfunc),
+      ("nats", TeXComm "mathbb" [FixArg (TeXRaw "N")]),
+      ("powerset",TeXComm "mathcal" [FixArg (TeXRaw "P")]),
       ("inv",TeXRaw "-1"),
-      ("integers", TeXComm "mathbb" [FixArg (TeXRaw "Z")])
+      ("integers", TeXComm "mathbb" [FixArg (TeXRaw "Z")]),
+      ("rationals", TeXComm "mathbb" [FixArg (TeXRaw "Q")])
       ]
 
 argMathCommands :: Map String ([TeXArg] -> LaTeX)
