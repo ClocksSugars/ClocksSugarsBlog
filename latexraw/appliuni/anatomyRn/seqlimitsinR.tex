@@ -1,0 +1,54 @@
+\documentclass[11pt]{article}
+    \title{\textbf{Default Doc}}
+    \date{\the\day/\the\month/\the\year}
+
+\input{../pdf.tex}
+\input{../webmacros.tex}
+\input{../amsthmstuff.tex}
+
+
+
+
+\begin{document}
+
+Here we can begin to substantiate at least one notion of what happens \emph{at infinity}, in so far as you could ever say that, which, for our formal purposes, I will continue to say we cannot. In fact, one could execute a proof of the Archimedian property from the previous section in the opposite manner, showing not that there exist no infinitessimals in the reals but no infinity objects in $\reals$. So infinity believers are in a rough spot right now. We certainly know what we mean informally when we want to discuss infinity, but we cannot actually do so without producing contradictions via the Archimedean property. It is perhaps one of the motivations of real analysis that we are able to construct ways to launder infinity into our work.
+
+Before we are ready to use infinity to speak of things infinitessimally close to a point however, it will be easier to develop our conceptions and mathematical tools if we focus on the simplest kind of infinity first, not an infinity we imagine in $\reals$ (or indeed an infinitessimal), but an infinity in $\nats$. This is no mere building block either; we will continue to use limits of countable sequences for probably the entirety of this text since they provide an alternate, often simpler, way to prove things or make statements.
+
+Our notion of \squote{what is at infinity} will be defined not as a literal infinity but as what happens \squote{on the way there}; consequently it will be easier to speak about \squote{on the way there} if the process of \squote{going there} is a countable one, i.e. we will work with sequences instead of paths.
+
+\begin{label definition}[Sequence on $\reals$]{NSequenceOnR}
+A sequence is an ordered set of real numbers indexed by $\nats$, or equivalently, it is a function $a: \nats \to \reals$ which we write $(a_n)_{n \in \nats}$ and denote elements of the ordered set (or equivalently outputs of the function) as $a_n$ for the corresponding counting number $n$.
+
+Sometimes (and in some math texts) we use $a_n$ with $n$ completely unspecified as a shorthand to refer to the whole sequence $(a_n)_{n\in \nats}$.
+\end{label definition}
+
+\begin{label definition}[Limits on Sequences]{SequenceLimit}
+We say that a sequence $(a_n)_{n \in \nats}$ \textbf{converges} to $a \in \reals$ or \squote{has \textbf{limit}} $a \in \reals$ if the following is true: 
+
+for all $\varepsilon > 0$, there exists $N \in \nats$ such that for all $n \ge N$, we have $|a_n - a| \le \varepsilon$.
+
+This condition is often formally written: \begin{gather*}
+\forall \varepsilon > 0, \hspace{0.1em} \exists N \in \nats, \hspace{0.1em} (n \ge N) \Rightarrow \big(|a_n - a| \le \varepsilon \big).
+\end{gather*}
+
+When the sequence converges to $a$, we write \begin{gather*}
+\lim_{n \to \infty} a_n = a
+\end{gather*}
+or say that $a_n \to a$ as $n \to \infty$.
+\end{label definition}
+
+Personally I found the statement for the requirement of a limit quite difficult to parse the first time I saw it, not having been practiced at proposition heavy mathematics. And especially I was frustrated that I did not see why this seemingly arbitrary requirement had anything to do with infinity. I hope that the following description will mean you share no such grievance.
+
+First, the limit requirement. The way this is to be read is thus. Imagine I gave you a sheet of metal and I told you, \dquote{hey, I found this sheet of metal, and it's \emph{perfectly smooth}}. You're suspicious, so you run your finger over it and feel that it is smooth, meaning that it appears perfectly smooth at least to the detection standard of your fingers, which are not very precise instruments. So you're still suspicious, and you get a magnifying glass and look it over for imperfections, and you still find none. Next, you get a microscope, and under the microscope, the sheet of metal still appears to be perfectly smooth. It is not that you need to view the atomic structure of the sheet to know that it is perfectly smooth, but in particular that you know it is perfectly smooth once you can \emph{trust} that \dquote{no matter how closely I look, my measuring device will always tell me the sheet is smooth}. This is our definition of \squote{perfect} here; that the property remains true no matter how much more precision you use to check if the property holds.
+
+The definition of the limit is exactly the same as above, but instead of perfect smoothness we are saying that the sequence \emph{becomes perfectly close} to $a$.
+
+I tell you that $(a_n)_{n \in \nats}$ converges to $a$. You're suspicious, so you pick some measuring threshhold $\varepsilon \in \reals$ which is $\varepsilon > 0$, and you ask me if I can find some point in the sequence where the entire sequence after that point is less than $\varepsilon$ away from $a$. That is, you ask me to find some $N \in \nats$ such that for all $n \ge N$, we satisfy $|a_n - a| \le \varepsilon$; the condition $n \ge N$ ensures that $a_n$ and all $a_n$ after it is past the point of sufficient closeness. You're still suspicious, so you pick a smaller $\varepsilon$, and once again I am able to find a larger $N \in \nats$ for which all $a_n$ with $n$ after $N$ are less than $\varepsilon$ away from $a$. You pick an even smaller $\varepsilon$, but this time, instead of giving you a \emph{particular} $N\in \nats$, I give you a method by which you can find your own $N \in \nats$ for any $\varepsilon$. By providing this method, you can trust that no matter how small a $\varepsilon$, there will exist a satisfactory $N$, and you can \emph{trust} that the sequence converges. This is what it means to prove the limit.
+
+something something
+
+
+
+
+\end{document}

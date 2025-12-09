@@ -7,6 +7,7 @@
 \input{../amsthmstuff.tex}
 
 
+\usepackage{amsmath}
 \begin{document}
 
 %	notes for how to write the next section:
@@ -351,7 +352,19 @@ There also exists a notion of subtraction on sets, which we call \emph{set minus
 A \setminus B = \big\{ a \in A \hspace{0.2em}\big| \hspace{0.2em} a \notin B \big\}.
 \end{gather*}
 
-Finally, we must discuss notations relating to sequential patterns, starting with \emph{big operator notation}. Once in a while this notation makes rounds on the internet as \squote{just being a for loop} and half that time that description is quite apt. When we have a binary operator such as $+$ or $\times$ which is associative and commutative, it is meaningful to simply take a list of values and say \squote{simply apply the binary operator to all of them, in any order} since, as commutativity and associativity describe, ordering really does not matter. In this case, we may write \begin{gather*}
+Before moving on from this chapter, we should also emphasize some notations for writing functions which were mentioned multiple times but should be clarified together here in case details were missed. That is, in general mathematics, we write $f\colon A \to B$ to say that $f$ is a function with domain $A$ and codomain $B$, and we write it in this way specifically with the arrow $\to$. This arrow is distinct from the arrow starting with a bar $\mapsto$, which describes not the set of inputs and the set of outputs $A$ and $B$, but instead a particular pattern for how to evaluate a function. For instance, we might write $\dquote{a} \mapsto 1$ to describe that a function on letters specifically maps the letter $\dquote{a}$ to the number $1$, but we might write $x \mapsto x + 1$ to describe a function that maps \emph{any} number $x$ to the number $x + 1$, and this is primarily contextual.
+
+It is very important that you \textbf{do not confuse these arrows} $\to$ and $\mapsto$. We may at times write that instead of $f\colon A \to B$, it is $f\colon a \mapsto b$ where $b$ is some expression involving what to do with $a$; in this context, we are basically writing that $f$ is defined to be the function that does $f(a) = b$ without explicitly setting the domain and codomain, but we can write $f\colon a \mapsto b$ and $f\colon A \to B$ together as well. A function which does different things in different \emph{cases} may be written with \emph{piecewise notation}, \begin{gather*}
+f(x) = \left\{ \begin{matrix}
+	x + 1, & x < 0\\
+	x + 2, & x > 0\\
+	0
+\end{matrix}
+ \right.
+\end{gather*}
+where in general we have a list of different things $f$ could do to $x$ and conditions beside them that say when to do these things. Sometimes the propositions will not describe every case of $x$, in which case an option should be provided at the bottom without a proposition, which is the fallback case that the function takes when no other case applies.
+
+We must also discuss notations relating to sequential patterns, starting with \emph{big operator notation}. Once in a while this notation makes rounds on the internet as \squote{just being a for loop} and half that time that description is quite apt. When we have a binary operator such as $+$ or $\times$ which is associative and commutative, it is meaningful to simply take a list of values and say \squote{simply apply the binary operator to all of them, in any order} since, as commutativity and associativity describe, ordering really does not matter. In this case, we may write \begin{gather*}
 \sum_{i = 1}^n f(i) = f(1) + f(2) + f(3) + ... + f(n)
 \end{gather*}
 which we call \textbf{summation} notation. The rule with this pattern is that we have an expression on the right hand side of the capital greek sigma $\Sigma$ involving a variable $i$ which we declare below it (this can be some other variable such as $n$ or $k$ or $j$) and we add the expression repeatedly, going through each counting number starting with the number we set $i$ equal to, 1 in this case, upwards until we reach $n$. We can also as necessary start with a negative number, in which case it is understood that we are counting upwards in the integers. A matching notation exists for multiplication, called the \textbf{product notation} \begin{gather*}
@@ -390,6 +403,27 @@ These notations also extend to union and intersection, so a sequence of sets may
 \end{gather*}
 
 We will often reuse symbols such as $+$ or $\times$ or indeed our big operators $\Sigma$ or $\Pi$ to mean different things when we have defined other concepts which we consider analogous to addition or multiplication. For instance, while we have $\int$ to represent integrals in calculus, the same way integration can be thought of as a sum over an area, there is an analogous notion of a product over an area which is generally denoted with product notation for lack of a better symbol (when it is not denoted $\exp(\int \log f(x) dx)$ instead or something of the sort), or a large number of multiplications in the sense of group theory may also use big $\Pi$.
+
+Finally, we have discussed context in the labelling of variables before. Mathematicians (especially in particular fields) tend to have specific symbols which they use to denote specific things as part of their language with one another. Accordingly, one tends to know that $f$ is a function or $x$ is a real number without any instruction. We list some of these here for your reference, and so you are not left out of these conventions, but in doing so we mention some things you may encounter elsewhere or later, so be sure to ignore anything you do not understand here until later.
+
+\begin{itemize}
+\item $x$ can be used to represent a point in a space or an input to a function. Accordingly, we sometimes write a point in space as $\mathbf{x}$ or $\vec{x}$, etc. in which case it may have coordinates $x_1,x_2,x_3$, but in other circumstances (especially in two or three dimensions) these may be labeled $x,y,z$.
+\item $y$ or $z$ are often used as an output for a function or as a spatial coordinate. It may also be used when $x$ is taken as a sort of second-preference $x$.
+\item When $x,y,z$ are in use, our next set of preference letters are generally $u,v,w$. These may also be used to describe coordinates in some transformed space where $x,y,z$ are the inputs or base space, as is the case in UV-maps in 3d model skins; it is precisely because a 3d model's skin is a bizarre map from 2d to 3d that we consider the 3d space version of the skin to be $x,y,z$ and the virtual space in which the skin were flat as the $u,v$ coordinates.
+\item $n$ is typically used to mean a counting number in $\nats$ with $m$ used as a second preference for this
+\item $i$, with $j$ and $k$ as second and third preferences are often used to \emph{index} some indexed object. That is to say, if we have three things $x_1,x_2,x_3$, we often write $x_i$ or $x_j$ to mean \squote{one of our labels}.
+\item $r$ is often used to describe a radius, but this may also mean that it describes a radius \emph{vector}, and thus a position in space \emph{relative to a origin}.
+\item Capital letters may be used to describe things which we do not think of as numbers but as containing numbers or number-adjacent things. Accordingly, sets are generally written with capital letters such as $A,B,S,X$, and we often use the lower case version of the letter to denote a member of that set, so $A \times B$ will often be written with elements $(a,b)$, implying $a\in A$ and $b\in B$.
+\item As we move on, we may encounter collections of objects which are collections of collections, and our first way of saying that something does not merely contain numbers or number-like things but contains things which themselves contain those, is to write it with a special script. This will often be a \textbf{caligraphic script}, and so we might write $\mathcal{A}$ to mean a set of sets for example.
+\item $q$ may be found used in place of $x$ in many texts related to physics to describe position, however physics has many many more conventions and expectations about which letters mean what, such as $p$ for momentum, $V$ for kinetic energy, etc. and frankly too many to list here.
+\item In general, it is often the preference when speaking about some collection of objects $G$ to call some member in it its lowercase letter, so we might say $g \in G$. When this letter is taken, or indeed we wish to speak about more than variable, the usual practice is to go up in the alphabet, often trying to exclude letters which are known to have strong connotations as a first preference to mean something else. so we would say $g,h,k \in G$, with $g$ and $h$ included since $g$ is the lowercase $G$ and $h$ comes after $k$, but since $i$ and $j$ are first and second preference letters for indicating index, it is convention to skip them and go to $k$.
+\item We usually skip the letter $o$ to be used as a variable name since it looks too much like zero.
+\item Often when there is not a good choice of letter in latin script, we use greek letters. Many greek letters have strong associations in mathematics for what they mean, for instance, the greek iota $\iota$ tends to mean some kind of \emph{inclusion}, a way of sending a value to basically itself but as contained in a larger set. Our first choices for greek letters are generally $\psi,\phi$ called psi and phi, however it is often preference to use a variant writing of phi written $\varphi$ (I am a fan of this one). Mathematicians tend to have conventions for handwriting these greek letters especially when it comes to those which look a lot like latin characters (i.e. $\kappa$ and k) but you are better off asking one and receiving a jubilant ideosyncratic rant. Some mathematicians, when there is no good greek character left in a context, will resort to using cyrillic letters such as Zhe although my editor will crash if I try to include that here.
+
+\item We use a special bold face script to denote certain canonical sets of numbers or number-like things which are important or well studied. For instance we have $\nats$ for the natural numbers, $\integers$ for the integers, $\rationals$ for the rationals and $\reals$ for the real numbers. There are also other sets which may be stranger such as $\mathbb{C}$ the complex numbers, $\mathbb{H}$ the quaternions, or $\mathbb{PR}^n$ the real projective space in dimension $n$. Some authors will generalize their theorems and say something like \dquote{for any field $\mathbb{F}$ ...} to mean that their theorems work on both $\reals$ and $\mathbb{C}$ or any other algebraic field satisfying the properties to make it behave like a similar number system; in that case $\mathbb{F}$ is but a variable for some set.
+\end{itemize}
+
+Again, many terms here are mentioned in advance of the time they show up so that this list may also act as something of a reference. In future, our preferences for what symbols we want to mean what will generally become apparent simply because we will use them a lot, so be sure to pay some attention to which letters we preferentially use as we develop our mathematical language.
 
 \subsection{On to Chapter Two}
 

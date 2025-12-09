@@ -27,7 +27,7 @@ tempappliuni = WrittenWorkBook {
             SubChapter {
                name = "philofmath",
                title = "Nascent's Philosophy of Mathematics",
-               description = "A philosophical discussion of what a theory does for us, what mathematical thought is as a category for theories, and how to read the language of mathematical texts.",
+               description = "(11 PDF Pages) A philosophical discussion of what a theory does for us, what mathematical thought is as a category for theories, and how to read the language of mathematical texts.",
                depends = [
                   "bentcylinder.svg"
                   ]
@@ -35,13 +35,13 @@ tempappliuni = WrittenWorkBook {
             SubChapter {
                name = "proptypes",
                title = "Propositional Logic: A Programming Inspired Approach",
-               description = "An introduction to dependent type theory and a basic discussion of proofs-as-programs, illustrating the reasoning style of propositional logic in a programmatic way.",
+               description = "(28 PDF Pages) An introduction to dependent type theory and a basic discussion of proofs-as-programs, illustrating the reasoning style of propositional logic in a programmatic way.",
                depends = []
                },
             SubChapter {
                name = "maththink",
                title = "Rewrites and Sets: The Cognitive Weapons of Math",
-               description = "in draft 1.5 stage. a mostly philosophical engagement on mathematical thinking + some basic set theory and what we mean by equivalence in a non-constructive world",
+               description = "(23 PDF Pages) in draft 1.5 stage. a mostly philosophical engagement on mathematical thinking + some basic set theory and what we mean by equivalence in a non-constructive world. Towards the end we tie off some notational loose ends and explicitly specify some more conventions.",
                depends = []
                }
             ]
@@ -53,8 +53,14 @@ tempappliuni = WrittenWorkBook {
             sections = [
                SubChapter {
                   name = "realnumsaxioms",
-                  title = "Real Numbers from Axioms: Why $\\mathbb{R^n}$ is Weirder Than You Thought, Part 1",
-                  description = "A discussion of the properties of real numbers as derived by rewrites on their axioms, as well as our earliest focus on the concerns and mentality of real analysis.",
+                  title = "Real Numbers from Axioms",
+                  description = "(13 PDF Pages) A discussion of the properties of real numbers as derived by rewrites on their axioms, as well as our earliest focus on the concerns and mentality of real analysis.",
+                  depends = []
+                  },
+               SubChapter {
+                  name = "seqlimitsinR",
+                  title = "Sequences and Limits in $\\mathbb{R}$",
+                  description = "(WIP) Here we introduce the notion of limits on sequences, taking great care to both establish them as formal objects and as intuitive ones. In this section we begin the process of thinking about the study of limits as the study of what happens when you look very close to a point.",
                   depends = []
                   }
                ]

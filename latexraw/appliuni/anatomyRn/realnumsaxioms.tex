@@ -161,13 +161,14 @@ Our next stop in making this game easier for ourselves will be to fill out some 
 
 In fact, we have not said anything at all about what it \emph{means} to write $a < b$, or any of these operations so far within a formal context. Of course we know the symbol $<$ to mean \textbf{less than} but the point in some sense is that its meaning here will appear not from what we name it but from what properties it has. Only having chosen those properties well, as is the case with these axioms, will we know for sure that this symbol and its properties reflects the intuition we wish it to match with.
 
-\begin{proposition}[Ordering Rules for Negatives]
-Let $a,b,c \in \reals$ and let $a < b$.
+\begin{label proposition}[Ordering Rules for Negatives]{BasicROrderProperties}
+Let $a,b,c,d \in \reals$ and let $a < b$.
 \begin{enumerate}
 \item Then we may write $- b < -a$, reversing the order on the number's negatives.
 \item If $c < 0$ then we have $b c < a c$ (by comparison to RNOA4 which required $0 < c$ and implied $a c < b c$).
+\item If we have $c < d$ then we have $a + c < b + d$.
 \end{enumerate}
-\end{proposition}
+\end{label proposition}
 \begin{my proof}{}
 Begin with the hypothesis $a < b$. By RNOA3 we may translate by the value $-a - b$.
 \begin{gather*}
@@ -194,7 +195,19 @@ Applying part a of proposition \ref{pro:RealNumInverses}, $I_+(I_+(a)) = a$ or i
 b c &< a c
 \end{align*}
 as desired.
+
+Part $c$ follows by applying translations and transitivity (RNOA3 and then RNOA2). That is, add $c$ to both sides of $a < b$ to get $a + c < b + c$. Now add $b$ to both sides of $c < d$ to obtain $b + c < b + d$. Now the right hand side of $a + c < b + c$ is the same as the left hand side of $b + c < b + d$, so by transitivity we have \begin{gather*}
+a + c < b + c < b + d
+\end{gather*}
+implying \begin{gather*}
+a + c < b + d
+\end{gather*}
+and we are done.
 \end{my proof}
+
+From this point on, we will begin taking some of these symbolic properties increasingly more for granted. For instance, we will slowly stop mentioning when we apply commutativity of addition or mulitplication (RNFA2 or RNFA6) or associativity (RNFA1 or RNFA5) when we reorder terms in sums or products. Nonetheless, the fact that we understand that we can do these reorderings is always strictly because they were written here. Because we \emph{have the property} that these rewrites are valid.
+
+\subsection{The Archimedean Property}
 
 Now that we have seen some examples of demonstrating things that we already intuit to be true using strict axiomatic rewrites, we are in a position to demonstrate some things we might not know with equal certainty. In particular, we are ready to demonstrate that real numbers do not contain infinitessimals.
 
@@ -221,7 +234,109 @@ Now, there must exist some $k \in \rationals^+$ which is $c \le k \le 2c$ or els
 This provides the contradiction which implies $Z$ must be empty.
 \end{my proof}
 
-As a corollary, this property may be used to show that numbers such as $0.999$ repeating are equal to the number they infinitely approximate. 
+As a corollary, this property may be thought of as saying that numbers such as $0.999$ repeating are equal to the number they infinitely approximate. That is, if infinitessimals do not exist in the reals, then there is also no notion of a number being infinitessimally larger or infinitessimally smaller than another; recall the property of trichotomoy for orderings (RNOA1) which says that two numbers $a,b$ are either $a < b$, $a = b$ or $a > b$, so a number such as $0.999$ repeating which we suppose is larger than all other numbers we can \emph{specifically point to} less than one ($0.998$, $0.9999453$, etc.) must only be equal to one. It seems obvious to say then that when the Archimedean property is true, as stated earlier, two real numbers are non-equal if and only if there exists a number between them. Superficially, we could already say that this was $a \neq b$ if $a \neq \frac{a + b}{2} \neq b$ with $(a+b)/2$ their average between them when they are not equal; but now we can be certain that no consequence of real numbers mean that there would be a quantity which is \emph{hard to refer to} strange way.
+
+We will later substantiate the meaning of infinitessimals in an informal sense, mostly as a tool for visualization wrapped up in significant algebraic (or, context dependently, analytic) abstractions, but these tools will never be \dquote{real numbers}. No matter how much abstraction we build up, if we are ever asked to find \emph{a number} which is somehow smaller than any other thing but greater than zero, we will say confidently that it does not exist.
+
+\subsection{The Triangle Inequality}
+
+We have one last serious property of the real numbers to prove, known as the \emph{triangle inequality}. This inequality in some sense is our first taste of the flavor of real analysis as a discipline; indeed we will use this inequality heavily despite its seemingly inane symbolic statement.
+
+The triangle inequality is born of the obvious fact that one cannot draw a triangle with any one side greater than the length of the other two. This property is obvious in the setting of euclidean geometry (no doubt, you can demonstrate right now with a piece of paper) but as we discuss more abstract spaces, expecting the triangle inequality to hold will constitute a very particular choice about exactly how abstract a notion of space we wish to describe. For instance, should a \emph{space of functions} with a notion of distance satisfy the triangle inequality with that notion of distance? We will later say that the answer is generally yes. Should a space of possible outcomes, an \emph{event space}, which we measure in probabilities, have a triangle inequality? Generally we say the answer is no in that case. But the kinds of things an abstract definition of \emph{space} can describe are downstream of the properties we expect of that space, and expecting or not expecting the triangle inequality will define what kind of space it is.
+
+In this case, we will be demonstrating the not-so-obvious fact that the triangle inequality, the inability to draw a three sided shape with one side greater than the sum of the other two, holds not just in two or more dimensions, but even on only one dimension. Yes, even on merely the number \emph{line}, we have the triangle inequality, and we can prove it as a natural consequence of the real number axioms.
+
+But to do this, we will first need the \emph{absolute value} operation. You may know this operation as the the one that leaves positive values the same but makes negative values become positive; in fact that will be our definition today, but I must foreshadow that despite its simplicity, the full scope of properties the absolute value has on other spaces will, in time, prove fascinating on its own.
+
+\begin{label definition}[Absolute Value]{RealAbsoluteValue}
+Given $a \in \reals$, denote by $|a|$ the \textbf{absolute value} of $a$, that is, the number of equal magnitude to $a$ which is non-negative. Formally, if $0 \le a$ then $|a| = a$, but if $a < 0$ then $|a| = -a$ in order to make it positive. \begin{gather*}
+|x| = \left\{ \begin{matrix}
+	-x, & x < 0\\
+	x, & x \ge 0\\
+\end{matrix}
+ \right.
+\end{gather*}
+As a simple consequence, $|-a| = |a|$.
+\end{label definition}
+
+\begin{label theorem}[Triangle Inequality]{RTriangleInequality}
+Any three $a,b,c \in \reals$ satisfy the property \begin{gather*}
+|a - c| \le |a - b| + |b-c|.
+\end{gather*}
+called the \textbf{triangle inequality} in $\reals$.
+\end{label theorem}
+
+This symbolic statement can then be read as the property we mentioned earlier; we read each $|a-c|$, $|a-b|$ and $|b-c|$ as the distances between points, since in $\reals$ distances between numbers are merely their positive differences. Then it is literally that the distance between any two points is less than or equal to the sum of the other two distances.
+
+\begin{my proof}{mo}
+This proof proceeds by brute force case analysis. There are six ways to order the three values, i.e. each case of ordering is something like $a \le b \le c$ or $b \le c \le a$ or something like that (this is applying RNOA1, since each pair of numbers must be either less than or equal to each other or greater than or equal to each other). Given that we are only concerned with the magnitude of their \emph{differences} however, the proof where we assume $a \le b \le c$ is also actually a proof for the case where $c \le b \le a$, since we could change $a$ to $-a$, $b$ to $-b$ and $c$ to $-c$, and each term, each difference $|a - c|$ would become \begin{align*}
+|a - c| \mapsto |(-a) - (-c)| &= |-a + c| \\
+&= |c - a| \\
+&= |a - c|
+\end{align*}
+and so our six cases become only three that we care about where the triangle inequality is concerned. These are cases are labelled (1), (2) and (3) respectively. \begin{gather*}
+(1) \hspace{1em} a \le b \le c \\
+(2) \hspace{1em} b \le a \le c \\
+(3) \hspace{1em} a \le c \le b
+\end{gather*}
+
+Let's start with case (1). In this case, $a-b$, $b - c$ and $a - c$ are all negative, so we may apply the appropriate sign changes to compute the absolute values in the triangle inequality we wish to prove as follows. \begin{gather*}
+c - a \le (b - a) + (c - b)
+\end{gather*}
+We can obtain this easily by starting with reflexivity of equality $c - a = c - a$ stated as $c - a \le c - a$ and then deduce this statement, but in this case it will be more obvious if we complete the proof by \emph{rewriting on the goal}. That is, if we can show that the thing we aim to prove can be rewritten as a fact which we know to be trivially true, then the proof is completed. We have already begun this process by deducing that when $a \le b \le c$, the triangle inequality is written as above. We continue this process by merely simplifying the statement. \begin{align*}
+c - a &\le (b - a) + (c - b) \\
+&\le b - b + c - a \\
+&\le 0 + c - a \\
+&\le c - a
+\end{align*}
+This of course obtains the same statement we noted earlier was true by reflexivity of equality. We could of course do these steps in reverse, proceeding from $c - a \le c - a$, adding $b - b$ to the right hand side using proposition \ref{pro:BasicROrderProperties}.c (with $\le$ instead of $<$), but the fact that we could do these steps in reverse is exactly the reason we do not have to.
+
+Concluding case (1), we study case (2) by applying a similar method of computing the absolute values when $b \le a \le c$. \begin{align*}
+c - a &\le (a - b) + (c - b) \\
+&\le a + b - 2b
+\end{align*}
+Now to both sides, add $b - c$ (i.e. apply RNOA3) to obtain \begin{align*}
+c-a (b-c) &\le a + c - 2b + (b-c) \\
+b - a & \le a - b
+\end{align*}
+This is then the statement we need to prove. Since $b \le a$ as in $b \le a \le c$, we have $b - a\le 0$ by subtracting $a$ from both sides of $b \le a$, and at the same time we could subtract $b$ from both sides of $b \le a$ and obtain $0 \le a- b$. By transitivity (RNOA2) we have \begin{gather*}
+b - a \le 0 \le a - b \\
+b - a \le a - b
+\end{gather*}
+which is what we wanted to show. Thus case (2) is covered.
+
+Case (3) will proceed similarly as in case (2). Our goal of the triangle inequality, when $a \le c \le b$, is read \begin{align*}
+c- a &\le (b-a) + (b - c) \\
+c - a &\le 2b - a - c.
+\end{align*}
+Adding $a - c$ to both sides we obtain \begin{gather*}
+c-a + (a - c) \le 2b - a - c + (a-c) \\
+0 \le 2b - 2c.
+\end{gather*}
+Since $c \le b$ as in $a \le c \le b$ of case (3), we know by RNOA4 that $2 c \le 2 b$, and subtracting $2c$ from both sides, that $0 \le 2b - 2c$. But this is what we wanted to show, the case (3) form of the triangle inequality.
+
+Then we have shown all three relevant cases for the triangle inequality on $\reals$ and know it to be true in general.
+\end{my proof}
+
+\subsection{Before Moving into Real Analysis...}
+
+The above proofs hopefully serve to show that one can prove statements that might seem so simple as to be tautological so long as we have a strong axiomatic basis. However, as you can see, this can lead to quite verbose proofs. From here on, going into the rest of the chapter and chapters beyond it, we will be a little more terse unless we are discussing a brand new concept, with the understanding that we know a bit about how to work with real numbers.
+
+Accordingly, we will largely mostly forget the axiomatic description of the reals except when it is necessary to disentangle a specific property related to numbers themselves. We will however need to bring some things with us foward, such as the triangle inequality, and we must pay attention in future for when a mathematical construction has many or most of the axioms of the real numbers, since they may share properties. It will also serve us well to state some earlier mentioned concepts in a self contained form to establish notational rules and strict definitions.
+
+\begin{label definition}[Upper and Lower Bounds]{RUpperLowerBounds}
+Let $A \subset \reals$ be a set of real numbers. We say that $b$ is a \textbf{upper bound} of $A$ (respectively a \textbf{lower bound}) if for all $a \in A$, $b$ satisfies $a < b$ (respectively $b < a$ for lower bounds).
+
+If $A$ has both an upper bound and a lower bound, we say that $A$ is \textbf{bounded}.
+\end{label definition}
+
+\begin{label definition}[Supremum and Infimum of a Set]{RSupremumInfimum}
+Let $A \subset \reals$ be a set of real numbers. Denote by $\sup(A)$ the \textbf{supremum} of $A$, meaning a value $\sup(A) \in \reals$ which is an upper bound for $A$, but is also $\sup(A) \le b$ for all $b \in \reals$ which are upper bounds for $A$. We also have the \textbf{infimum} denoted $\inf(A)$ which is the \emph{greatest lower bound} satisfying $\inf(A) > b$ for all $b$ which are lower bounds of $A$, or equivalently $\inf(A) = -\sup(\{-x | x \in A\})$.
+
+The supremum and infimum can be thought of as analogous to the \textbf{maximum} and \textbf{minimum} of a set, but where it may be impossible to specify a largest or smallest value which is itself included in the set (say because a set does not include its endpoints). When it is possible, the supremum is equal to the maximum (and the infimum to the minimum), but when it is not the supremum will select the excluded endpoint, thus sometimes $\sup(A) \notin A$.
+
+%Sometimes we will write the supremum as $\sup_{x \in A}(f(x))$ to mean the supremum of the image $\sup(f(A))$, but we may also sometimes write $\text{argsup}_{x\in A}(f(x))$ to mean the specific $x$ which makes $f(x)$ the supremum of $f(A)$. Analogous notations exist for $\text{argmin}$, $\text{argmax}$, and $\text{arginf}$, but they are not guarenteed to produce only a single value if $f$ is not injective; moreover $\text{argsup}$ and $\textbf{arginf}$ may produce values which are themselves outside the set.
+\end{label definition}
 
 
 
