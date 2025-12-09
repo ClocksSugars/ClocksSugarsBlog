@@ -54,7 +54,7 @@ tempappliuni = WrittenWorkBook {
                SubChapter {
                   name = "realnumsaxioms",
                   title = "Real Numbers from Axioms",
-                  description = "(13 PDF Pages) A discussion of the properties of real numbers as derived by rewrites on their axioms, as well as our earliest focus on the concerns and mentality of real analysis.",
+                  description = "(14 PDF Pages) A discussion of the properties of real numbers as derived by rewrites on their axioms, as well as our earliest focus on the concerns and mentality of real analysis.",
                   depends = []
                   },
                SubChapter {

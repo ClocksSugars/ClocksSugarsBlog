@@ -58,6 +58,12 @@
  initial-value: lightpink;
 }
 
+@property --exa-color {
+ syntax: "<color>";
+ inherits: false;
+ initial-value: orange;
+}
+
 h1 {
   color: grey;
 }
@@ -197,6 +203,19 @@ h1 {
 
 .Lemmatitle {
    background-color: var(--lem-color);
+   border-radius: 5px;
+   padding: 5px;
+}
+
+.Example {
+   border: 3px solid var(--exa-color);
+   border-radius: 8px;
+   background-color: white;
+   padding: 5px;
+}
+
+.Exampletitle {
+   background-color: var(--exa-color);
    border-radius: 5px;
    padding: 5px;
 }

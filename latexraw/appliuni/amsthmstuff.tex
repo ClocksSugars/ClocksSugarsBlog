@@ -146,7 +146,7 @@
 	[]%
 	{%
 		colback=white,%
-		colframe=LightYellow,%
+		colframe=Khaki,%
 		coltitle=black,%
 		title=Corollary \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 		label=crl:#2,%
@@ -174,7 +174,7 @@
 		colframe=LightGrey,%
 		coltitle=black,%
 		title=Notation \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
-		label=crl:#2%
+		label=not:#2%
 	}
 
 \newtcolorbox[use counter=statements]%
@@ -187,5 +187,31 @@
 		coltitle=black,%
 		title=Notation \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 	}
+	
+\newtcolorbox[use counter=statements]%
+	{label example}%
+	[2]%
+	[]%
+	{%
+		breakable,%
+		colback=white,%
+		colframe=Orange,%
+		coltitle=black,%
+		title=Example \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		label=exa:#2%
+	}
+
+\newtcolorbox[use counter=statements]%
+	{example}%
+	[1]%
+	[]
+	{%
+		breakable,%
+		colback=white,%
+		colframe=Orange,%
+		coltitle=black,%
+		title=Example \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+	}	
+	
 	
 \makeatother

@@ -61,6 +61,7 @@ data Htmllatexinter =
    |  IMProofBox Bool (Maybe Text) (Maybe [Htmllatexinter]) [Htmllatexinter]
    |  LineBreak
    |  IReference Text
+   |  ILink Text Text
    deriving (Eq, Show)
 
 inlineCommands :: [String]
@@ -117,6 +118,7 @@ processOne arg = let
    subprocess (TeXComm "figuresvgwithcaption" [FixArg (TeXRaw location), FixArg (TeXRaw content)]) =
       Right $ IFigure (location <> ".svg") content
    subprocess (TeXComm "ref" [FixArg (TeXRaw referenceName)]) = Right $ IReference referenceName
+   subprocess (TeXComm "href" [FixArg (TeXRaw turl), FixArg (TeXRaw tx)]) = Right $ ILink turl tx
    subprocess (TeXComm "dquote" [FixArg dquotearg]) = subprocess $
       TeXSeq (TeXRaw "\"") $ attachRightMostLaTeX dquotearg $ TeXRaw"\""
    subprocess (TeXComm "squote" [FixArg dquotearg]) = subprocess $
@@ -148,6 +150,8 @@ processOne arg = let
          ("corollary", _) -> Right $ handleUnlabeledBox "Corollary" texargs content
          ("label notation", _) -> Right $ handleLabeledBox "Notation" texargs content
          ("notation", _) -> Right $ handleUnlabeledBox "Notation" texargs content
+         ("label example", _) -> Right $ handleLabeledBox "Example" texargs content
+         ("example", _) -> Right $ handleUnlabeledBox "Example" texargs content
          (_, _) -> Right . RawPrint $ render (TeXEnv kind texargs content) -- This is under the assumption that it is a math env
    subprocess (TeXMath sign content) = Right . InLineEffect $
       TeXMath sign $ applyMathCommands content
@@ -194,6 +198,7 @@ inLineTranslation (InLineEffect otherwise) = RawText . render $ otherwise -- Jus
 inLineTranslation (Prose xs) = RawText xs
 inLineTranslation (RawPrint xs) = RawText xs
 inLineTranslation (IReference reference) = ReferenceNum reference
+inLineTranslation (ILink turl tx) = HLink turl tx
 inLineTranslation _ = RawText "failcase" -- this should NEVER HAPPEN since
 -- it is applied to the takeWhile in the below span which has as its
 -- condition that the constructor is Prose or InLineEffect
@@ -226,6 +231,7 @@ processTwo arg = let
       LineBreak -> True
       InLineEffect _ -> True
       IReference _ -> True
+      ILink _ _ -> True
       _ -> False
    cond :: Htmllatexinter -> Bool
    cond x= (x /= LineBreak)

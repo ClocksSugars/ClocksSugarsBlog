@@ -112,6 +112,7 @@ processThree pagename content indexstate = let
       RawText x -> (toHtml x, propind)
       Emphasize x -> (i $ toHtml x, propind)
       Bold x -> (b $ toHtml x, propind)
+      HLink turl tx -> (H.a ! href (fromString $ fromText turl) $ fromString $ fromText tx, propind)
       ListItem xs -> passFirst li $ repeatCase xs propind
       Itemize xs -> passFirst ul $ repeatCase xs propind
       Enumerate listkind xs -> passFirst (ol ! A.type_ (fromString $ fromText listkind)) $ repeatCase xs propind

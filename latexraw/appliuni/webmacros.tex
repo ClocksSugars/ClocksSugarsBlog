@@ -2,6 +2,17 @@
 % i.e. svgs have to go through a very different process on latex than
 % on html
 %
+
+\usepackage{hyperref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=blue,
+	citecolor=black
+    }
+
 \newcommand{\figuresvgwithcaption}[2]{%
 	\begin{figure}[tbh]%
 		\centering%

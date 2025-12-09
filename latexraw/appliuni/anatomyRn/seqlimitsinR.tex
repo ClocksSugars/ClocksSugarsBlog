@@ -35,7 +35,7 @@ This condition is often formally written: \begin{gather*}
 When the sequence converges to $a$, we write \begin{gather*}
 \lim_{n \to \infty} a_n = a
 \end{gather*}
-or say that $a_n \to a$ as $n \to \infty$.
+or say that $a_n \to a$ as $n \to \infty$. (The symbol $\varepsilon$ is the greek letter \squote{epsilon}.)
 \end{label definition}
 
 Personally I found the statement for the requirement of a limit quite difficult to parse the first time I saw it, not having been practiced at proposition heavy mathematics. And especially I was frustrated that I did not see why this seemingly arbitrary requirement had anything to do with infinity. I hope that the following description will mean you share no such grievance.
@@ -46,9 +46,136 @@ The definition of the limit is exactly the same as above, but instead of perfect
 
 I tell you that $(a_n)_{n \in \nats}$ converges to $a$. You're suspicious, so you pick some measuring threshhold $\varepsilon \in \reals$ which is $\varepsilon > 0$, and you ask me if I can find some point in the sequence where the entire sequence after that point is less than $\varepsilon$ away from $a$. That is, you ask me to find some $N \in \nats$ such that for all $n \ge N$, we satisfy $|a_n - a| \le \varepsilon$; the condition $n \ge N$ ensures that $a_n$ and all $a_n$ after it is past the point of sufficient closeness. You're still suspicious, so you pick a smaller $\varepsilon$, and once again I am able to find a larger $N \in \nats$ for which all $a_n$ with $n$ after $N$ are less than $\varepsilon$ away from $a$. You pick an even smaller $\varepsilon$, but this time, instead of giving you a \emph{particular} $N\in \nats$, I give you a method by which you can find your own $N \in \nats$ for any $\varepsilon$. By providing this method, you can trust that no matter how small a $\varepsilon$, there will exist a satisfactory $N$, and you can \emph{trust} that the sequence converges. This is what it means to prove the limit.
 
-something something
+\begin{example}[$1/n^2$ goes to $0$ as $n$ goes to $\infty$]
+Let us show that the sequence $\left(\frac{1}{n^2} \right)_{n \in \nats}$ converges to $0$. Observe first that $\left|\frac{1}{n^2} - 0\right| = \frac{1}{n^2}$ since $\frac{1}{n^2}$ is always positive. Moreover, the function (and the sequence it defines) $n \mapsto \frac{1}{n^2}$ is \emph{monotonically decreasing} as defined in the previous section, meaning that for all $n$, $\frac1{n^2} > \frac1{(n+1)^2}$. (If the reason why in this case is not obvious to you, set $n = 2$ and remember that a quarter of a pizza is larger than a ninth of one. See corollaries at the end of the previous chapter). This means that if we pick $\varepsilon = 1/N^2$, this would satisfy the limit $|1/n^2 - 0| \le 1/N^2$ for all $n \ge N$ since when $n$ is greater than $N$, by the monotonically decreasing property, $1/n^2$ must be smaller than $1/N^2$.
 
+But the whole point of the reasoning of the limit is that we, as the ones proving the limit, cannot pick $\varepsilon$. We must imagine someone else picking $\varepsilon$ and ourselves making a procedure to find $N$ for which $n \ge N$ implies $|1/n^2 - 0| < \varepsilon$. Still, noticing that the limit is satisfied when $\varepsilon = 1/N^2$ helps us, since we can invert this relation. Naively we can take \begin{align*}
+\varepsilon &= \frac{1}{N^2} \\
+\frac{1}{\varepsilon} &= N^2 \\
+\frac{1}{\sqrt{\varepsilon}} &= N
+\end{align*}
+And if this alone worked, then in fact we would be done. Setting $N$ like this would indeed mean that when $n \ge N$ then we have $|1/n^2 - 0| < \varepsilon$. The only trouble is that $N \in \nats$ needs to be a counting number, and we have no guarentee that the $\varepsilon$ picked will produce a counting number when we take its inverse squareroot. This is easily solved however by rounding up $1/\sqrt{\varepsilon}$ to the largest whole number, an operation called taking the \emph{ceiling} and written \begin{gather*}
+N = \left\lceil \frac{1}{\sqrt{\varepsilon}} \right\rceil \ge \frac{1}{\sqrt{\varepsilon}}.
+\end{gather*}
+with the property that it is greater than or equal to its counterpart that is not rounded up. Now when we are given some $\varepsilon$ we are able to automatically produce some $N$ for which $n \ge N$ will satisfy $|1/n^2 - 0| \le \varepsilon$.
 
+Let's test this to be certain. Say we are given $\varepsilon$ and thus set $N = \lceil 1/\sqrt{\varepsilon} \rceil$. Since $N$ is rounded up, first and foremost we have $N \ge 1/\sqrt{\varepsilon}$ larger than its unrounded version.
 
+Now consider that since $x \mapsto 1/x$ is a monotonic decreasing function on positive numbers (which $\varepsilon$ is required to be), we deduce from $N \ge 1/\sqrt{\varepsilon}$ that \begin{gather*}
+\frac{1}{N} \le \sqrt{\varepsilon}
+\end{gather*}
+flipping the ordering by the monotonic decreasing property in \ref{def:MonotonicFunction}. We also have that $x \mapsto x^2$ is a monotonic increasing function on positive numbers, so undoing the square root will preserve the ordering. \begin{gather*}
+\frac{1}{N^2} \le \varepsilon.
+\end{gather*}
+Recall that the property we wanted out of $N$ was that $|1/n^2 - 0| \le \varepsilon$ was only true when $n \ge N$, so let us operate on that next. Once again, $x \mapsto 1/x$ will flip the sign, and $x \mapsto x^2$ will preserve it. \begin{gather*}
+n \ge N \\
+\frac{1}{n} \le \frac{1}{N} \\
+\frac{1}{n^2} \le \frac{1}{N^2}
+\end{gather*}
+We also had that $|1/n^2 - 0| = 1/n^2$. So together we have a transitivity between equality and addition, \begin{gather*}
+\left| \frac{1}{n^2} - 0\right| = \frac{1}{n^2} \le \frac{1}{N^2} \le \epsilon
+\end{gather*}
+implying \begin{gather*}
+\left| \frac{1}{n^2} - 0\right| \le \epsilon
+\end{gather*}
+as we had wanted. Notice that we proved this, as we needed to, \emph{for any} $\varepsilon > 0$ that \emph{there exists some} $N \in \nats$ which for us was $N = \lceil 1/\sqrt{\varepsilon} \rceil$, and if we assumed $n \ge N$ then we could deduce $|1/n^2 - 0| \le \varepsilon$. This is the pattern of a proof of limit.
+\end{example}
+
+In general, the pattern of proving a limit is roughly as above; in particular, we first identify how small a $\varepsilon$ a given $N$ can satisfy, which we did when we noticed that $\varepsilon = 1/N^2$ will mean we are trying to prove $n \ge N$ implies $1/n^2 \le 1/N^2$, which we know to be true immediately from the monotonic decreasing property of $x \mapsto 1/x^2$. Next, we treat the earlier relationship $\varepsilon = 1/N^2$ as a function $\varepsilon \mapsto 1/N^2$ and we see if we can invert it, finding either some way to calculate $1/N^2 \mapsto \varepsilon$ or the next best thing; this ended up being our $N \mapsto 1/\sqrt{\varepsilon}$ as our inverse function, and we had to round it up to make it a whole number. Most proofs will omit these steps, since the crux of the proof is not that we can find some relationship but rather that a relationship exists and that it \emph{works}. So having found our relationship $N = \lceil 1/\sqrt{\varepsilon} \rceil$ we try to in some sense unwrap whatever transformations we've made to the function while taking $n$ along for the journey; that is, we map $n \ge N$ to $1/n \le 1/N$ together, then square them together. At this point, some minor amount of symbolic massaging will generally get you your limit.
+
+We could do more examples (and indeed I may have to return here and add more) but the majority of the limits we will prove over this chapter are limits related to other limits. So instead of the particular technique described above, what we will frequently be doing is saying that some sequence $(a_n)_{n \in \nats}$ converges to $a$, and that since it does, we can take the existence of the $N$ which it implies and use it to imply that some other sequence $(b_n)_{n\in \nats}$ also converges to some $b$.
+
+At the beginning of chapter 1 we discussed the idea of the development of a theory; this involved defining core concepts, sub-concepts, relationships between those concepts, and finally substantiation of the implication of the theory onto other areas of study. We have now defined our core concepts for our theory of limits, and so in line with stage two, we must define sub-concepts and properties.
+
+\begin{label definition}[Subsequences on $\mathbb{R}$]{NSubsequenceOnR}
+Let $(a_n)_{n\in \nats}$ and $(b_n)_{n\in \nats}$ be sequences, and let there exist a monotonic increasing map $\varphi\colon \nats \to \nats$ (so for all $n > m$ we have $\varphi(n) > \varphi(m)$). If $b_n = a_{\varphi(n)}$ for all $n \in \nats$ then we call $(b_n)_{n\in\nats}$ a \textbf{subsequence} of $(a_n)_{n\in \nats}$. That is, a subsequence is a sequence that skips elements, or that is missing elements.
+\end{label definition}
+
+A subsequence can do a few things for us. We can define a subsequence with $\varphi\colon n \mapsto n + m$ where $m \in \nats$ is some number that skips the sequence forwards by a constant. We could have $\varphi\colon n \mapsto 2n$ which would skip every second entry; this is useful in cases like the sequence $\big((-1)^n\big)_{n\in \nats}$ which alternates between $1$ and $-1$ and does not converge, unless of course we were to skip all the $-1$ entries as the subsequence $\big((-1)^{\varphi(n)}\big)_{n \in \nats}$ allows us to do, making it a constant sequence.
+
+We are now at the point where we can make a firm statement about what is and is not possible given the definitions we have constructed. If a sequence converges, no subsequence of that sequence can converge to a different value. This should make sense to us, since if we think of a converging sequence as one that becomes as close as desired to a point it converges at, then of course skipping some of the points in the sequence should simply make the subsequence converge faster.
+
+\begin{label proposition}[Subsequences Preserve Limits]{SubsequencePreservesLimits}
+Let $(a_n)_{n\in \nats}$ be a sequence which converges at $a \in \reals$. Then all subsequences $(b_n)_{n\in \nats}$ converge to $a$ as well.
+\end{label proposition}
+
+\begin{my proof}{mo}
+Since we know $(a_n)_{n\in \nats}$ converges to $a$, we have that any $\varepsilon_a > 0$ we choose, there exists $N_a$ such that for all $n \ge N_a$, $|a_n - a| \le \varepsilon_a$. From this, we want to prove that for all $\varepsilon_b$, there exists $N_b$ such that for all $n \ge N_b$ we have $|b_n - a| \le \varepsilon_b$. We also know that $(b_n)_{n\in \nats}$ is a subsequence, and thus that there exists a monotonic increasing map $\varphi\colon \nats \to \nats$ for which $b_n = a_{\varphi(n)}$, and so we can rewrite the goal of our proof instead as $\varphi(n) \ge N_b$ implies $|a_{\varphi(n)} - a| \le \varepsilon_b$.
+
+Then when we are given some $\varepsilon_b > 0$, set our $\varepsilon_a$ from earlier as $\varepsilon_a = \varepsilon_b$ so that it tells us there exists a $N_a$ for which $n \ge N_a$ implies $|a_n - a| \le \varepsilon_a = \varepsilon_b$. Because $\varphi$ is an increasing map, it has $n \le \varphi(n)$, which is the same as either $n = \varphi(n)$ or $n < \varphi(n)$. If it is the former, then the statement $\varphi(n) \ge N_b$ implies $|a_{\varphi(n)} - a| \le \varepsilon_b$ is literally $n \ge N_b$ implies $|a_n - a| \le \varepsilon_b = \varepsilon_a$, and so we can set $N_b = N_a$ and \emph{inherit} the limit directly from $(a_n)_{n\in \nats}$.
+
+In the other case where $\varphi(n) > n$, notice that if we knew $n \ge N_a$ then we would have by transitivity that \begin{gather*}
+\varphi(n) > n \ge N_a
+\end{gather*}
+meaning that we have $\varphi(n) \ge N_a$. But since we know $(a_m)_{m\in \nats}$ converges, we have that $m \ge N_a$ implies $|a_m - a| \le \varepsilon_a$, and this holds for all $m$ (which we write instead of $n$ to avoid confusion about which implications we are using) including if we write $\varphi(n)$ in place of $m$. So, since we know $\varphi(n) \ge N_a$, we know $|a_{\varphi(n)} - a| \le \varepsilon_a$. Earlier we said though that $b_n = a_{\varphi(n)}$, and we also set $\varepsilon_a =\varepsilon_b$. This means that we have shown $n \ge N_a$, together with other facts we know to be true, implies \begin{gather*}
+|b_n - a| = |a_{\varphi(n)} - a| \le \varepsilon_a \le \varepsilon_b \\
+|b_n - a| \le \varepsilon_b
+\end{gather*}
+So we need a way to know that $n \ge N_a$, and remember that our main goal is to show $n \ge N_b$ implies $|b_n - a| \le \varepsilon_b$, and we have not yet decided what $N_b$ should be. We can solve this conundrum by setting $N_b = N_a$, the same $N_a$ we were told exists since $(a_n)_{n\in \nats}$ converges when we set $\varepsilon_a = \varepsilon_b$. This means that assuming $n \ge N_b$ implies $n \ge N_a$, which we showed earlier implies that $|b_n - a| \le \varepsilon_b$. So we are done.
+\end{my proof}
+
+We can forecast some intuitions if we think about the above statement; recall earlier that we are studying sequences in place of paths, but for the sake of intuition, imagine a path, a line through $\reals$ or a dot moving around on a journey in $\reals$ and tracing its path. A converging sequence can be thought of as the dot moving around in $\reals$ until it eventually settles into a region around the point it will eventually converge to; indeed it must settle in such a fashion, or else it would be impossible to say that eventually the rest of the sequence past some $N$ will be less than $\varepsilon$ distance away. Then of course, we reason that skipping the start of this journey or speeding this process along should only make it settle faster. In this way, the above proposition is obvious.
+
+However we can draw more insights from this picture, each which will translate into theorems.
+
+Now imagine the path it takes; that region it settles into must be bounded, because just as eventually (for some $N\in \nats$) it will be less than $\varepsilon$ away from its destination, its limit, it is bounded on either side of the limit by a distance of $\varepsilon$. Prior to this (i.e. for $n < N$), it is not bounded, except that on any \emph{particular} sequence it takes \emph{particular} values $a_n$ for each $n < N$, and let us not forget that this moving dot moves not continuously but from each $a_n$ to the next $a_{n+1}$. As such, although it will have an infinite amount of time to move \emph{closer} to its limit, it has only a finite amount of time (since $0 < n < N$) to get within $\varepsilon$ of its limit, and only a finite number of stops $a_1, a_2, ...$ before it does so. And as a finite number of particular points, we may simply draw a circle around them and bound them as well. So we conclude that any sequence that converges will have the entire path it takes bounded as well.
+
+Conversely, if a sequence is bounded but not necessarily converging, then it has an infinite number of points $a_n$ to stop at and only a finite amount of space to place them. Those points have to go somewhere, and by skipping the points that do not move closer to some infinite collection of points, we can find a subsequence which converges even if the main sequence itself does not.
+
+By similar reasoning, we can also say that a sequence which has an upper bound but is monotonic increasing must keep going up yet only has a finite amount of up it is allowed to go; it may not necessarily stop somewhere, but it must either stop or make its movements upwards slow down until the manner of its movements look like a convergence, and so the upper-bounded monotonic increasing sequence must too converge.
+
+There is one more extremely valuable insight we can glean from this kind of pictoral thinking. There is a sort of parallel criterion to the limit, another thing we could prove which is ultimately the same as proving convergence which may be easier to prove sometimes. That is, the same way we picture a sequence jumping from $a_n$ to $a_{n+1}$ until it is bounded in a region around its convergence, it must also be bounded around its own path. If a sequence were to converge, one should hope that the steps it takes should get smaller and smaller over time, and so we can imagine a converging sequence as not just being $\varepsilon$ away from its limit, but perhaps $\varepsilon$ away from its next point and all points after that.
+
+This notion of a \squote{region of convergence} is not merely imaginary, but to substantiate it, we will need to learn more strange things about the real numbers, which we will do in the next section. Once we do, we will find that it is a concept of utmost importance.
+
+Now let us translate these intuitive deductions into formal ones.
+
+\begin{label corollary}[Subsequence Limit Theorem]{SubsequenceLimitTheorem}
+Let $(a_n)$ be a sequence and $(b_n)_{n\in \nats}$ be a subsequence which converges to $b\in \reals$. Then if $(a_n)_{n \in \nats}$ to $a \in \reals$, we have $a = b$.
+\end{label corollary}
+
+This follows directly from the previous proposition, and is in some sense a direct restatement of subsequences preserving limits. In fact it is somewhat difficult to prove this explicitly since in order to propose a fault from which to proceed with proof by contradiction, one must begin with something that is so blatantly false on its face that the rest of the proof by contradiction is not particularly necessary.
+
+\begin{label proposition}[Convergent Sequences Are Bounded]{BoundednessOfConvergentSequences}
+If a sequence converges, then it is bounded. That is, if $(a_n)_{n\in \nats}$ is a sequence which converges to $a$, then there exists some $b_- \in \reals$ and some $b_+ \in \reals$ which satisfy \begin{gather*}
+b_- \le a_n \le b_+
+\end{gather*}
+for all $n\in \nats$.
+\end{label proposition}
+
+\begin{my proof}{m}
+Return here %%%%%%%%%%%%%%%
+\end{my proof}
+
+\begin{label theorem}[Monotone Convergence Theorem]{MonotoneConvergenceTheoremRSeq}
+Let $(a_n)_{n\in \nats}$ be a sequence which is bounded above and monotone increasing, i.e. $a_n \le a_{n+1}$ for all $n \in \nats$ and there exists $b\in \reals$ for which $a_n \le b$ for all $n \in \nats$. Then $(a_n)_{n\in \nats}$ must converge.
+\end{label theorem}
+
+\begin{my proof}{m}
+Return here %%%%%%%%%%%%%%
+\end{my proof}
+
+\begin{label definition}[Cauchy Criterion]{CauchyCriterionRSeq}
+A sequence satisfies the \textbf{Cauchy criterion} if it satisfies the following property: 
+
+for all $\varepsilon > 0$, there exists $N \in \nats$ such that for all $m,n \ge N$, we have $|a_m - a_n| \le \varepsilon$.
+
+When this is true of a sequence, we call it a \textbf{Cauchy sequence}.
+\end{label definition}
+
+It is worth noting something about the Cauchy criterion, which is that it is not exactly a formal statement that ‘the steps the sequence takes get smaller over time’ as I said earlier. Instead it is that any two points in the sequence have shorter distances over time. Or one could read this as the statement that the sequence gets closer to the rest of itself over time.
+
+Some intuitively obvious facts follow from this that we will want formally.
+
+\begin{label proposition}{CauchySequenceProperties}
+\begin{enumerate}
+\item Let $(a_n)_{n\in \nats}$ be a Cauchy sequence. Then the sequence is bounded.
+\item Let $(a_n)_{n\in \nats}$ be a sequence which converges to $a \in \reals$. Then the sequence is Cauchy.
+\end{enumerate}
+\end{label proposition}
+
+\begin{my proof}{m}
+Return here %%%%%%%%%%%%%
+\end{my proof}
 
 \end{document}

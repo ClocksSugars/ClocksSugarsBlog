@@ -15,5 +15,6 @@ data HtmlVers =
    |  BoxedSec String (Maybe Text) (Maybe [HtmlVers]) [HtmlVers]
    |  MProofBox Bool (Maybe Text) (Maybe [HtmlVers]) [HtmlVers]
    |  ReferenceNum Text
+   |  HLink Text Text
    deriving ( Show )
 --   |  Env Text [HtmlVers]
