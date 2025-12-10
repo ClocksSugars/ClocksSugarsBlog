@@ -145,18 +145,39 @@ for all $n\in \nats$.
 
 \begin{my proof}{m}
 
-We formalize almost exactly the story we told above. For some $\varepsilon > 0$ we have that there exists $N \in \nats$ such that when $n \ge N$, $|a_n - a| \le \varepsilon$, since by hypothesis $(a_n)_{n\in \nats}$ converges. Then fix some choice of $\varepsilon > 0$ (although the particular choice does not matter)
+We formalize almost exactly the story we told above. For some $\varepsilon > 0$ we have that there exists $N \in \nats$ such that when $n \ge N$, $|a_n - a| \le \varepsilon$, since by hypothesis $(a_n)_{n\in \nats}$ converges. Then fix some choice of $\varepsilon > 0$ (although the particular choice does not matter) so that it implies the existence of an appropriate $N \in \nats$ with the properties we expect for convergence. We'll set a variable $\hat{b}_+ = \sup\{|a_n - a| \mid n \ge N \}$ to be the largest distance, $|a_n - a|$, the sequence takes from its limit when $n \ge N$; this means $a + \hat{b}$ will be greater than all $a_n$ after $n \ge N$.
 
-Return here %%%%%%%%%%%%%%%
+Then $a+\hat{b}$ would be an upper bound for $(a_n)_{n\in \nats}$ if not for the fact that some $a_n$ with $n < N$ might be greater than this upper bound; to fix this, we will define an upper bound for all $a_n$ before $n < N$, and we do this first by defining the set of points before $n < N$, $A_N = \{a_m \mid n < N\}$. With this set, we can take its maximum $\max(A_n)$ and either $\max(A_N)$ or $a+\hat{b}$ will be the upper bound for the entire sequence, so let us define \begin{gather*}
+b_+ = \max \big\{ \max(A_N), a+ \hat{b}_+ \big\}
+\end{gather*}
+
+Since $A_N$ is literally contains $N - 1$ or less numbers, this quantity can be computed so long as we have a method to find $N$ from $\varepsilon$, which is guaranteed by hypothesis of convergence. The corresponding proof to calculate $b_-$, the lower bound, is exactly the same but with minimums instead of maximums and $a - \hat{b}$. \begin{gather*}
+b_- = \min \big\{ \min(A_N), a - \hat{b} \big\}
+\end{gather*}
 \end{my proof}
 
 \begin{label theorem}[Monotone Convergence Theorem]{MonotoneConvergenceTheoremRSeq}
-Let $(a_n)_{n\in \nats}$ be a sequence which is bounded above and monotone increasing, i.e. $a_n \le a_{n+1}$ for all $n \in \nats$ and there exists $b\in \reals$ for which $a_n \le b$ for all $n \in \nats$. Then $(a_n)_{n\in \nats}$ must converge.
+Let $(a_n)_{n\in \nats}$ be a sequence which is bounded above and monotone increasing, i.e. $a_n \le a_{m}$ for all $m,n  \in \nats$ satisfying $m \ge n$, and there exists $b\in \reals$ for which $a_n \le b$ for all $n \in \nats$. Then $(a_n)_{n\in \nats}$ must converge.
 \end{label theorem}
 
 \begin{my proof}{m}
-Return here %%%%%%%%%%%%%%
+Once again, we take the story we told and formalize it. Let $A = \{ a_n \mid n\in \nats \}$ be the unordered set of all $a_n$ in the sequence. Since the set is bounded and non-empty, it has a supremum by the axiom of completeness, and we call this $s = \sup(A)$.
+
+Now we aim to show that $s$ is the limit of $(a_n)_{n \in \nats}$. For any $\varepsilon > 0$ we are given, there must exist some $a^* \in A$ which satisfies $s - \varepsilon \le a^* \le s$, since if no such $a^* \in A$ existed in this range then the least upper bound would be $s - \varepsilon$ not $s$. Now, since $A$ is the set of all $a_n$ in the sequence, $a^* \in A$ means there must exist some $N \in \nats$ for which $a^* = a_N$, where $N$ is the $n$ which indexes the particular $a^*$ we pulled out of the sequence. Then since $(a_n)_{n\in \nats}$ is monotonic increasing, we have for all $n \ge N$ that \begin{gather*}
+s - \varepsilon \le a_N \le a_n \\
+s - \varepsilon \le a_n
+\end{gather*}
+by transitivity of ordering. Now, if we add $\varepsilon - a_n$ to both sides of this inequality, we obtain \begin{gather*}
+s - \varepsilon + (\varepsilon - a_n) \le a_n + (\varepsilon - a_n) \\
+s - a_n \le \varepsilon.
+\end{gather*}
+This is neat, because $s-a_n$ is ensured to be positive ($s$ is the \emph{supremum} of the set of all points in the sequence, and thus is larger than all $a_n$) meaning $s - a_n = |s - a_n|$. Moreover, $|s-a_n| = |a_n - s|$ because the absolute value will undo any multiplication by $-1$ inside its argument. This means we get to write \begin{gather*}
+|a_n - s| \le \varepsilon
+\end{gather*}
+and notice that this followed as an implication from $n \ge N$ (since we could not have written $s- \varepsilon \le a_n$ otherwise). Then we have proven the limit. 
 \end{my proof}
+
+If you're interested, you should note something about the above proof. That is, unlike in previous examples, we did not actually find a method to produce $N$ for a given $\varepsilon > 0$. What we did instead was show that \emph{some} $N$ exists, and indeed if you had a picture of a number line with all the points $a_n$ marked and numbered, you would certainly be able to look between $s-\varepsilon$ and $s$ and select some $a_n$ to become our $a_N$. But instead, we selected our $a_N$ ultimately using the axiom of choice.
 
 \begin{label definition}[Cauchy Criterion]{CauchyCriterionRSeq}
 A sequence satisfies the \textbf{Cauchy criterion} if it satisfies the following property: 
