@@ -169,7 +169,7 @@ Let $a,b,c,d \in \reals$ and let $a < b$.
 \item If we have $c < d$ then we have $a + c < b + d$.
 \end{enumerate}
 \end{label proposition}
-\begin{my proof}{}
+\begin{my proof}{mo}
 Begin with the hypothesis $a < b$. By RNOA3 we may translate by the value $-a - b$.
 \begin{gather*}
 a + (-a - b) < b + ( -a - b)
@@ -338,7 +338,35 @@ The supremum and infimum can be thought of as analogous to the \textbf{maximum} 
 %Sometimes we will write the supremum as $\sup_{x \in A}(f(x))$ to mean the supremum of the image $\sup(f(A))$, but we may also sometimes write $\text{argsup}_{x\in A}(f(x))$ to mean the specific $x$ which makes $f(x)$ the supremum of $f(A)$. Analogous notations exist for $\text{argmin}$, $\text{argmax}$, and $\text{arginf}$, but they are not guarenteed to produce only a single value if $f$ is not injective; moreover $\text{argsup}$ and $\textbf{arginf}$ may produce values which are themselves outside the set.
 \end{label definition}
 
+Finally, we include one last property of functions with respect to orderings which will be valuable in the next section. That is, we showed under what circumstances $x = y$ can be rewritten to $f(x)=f(y)$ or back (namely when $f$ is injective), but we did not show the corresponding property for orders. That is in part because we must speak about a new property of functions when they go from ordered sets to ordered sets. We must discuss \emph{monotonicity}.
 
+\begin{label definition}[Monotonic Functions]{MonotonicFunction}
+Let $f \colon \reals \to \reals$. If $f$ has the property that for all $x,y \in \reals$ $x < y$ implies $f(x) < f(y)$ then we say that $f$ is a \textbf{strictly monotonic increasing} function, that is, it is a function for which a larger input $y$ will always yield a larger output $f(y)$ than the output for the previous input $f(x)$. There is also the corresponding property of \textbf{strictly monotonic decreasing} function for which $x < y$ implies $f(y) < f(x)$.
 
+When instead we have that $x < y$ implies $f(x) \le f(y)$, we say that $f$ is a \textbf{monotonic increasing} function, or a \textbf{monotonic non-decreasing} function, signifying that larger inputs may not always lead to larger outputs, but that the outputs are at least as big as all inputs before and no smaller. Correspondingly, a function for which $x < y$ implies $f(y) \le f(x)$ is a \textbf{monotonic decreasing} or \textbf{monotonic non-increasing} function. 
+\end{label definition}
+
+In the context of this, we can see that addition by a constant $x \mapsto x + a$ is a strictly monotonic increasing function, since $x < y$ has $x + a < x + y$ by RNOA3 and similarly $x \mapsto xa$ is monotonic increasing when $0 < a$ by RNOA4.
+
+\begin{label corollary}[Composition of Monotonic Functions]{CompositionOfMonotonicFunctions}
+Let $f,g\colon \reals \to \reals$ be functions.\begin{itemize}
+\item if $f$ and $g$ are monotonic increasing, then $g \circ f$ is also monotonic increasing
+\item if $f$ and $g$ are monotonic decreasing, then $g \circ f$ is monotonic \emph{increasing} since the ordering is reversed twice.
+\end{itemize}
+\end{label corollary}
+
+\begin{label corollary}[Some Basic Monotonic functions]{ListOfBasicMonotonicFunctions}
+I encourage you to go to \href{https://www.desmos.com/calculator}{desmos.com/calculator} or anywhere else you like to graph functions and graph these functions yourself to see that they are monotonic in the way described. When we speak of conditional monotonicity, we mean that $x < y$ implies $f(x) < f(y)$ or $f(x) > f(y)$ respectively when both $x$ and $y$ satisfy the condition.
+\begin{itemize}
+\item $x \mapsto x$ is strictly montonic increasing
+\item $x \mapsto -x$ is strictly montonic decreasing
+\item $x \mapsto x^3$ is strictly monotonic increasing
+\item $x \mapsto e^x$ is strictly monotonic increasing
+\item $x \mapsto \sqrt{x}$ is strictly monotonic increasing when valid, i.e. on $x \ge 0$
+\item $x \mapsto \log x$ is strictly monotonic increasing when valid, i.e. on $x > 0$
+\item $x \mapsto x^2$ is strictly monotonic increasing when $x > 0$ and strictly monotonic decreasing when $x < 0$
+\item $x \mapsto 1/x$ is strictly monotonic decreasing on $x < 0$ and on $x>0$ separately but not together due to the discontinuity of one divided by zero
+\end{itemize}
+\end{label corollary}
 
 \end{document}
