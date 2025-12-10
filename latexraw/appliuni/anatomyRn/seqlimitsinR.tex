@@ -147,7 +147,7 @@ for all $n\in \nats$.
 
 We formalize almost exactly the story we told above. For some $\varepsilon > 0$ we have that there exists $N \in \nats$ such that when $n \ge N$, $|a_n - a| \le \varepsilon$, since by hypothesis $(a_n)_{n\in \nats}$ converges. Then fix some choice of $\varepsilon > 0$ (although the particular choice does not matter) so that it implies the existence of an appropriate $N \in \nats$ with the properties we expect for convergence. We'll set a variable $\hat{b}_+ = \sup\{|a_n - a| \mid n \ge N \}$ to be the largest distance, $|a_n - a|$, the sequence takes from its limit when $n \ge N$; this means $a + \hat{b}$ will be greater than all $a_n$ after $n \ge N$.
 
-Then $a+\hat{b}$ would be an upper bound for $(a_n)_{n\in \nats}$ if not for the fact that some $a_n$ with $n < N$ might be greater than this upper bound; to fix this, we will define an upper bound for all $a_n$ before $n < N$, and we do this first by defining the set of points before $n < N$, $A_N = \{a_m \mid n < N\}$. With this set, we can take its maximum $\max(A_n)$ and either $\max(A_N)$ or $a+\hat{b}$ will be the upper bound for the entire sequence, so let us define \begin{gather*}
+Then $a+\hat{b}$ would be an upper bound for $(a_n)_{n\in \nats}$ if not for the fact that some $a_n$ with $n < N$ might be greater than this upper bound; to fix this, we will define an upper bound for all $a_n$ before $n < N$, and we do this first by defining the set of points before $n < N$, $A_N = \{a_n \mid n < N\}$ (strictly this is not a set comprehension but an image of $\{n \in \nats \mid n < N\}$ through the sequence acting as a function $a_\square \colon \nats \to \reals$). With this set, we can take its maximum $\max(A_n)$ and either $\max(A_N)$ or $a+\hat{b}$ will be the upper bound for the entire sequence, so let us define \begin{gather*}
 b_+ = \max \big\{ \max(A_N), a+ \hat{b}_+ \big\}
 \end{gather*}
 
@@ -187,9 +187,9 @@ for all $\varepsilon > 0$, there exists $N \in \nats$ such that for all $m,n \ge
 When this is true of a sequence, we call it a \textbf{Cauchy sequence}.
 \end{label definition}
 
-It is worth noting something about the Cauchy criterion, which is that it is not exactly a formal statement that ‘the steps the sequence takes get smaller over time’ as I said earlier. Instead it is that any two points in the sequence have shorter distances over time. Or one could read this as the statement that the sequence gets closer to the rest of itself over time.
+It is worth noting something about the Cauchy criterion, which is that it is not exactly a formal statement that ‘the steps the sequence takes get smaller over time’ as I said earlier. Instead it is that \emph{any} two points in the sequence have shorter distances over time, since indeed \emph{all} $m,n \ge N$ will satisfy $|a_m - a_n| \le \varepsilon$. Or one could read this as the statement that the sequence gets closer to the rest of itself over time.
 
-Some intuitively obvious facts follow from this that we will want formally.
+This criterion is in some sense parallel to our existing definition of limit convergence; at this stage we have not proven that the Cauchy criterion has anything formally to do with limits, and yet it has a very obviously similar propositional form. Given the stories we told earlier, we can intuitively conclude some more things which we should formalize. For instance, if the sequence converges \squote{to itself}, then for similar reasons as discussed earlier for convergent sequences, it should also be bounded. And as we discussed above, a sequence which does converge should then be Cauchy.
 
 \begin{label proposition}{CauchySequenceProperties}
 \begin{enumerate}
@@ -199,6 +199,30 @@ Some intuitively obvious facts follow from this that we will want formally.
 \end{label proposition}
 
 \begin{my proof}{m}
+
+\begin{enumerate}
+\item Since the sequence is assumed Cauchy, we may pick any $\varepsilon > 0$ (the choice does not matter) and the Cauchy assumption says that there must exist some $N \in \nats$ for which all $m,n \ge N$ has $|a_m - a_n| \le \varepsilon$. Now fix a choice of $m$ (again the particular choice does not matter). The proof will now proceed very similarly to the proof of proposition \ref{pro:BoundednessOfConvergentSequences}.
+
+Let \begin{gather*}
+\hat{b} = \sup\{|a_m - a_n| \mid n \ge N\}
+\end{gather*}
+be the supremum difference $a_m$ from all other elements of the sequence $a_n$ with $n \ge N$ (i.e. the value which bounds all other differences, the largest and then some perhaps). Then $a_m + \hat{b}$ forms an upper bound for the sequence of elements $n \ge N$. 
+
+Since $n$ is a counting number in $\nats$, it is non-negative and thus any $n < N$ is also $0 < n < N$, meaning once again that the set of elements $a_n$ which come before $N$ are finite of length $N-1$ or less. Let's call this set $B = \{ a_n \mid n < N \}$ (once again, this is not technically a set comprehension but an image of one), so either $\max(B)$ or $a_m + \hat{b}$ will now bound the sequence. Our upper bound is then \begin{gather*}
+b_+ = \max \big\{ \max(B), a_m + \hat{b} \big\}
+\end{gather*}
+and by a similar argument, our lower bound is \begin{gather*}
+b_+ = \min \big\{ \min(B), a_m - \hat{b} \big\}.
+\end{gather*}
+
+\item Since the sequence is assumed to converge, choose some $\varepsilon > 0$; we aim to show that it is Cauchy. Since we have the limit $a_n \to a$ as $n \to \infty$, we may also set two epsilons $\varepsilon_m,\varepsilon_n = \varepsilon/2$, each half of our earlier mentioned epsilon. For each of these epsilon, since $(a_n)_{n\in \nats}$ converges, they induce some $N$, $N_m, N_n \in \nats$, each such that when $m \ge N_m$ or $n \ge N_n$ we have \begin{gather*}
+|a_m - a| \le \varepsilon_m \\
+|a_n - a| \le \varepsilon_n
+\end{gather*}
+respectively, where in particular $N_m = N_n$ since $\varepsilon_m = \varepsilon_n = \varepsilon/2$. Now we can apply the \hyperref[thm:RTriangleInequality]{triangle inequality}
+\end{enumerate}
+
+
 Return here %%%%%%%%%%%%%
 \end{my proof}
 
