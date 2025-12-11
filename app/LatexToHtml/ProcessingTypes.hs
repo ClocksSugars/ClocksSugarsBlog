@@ -19,6 +19,7 @@ data HtmlVers =
    |  Figure Text Text
    |  BoxedSec InfoBox (Maybe [HtmlVers]) [HtmlVers]
    |  ReferenceNum String
-   |  HLink Text Text
+   |  HLink Text [HtmlVers]
+   |  HRefLink String [HtmlVers]
    deriving ( Show )
 --   |  Env Text [HtmlVers]

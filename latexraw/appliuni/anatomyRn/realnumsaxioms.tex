@@ -260,7 +260,7 @@ Given $a \in \reals$, denote by $|a|$ the \textbf{absolute value} of $a$, that i
 \end{matrix}
  \right.
 \end{gather*}
-As a simple consequence, $|-a| = |a|$.
+As a simple consequence, $|-a| = |a|$ and $k|a| = |ka|$ for all $k \in \reals$.
 \end{label definition}
 
 \begin{label theorem}[Triangle Inequality]{RTriangleInequality}
@@ -322,11 +322,13 @@ Since $c \le b$ as in $a \le c \le b$ of case (3), we know by RNOA4 that $2 c \l
 Then we have shown all three relevant cases for the triangle inequality on $\reals$ and know it to be true in general.
 \end{my proof}
 
-\subsection{Before Moving into Real Analysis...}
+\subsection{Section Appendix: Some Loose Ends}
 
 The above proofs hopefully serve to show that one can prove statements that might seem so simple as to be tautological so long as we have a strong axiomatic basis. However, as you can see, this can lead to quite verbose proofs. From here on, going into the rest of the chapter and chapters beyond it, we will be a little more terse unless we are discussing a brand new concept, with the understanding that we know a bit about how to work with real numbers.
 
 Accordingly, we will largely mostly forget the axiomatic description of the reals except when it is necessary to disentangle a specific property related to numbers themselves. We will however need to bring some things with us foward, such as the triangle inequality, and we must pay attention in future for when a mathematical construction has many or most of the axioms of the real numbers, since they may share properties. It will also serve us well to state some earlier mentioned concepts in a self contained form to establish notational rules and strict definitions.
+
+Here we will begin to establish a formal pattern that most sections will come with a section appendix, a collection of statements, proofs, or intuitive descriptions which are either tangential to the direction of our exposition or do not fit neatly within it. In general, it is recommended that treat section appendices as either references or as almost standalone discussions. In fact it is somewhat optional to read a section appendix at the moment you encounter it, but almost all section appendices will become relevant later, and are written so that you \emph{can} understand them when you encounter them, even if their true importance will only be revealed later. Nonetheless, I hope that you enter the following section trying to follow where the thread left off just before the appendix began.
 
 \begin{label definition}[Upper and Lower Bounds]{RUpperLowerBounds}
 Let $A \subset \reals$ be a set of real numbers. We say that $b$ is a \textbf{upper bound} of $A$ (respectively a \textbf{lower bound}) if for all $a \in A$, $b$ satisfies $a < b$ (respectively $b < a$ for lower bounds).

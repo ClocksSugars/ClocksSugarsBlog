@@ -35,7 +35,11 @@ import LatexToHtml.InfoBoxType (
 --  requirements then it should work here
 --  is what we're aiming for.
 
--- type Parser = Parsec () LaTeX
+
+--- When adding a new intermediary process type constructor
+--    make CERTAIN to include it in processTwo or else the
+--    program will not terminate
+
 
 
 extractDocument :: LaTeX -> LaTeX
@@ -63,7 +67,8 @@ data Htmllatexinter =
    |  IBoxedSec InfoBox (Maybe [Htmllatexinter]) [Htmllatexinter]
    |  LineBreak
    |  IReference String
-   |  ILink Text Text
+   |  ILink Text [Htmllatexinter]
+   |  IRefLink String [Htmllatexinter]
    deriving (Eq, Show)
 
 inlineCommands :: [String]
@@ -83,7 +88,8 @@ processOne arg = let
    subprocess (TeXComm "figuresvgwithcaption" [FixArg (TeXRaw location), FixArg (TeXRaw content)]) =
       Right $ IFigure (location <> ".svg") content
    subprocess (TeXComm "ref" [FixArg (TeXRaw referenceName)]) = Right $ IReference $ fromText referenceName
-   subprocess (TeXComm "href" [FixArg (TeXRaw turl), FixArg (TeXRaw tx)]) = Right $ ILink turl tx
+   subprocess (TeXComm "href" [FixArg (TeXRaw turl), FixArg tx]) = Right $ ILink turl $ processOne tx
+   subprocess (TeXComm "hyperref" [OptArg (TeXRaw tref), FixArg tx]) = Right $ IRefLink (fromText tref) $ processOne tx
    subprocess (TeXComm "dquote" [FixArg dquotearg]) = subprocess $
       TeXSeq (TeXRaw "\"") $ attachRightMostLaTeX dquotearg $ TeXRaw"\""
    subprocess (TeXComm "squote" [FixArg dquotearg]) = subprocess $
@@ -157,7 +163,8 @@ inLineTranslation (InLineEffect otherwise) = RawText . render $ otherwise -- Jus
 inLineTranslation (Prose xs) = RawText xs
 inLineTranslation (RawPrint xs) = RawText xs
 inLineTranslation (IReference reference) = ReferenceNum reference
-inLineTranslation (ILink turl tx) = HLink turl tx
+inLineTranslation (ILink turl tx) = HLink turl $ map inLineTranslation tx
+inLineTranslation (IRefLink tref tx) = HRefLink tref $ map inLineTranslation tx
 inLineTranslation _ = RawText "failcase" -- this should NEVER HAPPEN since
 -- it is applied to the takeWhile in the below span which has as its
 -- condition that the constructor is Prose or InLineEffect
@@ -189,6 +196,7 @@ processTwo arg = let
       InLineEffect _ -> True
       IReference _ -> True
       ILink _ _ -> True
+      IRefLink _ _ -> True
       _ -> False
    cond :: Htmllatexinter -> Bool
    cond x= (x /= LineBreak)

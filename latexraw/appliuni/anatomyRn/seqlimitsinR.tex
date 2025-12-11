@@ -215,15 +215,100 @@ and by a similar argument, our lower bound is \begin{gather*}
 b_+ = \min \big\{ \min(B), a_m - \hat{b} \big\}.
 \end{gather*}
 
-\item Since the sequence is assumed to converge, choose some $\varepsilon > 0$; we aim to show that it is Cauchy. Since we have the limit $a_n \to a$ as $n \to \infty$, we may also set two epsilons $\varepsilon_m,\varepsilon_n = \varepsilon/2$, each half of our earlier mentioned epsilon. For each of these epsilon, since $(a_n)_{n\in \nats}$ converges, they induce some $N$, $N_m, N_n \in \nats$, each such that when $m \ge N_m$ or $n \ge N_n$ we have \begin{gather*}
+\item Since the sequence is assumed to converge, let us say we are given some $\varepsilon > 0$ not in the sense of an epsilon that proves convergence but in the sense of an epsilon that proves it is Cauchy. Since we have the limit $a_n \to a$ as $n \to \infty$, we may also set two epsilons $\varepsilon_m,\varepsilon_n = \varepsilon/2$, each half of the epsilon we are given. For each of these epsilon, since $(a_n)_{n\in \nats}$ converges, they each induce some $N$ which we call $N_m, N_n \in \nats$, both such that when $m \ge N_m$ or $n \ge N_n$ we have \begin{gather*}
 |a_m - a| \le \varepsilon_m \\
 |a_n - a| \le \varepsilon_n
 \end{gather*}
-respectively, where in particular $N_m = N_n$ since $\varepsilon_m = \varepsilon_n = \varepsilon/2$. Now we can apply the \hyperref[thm:RTriangleInequality]{triangle inequality}
+respectively. Note also that $N_m = N_n$ since $\varepsilon_m = \varepsilon_n = \varepsilon/2$. Now we can apply the \hyperref[thm:RTriangleInequality]{triangle inequality} on the values $a_m, a_n, a \in \reals$. We obtain \begin{gather*}
+|a_m - a_n| \le |a_m - a| + |a_n - a|.
+\end{gather*}
+Now consider that since $(a_n)_{n\in \nats}$ converges, both terms $|a_m - a|$ and $|a_n - a|$ obey the relations above (each being less than $\varepsilon_m = \varepsilon_n = \varepsilon/2$) when $n \ge N_m = N_n$. For each of these, we may add a missing term to both sides by translation of orderings ($|a_n - a|$ to the first and $\varepsilon_m$ to the other) \begin{gather*}
+|a_m - a| + |a_n - a| \le \varepsilon_m + |a_n - a| \\
+\varepsilon_m + |a_n - a| \le \varepsilon_m + \varepsilon_n
+\end{gather*}
+to construct the transitive sequence \begin{gather*}
+|a_m - a_n| \le |a_m - a| + |a_n - a| \le \varepsilon_m + |a_n - a| \le \varepsilon_m + \varepsilon_n
+\end{gather*}
+which is \begin{gather*}
+|a_m - a_n| \le \varepsilon_m + \varepsilon_n = \frac{\varepsilon}{2} + \frac{\varepsilon}{2} = \varepsilon
+\end{gather*}
+meaning that \begin{gather*}
+|a_m - a_n| \le \varepsilon
+\end{gather*}
+as desired. Thus the $N \in \nats$ we wished to prove existed for a given $\varepsilon> 0$ was in fact the same $N \in \nats$ induced by our limit when we used $\varepsilon/2$ for convergence. When $n \ge N = N_m = N_n$, we have $|a_m - a_n| \le \varepsilon$, satisfying the Cauchy criterion.
 \end{enumerate}
-
-
-Return here %%%%%%%%%%%%%
 \end{my proof}
+
+The above proofs are minimized by default since many of them appear at once; I highly recommend that you take a look at them but if you read them in order, you may begin to notice the proofs repeating themselves a little here. What are beginning to appear are \emph{proof techniques}, recurring patterns that are useful to us when we need to prove something. If indeed you are trying to follow along with exercises or trying to reproduce these proofs yourself (an exercise of its own that I highly recommend) then these techniques will be indispensible to you. Before long, the particular techniques we use will find their applications few and far between, as we package up each of their implications into theorems which we apply to greatly simplify the process.
+
+We will shortly be able to prove that Cauchy sequences always converge in $\reals$, but to do so (and indeed for the nature of the proof to be meaningful to us) we will need some additional structures which we are yet to discuss. Accordingly, we postpone both the proof of this and the proof that bounded sequences have convergent subsequences until the following section, when we are able to discuss the formal reality of a \emph{region of convergence}.
+
+We close this section instead with some properties of limits that bare a resemblance to the real numbers. That is, in much the same way that real numbesr are defined with addition, subtraction, multiplication, ordering, and an Archimedean property, we will see that we can do most of these things for limits.
+
+All these will be discussed and proven in the section appendix.
+
+\subsection{Section Appendix: The Limit is a Homomorphism}
+
+In the following chapter we will spend much of our focus on algebraic properties. These can be difficult to understand as the algebraic frame of mind is far removed from that of analysis, much less the frame of analytic geometry that most people encounter as highschool mathematics. However we have in fact already met these concerns when we discussed real numbers and the limit of a sequence.
+
+That is, one first encounters the term algebra to refer to the ways in which one manipulates symbols standing for numbers using rewrites related to addition, subtraction, multiplication, and division. But this new structure we have introduced, the sequence, can also have these notions since they are related to real numbers. That is, for any sequences $(a_n)_{n\in \nats}$ and $(b_n)_{n\in \nats}$, it is clear certainly that we can define a new sequence $(c_n)_{n\in \nats}$ which is either $c_n = a_n + b_n$, $c_n = a_n - b_n$, $c_n = a_n b_n$, or when $b_n \neq 0$ for all $n \in \nats$, even $c_n = a_n / b_n$.
+
+The question then appears; we have an operation, the limit, which can turn some sequences (those that converge) into real numbers, but how much structure does it preserve? Which manipulations can we do to sequences before will take the limit will remain after we take the limit? Can we ensure that $\lim_{n \to \infty} c = \left( \lim_{n \to \infty} a_n \right) + \left( \lim_{n \to \infty} b_n \right)$?
+
+The question we are ultimately asking is \dquote{is the limit homomorphic}, the formal name for asking if the function we are discussing preserves the features and structure of its input when it becomes an output. Since both sequences and real numbers can be added, subtracted, multiplied, and divided, there is indeed a lot of structure that the limit could potentially preserve, and if it does, this would grant us a great many tools in proofs going forward.
+
+In fact it is true that the limit is homomorphic in a sense; our notion of division must surely be weakened since in order to preserve the structure of a division, the divisor must \emph{never} be zero. But this is still enough to satisfy the requirements for a \emph{partially ordered ring homomorphism}, a map that preserves the structures of addition, subtraction, multiplication and ordering, but not division. Strictly speaking it preserves even more structure than that, but that is certainly the neatest existing class of homomorphism we can put the limit in.
+
+The clear implication of this, if you wish to dwell on it, is that there is something \emph{number-like} about sequences of real numbers, much in the way we expect real numbers to function as numbers
+
+Let us begin to show this.
+
+\begin{label theorem}[Algebraic Limit Theorem for Sequences]{AlgebraicLimitTheoremSequences}
+Let $(a_n)_{n\in \nats}$ and $(b_n)_{n\in \nats}$ be two sequences which converge to $a$ and $b$ respectively. Then we have the following. \begin{enumerate}
+\item The sequence defined $c_n = k a_n$ for any constant $k \in \reals$ converges to $\lim_{n \to \infty} c_n = ka$. If we write this without $c_n$, this is \begin{gather*}
+\lim_{n \to \infty} (k a_n) = k \left( \lim_{n \to \infty} a_n \right)
+\end{gather*}
+\item The sequence defined $c_n = a_n + b_n$ converges to $\lim_{n \to \infty} c_n = a + b$. If we write this without $c_n$, this is \begin{gather*}
+\lim_{n \to \infty} (a_n + b_n) = \left( \lim_{n \to \infty} a_n \right) + \left( \lim_{n \to \infty} b_n \right)
+\end{gather*}
+\item The sequence defined $c_n = a_n b_n$ converges to $\lim_{n \to \infty} c_n = a b$. If we write this without $c_n$, this is \begin{gather*}
+\lim_{n \to \infty} (a_n b_n) = \left( \lim_{n \to \infty} a_n \right) \left( \lim_{n \to \infty} b_n \right)
+\end{gather*}
+\item When $b_n \neq 0$ for all $n\in \nats$ and $b \neq 0$, the sequence defined $c_n = a_n / b_n$ converges to $\lim_{n \to \infty} c_n = a/b$. If we write this without $c_n$ and the requirements are met, this is \begin{gather*}
+\lim_{n \to \infty} \frac{a_n}{b_n} = \frac{\lim_{n \to \infty} a_n }{\lim_{n \to \infty} b_n}
+\end{gather*}
+\end{enumerate}
+\end{label theorem}
+
+Note here that a specific carve out is made for division, since it has additional requiremets, but not for subtraction; in place of subtraction we have \emph{scalar multiplication}, since it is then possible to set $k = -1$ for part a and use it on conjunction with part b to define $c_n = a_n + (-1)b_n = a_n - b_n$.
+
+\begin{my proof}{mo}
+Let us first notice what we know and what we need to prove. We know $(a_n)_{n\in \nats}$ and $(b_n)_{n\in \nats}$ converge to $a$ and $b$ respectively, so for each of them we have a way to find $N_a$ and $N_b$ for any given $\varepsilon_a$ or $\varepsilon_b$ we choose, satisfying the rest of the limit properties. We are proving convergence of $(c_n)_{n\in \nats}$ so we presume we are given some $\varepsilon_c > 0$ and need to find $N_c \in \nats$ such that when $n \ge N_c$, we have the appropriate absolute value difference smaller than $\varepsilon$. 
+\begin{enumerate}
+\item For $\varepsilon_c > 0$, we must find $N_c \in \nats$ such that when $n \ge N_c$, we have $|ka_n - k a| \le \varepsilon_c$. So set $\varepsilon_a = \varepsilon_c / k$; by convergence of $(a_n)_{n\in \nats}$, we have that when $n \ge N_a$, we have \begin{gather*}
+|a_n - a| \le \varepsilon_a = \frac{\varepsilon_c}{k}
+\end{gather*}
+so we may merely multiply both sides by $k$ to obtain \begin{gather*}
+k|a_n - a| \le k \left( \frac{\varepsilon_c}{k}\right) \\
+|k a_n - k a| \le \varepsilon_c
+\end{gather*}
+by distributivity and the property $k |a| = |ka|$ of absolute values. This means that $c_n = k a_n \to k a$ as $n \to \infty$ as we desired to show.
+
+\item For $\varepsilon_c > 0$, we must find $N_c \in \nats$ such that when $n \ge N_c$, we have \begin{gather*}
+|(a_n + b_n) - (a + b)| \le \varepsilon_c.
+\end{gather*}
+\end{enumerate}
+\end{my proof}
+
+
+
+
+
+
+
+
+
+
+
 
 \end{document}

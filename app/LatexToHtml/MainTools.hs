@@ -73,13 +73,13 @@ inlineProcessThree (x:xs) propind = (\y -> y >> (inlineProcessThree xs propind))
    RawText x -> toHtml x
    Bold x -> b $ toHtml x
    Emphasize x -> i $ toHtml x
-   HLink turl tx -> H.a ! href (fromString $ fromText turl) $ fromString $ fromText tx
+   HLink turl tx -> H.a ! href (fromString $ fromText turl) $ inlineProcessThree tx propind
    ReferenceNum reflabel -> let
       droppedBoxTypeV  = drop 4 reflabel
       thenumber = references propind Data.Map.Strict.!? droppedBoxTypeV
       in case thenumber of
          Just (pageaddress, pagename, thmnum) -> linknewtab !
-            href (fromString $ pageaddress ++ "#" ++ reflabel) $
+            href (fromString $ pageaddress ++ "#" ++ droppedBoxTypeV) $
                toHtml $ pagename ++ "." ++ thmnum
          _ -> "REFERENCE-ERROR"
    _ -> "WAS TOLD TO INLINE SOMETHING THAT I CANNOT INLINE"
@@ -99,19 +99,28 @@ processThree pagename theaddress content indexstate = let
       RawText x -> (toHtml x, propind)
       Emphasize x -> (i $ toHtml x, propind)
       Bold x -> (b $ toHtml x, propind)
-      HLink turl tx -> (H.a ! href (fromString $ fromText turl) $ fromString $ fromText tx, propind)
+      HLink turl tx -> (H.a ! href (fromString $ fromText turl) $ inlineProcessThree tx propind, propind)
       ListItem xs -> passFirst li $ repeatCase xs propind
       Itemize xs -> passFirst ul $ repeatCase xs propind
       Enumerate listkind xs -> passFirst (ol ! A.type_ (fromString $ fromText listkind)) $ repeatCase xs propind
       -- TODO MAKE THE OL TYPE MORE ROBUST
       Paragraph xs -> passFirst p $ repeatCase xs propind
 
+      HRefLink reflabel tx -> let
+         droppedBoxTypeV  = drop 4 reflabel
+         theref = references propind Data.Map.Strict.!? droppedBoxTypeV
+         in case theref of
+            Just (pageaddress, _, _) -> (, propind) $ linknewtab !
+               href (fromString $ pageaddress ++ "#" ++ droppedBoxTypeV) $
+                  inlineProcessThree tx propind
+            Nothing -> ("REFERENCE-ERROR", propind)
+
       ReferenceNum reflabel -> let
          droppedBoxTypeV  = drop 4 reflabel
-         thenumber = references propind Data.Map.Strict.!? droppedBoxTypeV
-         in case thenumber of
-            Just (pageaddress, pagename, thmnum) -> (\x -> (x, propind)) $ linknewtab !
-               href (fromString $ pageaddress ++ "#" ++ reflabel) $
+         theref = references propind Data.Map.Strict.!? droppedBoxTypeV
+         in case theref of
+            Just (pageaddress, _, thmnum) -> (, propind) $ linknewtab !
+               href (fromString $ pageaddress ++ "#" ++ droppedBoxTypeV) $
                   toHtml $ pagename ++ "." ++ thmnum
             Nothing -> ("REFERENCE-ERROR", propind)
 
