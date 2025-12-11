@@ -257,9 +257,9 @@ The question then appears; we have an operation, the limit, which can turn some 
 
 The question we are ultimately asking is \dquote{is the limit homomorphic}, the formal name for asking if the function we are discussing preserves the features and structure of its input when it becomes an output. Since both sequences and real numbers can be added, subtracted, multiplied, and divided, there is indeed a lot of structure that the limit could potentially preserve, and if it does, this would grant us a great many tools in proofs going forward.
 
-In fact it is true that the limit is homomorphic in a sense; our notion of division must surely be weakened since in order to preserve the structure of a division, the divisor must \emph{never} be zero. But this is still enough to satisfy the requirements for a \emph{partially ordered ring homomorphism}, a map that preserves the structures of addition, subtraction, multiplication and ordering, but not division. Strictly speaking it preserves even more structure than that, but that is certainly the neatest existing class of homomorphism we can put the limit in.
+In fact it is true that the limit is homomorphic in a sense; our notion of division must surely be weakened since in order to preserve the structure of a division, the divisor must \emph{never} be zero. But this is still enough to satisfy the requirements for a \emph{partially ordered ring homomorphism}, a map that preserves the structures of addition, subtraction, multiplication and ordering, but not division. Strictly speaking it preserves even more structure than that, but that is certainly the neatest existing class of homomorphism we can put the limit in. In practice, one rarely thinks of the limit in this way with relation to algebraic rings, but rather we focus on exactly the structure preservation we are about to discuss.
 
-The clear implication of this, if you wish to dwell on it, is that there is something \emph{number-like} about sequences of real numbers, much in the way we expect real numbers to function as numbers
+The implication of this however, if you wish to dwell on it, is that there is something \emph{number-like} about sequences of real numbers, much in the way we expect real numbers to function as numbers
 
 Let us begin to show this.
 
@@ -282,7 +282,7 @@ Let $(a_n)_{n\in \nats}$ and $(b_n)_{n\in \nats}$ be two sequences which converg
 
 Note here that a specific carve out is made for division, since it has additional requiremets, but not for subtraction; in place of subtraction we have \emph{scalar multiplication}, since it is then possible to set $k = -1$ for part a and use it on conjunction with part b to define $c_n = a_n + (-1)b_n = a_n - b_n$.
 
-\begin{my proof}{mo}
+\begin{my proof}{m}
 Let us first notice what we know and what we need to prove. We know $(a_n)_{n\in \nats}$ and $(b_n)_{n\in \nats}$ converge to $a$ and $b$ respectively, so for each of them we have a way to find $N_a$ and $N_b$ for any given $\varepsilon_a$ or $\varepsilon_b$ we choose, satisfying the rest of the limit properties. We are proving convergence of $(c_n)_{n\in \nats}$ so we presume we are given some $\varepsilon_c > 0$ and need to find $N_c \in \nats$ such that when $n \ge N_c$, we have the appropriate absolute value difference smaller than $\varepsilon$. 
 \begin{enumerate}
 \item For $\varepsilon_c > 0$, we must find $N_c \in \nats$ such that when $n \ge N_c$, we have $|ka_n - k a| \le \varepsilon_c$. So set $\varepsilon_a = \varepsilon_c / k$; by convergence of $(a_n)_{n\in \nats}$, we have that when $n \ge N_a$, we have \begin{gather*}
@@ -297,6 +297,69 @@ by distributivity and the property $k |a| = |ka|$ of absolute values. This means
 \item For $\varepsilon_c > 0$, we must find $N_c \in \nats$ such that when $n \ge N_c$, we have \begin{gather*}
 |(a_n + b_n) - (a + b)| \le \varepsilon_c.
 \end{gather*}
+So set $\varepsilon_a, \varepsilon_b = \varepsilon_c/2$ so that they induce $N_a,N_b \in \nats$ each with \begin{gather*}
+n \ge N_a \implies |a_n - a| \le \varepsilon_a = \frac{\varepsilon_c}{2}, \\
+n \ge N_b \implies |b_n - b| \le \varepsilon_b = \frac{\varepsilon_c}{2}.
+\end{gather*}
+Set $N_c = \max\{N_a,N_b\}$ so that both $n \ge N_a$ and $n \ge N_b$ are satisfied when $n \ge N_c$. Now we apply the \hyperref[thm:RTriangleInequality]{triangle inequality} on the values $(a_n -a),(b_n - b), 0 \in \reals$ and obtain \begin{gather*}
+|(a_n - a) - (b_n - b)| \le |(a_n - a) - 0 | + |(b_n - b) - 0|
+\end{gather*}
+which we may easily rearrange some terms to turn it into \begin{gather*}
+|(a_n + b_n) - (a + b)| \le |a_n - a| + |b_n - b|.
+\end{gather*}
+Now we may translate our existing relations which are true when $n \ge N_c$ by $|b_n - b|$ and $\varepsilon_a$ respectively \begin{gather*}
+|a_n - a| + |b_n - b| \le \varepsilon_a + |b_n - b| \\
+\varepsilon_a + |b_n - b| \le \varepsilon_a + \varepsilon_b
+\end{gather*}
+and this forms the transitive sequence \begin{align*}
+|(a_n + b_n) - (a + b)| &\le |a_n - a| + |b_n - b| \\
+&\le \varepsilon_a + |b_n - b| \\
+&\le \varepsilon_a + \varepsilon_b \\
+&= \frac{\varepsilon_c}{2} + \frac{\varepsilon_c}{2} \\
+&= \varepsilon_c
+\end{align*}
+which is exactly our desired \begin{gather*}
+|(a_n + b_n) - (a + b)| \le \varepsilon_c
+\end{gather*}
+when $n \ge N_c$. We are done.
+
+\item For any $\varepsilon_c > 0$ that we are given, we want some $N_c \in \nats$ such that $|(a_n b_n) - a b| \le \varepsilon_c$. Let us say that we choose some $\varepsilon_a, \varepsilon_b > 0$ related to $\varepsilon_c$, but for now it is better to postpone explaining what we will set them too since an excellent choice will become obviously shortly. If $\varepsilon_a$ and $\varepsilon_b$ are chosen then they induce $N_a,N_b \in \nats$ such that for each $n \ge N_a$ and $n \ge N_b$, we have $|a_n - a| \le \varepsilon_a$ and $|b_n - b| \le \varepsilon_b$. Set $N_c = \max\{N_a,N_b\}$ once again so that both $n \ge N_a$ and $n \ge N_b$ are satisfied when $n \ge N_c$.
+
+Apply the triangle inequality on the elements $b_n(a_n - a)$, $a (b - b_n)$ and $0 \in \reals$. We obtain \begin{gather*}
+|b(a_n - a) - a(b - b_n)| \le |b_n(a_n - a) - 0| + |a (b - b_n) - 0|
+\end{gather*}
+rearranging terms and simplying to \begin{gather*}
+|a_n b - a b_n + a b_n - ab| \le |b_n| |a_n - a| + |a||b_n - b|, \\
+|a_n b - a b| \le |b_n| |a_n - a| + |a| |b_n - b|.
+\end{gather*}
+A mess of symbols though this might seem, we have a trick up our sleeves in proposition \ref{pro:BoundednessOfConvergentSequences}. Since $(b_n)_{n\in \nats}$ converges we know it has a bound $B \in \reals$ such that $|b_n| \le B$ for all $n \in \nats$. We can focus on individual terms of the above inequality to see where $B$ applies \begin{gather*}
+|b_n| |a_n - a| \le B |a_n - a|
+\end{gather*}
+which we know by taking $|b_n| \le B$ and dilating it by a factor $|a_n - a|$, and we can then translate this by $|a| |b_n - b|$ to obtain \begin{gather*}
+|b_n| |a_n - a| + |a| |b_n - b| \le B |a_n - a| + |a| |b_n - b|.
+\end{gather*}
+We can apply this transitively on our old relation then to obtain \begin{gather*}
+|a_n b - a b| \le B |a_n - a| + |a| |b_n - b|
+\end{gather*}
+We are now ready to define $\varepsilon_a = \varepsilon_c/2B$ and $\varepsilon_b = \varepsilon_c/2|a|$, since neither $B$ nor $a$ rely on a choice of $n$ or $N$ or anything downstream of our pretending we had already chosen $\varepsilon_a$ and $\varepsilon_b$. There is one problem with this though, which is that $|a|$ could be zero ($B$ can not, think about why) but in this case set $\varepsilon_b = \varepsilon_c / 2$ and use by transitivity $0 = |a||b_n - b| \le 1 \cdot |b_n - b|$.
+
+Now recall that we started with $n \ge N_c$ implies $|a_n - a| \le \varepsilon_a$ and $|b_n - b| \le \varepsilon_b$. These are now \begin{gather*}
+|a_n - a| \le \varepsilon_a = \frac{\varepsilon_c}{2B}, \\
+|b_n - b| \le \varepsilon_b = \frac{\varepsilon_c}{2 |a|},
+\end{gather*}
+or equivalently by dilations, \begin{gather*}
+B |a_n - a| \le \frac{\varepsilon_c}{2}, \\
+|a||b_n - b| \le \frac{\varepsilon_c}{2}.
+\end{gather*}
+We'll skip the obvious step of translating these so that they appear in the obvious forms for a transitive sequence since we've done that a few times now, but needless to say we now have \begin{gather*}
+|a_n b_n - a b| \le B |a_n - a| + |a| |b_n - b| \le \frac{\varepsilon_c}{2} + \frac{\varepsilon_c}{2} = \varepsilon_c, \\
+|a_n b_n - a b| \le \varepsilon_c
+\end{gather*}
+which is exactly what we wanted to prove. Since this is true whenever $n \ge N_c$, we know that $a_n b_n \to a b$ when $n \to \infty$. We are done.
+
+\item Part d follow trivially from part c so long as we first prove that $(d_n)_{n\in \nats}$ defined $d_n = 1/b_n$ converges to $1/b$, since then we can say $a_n d_n \to a(1/b) = a/b$ as $n \to \infty$.
+
+ 
 \end{enumerate}
 \end{my proof}
 

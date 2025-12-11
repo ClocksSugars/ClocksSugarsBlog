@@ -79,7 +79,7 @@ inlineProcessThree (x:xs) propind = (\y -> y >> (inlineProcessThree xs propind))
       thenumber = references propind Data.Map.Strict.!? droppedBoxTypeV
       in case thenumber of
          Just (pageaddress, pagename, thmnum) -> linknewtab !
-            href (fromString $ pageaddress ++ "#" ++ droppedBoxTypeV) $
+            href (fromString $ "/" ++ pageaddress ++ ".html#" ++ droppedBoxTypeV) $
                toHtml $ pagename ++ "." ++ thmnum
          _ -> "REFERENCE-ERROR"
    _ -> "WAS TOLD TO INLINE SOMETHING THAT I CANNOT INLINE"
@@ -111,7 +111,7 @@ processThree pagename theaddress content indexstate = let
          theref = references propind Data.Map.Strict.!? droppedBoxTypeV
          in case theref of
             Just (pageaddress, _, _) -> (, propind) $ linknewtab !
-               href (fromString $ pageaddress ++ "#" ++ droppedBoxTypeV) $
+               href (fromString $ "/" ++ pageaddress ++ ".html#" ++ droppedBoxTypeV) $
                   inlineProcessThree tx propind
             Nothing -> ("REFERENCE-ERROR", propind)
 
@@ -120,7 +120,7 @@ processThree pagename theaddress content indexstate = let
          theref = references propind Data.Map.Strict.!? droppedBoxTypeV
          in case theref of
             Just (pageaddress, _, thmnum) -> (, propind) $ linknewtab !
-               href (fromString $ pageaddress ++ "#" ++ droppedBoxTypeV) $
+               href (fromString $ "/" ++ pageaddress ++ ".html#" ++ droppedBoxTypeV) $
                   toHtml $ pagename ++ "." ++ thmnum
             Nothing -> ("REFERENCE-ERROR", propind)
 

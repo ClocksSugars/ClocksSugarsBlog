@@ -345,6 +345,7 @@ Many binary operations we have seen so far obey these, but notably operations su
 \item Logical-Or ($\vee$) is associative and commutative with identity $\bot$ the false proposition.
 \item Set Union ($\cup$) is associative and commutative with identity $\emptyset$ the empty set.
 \item Set Intersection ($\cap$) is associative and commutative, and when it exists in the context of some total-set $X$ (as is often the case when discussing subsets of a \emph{space}) then it has identity $X$.
+\item Function composition ($\circ$) is associative but not commutative, but has identity which is the identity function, the function that takes an input and returns it as output unchanged.
 \item Cartesian Product ($\times$) is in practice associative since we are generally unconcerned with finer structure beyond the creation of tuples, so $(A \times B) \times C$ is treated as equal to $A \times (B \times C)$ since we only care that their members are triples $(a,b,c)$ with $a \in A$, $b\in B$ and $c \in C$. If enforce that cartesian products only make pairs, i.e. $A \times (B\times C)$ has elements $(a , (b,c))$ then it is not associative. It is also not commutative since $A \times B$ has members $(a,b)$ but not members $(b,a)$. It does in a sense have an identity however, since any set $\{z\}$ with only one element will produce a set of pairs $(a,z) \in A \times \{z\}$ which is isomorphic to $A$ via $(a,z) \mapsto a$ and $a \mapsto (a,z)$, however this is the sort of thing that we care about contextually.
 \end{itemize}
 
