@@ -25,7 +25,10 @@ import Control.Applicative
 import LatexToHtml.ProcessingTypes
 import LatexToHtml.NewCommand
 import LatexToHtml.Utils
-
+import LatexToHtml.InfoBoxType (
+   InfoBox(..),
+   getInfoBox
+   )
 -- This all exists under the assumption that
 --  the document being processed can produce
 --  a pdf. If it passes the LaTeX Syntax
@@ -57,10 +60,9 @@ data Htmllatexinter =
    |  Section [Htmllatexinter]
    |  List Text (Maybe [TeXArg]) [[Htmllatexinter]] -- instead of having items, we put item stuff in each element
    |  IFigure Text Text
-   |  IBoxedSec String (Maybe Text) (Maybe [Htmllatexinter]) [Htmllatexinter]
-   |  IMProofBox Bool (Maybe Text) (Maybe [Htmllatexinter]) [Htmllatexinter]
+   |  IBoxedSec InfoBox (Maybe [Htmllatexinter]) [Htmllatexinter]
    |  LineBreak
-   |  IReference Text
+   |  IReference String
    |  ILink Text Text
    deriving (Eq, Show)
 
@@ -69,43 +71,6 @@ inlineCommands = ["emph","textbf"]
 
 processOne :: LaTeX -> [Htmllatexinter]
 processOne arg = let
-   handleLabeledBox :: String -> [TeXArg] -> LaTeX -> Htmllatexinter
-   handleLabeledBox kind xargs content = let
-      (itslabel,opttitle) = case xargs of
-         [OptArg x, FixArg (TeXRaw y)] -> (Just y, Just $ processOne x)
-         [FixArg (TeXRaw y)] -> (Just y, Nothing)
-         _ -> (Nothing, Just [RawPrint "Something went wrong here"])
-      in IBoxedSec kind itslabel opttitle $ processOne content
-   handleUnlabeledBox :: String -> [TeXArg] -> LaTeX -> Htmllatexinter
-   handleUnlabeledBox kind xargs content = let
-      opttitle = case xargs of
-         [OptArg x] -> Just $ processOne x
-         [] -> Nothing
-         _ -> Just [RawPrint "Something went wrong here"]
-      in IBoxedSec kind Nothing opttitle $ processOne content
-   handleProof :: [TeXArg] -> LaTeX -> Htmllatexinter
-   handleProof xargs content = let
-      openornot :: Maybe Bool
-      opttitle :: Maybe [Htmllatexinter]
-      itslabel :: Maybe Text
-      (itslabel, opttitle, openornot) = case xargs of
-         [OptArg x, FixArg TeXEmpty, FixArg (TeXRaw y)] -> (Just y, Just $ processOne x, Nothing)
-         [OptArg x, FixArg (TeXRaw "m"), FixArg (TeXRaw y)] -> (Just y, Just $ processOne x, Just False)
-         [OptArg x, FixArg (TeXRaw "mo"), FixArg (TeXRaw y)] -> (Just y, Just $ processOne x, Just True)
-         [FixArg TeXEmpty, FixArg (TeXRaw y)] -> (Just y, Nothing, Nothing)
-         [FixArg (TeXRaw "m"), FixArg (TeXRaw y)] -> (Just y, Nothing, Just False)
-         [FixArg (TeXRaw "mo"), FixArg (TeXRaw y)] -> (Just y, Nothing, Just True)
-         [OptArg x, FixArg TeXEmpty] -> (Nothing, Just $ processOne x, Nothing)
-         [OptArg x, FixArg (TeXRaw "m")] -> (Nothing, Just $ processOne x, Just False)
-         [OptArg x, FixArg (TeXRaw "mo")] -> (Nothing, Just $ processOne x, Just True)
-         [FixArg TeXEmpty] -> (Nothing, Nothing, Nothing)
-         [FixArg (TeXRaw "m")] -> (Nothing, Nothing, Just False)
-         [FixArg (TeXRaw "mo")] -> (Nothing, Nothing, Just True)
-         [] -> (Nothing, Nothing, Nothing)
-         _ -> (Nothing, Just $ [Prose "SOMETHING WENT WRONG HERE"], Just False)
-      in case openornot of
-         Just isopen -> IMProofBox isopen itslabel opttitle $ processOne content
-         Nothing -> IBoxedSec "Proof" itslabel opttitle $ processOne content
    subprocess :: LaTeX -> Either [Htmllatexinter] Htmllatexinter
    subprocess (TeXRaw xs) = Right $ Prose xs
    subprocess (TeXComment _) = Left []
@@ -117,13 +82,15 @@ processOne arg = let
    subprocess (TeXComm "subsection" [FixArg stuff]) = Right . Section $ processOne stuff
    subprocess (TeXComm "figuresvgwithcaption" [FixArg (TeXRaw location), FixArg (TeXRaw content)]) =
       Right $ IFigure (location <> ".svg") content
-   subprocess (TeXComm "ref" [FixArg (TeXRaw referenceName)]) = Right $ IReference referenceName
+   subprocess (TeXComm "ref" [FixArg (TeXRaw referenceName)]) = Right $ IReference $ fromText referenceName
    subprocess (TeXComm "href" [FixArg (TeXRaw turl), FixArg (TeXRaw tx)]) = Right $ ILink turl tx
    subprocess (TeXComm "dquote" [FixArg dquotearg]) = subprocess $
       TeXSeq (TeXRaw "\"") $ attachRightMostLaTeX dquotearg $ TeXRaw"\""
    subprocess (TeXComm "squote" [FixArg dquotearg]) = subprocess $
       TeXSeq (TeXRaw "'") $ attachRightMostLaTeX dquotearg $ TeXRaw"'"
-   subprocess (TeXEnv kind texargs content) = case (kind, texargs) of
+   subprocess (TeXEnv kind texargs content) = let
+      fallbackcase = Right . RawPrint $ render (TeXEnv kind texargs content) -- This is under the assumption that it is a math env
+      in case (kind, texargs) of
          ("itemize", _) -> Right $ List "itemize" Nothing $
             map processOne (drop 1 $ splitByDelimiterLaTeX (TeXCommS "item") content)
             -- must drop 1 bc content preceeding first \item should be ignored. we can also guarentee
@@ -136,23 +103,15 @@ processOne arg = let
          ("align*", _) -> Right . RawPrint . render $
             TeXMath DoubleDollar $ TeXEnv kind texargs $ applyMathCommands content
 
-         ("label definition", _) -> Right $ handleLabeledBox "Definition" texargs content
-         ("definition", _) -> Right $ handleUnlabeledBox "Definition" texargs content
-         ("label theorem", _) -> Right $ handleLabeledBox "Theorem" texargs content
-         ("theorem", _) -> Right $ handleUnlabeledBox "Theorem" texargs content
-         ("label proposition", _) -> Right $ handleLabeledBox "Proposition" texargs content
-         ("proposition", _) -> Right $ handleUnlabeledBox "Proposition" texargs content
-         ("label lemma", _) -> Right $ handleLabeledBox "Lemma" texargs content
-         ("lemma", _) -> Right $ handleUnlabeledBox "Lemma" texargs content
-         ("label proof", _) -> Right $ handleProof texargs content
-         ("my proof", _) -> Right $ handleProof texargs content
-         ("label corollary", _) -> Right $ handleLabeledBox "Corollary" texargs content
-         ("corollary", _) -> Right $ handleUnlabeledBox "Corollary" texargs content
-         ("label notation", _) -> Right $ handleLabeledBox "Notation" texargs content
-         ("notation", _) -> Right $ handleUnlabeledBox "Notation" texargs content
-         ("label example", _) -> Right $ handleLabeledBox "Example" texargs content
-         ("example", _) -> Right $ handleUnlabeledBox "Example" texargs content
-         (_, _) -> Right . RawPrint $ render (TeXEnv kind texargs content) -- This is under the assumption that it is a math env
+         -- when there is a title it always appears first
+         (_, OptArg pretitle : restoftexargs) -> case getInfoBox kind restoftexargs of
+            Just infobox -> Right $
+               IBoxedSec infobox (Just $ processOne pretitle) $ processOne content
+            Nothing -> fallbackcase
+         (_, _) -> case getInfoBox kind texargs of
+            Just infobox -> Right $ IBoxedSec infobox Nothing $ processOne content
+            Nothing -> fallbackcase
+
    subprocess (TeXMath sign content) = Right . InLineEffect $
       TeXMath sign $ applyMathCommands content
    subprocess (TeXBraces content) = case content of
@@ -203,6 +162,7 @@ inLineTranslation _ = RawText "failcase" -- this should NEVER HAPPEN since
 -- it is applied to the takeWhile in the below span which has as its
 -- condition that the constructor is Prose or InLineEffect
 
+
 processTwo :: [Htmllatexinter] -> [HtmlVers]
 processTwo [] = []
 processTwo ((RawPrint content):xs) = RawText content : processTwo xs
@@ -217,12 +177,9 @@ processTwo ((List kind margs items):xs) = case kind of
          Just [FixArg (TeXRaw x)] -> x
          _ -> "a"
    _ -> Paragraph [RawText "failed here"] : processTwo xs
-processTwo ((IBoxedSec kind mlabel mtitle content):xs) = BoxedSec kind mlabel (
+processTwo ((IBoxedSec infobox mtitle content):xs) = BoxedSec infobox (
    fmap (map inLineTranslation) mtitle
    ) (processTwo content) : processTwo xs
-processTwo ((IMProofBox isopen mlabel mtitle content):xs) = MProofBox isopen mlabel (
-      fmap (map inLineTranslation) mtitle
-      ) (processTwo content) : processTwo xs
 processTwo arg = let
    paragraphRelevant :: Htmllatexinter -> Bool
    paragraphRelevant testitem = case testitem of

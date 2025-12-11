@@ -71,6 +71,8 @@ executable ClocksSugarsBlog
                      LatexToHtml.NewCommand,
                      LatexToHtml.Utils,
                      LatexToHtml.PageTemplate,
+                     LatexToHtml.InfoBoxType,
+                     LatexToHtml.ReferenceHandling,
                      SiteStructure.DefaultPage,
                      SiteStructure.RecordTypes,
                      SiteStructure.AddressManagement,

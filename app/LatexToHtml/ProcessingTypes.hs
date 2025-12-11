@@ -2,6 +2,11 @@ module LatexToHtml.ProcessingTypes (HtmlVers(..)) where
 
 import Data.Text
 
+import LatexToHtml.InfoBoxType (
+   InfoBox(..),
+   getInfoBox
+   )
+
 data HtmlVers =
       RawText Text
    |  Paragraph [HtmlVers]
@@ -12,9 +17,8 @@ data HtmlVers =
    |  ListItem [HtmlVers]
    |  Subheading [HtmlVers] -- <h2>
    |  Figure Text Text
-   |  BoxedSec String (Maybe Text) (Maybe [HtmlVers]) [HtmlVers]
-   |  MProofBox Bool (Maybe Text) (Maybe [HtmlVers]) [HtmlVers]
-   |  ReferenceNum Text
+   |  BoxedSec InfoBox (Maybe [HtmlVers]) [HtmlVers]
+   |  ReferenceNum String
    |  HLink Text Text
    deriving ( Show )
 --   |  Env Text [HtmlVers]

@@ -54,6 +54,7 @@ parseSubChapter address subchapter = let
                subchapter.title
                subchapter.name
                (addressListHtml docaddress)
+               (folderPathRender docaddress)
                (extractDocument doc)
                resetAllButReferences
          writeFileMakePath (docaddress ++ ["public"]) ".html" thepage
