@@ -17,6 +17,8 @@ Before we are ready to use infinity to speak of things infinitessimally close to
 
 Our notion of \squote{what is at infinity} will be defined not as a literal infinity but as what happens \squote{on the way there}; consequently it will be easier to speak about \squote{on the way there} if the process of \squote{going there} is a countable one, i.e. we will work with sequences instead of paths.
 
+\subsection{Formal Definitions}
+
 \begin{label definition}[Sequence on $\reals$]{NSequenceOnR}
 A sequence is an ordered set of real numbers indexed by $\nats$, or equivalently, it is a function $a: \nats \to \reals$ which we write $(a_n)_{n \in \nats}$ and denote elements of the ordered set (or equivalently outputs of the function) as $a_n$ for the corresponding counting number $n$.
 
@@ -114,7 +116,11 @@ meaning that we have $\varphi(n) \ge N_a$. But since we know $(a_m)_{m\in \nats}
 So we need a way to know that $n \ge N_a$, and remember that our main goal is to show $n \ge N_b$ implies $|b_n - a| \le \varepsilon_b$, and we have not yet decided what $N_b$ should be. We can solve this conundrum by setting $N_b = N_a$, the same $N_a$ we were told exists since $(a_n)_{n\in \nats}$ converges when we set $\varepsilon_a = \varepsilon_b$. This means that assuming $n \ge N_b$ implies $n \ge N_a$, which we showed earlier implies that $|b_n - a| \le \varepsilon_b$. So we are done.
 \end{my proof}
 
-We can forecast some intuitions if we think about the above statement; recall earlier that we are studying sequences in place of paths, but for the sake of intuition, imagine a path, a line through $\reals$ or a dot moving around on a journey in $\reals$ and tracing its path. A converging sequence can be thought of as the dot moving around in $\reals$ until it eventually settles into a region around the point it will eventually converge to; indeed it must settle in such a fashion, or else it would be impossible to say that eventually the rest of the sequence past some $N$ will be less than $\varepsilon$ distance away. Then of course, we reason that skipping the start of this journey or speeding this process along should only make it settle faster. In this way, the above proposition is obvious.
+\subsection{Sketching an Intuition On Sequences}
+
+Here we take pause to do something we will need to do many times moving forward. While it is certainly true that all one needs to solve many problems in pure mathematics is the symbolic awareness to throw rocks together and see which ones stick, our time will be much better spent of we develop an internal philosophy of our objects of study. The internal philosophy on its own is not of formal value, since formally it says nothing, but if our philosophy is a good one then it will suggest to us things which should be true which we can aim at proving.
+
+We can forecast some intuitions if we think about the above statement; recall earlier that we are studying sequences in place of paths, but for the sake of intuition, imagine something like a path, a route through $\reals$ punctuated by pitstops $a_n$ or a frog on a journey through $\reals$ and tracing a path by each lilypad it stops at. A converging sequence can be thought of as the dot moving around in $\reals$ until it eventually settles into a region around the point it will eventually converge to; indeed it must settle in such a fashion, or else it would be impossible to say that eventually the rest of the sequence past some $N$ will be less than $\varepsilon$ distance away. Then of course, we reason that skipping the start of this journey or speeding this process along should only make it settle faster. In this way, the above proposition is obvious.
 
 However we can draw more insights from this picture, each which will translate into theorems.
 
@@ -257,9 +263,9 @@ The question then appears; we have an operation, the limit, which can turn some 
 
 The question we are ultimately asking is \dquote{is the limit homomorphic}, the formal name for asking if the function we are discussing preserves the features and structure of its input when it becomes an output. Since both sequences and real numbers can be added, subtracted, multiplied, and divided, there is indeed a lot of structure that the limit could potentially preserve, and if it does, this would grant us a great many tools in proofs going forward.
 
-In fact it is true that the limit is homomorphic in a sense; our notion of division must surely be weakened since in order to preserve the structure of a division, the divisor must \emph{never} be zero. But this is still enough to satisfy the requirements for a \emph{partially ordered ring homomorphism}, a map that preserves the structures of addition, subtraction, multiplication and ordering, but not division. Strictly speaking it preserves even more structure than that, but that is certainly the neatest existing class of homomorphism we can put the limit in. In practice, one rarely thinks of the limit in this way with relation to algebraic rings, but rather we focus on exactly the structure preservation we are about to discuss.
+In fact it is true that the limit is homomorphic in a sense; our notion of division must surely be weakened since in order to preserve the structure of a division, the divisor must \emph{never} be zero. But this is still enough to satisfy the requirements for a \emph{partially ordered ring homomorphism}, a map that preserves the structures of addition, subtraction, multiplication and ordering, but not division. Strictly speaking it preserves even more structure than that, but that is certainly the neatest existing class of homomorphism we can put the limit in. In practice, one rarely thinks of the limit in this way with relation to algebraic rings, but rather focus on exactly the structure preservation we are about to discuss with each preserved feature in mind individually.
 
-The implication of this however, if you wish to dwell on it, is that there is something \emph{number-like} about sequences of real numbers, much in the way we expect real numbers to function as numbers
+The implication of this however, if you wish to dwell on it, is that there is something \emph{number-like} about convergent sequences of real numbers, much in the way we expect real numbers to function as numbers
 
 Let us begin to show this.
 
@@ -475,9 +481,25 @@ Let $(a_n)_{n\in \nats}$, $(b_n)_{n\in \nats}$ and $(c_n)_{n\in \nats}$ be seque
 \begin{my proof}{m}
 Say we are given some $\varepsilon_b > 0$ in the course of proving its limit. Set $\varepsilon_a$ and $\varepsilon_c$ to $\varepsilon_a,\varepsilon_c = \varepsilon_b$ and $N_b = \max\{N_a,N_c\}$ so that when $n \ge N_b$, we have \begin{gather*}
 |a_n - a| \le \varepsilon_a = \varepsilon_b, \\
-|c_n - c| \le \varepsilon_c = \varepsilon_b.
+|c_n - a| \le \varepsilon_c = \varepsilon_b.
 \end{gather*}
-We'll
+We'll now apply a similar technique to the one from the order limit theorem proof, applying lemma \ref{lem:RAbsoluteValueProperties}.e both times to get \begin{gather*}
+- \varepsilon_b \le a_n - a \le \varepsilon_b, \\
+- \varepsilon_b \le c_n - a \le \varepsilon_b
+\end{gather*}
+where we take the left hand inequality of the first line and add $a$ to both sides, and take the right hand inequality on the second line and add $a$ to both sides, getting \begin{gather*}
+a - \varepsilon_b \le a_n, \\
+c_n \le a + \varepsilon_b.
+\end{gather*}
+Since by assumption we have $a_n \le b_n \le c_n$ for all $n\in \nats$, we can add these inequalities to the transitive chain and obtain \begin{gather*}
+a - \varepsilon_b \le a_n \le b_n \le c_n \le a + \varepsilon_b \\
+a - \varepsilon_b \le  b_n \le a + \varepsilon_b \\
+- \varepsilon_b \le  b_n - a\le  \varepsilon_b
+\end{gather*}
+which now lets us use the other direction of lemma \ref{lem:RAbsoluteValueProperties}.e to obtain \begin{gather*}
+|b_n - a| \le \varepsilon_b
+\end{gather*}
+as desired when $n \ge N_b$. We are done.
 \end{my proof}
 
 

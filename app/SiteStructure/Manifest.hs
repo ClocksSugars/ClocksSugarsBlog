@@ -54,13 +54,19 @@ tempappliuni = WrittenWorkBook {
                SubChapter {
                   name = "realnumsaxioms",
                   title = "Real Numbers from Axioms",
-                  description = "(14 PDF Pages) A discussion of the properties of real numbers as derived by rewrites on their axioms, as well as our earliest focus on the concerns and mentality of real analysis.",
+                  description = "(17 PDF Pages) A discussion of the properties of real numbers as derived by rewrites on their axioms, as well as our earliest focus on the concerns and mentality of real analysis.",
                   depends = []
                   },
                SubChapter {
                   name = "seqlimitsinR",
                   title = "Sequences and Limits in $\\mathbb{R}$",
-                  description = "(WIP) Here we introduce the notion of limits on sequences, taking great care to both establish them as formal objects and as intuitive ones. In this section we begin the process of thinking about the study of limits as the study of what happens when you look very close to a point.",
+                  description = "(19 PDF Pages) Here we introduce the notion of limits on sequences, taking great care to both establish them as formal objects and as intuitive ones. In this section we begin the process of thinking about the study of limits as the study of what happens when you look very close to a point. For our Section appendix we discuss the similarities between real numbers as a number system and convergent sequences, and how limits preserve these similarities.",
+                  depends = []
+                  },
+               SubChapter {
+                  name = "openlimsR",
+                  title = "Intervals in $\\mathbb{R}$ and Limit Characterizations",
+                  description = "(WIP) In this section we formally discuss intervals in $\\mathbb{R}$, introducing notions of open and closed intervals, and open and closed sets. This will be our very first little taste of (non-algebraic) topological concerns, and accordingly we introduce the topological limit characterization, before paying off earlier promised theorems such as Bolzano-Weierstraß and the convergence of Cauchy sequences. For our section appendix we give a much more informal discussion on cardinality, explaining uncountable infinity and when we need to be concerned about it.",
                   depends = []
                   }
                ]

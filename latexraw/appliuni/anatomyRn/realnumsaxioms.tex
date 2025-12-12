@@ -418,7 +418,9 @@ and thus in every case we obtain $|ka| = |k||a|$.
 
 On the other side, if $|a| = -a$ then $-a$ is a positive number, and we may write $k \ge |a| = -a$. Multiplying both sides of this by $-1$, we obtain $-k \le a$ when $a$ is negative. When $a$ is positive, $-k \le a$ remains true anyway, since $k$ is less than zero and $a$ is more than zero.
 
-Together, we have $-k \le a$ and $a \le k$ regardless of the positivity/negativity of $a$, so the proof is complete.
+Together, we have $-k \le a$ and $a \le k$ regardless of the positivity/negativity of $a$, completing the proof in one direction.
+
+In the other direction, assume it is known that $-k \le a \le k$. Once again this implies that $k$ is positive, since by transitivity we have $-k \le k$. If $a$ is positive then by $a \le k$, we know that $|a| \le k$. If $a$ is negative then by $-k \le a$ we can multiply the inequality by $-1$ to obtain $k \ge -a$ and since $|a| = -a$ in this case, it is $k \ge |a|$ as well. Once again, in either case we obtain $k \ge |a|$.
 \end{enumerate}
 \end{my proof}
 
