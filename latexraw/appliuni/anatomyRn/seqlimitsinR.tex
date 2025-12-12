@@ -363,7 +363,7 @@ To do that, we will need to employ some unusual techniques in the proving of a l
 |b_n - b| \le \varepsilon_b = \frac{|b|}{2}.
 \end{gather*}
 
-Recall in lemma \ref{lem:RAbsoluteValueProperties} we showed that $|a| \le k$ satisfies $-k \le a \le k$ so we'll use that now on $|b|/2$ and $b_n - b$. This gives us \begin{gather*}
+Recall in lemma \ref{lem:RAbsoluteValueProperties}.e we showed that $|a| \le k$ satisfies $-k \le a \le k$ so we'll use that now on $|b|/2$ and $b_n - b$. This gives us \begin{gather*}
 -\frac{|b|}{2} \le b_n - b \le \frac{|b|}{2}.
 \end{gather*}
 Now consider that $|b|$ is either $b$ or $-b$ depending on whether $b$ is positive or negative, and depending on those two cases, this sequence of inequalities is one of the following: \begin{gather*}
@@ -407,12 +407,78 @@ as we had desired.
 \end{enumerate}
 \end{my proof}
 
+I highly recommend looking over the above proof for any techniques which are unfamiliar, since there are a few there we haven't used before.
+
+It must be noted that while all numbers can be compared in $\reals$, this is not the case for sequences since it is entirely possible for two sequences to have, say $a_1 > b_1$ but $a_2 < b_2$ for different parts of the sequence $n=1$ or $n=2$ respectively. This is what it means to be partially ordered; in a partially ordered set, objects can be ordered but not reliably. Some objects will be incomparable with one another as is the case in sequences.
+
+The point of the \emph{Order Limit Theorem} will be that when such an ordering does exist, it is preserved under the limit.
+
+\begin{label theorem}[Order Limit Theorem]{OrderLimitTheoremSequences}
+Let $(a_n)_{n\in \nats}$ and $(b_n)_{n\in \nats}$ be sequences converging to $a$ and $b$ respectively. If $a_n \le b_n$ for all $n\in \nats$ then $a \le b$. That is, \begin{gather*}
+\forall n\in \nats, (a_n \le b_n) \implies \left( \lim_{n\to \infty} a_n \right) \le \left(\lim_{n\to\infty} b_n\right)
+\end{gather*}
+\end{label theorem}
+
+\begin{my proof}{m}
+This time we are not proving a limit, but rather purely trying to get the inequality $a \le b$ from knowing that $a_n \to a$ and $b_n \to b$ as $n \to \infty$ and $a_n \le b_n$ for all $n \in \nats$. First, set $\varepsilon_a$ and $\varepsilon_b$ both to the value $\varepsilon_a,\varepsilon_b = |a-b|/3$ and set $N = \max\{N_a, N_b\}$ the maximum of the two. And since $\varepsilon_a = \varepsilon_b$, it will become prudent to refer to them interchangably so let them both be written $\varepsilon$. So we have \begin{gather*}
+|a_n - a| \le \varepsilon = \frac{|a- b|}{3} \\
+|b_n - b| \le \varepsilon = \frac{|a- b|}{3}
+\end{gather*}
+when we assume $n \ge N$.
+
+We start by applying lemma \ref{lem:RAbsoluteValueProperties}.e to these inequalities, obtaining \begin{gather*}
+-\varepsilon \le a_n - a \le \varepsilon \\
+- \varepsilon \le b_n - b \le \varepsilon
+\end{gather*}
+from which we take the left inequality from the first line, multiplying by $-1$ and adding $a_n$ to both sides, and the right inequality of the second line adding $b + \varepsilon$ to both sides. \begin{gather*}
+a \le a_n + \varepsilon \\
+b_n + \varepsilon \le b + 2\varepsilon
+\end{gather*}
+Since we have $a_n \le b_n$ for all $n\in \nats$, we also have $a_n + \varepsilon \le b_n + \varepsilon$, which gives us the transitive sequence \begin{gather*}
+a \le a_n + \varepsilon \le b_n + \varepsilon \le b + 2\varepsilon \\
+a \le b + 2\varepsilon.
+\end{gather*}
+We can subtract $b$ from both sides and divide by two to isolate $\varepsilon$ before expanding to its form as $|a-b|/3$, obtaining \begin{gather*}
+\frac{a-b}{2} \le \frac{|a-b|}{3}.
+\end{gather*}
+Note at this point that since no value in this inequality depends on $n$, despite the fact that we implied it from $n \ge N$, it must be true always since it does not change when $n$ is changed, and indeed it is always possible to set $n \ge N$ since $(a_n)_{n\in \nats}$ and $(b_n)_{n\in \nats}$ converge.
 
 
+We now have three cases to consider. By the trichotomy of ordering, $a-b$ is either $a-b < 0$, $a-b = 0$ or $a-b > 0$. We'll call these cases (1), (2) and (3).
 
+In case (1), $a-b < 0$ implies $a < b$ by adding $b$ to both sides, which is exactly what we wanted to prove.
 
+In case (2), $a-b = 0$ implies $a = b$ by adding $b$ to both sides, and this is a subcase of $a \le b$ which is literally $(a<b)\wedge(a = b)$, so once again the theorem is proven in this case.
 
+Case (3) gets a bit weirder, since assuming $a-b > 0$ and thus $a > b$ also implies $|a-b| = a-b$, the inequality we have above can be rewritten by manipulations on fractions, \begin{gather*}
+\frac{a-b}{2} \le \frac{a-b}{3} \\
+\frac{a-b}{2} - \frac{a-b}{3}\le 0 \\
+\frac{3(a-b)}{6} - \frac{2(a-b)}{6}\le 0 \\
+\frac{a-b}{6}\le 0 \\
+a-b\le 0
+\end{gather*}
+but this is in contradiction with our assumption that $a- b > 0$, so we can assume that this case never occurs.
 
+This means that only cases (1) or (2) never happen, and thus $a \le b$ is always true when $a_n \le b_n$ for all $n\in \nats$.
+\end{my proof}
+
+In the following section, our discussion on regions of convergence will make it intuitively obvious that the 'regions' that $(a_n)_{n\in \nats}$ and $(b_n)_{n\in \nats}$ converge in are obviously non-overlapping eventually when $a < b$, and thus that $a < b$ has to be true.
+
+As promised above, the following theorem will be our very rough analogy to the Archimedean principle for limits. That is, it says nothing about infinitessimals, however in the same way that showing no infinitessimals exists means that two numbers are presumed equal if you cannot find a number between them, this theorem will say that a sequence must converge if it is bounded on either side by sequences which together converge on the same limit between them. In this way, a sequence is \emph{squeezed} into convergence.
+
+When last I was taking graduate mathematics class, my peers and I still considered this theorem a relevant one which we would mention by name, a testament to its enduring usefulness.
+
+\begin{label theorem}[Squeeze Theorem]{SeqSqueezeTheorem}
+Let $(a_n)_{n\in \nats}$, $(b_n)_{n\in \nats}$ and $(c_n)_{n\in \nats}$ be sequences, where $a_n \to a$ and $c_n \to a$ as $n\to \infty$. If $a_n \le b_n \le c_n$ for all $n\in \nats$, then $(b_n)_{n\in \nats}$ also converges to $a$.
+\end{label theorem}
+
+\begin{my proof}{m}
+Say we are given some $\varepsilon_b > 0$ in the course of proving its limit. Set $\varepsilon_a$ and $\varepsilon_c$ to $\varepsilon_a,\varepsilon_c = \varepsilon_b$ and $N_b = \max\{N_a,N_c\}$ so that when $n \ge N_b$, we have \begin{gather*}
+|a_n - a| \le \varepsilon_a = \varepsilon_b, \\
+|c_n - c| \le \varepsilon_c = \varepsilon_b.
+\end{gather*}
+We'll
+\end{my proof}
 
 
 
