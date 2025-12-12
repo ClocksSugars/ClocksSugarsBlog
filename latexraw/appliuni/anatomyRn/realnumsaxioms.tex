@@ -260,7 +260,7 @@ Given $a \in \reals$, denote by $|a|$ the \textbf{absolute value} of $a$, that i
 \end{matrix}
  \right.
 \end{gather*}
-As a simple consequence, $|-a| = |a|$ and $k|a| = |ka|$ for all $k \in \reals$.
+As a simple consequence, $|-a| = |a|$ and $|k||a| = |ka|$ for all $k \in \reals$ and $|ka| = k |a|$ for all $k \ge 0$.
 \end{label definition}
 
 \begin{label theorem}[Triangle Inequality]{RTriangleInequality}
@@ -374,5 +374,52 @@ I encourage you to go to \href{https://www.desmos.com/calculator}{desmos.com/cal
 \item $x \mapsto 1/x$ is strictly monotonic decreasing on $x < 0$ and on $x>0$ separately but not together due to the discontinuity of one divided by zero
 \end{itemize}
 \end{label corollary}
+
+Finally, some facts should be elaborated about absolute values before we move forward. This is by no means the rich properties they hold which we must discuss much later, but it will save us a great deal of time explaining why these properties are true on a case by case basis later.
+
+\begin{label lemma}[Absolute Value Properties]{RAbsoluteValueProperties}
+It will prove valuable to understand some basic properties of absolute values. Let $a,k\in \reals$. Then the following are true: \begin{enumerate}
+\item $|-a| = |a|$
+\item $|ka| = |k| |a|$
+\item if $k \ge 0$ then $|ka| = k |a|$
+\item $x \mapsto |x|$ is monotonic increasing when $x \ge 0$ and monotonic decreasing on $x \le 0$.
+\item $|a| \le k$ is an equivalent statement to $-k \le a \le k$
+\end{enumerate}
+\end{label lemma}
+\begin{my proof}{m}
+\begin{enumerate}
+\item Consider the two possibilities: if $a$ is positive, then $|a| = a$, and since $-a$ is negative, we get $|-a| = -(-a) = a$. Consequently it is clear that $|-a| = a = |a|$. A similar argument follows if $a$ is negative, since $|a| = -a$, and $-a$ is positive, making $|-a| = -a$. Once again we get $|-a| = -a = |a|$. Although in the first case they are both $a$ and in the second case they are both $-a$, ultimately $|-a| = |a|$ remains true either way.
+
+\item This is a more general case of the latter. There are four relevant cases, $k \ge 0$ and $a \ge 0$, $k \le 0$ and $a \ge 0$, $k \ge 0$ and $a \le 0$, and finally $k \le 0$ and $a \le 0$. In each of these cases, the first thing to notice is whether they are both positive or both negative since this will make their product positive, or rather if one is positive and one is negative in which case their product is negative. Thus we have \begin{gather*}
+(k \ge 0) \wedge (a \ge 0) \implies |ka| = ka \\
+(k \le 0) \wedge (a \ge 0) \implies |ka| = -ka \\
+(k \ge 0) \wedge (a \le 0) \implies |ka| = -ka \\
+(k \le 0) \wedge (a \le 0) \implies |ka| = ka
+\end{gather*}
+and on the individual factors we have \begin{gather*}
+(k \ge 0) \wedge (a \ge 0) \implies (|k| = k) \wedge (|a| = a)  \\
+(k \le 0) \wedge (a \ge 0) \implies (|k| = - k) \wedge (|a| = a)  \\
+(k \ge 0) \wedge (a \le 0) \implies (|k| = k) \wedge (|a| = -a)  \\
+(k \le 0) \wedge (a \le 0) \implies (|k| = -k) \wedge (|a| = -a) 
+\end{gather*}
+but we see that $(-k)(-a) = ka$ and that $(-k)a = k (-a) = -k a$. So we may write \begin{gather*}
+(k \ge 0) \wedge (a \ge 0) \implies |ka| = ka = |k||a| \\
+(k \le 0) \wedge (a \ge 0) \implies |ka| = -ka = |k||a|\\
+(k \ge 0) \wedge (a \le 0) \implies |ka| = -ka = |k||a|\\
+(k \le 0) \wedge (a \le 0) \implies |ka| = ka = |k||a|
+\end{gather*}
+and thus in every case we obtain $|ka| = |k||a|$.
+
+\item This is clearly just one of the cases of the previous proof and is included for emphasis only.
+
+\item Let $x,y \in \reals$. If $0 < x < y$ then $x$ and $y$ are positive numbers, meaning $|x| = x$ and $|y| = y$, so it is clear that $x < y$ implies $|x| < |y|$ and $x \mapsto |x|$ is behaving as strictly monotonic increasing. If $x < y < 0$, then $x$ and $y$ are negative numbers, and so $|x| = -x$ and $|y| = -y$. We can take our existing statement in this case $x < y$ and multiply both sides by $-1$ (this applies proposition \ref{pro:BasicROrderProperties}.b with $c=-1$) to obtain $-x > -y$ which is then rewritten $|x| > |y|$, flipping the sign as a strictly monotonic decreasing function does.
+
+\item Consider that $|a|$ is positive regardless of whether $a$ is positive, and since $k \ge |a|$, it must be that $k$ is positive. This also means that if $a$ is positive, $k \ge |a| = a$ but if $a$ is negative, as a negative number smaller than zero, $k \ge a$ anyway. So we have that $k \ge |a|$ implies $k \ge a$.
+
+On the other side, if $|a| = -a$ then $-a$ is a positive number, and we may write $k \ge |a| = -a$. Multiplying both sides of this by $-1$, we obtain $-k \le a$ when $a$ is negative. When $a$ is positive, $-k \le a$ remains true anyway, since $k$ is less than zero and $a$ is more than zero.
+
+Together, we have $-k \le a$ and $a \le k$ regardless of the positivity/negativity of $a$, so the proof is complete.
+\end{enumerate}
+\end{my proof}
 
 \end{document}

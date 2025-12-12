@@ -359,7 +359,51 @@ which is exactly what we wanted to prove. Since this is true whenever $n \ge N_c
 
 \item Part d follow trivially from part c so long as we first prove that $(d_n)_{n\in \nats}$ defined $d_n = 1/b_n$ converges to $1/b$, since then we can say $a_n d_n \to a(1/b) = a/b$ as $n \to \infty$.
 
- 
+To do that, we will need to employ some unusual techniques in the proving of a limit. We will need to show that for all $\varepsilon_d > 0$ there exists some $N_d \in \nats$ such that when $n\ge N_d$, $|1/b_n - 1/b| \le \varepsilon_d$; first notice something about the term $|1/b_n - 1/b|$. We know that $(b_n)_{n\in \nats}$ converges, and so we know that there exists some $N_b$ for when $\varepsilon_b = |b|/2$ we will be able to write \begin{gather*}
+|b_n - b| \le \varepsilon_b = \frac{|b|}{2}.
+\end{gather*}
+
+Recall in lemma \ref{lem:RAbsoluteValueProperties} we showed that $|a| \le k$ satisfies $-k \le a \le k$ so we'll use that now on $|b|/2$ and $b_n - b$. This gives us \begin{gather*}
+-\frac{|b|}{2} \le b_n - b \le \frac{|b|}{2}.
+\end{gather*}
+Now consider that $|b|$ is either $b$ or $-b$ depending on whether $b$ is positive or negative, and depending on those two cases, this sequence of inequalities is one of the following: \begin{gather*}
+-\frac{b}{2} \le b_n - b \le \frac{b}{2}, \\
+\frac{b}{2} \le b_n - b \le -\frac{b}{2}.
+\end{gather*}
+We will see that despite not knowing which is true, the structure of the inequality means that we can say something regardless; in either case, add $b$ to both sides to obtain one of the two \begin{gather*}
+\frac{b}{2} \le b_n \le \frac{3b}{2}, \\
+\frac{3b}{2} \le b_n \le \frac{b}{2}.
+\end{gather*}
+Now consider what happens to the ordering if we take the absolute value: the absolute value operation $x \mapsto |x|$ is a monotonic increasing function $x \mapsto x$ when its argument is greater than or equal to zero, meaning that in the first case the order is preserved, but it is a monotonic decreasing function $x \mapsto -x$ when its argument is less than or equal to zero, which flips the orderings, meaning both cases result in \begin{gather*}
+\frac{|b|}{2} \le |b_n| \le \frac{3|b|}{2}.
+\end{gather*}
+This entire inequality is of some interest to us, since it says that at some point, when $n \ge N_b$ for some $N_b$ induced by a choice $\varepsilon_b = |b|/2$, we will have $|b_n$ less than $|b|/2$ away from $|b|$ but specifically we need the first part, \begin{gather*}
+\frac{|b|}{2} \le |b_n|.
+\end{gather*}
+Moreover, if we say $n \ge N_d$ for some $N_d$ we specify shortly, and $N_d \ge N_b$, then we will have $n \ge N_d \ge N_b$, and thus $n \ge N_b$, implying that $|b|/2 \le |b_n|$ also. Once again, this is all downstream of the fact that $|b|/2$ is itself $|b|/2$ away from $|b|$, and at some point $|b_n|$ must get close enough to $|b|$ that it cannot be more than $|b|/2$ away in the course of its convergence on $b$.
+
+This may at first seem like a strange fact, since we have not previously explored setting $\varepsilon$ for known limits to some specific value in order to obtain specific inequalities, but it remains a valid one, and is indeed vital for the rest of the proof.
+
+Now say we are given some $\varepsilon_d > 0$ and we need to find $N_d \in \nats$ such that when $n \ge N_d$, we have $|1/b_n - 1/b| \le \varepsilon$. Set $\varepsilon_b = |b|^2 \varepsilon_d / 2$ so that it induces some $N_b$, but importantly, if this $N_b$ induced by $\varepsilon_b = |b|^2 \varepsilon_d / 2$ is smaller than the $N_b$ induced by $\varepsilon_b = |b|/2$, take the larger $N_b$ to be our $N_d$ so that it is always true that $|b_n| \ge |b|/2$.
+
+Now observe we can do some manipulations on the fractions in $|1/b_n - 1/b|$, \begin{align*}
+\left|\frac{1}{b_n} - \frac{1}{b} \right| &= \left|\frac{b}{ b b_n} - \frac{b_n}{b b_n} \right| \\
+&= \left|\frac{b - b_n}{ b b_n} \right| \\
+&= \frac{|b - b_n|}{ |b| |b_n|}.
+\end{align*}
+We can now apply $|b|/2 \le |b_n|$ on this by inverting the inequality, which we recall is a monotonic decreasing function $x \mapsto 1/x$ so we flip the ordering and write $2/|b| \ge 1/|b_n|$. This new inequality, dilated on both sides by $|b-b_n|/|b|$ is exactly the form above, and gives us \begin{gather*}
+\left|\frac{1}{b_n} - \frac{1}{b} \right| = \frac{|b - b_n|}{ |b| |b_n|} \le \frac{2|b_n - b|}{|b|^2}.
+\end{gather*}
+Presuming that $n \ge N_d$ and $N_d = N_b$ or $N_d > N_b$ depending on what we chose earlier, we know that $n \ge N_b$ and thus $|b_n - b| \le \varepsilon_b$ is satisfied. Dilating this on both sides by $2/|b|^2$ it is \begin{gather*}
+\frac{2|b_n - b|}{|b|^2} = \left( \frac{2}{|b|^2} \right) \big( |b_n - b| \big) \le \left( \frac{2 }{|b|^2} \right) ( \varepsilon_b ) 
+\end{gather*}
+but we had set $\varepsilon_b = |b^2| \varepsilon_d / 2$ so we have \begin{gather*}
+\left|\frac{1}{b_n} - \frac{1}{b} \right| \le \frac{2|b_n - b|}{|b|^2} \le \left( \frac{2 }{|b|^2} \right) \left( \frac{|b^2| \varepsilon_d}{2}\right).
+\end{gather*}
+Cancelling some terms in our fractions on the right and ignoring the middle of this transitive inequality, we have \begin{gather*}
+\left|\frac{1}{b_n} - \frac{1}{b} \right| \le \varepsilon_d
+\end{gather*}
+as we had desired.
 \end{enumerate}
 \end{my proof}
 
