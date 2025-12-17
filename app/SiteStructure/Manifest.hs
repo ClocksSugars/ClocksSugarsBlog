@@ -41,7 +41,7 @@ tempappliuni = WrittenWorkBook {
             SubChapter {
                name = "maththink",
                title = "Rewrites and Sets: The Cognitive Weapons of Math",
-               description = "(23 PDF Pages) in draft 1.5 stage. a mostly philosophical engagement on mathematical thinking + some basic set theory and what we mean by equivalence in a non-constructive world. Towards the end we tie off some notational loose ends and explicitly specify some more conventions.",
+               description = "(24 PDF Pages) in draft 1.5 stage. a mostly philosophical engagement on mathematical thinking + some basic set theory and what we mean by equivalence in a non-constructive world. Towards the end we tie off some notational loose ends and explicitly specify some more conventions.",
                depends = []
                }
             ]
