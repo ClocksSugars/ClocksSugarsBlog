@@ -79,9 +79,9 @@ inlineProcessThree (x:xs) propind = (\y -> y >> (inlineProcessThree xs propind))
       droppedBoxTypeV  = drop 4 reflabel
       thenumber = references propind Data.Map.Strict.!? droppedBoxTypeV
       in case thenumber of
-         Just (pageaddress, pagename, thmnum) -> linknewtab !
+         Just (pageaddress, refpagename, thmnum) -> linknewtab !
             href (fromString $ "/" ++ pageaddress ++ ".html#" ++ droppedBoxTypeV) $
-               toHtml $ pagename ++ "." ++ thmnum
+               toHtml $ refpagename ++ "." ++ thmnum
          _ -> "REFERENCE-ERROR"
    _ -> "WAS TOLD TO INLINE SOMETHING THAT I CANNOT INLINE"
 
@@ -120,9 +120,9 @@ processThree pagename theaddress content indexstate = let
          droppedBoxTypeV  = drop 4 reflabel
          theref = references propind Data.Map.Strict.!? droppedBoxTypeV
          in case theref of
-            Just (pageaddress, _, thmnum) -> (, propind) $ linknewtab !
+            Just (pageaddress, refpagename, thmnum) -> (, propind) $ linknewtab !
                href (fromString $ "/" ++ pageaddress ++ ".html#" ++ droppedBoxTypeV) $
-                  toHtml $ pagename ++ "." ++ thmnum
+                  toHtml $ refpagename ++ "." ++ thmnum
             Nothing -> ("REFERENCE-ERROR", propind)
 
       Subheading x -> let
@@ -145,8 +145,8 @@ processThree pagename theaddress content indexstate = let
 
       BoxedSec infobox mtitle content -> let
          mlabel = getMaybeLabelInfoBox infobox
-         isProof = shouldUpdateThmCounter infobox
-         (newind1, thmnum) = doAnInfoBox isProof mlabel theaddress pagename propind
+         updateTheoremCounter = shouldUpdateThmCounter infobox
+         (newind1, thmnum) = doAnInfoBox updateTheoremCounter mlabel theaddress pagename propind
          (processedContent, newind2) = processThree pagename theaddress content newind1
          pmtitle = case mtitle of
             Just ttitle -> Just $ inlineProcessThree ttitle propind
