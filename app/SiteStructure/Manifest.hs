@@ -67,7 +67,7 @@ tempappliuni = WrittenWorkBook {
                   name = "openlimsR",
                   title = "Intervals in $\\mathbb{R}$ and Limit Characterizations",
                   description = "(WIP) In this section we formally discuss intervals in $\\mathbb{R}$, introducing notions of open and closed intervals, and open and closed sets. This will be our very first little taste of (non-algebraic) topological concerns, and accordingly we introduce the topological limit characterization, before paying off earlier promised theorems such as Bolzano-Weierstraß and the convergence of Cauchy sequences. For our section appendix we give a much more informal discussion on cardinality, explaining uncountable infinity and when we need to be concerned about it.",
-                  depends = []
+                  depends = ["metricopensetproperty.svg"]
                   }
                ]
             }

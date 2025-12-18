@@ -123,7 +123,7 @@ This means that \begin{align*}
 &= \lim_{n\to\infty} \big\{ x\in \reals \mid a_n \le x \le b_n \big\}.
 \end{align*}
 
-It may here seem difficult to proceed, since we do not have an obvious rule that allows us to pass a limit inside a set. We do however have a way to pass a limit to an inequality via the \hyperref[thm:OrderLimitTheoremSequences]{order limit theorem}, and we can apply this on $a_n \le x$ and $x \le b_n$ separately to produce a transitive chain. All that we require to do such a thingf is to reinterpret each $x \in \reals$ as a sequence $(x_n)_{n \in \nats}$ for which $x_n = x$ for all $n\in \nats$, i.e. each $(x_n)_{n\in \nats}$ is a constant sequence which is always equal to the value of $x \in \reals$ we care about. Consequently each such sequence converges trivially to its corresponding $x$. Then each $x \in \reals$ may apply the \hyperref[thm:OrderLimitTheoremSequences]{order limit theorem} and deduce that $a_n \le x_n$ and $x_n \le b_n$ implies $a \le x$ and $x \le b$, thus $a \le x \le b$. Since we can apply this for all $x \in \reals$, we have in a sense performed a transformation on the condition that $x$ is defined to satisfy in $I_n$. So just as in the \hyperref[thm:OrderLimitTheoremSequences]{order limit theorem} we wrote \begin{gather*}
+It may here seem difficult to proceed, since we do not have an obvious rule that allows us to pass a limit inside a set. We do however have a way to pass a limit to an inequality via the \hyperref[thm:OrderLimitTheoremSequences]{order limit theorem}, and we can apply this on $a_n \le x$ and $x \le b_n$ separately to produce a transitive chain. All that we require to do such a thing is to reinterpret each $x \in \reals$ as a sequence $(x_n)_{n \in \nats}$ for which $x_n = x$ for all $n\in \nats$, i.e. each $(x_n)_{n\in \nats}$ is a constant sequence which is always equal to the value of $x \in \reals$ we care about. Consequently each such sequence converges trivially to its corresponding $x$. Then each $x \in \reals$ may apply the \hyperref[thm:OrderLimitTheoremSequences]{order limit theorem} and deduce that $a_n \le x_n$ and $x_n \le b_n$ implies $a \le x$ and $x \le b$, thus $a \le x \le b$. Since we can apply this for all $x \in \reals$, we have in a sense performed a transformation on the condition that $x$ is defined to satisfy in $I_n$. So just as in the \hyperref[thm:OrderLimitTheoremSequences]{order limit theorem} we wrote \begin{gather*}
 \forall n\in \nats, (a_n \le b_n) \implies \left( \lim_{n\to \infty} a_n \right) \le \left(\lim_{n\to\infty} b_n\right)
 \end{gather*}
 we will now write \begin{align*}
@@ -150,7 +150,7 @@ Let $(a_n)_{n\in \nats}$ be our bounded seequence, and since it is bounded, ther
 
 We now proceed by binary search, much in the same way one would search an ordered list, to find some infinite collection of points which can form a converging subsequence. Since $(a_n)_{n\in \nats}$ is an infinite sequence, there are infinite elements of the sequence in $[-b,b]$ since all $a_n \in [-b,b]$. We call $I_0 = [-b,b]$.
 
-Now one of the two intervals $[-b,0]$ or $[0,b]$ will have the property that there does not exist a $N \in \nats$ with the property that $n \ge N$ implies $a_n$ is not in the interval, and we call this interval $I_1$. In other words, this interval $I_1$ which is either $[-b,0]$ or $[0,b]$, since $(a_n)_{n\in \nats}$ is infinite and must put its sequence elements somewhere, is the interval out of the two that does continue indefinitely to contain elements $a_n$. It is our narrowing region of convergence.
+Now one of the two intervals $[-b,0]$ or $[0,b]$ will have the property that there does not exist a $N \in \nats$ with the property that $n \ge N$ implies $a_n$ is not in the interval, and we call this interval $I_1$. In other words, this interval $I_1$ which is either $[-b,0]$ or $[0,b]$, has the property that there is no \emph{final} $a_n \in I_1$, and so there does not exist a $N \in \nats$ that would allow $n \ge N$ to imply $a_n \notin I_1$. This is since $(a_n)_{n\in \nats}$ is infinite and must put its sequence elements somewhere, so $I_1$ is the interval out of the two that does continue indefinitely to contain elements $a_n$. It is our narrowing region of convergence.
 
 Repeating this operation, assume we had picked $I_1 = [0,b]$ (although of course the operation is very similar if we had not), we then pick $I_2$ as either $[0,b/2]$ or $[b/2,b]$, depending on which interval has the property that there does not exist a rank $N\in \nats$ after which $n \ge N$ fails to find any $a_n \in I_2$.
 
@@ -217,9 +217,9 @@ It is worth noting how short this proof is, considering how important it will be
 
 \subsection{Open and Closed Sets and the Topological Limit}
 
-We have however only scratched the surface of our discussion of space, and we have tiptoed into it using the notion of an interval to describe the idea of a region. But the way in which we have called our intervals \emph{open} or \emph{closed} is a property more general than mere intervals. In fact they will continue to prove fundamental for many chapters to come.
+We have however only scratched the surface of our discussion of space, and we have tiptoed into it using the notion of an interval to describe the idea of a region. But the way in which we have called our intervals \emph{open} or \emph{closed} is a far more general property of regions than mere intervals. In fact they will continue to prove fundamental for many chapters to come.
 
-Our exploration of openness and closedness will remain in $\reals$ in this section as we use $\reals$ as an example to demonstrate their properties and their uses. Quickly it will become apparent that the exclusion or inclusion of end-points of an interval are perhaps the least interesting things about open and closed sets.
+Our exploration of openness and closedness will remain in $\reals$ in this section as we use $\reals$ as an example to demonstrate their properties and their uses. Quickly it will become apparent that the exclusion or inclusion of end-points of an interval are perhaps the least interesting things about open and closed sets. In fact, if we are to ask what are motivations are here, why we are investigating this notion of \dquote{openness} or \dquote{closedness} at all, it is because these properties turn out to be deeply intrinsically linked with the features of limits.
 
 \begin{label definition}[Open and Closed Sets in $\reals$]{OpenClosedSetsInR}
 Let $A \subseteq \reals$ be some set. We say that $A$ is an \textbf{open set} if for any point $a \in \reals$, there exists an open interval containing $a$, $a \in I$, which is also contained in $A$, $I \subseteq A$. When a set $B \subset \reals$ has the property that there exists some open set $A \subseteq \reals$ which is its set compliment, i.e. \begin{gather*}
@@ -228,9 +228,76 @@ B = \reals \setminus A = \{b\in \reals \mid b \notin A\}
 then we call $B$ a \textbf{closed set}.
 \end{label definition}
 
+Since closed sets here are defined by the space being absent an open set (indeed this was also noted when we mentioned the $]a,b[$ open interval notation), we shall focus on open sets first. Immediately we should look at this definition and ask if it generalizes what we want it to, i.e. are open intervals actually open sets? Well let's look closely at the definition.
 
+The property stated is that an open set only contains points which it can place an open interval around within itself. At first this statement might sound strange, but remember that open intervals do not contain their end points. If we are to assume for a moment that open sets also do not contain endpoints, then any point we pick in an open interval is not itself an endpoint and thus not on the boundary. If it is within the boundary, then there are points between itself and the boundary which can itself form a bound for an interval which is contained in the set. Thus the intuition is as in the diagram below.
 
+\figuresvgwithcaption{./metricopensetproperty}{Our open set (left) contains only points for which we can find an open interval within the open set containing the point. We also see inside it a point which looks very close to the boundary; zooming in there (right), we see that the point cannot be \emph{on} the boundary, or else any open interval containing it would escape the open set. The point must be within the boundary, but it can be arbitrarily close to the edge, just never on the edge itself, and still have a contained open interval.}
 
+But we must not let ourselves think that this means open sets are merely open intervals. In $\reals$ (and particular in only one dimension) this is \emph{almost} true. The particular caveat we make is that, since an open set must only have the property above, that every point in the open set has an interval containing it which is itself contained in the open set, there is nothing stopping us from saying that an open set contains disconnected components. For instance, if we have four numbers $a,b,c,d \in \reals$ with $a<b < c <d$ we may take the open intervals $(a,b)$ and $(c,d)$ and establish the open set $(a,b) \cup (c,d)$, the set containing all elements in either interval, and this is an example of an open set. The trick with this however is that open sets will sometimes be much stranger foam-like sets with perhaps infinite open intervals. The magic of this construction is that no matter how strange an open set we select, this particular statement of openness allows us to prove a lot of things without knowing the finer details of whatever infinite open-foam is going on in the open set. We simply know that every point in the set has an open interval around it.
+
+We will be able to say much much more about closed sets shortly, but for now, since we have defined closed sets in $\reals$ as the absence of an open set in $\reals$, it is immediately apparent that since $(-\infty,a) \cup (b, \infty)$ is an open set, we also have its compliment $[a,b]$ the closed interval, as a closed set. Very roughly we can say that closed sets contain their end points in the way that closed intervals do, but the particular manner in which this works will have to be proven shortly.
+
+\begin{label lemma}[Open Intervals are Open Sets and Closed Intervals are Closed Sets]{OpenClosedIntervalsAreOpenClosedSets}
+Let $a,b \in \reals$ with $a< b$. Then $(a,b)$ is an open set and $[a,b]$ is a closed set.
+\end{label lemma}
+\begin{my proof}{m}
+This is a nearly trivial statement but worth formalizing regardless. The open interval $(a,b)$ satisfies the property of open sets since for any $x \in (a,b)$, trivially there exists an interval $I \subseteq (a,b)$ which is $I = (a,b)$, meaning that $x \in I$ automatically.
+
+Every closed interval $[a,b]$ also has the open set $A = (-\infty,a) \cup (b, \infty)$ so that $[a,b] = \reals \setminus A$.
+\end{my proof}
+
+We must also acknowledge a sleight of hand. Our epsilon-N notion of a limit in the way we have been showing limits so far will begin to fail as we move deeper into mathematics, and that is because, in some sense, our definition is not the \emph{true} one. We have relaxed a requirement, which is that we have said a limit is \dquote{for all $\varepsilon > 0$, there exists $N \in \nats$ such that when $n \ge N$, we have $|a_n - a| \le \varepsilon$} and this relaxation is to be found in our use of $\ge$ and $\le$. In more general spaces, limits are proven using $> $ and $<$, so that the statement becomes \dquote{for all $\varepsilon > 0$, there exists $N \in \nats$ such that when $n > N$, we have $|a_n - a| < \varepsilon$}, and indeed the statement $|a_n - a| < \varepsilon$ is then the same as $a_n \in (a - \varepsilon,a + \varepsilon)$. We have \emph{relaxed} this definition thus far because \emph{we can}, that is, in $\reals$ at least it turns out that these definitions are \emph{equivalent}, and because being able to do this makes proofs much much easier. However this will begin to fail as we move into other spaces, and as it fails and we are forced to narrate limits not as $a_n \in [a - \varepsilon,a + \varepsilon]$ but as $a_n \in (a - \varepsilon,a + \varepsilon)$, excluding endpoints, a fundamental property of open sets will become apparent very slowly. That is, the idea that limits converge at all and what they converge to is ultimately a property \emph{defined by} open sets. In fact this is what topology, absent any algebraic concerns, priniciply does for us in analysis, but it will take many more sections before we are able to see this in its full glory.
+
+\begin{label theorem}[Characterizations of the Limit in $\reals$]{SeqLimCharacterizationsR}
+Let $(a_n)_{n\in \nats}$ be a sequence and $a \in \reals$ a number. Then the following statements are equivalent. \begin{itemize}
+\item $\displaystyle{\lim_{n\to\infty} a_n = a}$
+\item for all $\varepsilon > 0$, there exists $N\in \nats$ such that for all $n \ge N$ we have $|a_n - a| \le \varepsilon$ (we will call this the \emph{relaxed limit})
+\item for all $\varepsilon > 0$, there exists $N\in \nats$ such that for all $n > N$ we have $|a_n - a| < \varepsilon$ (we will call this the \emph{proper limit})
+\item for all open intervals $(x,y)$ such that $a \in (x,y)$, there exists some $N \in \nats$ such that for all $n > N$, we have $a_n \in (x,y)$ (we will call this the \emph{region of convergence limit})
+\item for all open sets $A \subseteq \reals$ such that $a \in A$, there exists some $N \in \nats$ such that for all $n > N$, we have $a_n \in A$ (we will call this the \emph{topological limit})
+\end{itemize}
+\end{label theorem}
+
+\begin{my proof}{m}
+The first statement of the list is purely notational, and is defined as equivalent to the relaxed limit. Indeed, once the proof is complete, we will interpret this notation as describing any of the other definitions of convergence. We will now need to move through this list proving that each one implies another and vice versa until we have formed a full chain of bidirectional implications. Note that this proof will use heavy implicit use of corollary \ref{crl:AbsOrderAsInterval}.
+
+We'll begin by assuming the relaxed limit and trying to show the proper limit. That is, we presume that for all $\varepsilon_1 > 0$, there exists $N_1$ such that for all $n \ge N_1$ we have $|a_n - a| \le \varepsilon_1$. We wish to prove that for all $\varepsilon_2 > 0$, there exists $N_2$ such that for all $n > N_2$, we have $|a_n - a| < \varepsilon_2$. So say we are given some $\varepsilon_2$. Set $\varepsilon_1 = \varepsilon_2/2$ so that it implies the existence of $N_1$, and choose $N_2 = N_1$. Since $\varepsilon_2 > 0$, it has the property that $\varepsilon_2 / 2 < \varepsilon_2$, that is, it is positive so its half is smaller than its whole. When we assume $n \ge N_2$, since $N_2 = N_1$, we have $|a_n - a| \le \varepsilon_1$, but by construction this is \begin{gather*}
+|a_n - a| \le \varepsilon_1 = \frac{\varepsilon_2}{2} < \varepsilon_2\\
+|a_n - a| < \varepsilon_2
+\end{gather*}
+as desired.
+
+To prove the opposite direction, let us reverse our assumptions. Say we are given $\varepsilon_1$ and must find $N_1$ with the appropriate properties to satisfy the relaxed limit. Set $\varepsilon_2 = \varepsilon_1$ so that it induces $N_2$ and set $N_1 = N_2 + 1$. This means that $N_1 > N_2$, and in particular the property $n \ge N_1$ is $n \ge N_1 > N_2$ so $n > N_2$ is satisfied. When $n > N_2$ is satisfied, we have $|a_n - a| < \varepsilon_2 = \varepsilon_1$, but this is the same as $a_n \in (a - \varepsilon_1, a + \varepsilon_1)$. Obviously, this open interval is a subset of the corresponding closed interval, since the interval without endpoints fits inside the interval with its endpoints. This means we have implied $a_n \in [a - \varepsilon_1, a+ \varepsilon_1]$, but that is the same as saying $|a_n - a| \le \varepsilon_1$, which is what we wanted to prove.
+
+For the next step, we show that the the proper limit is equivalent to the region of convergence limit. We'll reuse our numbers, saying that we wish to show \dquote{for all $\varepsilon_1 > 0$ there exists $N_1 \in \nats$ such that for all $n > N$ we have $|a_n - a| < \varepsilon_1$} is the same as \dquote{for all open intervals $(x,y)$ such that $a \in (x,y)$, there exists some $N_2 \in \nats$ such that for all $n > N_2$, we have $a_n \in (x,y)$}. So presume the former and we will show the latter. That is, assume we are given some $(x,y)$ satisfying $a \in (x,y)$. Now choose $\varepsilon_1 = \min\{a - x, y - a\}$, since $a$ is $x < a < y$, so these numbers $a-x$ and $y-a$ are both positive, and in particular choosing the smaller of them in this way will mean that \begin{gather*}
+(a - \varepsilon_1, a + \varepsilon_1) \subseteq (x,y)
+\end{gather*}
+We should prove this however. And the particular form of this proof will be that all $z \in (a - \varepsilon_1, a + \varepsilon_1)$ must also be $z \in (x,y)$. That is, we prove that any number satisfying the condition defining the subset satisfies the condition defining the proposed superset. First consider that \begin{gather*}
+(a - \varepsilon_1, a + \varepsilon_1) = (a - \varepsilon_1, \infty) \cap  (-\infty, a + \varepsilon_1)
+\end{gather*}
+in the sense that the restriction $a - \varepsilon_1 < z < a + \varepsilon_1$ may be decomposed into the two restrictions $a - \varepsilon_1 < z $ and $z < a + \varepsilon_1$. Since we define $\varepsilon_1 = \min\{a - x, y - a\}$, we have $\varepsilon_1 \le a - x$ and $\varepsilon_1 \le y - a$, since it is either equal to either of them or less than either one because it is the other one. So manipulating these individual conditions, \begin{gather*}
+a-\varepsilon_1 < z \implies a-z  <\varepsilon_1 \\
+z < a + \varepsilon_1 \implies z - a  < \varepsilon_1
+\end{gather*}
+we may apply transitivity using the two different inequalities, \begin{gather*}
+a-z  <\varepsilon_1 \le a - x \\
+z - a  < \varepsilon_1 \le y - a
+\end{gather*}
+deriving \begin{gather*}
+a-z  < a - x \implies x < z\\
+z - a  < y - a \implies z < y
+\end{gather*}
+and thus putting them together, we have shown $a - \varepsilon_1 < z < a + \varepsilon_1$ implies $x < z < y$. The corresponding statement on sets is that $(a - \varepsilon_1, a + \varepsilon_1) \subseteq (x,y)$ as desired. This means that $a_n \in (a - \varepsilon_1, a + \varepsilon_1)$, the same statement as $|a_n - a| < \varepsilon_1$ is the same as $a_n \in (x,y)$. But then if we choose the $N_2$ that we need to show exists to be $N_2 = N_1$, we have that for all $n > N_1 = N_2$, we have $|a_n - a| < \varepsilon_1$ which also implies $a_n \in (x,y)$ as desired.
+
+To do the proof in the converse case is even easier, since we may pick any interval $(x,y)$ containing $a$ and find $N_2$ such that $n > N_2$ implies $a_n \in (x,y)$. So say we are given $\varepsilon_1$, we may simply pick $x = a - \varepsilon_1$ and $y = a + \varepsilon_1$. Choosing $N_1 = N_2$, the statement $n > N_1 $ implies $|a_n - a| < \varepsilon_1$ is now immediately the same as the statement we already know to be true, that $n > N_2$ implies $a_n \in (x,y) = (a - \varepsilon_1, a + \varepsilon_1)$ by corollary \ref{crl:AbsOrderAsInterval}.
+
+For the final step of the proof, we must show that the region of convergence limit is the same as the topological limit. So we want to show that \dquote{for all open intervals $(x,y)$ such that $a \in (x,y)$, there exists some $N_1 \in \nats$ such that for all $n > N_1$, we have $a_n \in (x,y)$} is the same as \dquote{for all open sets $A$ such that $a \in A$, there exists some $N_2 \in \nats$ such that for all $n > N_2$, we have $a_n \in (x,y)$}. So we'll presume that the sequence converges under the region of convergence limit and show that it converges under the topological limit. So say we are given some open set $A$ with $a \in A$; since it is an open set, there exists an open interval with $a \in I$ and $I \subseteq A$. So we'll take this interval $(x,y) = I$ to be the open interval for the region of convergence limit, and thus imply a $N_1$ such that $n > N_1$ implies $a_n \in (x,y) = I \subseteq A$, and thus $a_n \in A$. So setting $N_2 = N_1$, we have $n > N_2 = N_1$ implies $a_n \in A$ exactly as we wanted.
+
+In the other direction, our proof is similarly simple. Since all open intervals are open sets, when we are given some $(x,y)$ with $a \in (x,y)$, we immediately set $A = (x,y)$ to induce some $N_2$ where $n > N_2$ implies $a_n \in A$. Setting $N_1 = N_2$, we have $n > N_1$ implying $a_n \in (x,y)$ since $a_n \in A = (x,y)$.
+\end{my proof}
+
+This proof in some sense shows how all along our use of $\varepsilon$ in proofs as a bound, a way of saying \squote{the distance between $a_n$ and $a$ is at least $\varepsilon$ small} was in fact a proxy for speaking about open sets. In the region of convergence limit and topological limit we see that we can similarly define limits not with a notion of \squote{small} defined by \emph{distance} but rather by choosing our own \emph{small set}. Recalling our earlier analogy about limits as checking a 
 
 
 
