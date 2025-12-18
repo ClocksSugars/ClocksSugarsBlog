@@ -61,7 +61,7 @@ tempappliuni = WrittenWorkBook {
                   name = "seqlimitsinR",
                   title = "Sequences and Limits in $\\mathbb{R}$",
                   description = "(19 PDF Pages) Here we introduce the notion of limits on sequences, taking great care to both establish them as formal objects and as intuitive ones. In this section we begin the process of thinking about the study of limits as the study of what happens when you look very close to a point. For our Section appendix we discuss the similarities between real numbers as a number system and convergent sequences, and how limits preserve these similarities.",
-                  depends = []
+                  depends = ["basicconvergence.svg"]
                   },
                SubChapter {
                   name = "openlimsR",

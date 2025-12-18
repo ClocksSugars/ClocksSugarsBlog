@@ -85,6 +85,29 @@ as we had wanted. Notice that we proved this, as we needed to, \emph{for any} $\
 
 In general, the pattern of proving a limit is roughly as above; in particular, we first identify how small a $\varepsilon$ a given $N$ can satisfy, which we did when we noticed that $\varepsilon = 1/N^2$ will mean we are trying to prove $n \ge N$ implies $1/n^2 \le 1/N^2$, which we know to be true immediately from the monotonic decreasing property of $x \mapsto 1/x^2$. Next, we treat the earlier relationship $\varepsilon = 1/N^2$ as a function $\varepsilon \mapsto 1/N^2$ and we see if we can invert it, finding either some way to calculate $1/N^2 \mapsto \varepsilon$ or the next best thing; this ended up being our $N \mapsto 1/\sqrt{\varepsilon}$ as our inverse function, and we had to round it up to make it a whole number. Most proofs will omit these steps, since the crux of the proof is not that we can find some relationship but rather that a relationship exists and that it \emph{works}. So having found our relationship $N = \lceil 1/\sqrt{\varepsilon} \rceil$ we try to in some sense unwrap whatever transformations we've made to the function while taking $n$ along for the journey; that is, we map $n \ge N$ to $1/n \le 1/N$ together, then square them together. At this point, some minor amount of symbolic massaging will generally get you your limit.
 
+\begin{label example}[$2^{-n}$ goes to $0$ as $n$ goes to $\infty$]{ConvergenceofTwotothenInR}{m}
+Let us repeat the steps we did prior but more streamlined this time. In this case we notice we are studying a strictly monotonic decreasing function $n \mapsto 2^{-n}$ which is always $2^{-n} > 0$, so immediately a condition $|2^{-n} - 0| \le \varepsilon$ can be read instead as $2^{-n} \le \varepsilon$. This may inspire us to take an inverse, and indeed we can notice that if we could choose $\varepsilon = 2^{-N}$ then $n \ge N$ would imply $2^{-n} \le \varepsilon$ as we desire, so we want to propose something like $N = - \log_2 \varepsilon$. The negative sign here is not to make $N$ negative (indeed we do not want this) but instead to make it positive, since a $\varepsilon < 1$ will have $\log_2 \varepsilon \le 0$, a property of logarithms. The problem we actually have is the same as in the previous example, that we have no guarentee that $- \log_2 \varepsilon$ is a whole number, so we will want to round it up as $N = \lceil - \log_2 \varepsilon \rceil$.
+
+With this $N$ proposed, we can now prove the limit. First observe that \begin{gather*}
+N = \lceil - \log_2 \varepsilon \rceil \ge - \log_2 \varepsilon
+\end{gather*}
+so we may apply the monotonic decreasing function to the inequality, $x \mapsto -x$, obtaining \begin{gather*}
+- N \le \log_2 \varepsilon
+\end{gather*}
+with the appropriate sign flip, followed by $x \mapsto 2^x$ to undo the logarithm (which is a monotonic increasing function), \begin{gather*}
+2^{- N} \le \varepsilon.
+\end{gather*}
+If we repeat these operations on $n \ge N$ we obtain \begin{gather*}
+-n \le -N \\
+2^{-n} \le 2^{-N}
+\end{gather*}
+providing the transitive chain \begin{gather*}
+|2^{-n} - 0| = 2^{-n} \le 2^{-N} \le \varepsilon \\
+|2^{-n} - 0| \le \varepsilon
+\end{gather*}
+completing the proof of the limit.
+\end{label example}
+
 We could do more examples (and indeed I may have to return here and add more) but the majority of the limits we will prove over this chapter are limits related to other limits. So instead of the particular technique described above, what we will frequently be doing is saying that some sequence $(a_n)_{n \in \nats}$ converges to $a$, and that since it does, we can take the existence of the $N$ which it implies and use it to imply that some other sequence $(b_n)_{n\in \nats}$ also converges to some $b$.
 
 At the beginning of chapter 1 we discussed the idea of the development of a theory; this involved defining core concepts, sub-concepts, relationships between those concepts, and finally substantiation of the implication of the theory onto other areas of study. We have now defined our core concepts for our theory of limits, and so in line with stage two, we must define sub-concepts and properties.
@@ -123,6 +146,8 @@ Here we take pause to do something we will need to do many times moving forward.
 We can forecast some intuitions if we think about the above statement; recall earlier that we are studying sequences in place of paths, but for the sake of intuition, imagine something like a path, a route through $\reals$ punctuated by pitstops $a_n$ or a frog on a journey through $\reals$ and tracing a path by each lilypad it stops at. A converging sequence can be thought of as the dot moving around in $\reals$ until it eventually settles into a region around the point it will eventually converge to; indeed it must settle in such a fashion, or else it would be impossible to say that eventually the rest of the sequence past some $N$ will be less than $\varepsilon$ distance away. Then of course, we reason that skipping the start of this journey or speeding this process along should only make it settle faster. In this way, the above proposition is obvious.
 
 However we can draw more insights from this picture, each which will translate into theorems.
+
+\figuresvgwithcaption{./basicconvergence}{A visualisation of a converging sequence beside the real number line, with the sequence points represented by dots converging on the limit $L$. We represent the region of convergence corresponding to a shrinking $\varepsilon$ as the sequence continues with red braces. Eventually we are able to say that \squote{the rest of the sequence} is contained in smaller and smaller regions.}
 
 Now imagine the path it takes; that region it settles into must be bounded, because just as eventually (for some $N\in \nats$) it will be less than $\varepsilon$ away from its destination, its limit, it is bounded on either side of the limit by a distance of $\varepsilon$. Prior to this (i.e. for $n < N$), it is not bounded, except that on any \emph{particular} sequence it takes \emph{particular} values $a_n$ for each $n < N$, and let us not forget that this moving dot moves not continuously but from each $a_n$ to the next $a_{n+1}$. As such, although it will have an infinite amount of time to move \emph{closer} to its limit, it has only a finite amount of time (since $0 < n < N$) to get within $\varepsilon$ of its limit, and only a finite number of stops $a_1, a_2, ...$ before it does so. And as a finite number of particular points, we may simply draw a circle around them and bound them as well. So we conclude that any sequence that converges will have the entire path it takes bounded as well.
 

@@ -70,6 +70,7 @@ processLatexToHtml pagename pageaddress x = processThree pagename pageaddress $ 
 inlineProcessThree :: [HtmlVers] -> RefIndexState -> Html
 inlineProcessThree [] _ = Empty ()
 inlineProcessThree (x:xs) propind = (\y -> y >> (inlineProcessThree xs propind)) $ case x of
+   Paragraph zs -> inlineProcessThree zs propind
    RawText x -> toHtml x
    Bold x -> b $ toHtml x
    Emphasize x -> i $ toHtml x
@@ -137,7 +138,9 @@ processThree pagename theaddress content indexstate = let
             H.figure ! class_ "flex-col" $ do
                img ! (src . fromString $ (fromText location)) !
                   alt "A visual representation of the description above"
-               figcaption . fromString . fromText $ ("Figure " <> (fromString . show $ fignumber) <> ": " <> thing)
+               figcaption $ (>>)
+                  (fromString $ "Figure " <> show fignumber <> ": ")
+                  $ inlineProcessThree thing propind
          in (htmlelement, newind)
 
       BoxedSec infobox mtitle content -> let

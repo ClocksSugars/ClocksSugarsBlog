@@ -63,7 +63,7 @@ data Htmllatexinter =
    |  InLineEffect LaTeX -- for commands that belong in a paragraph
    |  Section [Htmllatexinter]
    |  List Text (Maybe [TeXArg]) [[Htmllatexinter]] -- instead of having items, we put item stuff in each element
-   |  IFigure Text Text
+   |  IFigure Text [Htmllatexinter]
    |  IBoxedSec InfoBox (Maybe [Htmllatexinter]) [Htmllatexinter]
    |  LineBreak
    |  IReference String
@@ -85,8 +85,8 @@ processOne arg = let
       (Right a, Left b) -> a:b
       (Right a, Right b) -> [a,b]
    subprocess (TeXComm "subsection" [FixArg stuff]) = Right . Section $ processOne stuff
-   subprocess (TeXComm "figuresvgwithcaption" [FixArg (TeXRaw location), FixArg (TeXRaw content)]) =
-      Right $ IFigure (location <> ".svg") content
+   subprocess (TeXComm "figuresvgwithcaption" [FixArg (TeXRaw location), FixArg content]) =
+      Right $ IFigure (location <> ".svg") $ processOne content
    subprocess (TeXComm "ref" [FixArg (TeXRaw referenceName)]) = Right $ IReference $ fromText referenceName
    subprocess (TeXComm "href" [FixArg (TeXRaw turl), FixArg tx]) = Right $ ILink turl $ processOne tx
    subprocess (TeXComm "hyperref" [OptArg (TeXRaw tref), FixArg tx]) = Right $ IRefLink (fromText tref) $ processOne tx
@@ -175,7 +175,7 @@ processTwo [] = []
 processTwo ((RawPrint content):xs) = RawText content : processTwo xs
 processTwo ((RawLaTeX content):xs) = (RawText $ render content) : processTwo xs
 processTwo ((Section content):xs) = Subheading (map inLineTranslation content) : processTwo xs
-processTwo ((IFigure location content):xs) = Figure location content : processTwo xs
+processTwo ((IFigure location content):xs) = Figure location (processTwo content) : processTwo xs
 -- processTwo ((IReference reference):xs) = ReferenceNum reference : processTwo xs
 processTwo ((List kind margs items):xs) = case kind of
    "itemize" -> Itemize (map (ListItem . processTwo) items) : processTwo xs

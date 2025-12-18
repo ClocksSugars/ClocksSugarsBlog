@@ -17,6 +17,221 @@ Such a concept is deceptively complicated, as it cuts to the heart of what separ
 
 In fact Cauchy completeness is exactly the property that in a space, all Cauchy sequences converge, a property that we will return to in many settings since it is profoundly non-trivial. Consider for instance the set of rational numbers, the numbers formed from fractions of integers, $\rationals$. Obviously numbers such as $\sqrt{2}$ are not included in such a set, and yet it is easy to construct a sequence of rational numbers that converges to an irrational. In fact it is relatively easy using the reasoning of the \hyperref[thm:MonotoneConvergenceTheoremRSeq]{monotone convergence theorem} to simply imagine a sequence of only rational numbers which is monotonic increasing but bounded above by $\sqrt{2}$ (since irrational numbers and rational numbers may be placed on the same ordered axis) which is at every point rational and yet always approaching an irrational number. It is possible to speak of such a sequence converging and yet it must converge to something outside of the space it is defined in, that of the rationals.
 
-It is precisely because we have the axiom of completeness that we may point to a subset of the rational numbers, bounded above by number which is not itself rational and thus a \squote{gap} as far as the rationals are concerned, and fill that gap with whatever needs to be there to \emph{complete} the space with a supremum of the set. 
+It is precisely because we have the axiom of completeness that we may point to a subset of the rational numbers, bounded above by a number which is not itself rational and thus a \squote{gap} as far as the rationals are concerned, and fill that gap with whatever needs to be there to \emph{complete} the space with a supremum of the set. There are far greater elaborations on these concepts that we can make but they will have to wait for the coming sections of this chapter. For now, we should actually find out what a region is in our $\reals$ conception of \squote{space}.
+
+\subsection{Intervals and some promised Theorems}
+
+We begin our study of \squote{regions} with the notion of an interval. Formally, the word \squote{line} refers to a line that does not end in either direction; if it stops in one direction but continues indefinitely in the other then we call it a \squote{ray}, and if it ends in both directions and thus has finite length, we call it a \squote{segment}. Obviously, if we are concerned with the real number \emph{line} then we may speak of real number \emph{segments}, and that is exactly what is described by an interval. Just as you think of a segment of time as beginning at one specified moment and ending at another, we can set a beginning and an end for an interval to define a very basic space.
+
+\begin{label definition}{ROpenClosedInterval}
+A set $I \subset \reals$ is called an \textbf{open interval} if there exists two numbers $a,b \in \reals$ such that 
+\begin{gather*}
+I = \{x \in \reals  \mid a < x < b\}
+\end{gather*}
+i.e. the interval is all of the points \emph{between} $a$ and $b$ but not including them. We then write as notation \begin{gather*}
+(a,b) := \{x \in \reals  \mid a < x < b\}.
+\end{gather*}
+We may also use this notation on open sets such as $\{x \in \reals \mid x < b\}$ or $\{x \in \reals \mid a < x\}$, writing \begin{gather*}
+(-\infty,b) := \{x \in \reals  \mid  x < b \} \\
+(a , \infty) := \{x \in \reals  \mid  a < x \} \\
+ (-\infty, \infty) := \reals
+\end{gather*}
+which we shall think of as making sense since this notation \emph{distinctly does not include} $-\infty$ or $\infty$, and thus only deals with real numbers.
+
+A set $I \subset \reals$ is called a \textbf{closed interval} if there exists two numbers $a,b \in \reals$ such that \begin{gather*}
+I = \{x \in \reals \mid a \le x \le b\}
+\end{gather*}
+i.e. the intterval is all of the points between $a$ and $b$ \emph{and including them}. We then write as notation \begin{gather*}
+[a,b] := \{x \in \reals \mid a \le x \le b\}
+\end{gather*}
+which thus allows one to write $[a,a] = \{a\}$ for a singleton set. There is also mixed interval notation \begin{gather*}
+[a,b) := \{x \in \reals  \mid  a \le x < b \} \\
+(a , b] := \{x \in \reals  \mid  a < x \le b \}
+\end{gather*}
+since the curved parentheses denote not including the endpoint and the square bracket denotes including the endpoint. 
+\end{label definition}
+
+I should tell you if you become interested in other mathematics texts that many authors will write open intervals not as $(a,b)$ but rather as $]a,b[$ to imply that those endpoints are taken by some imaginary closed intervals on either side of the open interval.
+
+It is also worth noting that this notation comes along with a certain responsibility, which is that when using it, we have to be certain that $(a,b)$ or $[a,b]$ indeed has $a < b$ or $a \le b$ respectively. This does not necessarily mean that at every point we write an interval in a proof we pause to show that the interval is a valid one (unless for some reason that should be necessary) but it is a case where the tools of our reasoning can be fallable. In fact this particular responsibility has probably never lead any major particular error, but it remains a good example of things we have to keep track of that simultaneously validate our thought process but are written only because we are certain they are true. For instance, neither can we write $\lim_{n \to \infty} a_n$ if $(a_n)_{n\in \nats}$ is not a sequence which converges, and there will be many instances where it is tempting to look at a sequence and simply think of $\lim_{n \to \infty}$ as a function on sequences, when it is only a function on convergent sequences.
+
+But this is our first look at a \emph{region}, and it is immediate that we can do some things with such a definition. In fact, since intervals can be thought of like segments, then we might consider their length; we have been using $|a - b|$ as the distance between two points $a$ and $b$ since it is the \emph{magnitude} of their difference. Now recall what a limit describes: we say that the points in a sequence beyond some $N \in \nats$ are $|a_n  -a| \le \varepsilon$ which is the same as \begin{gather*}
+- \varepsilon \le a_n - a \le \varepsilon
+\end{gather*}
+by lemma \ref{lem:RAbsoluteValueProperties}.e and thus also \begin{gather*}
+a - \varepsilon \le a_n \le a + \varepsilon.
+\end{gather*}
+But the set of points $x$ satisfying this condition in place of $a_n$ would then be an interval $[a - \varepsilon, a + \varepsilon]$ since they are the same statement. This is our first observation about the role of \squote{regions} in convergence.
+
+\begin{label lemma}{IntervalAbsCharacterization}
+Let $a,b,c \in \reals$ and $c \ge 0$. Then we have the following equivalences of statements. \begin{itemize}
+\item $|a - b| \le c$ if and only if $a \in [b - c, b + c]$
+\item if $c \neq 0$ then $|a - b| < c$ if and only if $a \in (b - c, b + c)$
+\end{itemize}
+\end{label lemma}
+
+\begin{my proof}{m}
+Apply lemma \ref{lem:RAbsoluteValueProperties}.e as mentioned above. Immediately our statements on absolute values are recognized as equivalent to \begin{gather*}
+-c \le a - b \le c \\
+-c < a - b < c
+\end{gather*}
+respectively. We can of course add $b$ in both cases immediately to obtain \begin{gather*}
+b  -c \le a \le b + c \\
+b -c < a < b + c
+\end{gather*}
+for the two cases. If we define sets $I$ and $\bar{I}$ (distinguished by the presence of the bar above one) as \begin{gather*}
+\bar{I} = [b - c, b + c] = \{x \in \reals \mid b - c \le x \le b + c\} \\
+I = (b - c, b + c) = \{x \in \reals \mid b - c < x < b + c\}
+\end{gather*}
+then the statement $b  -c \le a \le b + c$ is equivalent to $a \in \bar{I}$ and the statement $b -c < a < b + c$ is equivalent to $a \in I$. So we have showed the implication, however all of our steps of reasoning were reversible, so we have shown the implication in both directions. 
+\end{my proof}
+
+\begin{label corollary}{AbsOrderAsInterval}
+Combining lemma \ref{lem:IntervalAbsCharacterization} and lemma \ref{lem:RAbsoluteValueProperties}.e one immediately concludes that for all $a,b\in \reals$, $|a| \le c$ if and only if $a \in [-c, c]$, and $|a| < c$ if and only if $a \in (-c,c)$.
+\end{label corollary}
+
+\begin{label corollary}{IntervalCharacterizationOfLimits}
+From lemma \ref{lem:IntervalAbsCharacterization} it follows that the statement of the limit for a sequence $(a_n)_{n\in \nats}$ 
+
+for all $\varepsilon > 0$ there exists $N \in \nats$ such that $n \ge N$ implies $|a_n - a| \le \varepsilon$
+
+is equivalent to the statement 
+
+for all $\varepsilon > 0$ there exists $N \in \nats$ such that $n \ge N$ implies $a_n \in [a - \varepsilon, a + \varepsilon]$.
+\end{label corollary}
+
+With this mental tool in hand, it now becomes pertinant to ask certain questions. For instance, in the section appendix of the previous section we presented the \hyperref[thm:OrderLimitTheoremSequences]{order limit theorem}, showing that two convergent sequences which retain an ordering for all $n \in \nats$ will continue to satisfy that ordering in their limit. But we may also consider the interval between them. We can now finally ask about limits not of numbers but of sets, with infinite intersections or infinite unions.
+
+\begin{label proposition}[Nested Interval Property]{NestedIntervalProperty}
+Let $(a_n)_{n\in \nats}$ and $(b_n)_{n\in \nats}$ be sequences with the property that $a_n \le b_n$ for all $n\in \nats$ and the closed intervals defined $I_n = [a_n,b_n]$ satisfy $I_{n+1} \subseteq I_n$, i.e. $(a_n)_{n\in \nats}$ is monotonic increasing and $(b_n)_{n \in \nats}$ is monotonic decreasing such that each successive interval is smaller and contained in the previous one. Then, defining the appropriate notation as below, the set \begin{gather*}
+\bigcap_{n\in \nats} I_n := \lim_{n\to\infty} \bigcap_{i=1}^n I_i
+\end{gather*}
+is a nonempty set. In other words, the intersection of any sequence of successively nested intervals is non-empty.
+\end{label proposition}
+
+\begin{my proof}{m}
+We may immediately notice that all of the requirements for the \hyperref[thm:MonotoneConvergenceTheoremRSeq]{monotone convergence theorem} are satisfied for both $(a_n)_{n\in \nats}$ and $(b_n)_{n\in \nats}$, so we know that they converge to values $a$ and $b$ in $\reals$ respectively. Moreover, the \hyperref[thm:OrderLimitTheoremSequences]{order limit theorem} then immediately tells us that these $a$ and $b$ satisfy $a \le b$.
+
+Now let us inspect the statement we wish to prove. Since the intervals are nested, we have that each intersection is equal only to the smallest interval in the intersection operation, which is the $I_\square$ with highest $i$. Recalling the big operator notation, for $\bigcap_{i = 1}^n I_i$, this highest $i$ is itself $n$, so $\bigcap_{i = 1}^n I_i = I_n$. Another way of saying this is that since $I_{i+1}$ is the set of points $x$ which satisfy $a_{i+1} \le x \le b_{i+1}$ then by transitivity, \begin{gather*}
+a_i \le a_{i+1} \le x \le b_{i+1} \le b
+\end{gather*}
+meaning $a_i \le x \le b$ are automatically satisfied by transitivity on both sides, i.e. $I_i \cap I_{i+1} = I_{i+1}$. And this remains inductively true, i.e. we may count up or down as many times as we want and still find that the deepest nested interval is the only one remaining from the intersection.
+
+This means that \begin{align*}
+\bigcap_{n\in \nats} I_n = \lim_{n\to\infty} \bigcap_{i=1}^n I_i &= \lim_{n\to\infty} I_n \\
+&= \lim_{n\to\infty} [a_n,b_n] \\
+&= \lim_{n\to\infty} \big\{ x\in \reals \mid a_n \le x \le b_n \big\}.
+\end{align*}
+
+It may here seem difficult to proceed, since we do not have an obvious rule that allows us to pass a limit inside a set. We do however have a way to pass a limit to an inequality via the \hyperref[thm:OrderLimitTheoremSequences]{order limit theorem}, and we can apply this on $a_n \le x$ and $x \le b_n$ separately to produce a transitive chain. All that we require to do such a thingf is to reinterpret each $x \in \reals$ as a sequence $(x_n)_{n \in \nats}$ for which $x_n = x$ for all $n\in \nats$, i.e. each $(x_n)_{n\in \nats}$ is a constant sequence which is always equal to the value of $x \in \reals$ we care about. Consequently each such sequence converges trivially to its corresponding $x$. Then each $x \in \reals$ may apply the \hyperref[thm:OrderLimitTheoremSequences]{order limit theorem} and deduce that $a_n \le x_n$ and $x_n \le b_n$ implies $a \le x$ and $x \le b$, thus $a \le x \le b$. Since we can apply this for all $x \in \reals$, we have in a sense performed a transformation on the condition that $x$ is defined to satisfy in $I_n$. So just as in the \hyperref[thm:OrderLimitTheoremSequences]{order limit theorem} we wrote \begin{gather*}
+\forall n\in \nats, (a_n \le b_n) \implies \left( \lim_{n\to \infty} a_n \right) \le \left(\lim_{n\to\infty} b_n\right)
+\end{gather*}
+we will now write \begin{align*}
+\lim_{n\to\infty} \big\{ x\in \reals \mid a_n \le x \le b_n \big\} &= \big\{ x\in \reals \mid \lim_{n\to\infty} a_n \le x \le \lim_{n\to\infty} b_n \big\} \\
+&= \big\{ x\in \reals \mid a \le x \le b \big\} \\
+&= [a,b].
+\end{align*}
+
+This alone is not the statement that $\bigcap_{n\in \nats} I_n$ is non-empty, however $a \le b$ is either $a < b$ or $a = b$. In the former case $[a,b]$ is clearly non-empty since it includes $(a+b)/2$ or any other number between. In the latter case it remains non-empty as we have effectively applied the \hyperref[thm:SeqSqueezeTheorem]{squeeze theorem}, concluding $\bigcap_{n\in \nats} I_n = [a,a]$ which is the singleton set $\{a\}$, containing itself and thus non-empty.
+\end{my proof}
+
+In fact this property, which once elaborated even a little seems obvious, is exactly what we need to complete two proofs promised in the previous section.
+
+We had said that a sequence which is bounded has an infinite number of points to place and only a finite amount of space to put them, and so it should make sense that at least some subsequence of the set does converge. We had also said that it should make sense that Cauchy sequences converge, a fact which we will then be able to prove.
+
+\begin{label theorem}[Bolzano Weierstraß]{BolzanoWeierstrass}
+Every bounded sequence has a converging subsequence.
+\end{label theorem}
+It is my understanding that when you are unable to type the character “ß”, the second most correct
+way to refer to this theorem is as Bolzano-Weierstrass. Not even wikipedia refers to it with this character, however it is common amongst mathematical texts to spell the theorem's name with the proper character.
+
+\begin{my proof}{m}
+Let $(a_n)_{n\in \nats}$ be our bounded seequence, and since it is bounded, there exists some $b\in \reals$ such that $a_n \in [-b,b]$ for all $n\in \nats$; this is not to imply that each $a_n$ is particularly close to zero, but rather in the way that you would say a bounded sequence has $b_- \le a_n \le b_+$ for some much tighter bound, we simply take $b = \max\{|b_-|,|b_+|\}$ and in the same way $|a_n| \le b$, we say $a_n \in [-b,b]$ by corollary \ref{crl:AbsOrderAsInterval}.
+
+We now proceed by binary search, much in the same way one would search an ordered list, to find some infinite collection of points which can form a converging subsequence. Since $(a_n)_{n\in \nats}$ is an infinite sequence, there are infinite elements of the sequence in $[-b,b]$ since all $a_n \in [-b,b]$. We call $I_0 = [-b,b]$.
+
+Now one of the two intervals $[-b,0]$ or $[0,b]$ will have the property that there does not exist a $N \in \nats$ with the property that $n \ge N$ implies $a_n$ is not in the interval, and we call this interval $I_1$. In other words, this interval $I_1$ which is either $[-b,0]$ or $[0,b]$, since $(a_n)_{n\in \nats}$ is infinite and must put its sequence elements somewhere, is the interval out of the two that does continue indefinitely to contain elements $a_n$. It is our narrowing region of convergence.
+
+Repeating this operation, assume we had picked $I_1 = [0,b]$ (although of course the operation is very similar if we had not), we then pick $I_2$ as either $[0,b/2]$ or $[b/2,b]$, depending on which interval has the property that there does not exist a rank $N\in \nats$ after which $n \ge N$ fails to find any $a_n \in I_2$.
+
+We are thus inductively defining a sequence of nested intervals $(I_n)_{n\in \nats}$ where each $I_n$ always fails to find a \squote{final} sequence element within it, and thus has infinite sequence elements within. Writing these intervals as $I_n = [x_n,y_n]$ we define the sequence of bounds $(x_n)_{n\in \nats}$ and $(y_n)_{n\in \nats}$, which are for example $x_1 = 0$, $x_2 = b/2$ and $y_1 = b$, $y_2 = b$, etc. with $x_n \le y_n$ for all $n\in \nats$. By the \hyperref[pro:NestedIntervalProperty]{nested interval property}, we know that $\lim_{n\to\infty} I_n$ is a non-empty set, so we choose some \begin{gather*}
+c \in \left[ \lim_{n\to\infty} x_n, \lim_{n\to\infty} y_n \right]
+\end{gather*}
+and define a corresponding subsequence $(c_n)_{n\in \nats}$ such that each $c_n$ is equal to the $a_m \in I_n$ with the smallest $m \ge n$ possible to satisfy $a_m \in I_n$. In this way we respect the subsequence property that the $\varphi\colon \nats\to\nats$ that defines $c_n = a_{\varphi(n)}$ is monotonic increasing, since the smallest $m\ge n$ such that $a_m \in I_n$ will either be excluded in $I_{n+1}$, be excluded since $m\ge n$ fails to be $m \ge n+1$, or simply remain in place until it is displaced as described. 
+
+Our goal now becomes to show that $c_n \to c$ as $n \to \infty$, since we have identified a subsequence and must now show that it is convergent. We will do this using the \hyperref[thm:SeqSqueezeTheorem]{squeeze theorem}, squeezing $(c_n)_{n\in \nats}$ between $(x_n)_{n\in \nats}$ and $(y_n)_{n\in \nats}$.
+
+Observe first that by construction, each $I_{n+1}$ has length half that of $I_n$, as we saw that $I_0 = [-b,b]$ and we split the interval in half so that $I_1$ is either $[-b,0]$ or $[0,b]$, etc. and since $I_n = [x_n,y_n]$, this means we may write \begin{gather*}
+|x_n - y_n| = \frac{b}{2^{n-1}}
+\end{gather*}
+since $[-b,0]$ and $[0,b]$ both have interval length $b$ at $I_1$, we see as well here that setting $n=1$ produces a length $|x_1 - y_1| = b$. But this is also \begin{gather*}
+|x_n - y_n| = (2b) 2^{-n}
+\end{gather*}
+and the right hand side should be familiar to us. In example \ref{exa:ConvergenceofTwotothenInR} we showed that $2^{-n} \to 0$ as $ n\to \infty$. By the \hyperref[thm:AlgebraicLimitTheoremSequences]{algebraic limit theorem}, we also know that $(2b) 2^{-n} \to 0$ as $n\to \infty$ since we are merely scaling the limit by $2b$. This tells us that the distance between $x_n$ and $y_n$ converges to zero, or that in the limit they should be the same number, and thus $[x,y]$ is a singleton set, $\{c\}$, but we should show that explicitly.
+
+We know that $x_n \le y_n$ for all $n\in \nats$ so $|x_n - y_n| = y_n - x_n$, and we know that $y_n$ by construction is monotonic decreasing and $x_n$ is monotonic increasing (once again, consider that the intervals are nested) so with $c \in [x,y]$, the limit of the interval-nesting, we may say $x_n \le x \le c \le y \le y_n$. This transitive chain implies that $x_n - c \ge 0$ and $y_n - c \le 0$ (which should be obvious, since $c$ is between $x_n$ and $y_n$) but we may also consider this a different way: \begin{gather*}
+0 \le c - x_n \le y_n - x_n \\
+0 \le y_n - c \le y_n - x_n
+\end{gather*}
+and we know this to be true since $c \ge x_n$ (as above, implying the $0 \le c - x_n$) and we may merely subtract $x_n$ from both sides of $c \le y_n$ (as above), and for the second inequality chain we may take $c \ge x_n$ and derive $-c \le -x_n$, adding $y_n$ to both sides. However we know that the expressions on the right $y_n - x_n$ converge to zero, so by \hyperref[thm:SeqSqueezeTheorem]{squeeze theorem}, we have $c - x_n \to 0$ and $y_n - c \to 0$ as $n \to \infty$, which by the \hyperref[thm:AlgebraicLimitTheoremSequences]{algebraic limit theorem} is the same as saying $x_n \to c$ and $y_n \to c$ as $n\to \infty$.
+
+Now since $(c_n)_{n\in \nats}$ is defined such that each $c_n$ is chosen from $[x_n,y_n]$, we have by construction \begin{gather*}
+x_n \le c_n \le y_n
+\end{gather*}
+for all $n\in \nats$ with both $x_n \to c$ and $y_n \to c$ as $n \to \infty$. This satisfies the requirements for the squeeze theorem to say $c_n \to c$ as $n \to \infty$.
+\end{my proof}
+
+With this in hand, we will be able to apply \hyperref[thm:BolzanoWeierstrass]{Bolzano-Weierstraß} together with the property of \hyperref[pro:SubsequencePreservesLimits]{preservation of limits under subsequences} and the \hyperref[pro:CauchySequenceProperties]{boundedness of Cauchy sequences} to say, hey, a cauchy sequence is bounded so it has a convergent subsequence with some limit, and the Cauchy sequence must get infinitely close to the rest of itself and thus to its subsequence, which also converges. That means it gets infinitely close to the same limit as its subsequence and converges!
+
+\begin{label theorem}{ConvergenceOfCauchySequencesInR}
+All Cauchy sequences converge.
+\end{label theorem}
+
+\begin{my proof}{mo}
+Let $(a_n)_{n\in \nats}$ be our Cauchy sequence. By proposition \ref{pro:CauchySequenceProperties}, it is bounded, and this satisfies the requirements for \hyperref[thm:BolzanoWeierstrass]{Bolzano-Weierstraß} implying there is a subsequence $(b_n)_{n\in \nats}$ of $(a_n)_{n\in \nats}$ and we call this limit $b \in \reals$. Our goal becomes to show that for all $\varepsilon_L > 0$ ($L$ for limit) there exists $N_L \in \nats$ such that $n\ge N_L$ implies $|a_n - b| \le \varepsilon_L$.
+
+To show this, let us start with the assumption that $(a_n)_{n\in \nats}$ is Cauchy, and so for any $\varepsilon_C > 0$ ($C$ for Cauchy) there exists $N_C \in \nats$ such that $n,m \ge N_C$ implies $|a_n - a_m| \le \varepsilon_C$, and the assumption that $(b_n)_{n\in \nats}$ converges, for all $\varepsilon_b > 0$ there exists $N_b \in \nats$ such that $n \ge N_b$ implies $|b_n - b| \le \varepsilon_b$.
+
+So assuming we are given some $\varepsilon_L$, set $\varepsilon_b, \varepsilon_C = \varepsilon_L/2$ and set $N_L = \max\{N_b,N_C\}$. This means that when $n,m \ge N_L$, we have both \begin{gather*}
+|b_n - b| \le \varepsilon_b = \frac{\varepsilon_L}{2},\\
+|a_n - a_m| \le \varepsilon_C = \frac{\varepsilon_L}{2}.
+\end{gather*}
+Moreover, since we may choose $m,n \ge N_L$, let us say that $m = \varphi(n)$ where $\varphi\colon\nats\to\nats$ is the monotonic increasing map that defines the subsequence $b_n = a_{\varphi(n)} = a_m$. This means that the latter inequality above is \begin{gather*}
+|a_n - b_n| \le \varepsilon_C = \frac{\varepsilon_L}{2}.
+\end{gather*}
+This is exactly what we need to apply the \hyperref[thm:RTriangleInequality]{triangle inequality} on $a_n,b_n,b \in \reals$, yielding \begin{gather*}
+|a_n - b| \le |a_n - b_n| + |b_n - b|.
+\end{gather*}
+
+We'll skip the bells and whistles as we have gotten more familiar with them in previous proofs: since we know $|a_n - b_n| \le \varepsilon_C$ and we know $|b_n - b| \le \varepsilon_b$, we'll replace them both in one transitive step which is obvious to us now.\begin{gather*}
+|a_n - b_n| + |b_n - b| \le \varepsilon_C + \varepsilon_b.
+\end{gather*}
+But recall we set $\varepsilon_C$ and $\varepsilon_b$ to $\varepsilon_L/2$ so they sum together to form $\varepsilon_L$. This gives us the transitive chain \begin{gather*}
+|a_n - b| \le |a_n - b_n| + |b_n - b| \le \varepsilon_C + \varepsilon_b = \varepsilon_L \\
+|a_n - b| \le \varepsilon_L
+\end{gather*}
+but this is exactly the form of the limit we wanted, so we are done.
+\end{my proof}
+
+It is worth noting how short this proof is, considering how important it will be to us and how we had first suspected this theorem might be true a whole section ago. In fact, most of the heavily lifting in this proof was done by applying theorems which were proved in the previous section, with the exception of \hyperref[thm:BolzanoWeierstrass]{Bolzano-Weierstraß}. Our theory is developing to the point where we are able to rapidly make meaningful statements about our constructions using the framework we have built up rather than constantly resorting to first principles. This is in many ways the pattern of a mathematical theory. The pattern we see here will become less starkly apparent as we move on however, since as we build up different theories they will begin to refer to one another in a much more interconnected way rather than merely a single theory building on itself.
+
+\subsection{Open and Closed Sets and the Topological Limit}
+
+We have however only scratched the surface of our discussion of space, and we have tiptoed into it using the notion of an interval to describe the idea of a region. But the way in which we have called our intervals \emph{open} or \emph{closed} is a property more general than mere intervals. In fact they will continue to prove fundamental for many chapters to come.
+
+Our exploration of openness and closedness will remain in $\reals$ in this section as we use $\reals$ as an example to demonstrate their properties and their uses. Quickly it will become apparent that the exclusion or inclusion of end-points of an interval are perhaps the least interesting things about open and closed sets.
+
+\begin{label definition}[Open and Closed Sets in $\reals$]{OpenClosedSetsInR}
+Let $A \subseteq \reals$ be some set. We say that $A$ is an \textbf{open set} if for any point $a \in \reals$, there exists an open interval containing $a$, $a \in I$, which is also contained in $A$, $I \subseteq A$. When a set $B \subset \reals$ has the property that there exists some open set $A \subseteq \reals$ which is its set compliment, i.e. \begin{gather*}
+B = \reals \setminus A = \{b\in \reals \mid b \notin A\}
+\end{gather*}
+then we call $B$ a \textbf{closed set}.
+\end{label definition}
+
+
+
+
+
+
 
 \end{document}
