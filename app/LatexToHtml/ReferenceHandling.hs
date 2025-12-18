@@ -29,13 +29,13 @@ doAnInfoBox :: Bool  -- avoid updating theorem counter ?
    -> String         -- pagename for outputting ref name
    -> RefIndexState  -- the counters and references
    -> (RefIndexState, Int)
-doAnInfoBox isProof mlabel address pagename propind = case mlabel of
+doAnInfoBox updateTheoremCounter mlabel address pagename propind = case mlabel of
    Nothing -> let
       oldthmnum = theorems propind
       ind = propind {theorems = oldthmnum + 1}
-      in if isProof
-         then (propind, oldthmnum)
-         else (ind, oldthmnum)
+      in if updateTheoremCounter
+         then (ind, oldthmnum)
+         else (propind, oldthmnum)
    Just label -> let
       oldthmnum = theorems propind
       ind = propind {
