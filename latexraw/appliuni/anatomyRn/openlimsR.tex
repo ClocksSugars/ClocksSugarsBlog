@@ -222,7 +222,7 @@ We have however only scratched the surface of our discussion of space, and we ha
 Our exploration of openness and closedness will remain in $\reals$ in this section as we use $\reals$ as an example to demonstrate their properties and their uses. Quickly it will become apparent that the exclusion or inclusion of end-points of an interval are perhaps the least interesting things about open and closed sets. In fact, if we are to ask what are motivations are here, why we are investigating this notion of \dquote{openness} or \dquote{closedness} at all, it is because these properties turn out to be deeply intrinsically linked with the features of limits.
 
 \begin{label definition}[Open and Closed Sets in $\reals$]{OpenClosedSetsInR}
-Let $A \subseteq \reals$ be some set. We say that $A$ is an \textbf{open set} if for any point $a \in \reals$, there exists an open interval containing $a$, $a \in I$, which is also contained in $A$, $I \subseteq A$. When a set $B \subset \reals$ has the property that there exists some open set $A \subseteq \reals$ which is its set compliment, i.e. \begin{gather*}
+Let $A \subseteq \reals$ be some set. We say that $A$ is an \textbf{open set} if for any point $a \in \reals$, there exists $\varepsilon > 0$ such that the open interval $I = (a - \varepsilon, a + \varepsilon)$ is contained in $A$, $I \subseteq A$. When a set $B \subset \reals$ has the property that there exists some open set $A \subseteq \reals$ which is its set compliment, i.e. \begin{gather*}
 B = \reals \setminus A = \{b\in \reals \mid b \notin A\}
 \end{gather*}
 then we call $B$ a \textbf{closed set}.
@@ -239,10 +239,22 @@ But we must not let ourselves think that this means open sets are merely open in
 We will be able to say much much more about closed sets shortly, but for now, since we have defined closed sets in $\reals$ as the absence of an open set in $\reals$, it is immediately apparent that since $(-\infty,a) \cup (b, \infty)$ is an open set, we also have its compliment $[a,b]$ the closed interval, as a closed set. Very roughly we can say that closed sets contain their end points in the way that closed intervals do, but the particular manner in which this works will have to be proven shortly.
 
 \begin{label lemma}[Open Intervals are Open Sets and Closed Intervals are Closed Sets]{OpenClosedIntervalsAreOpenClosedSets}
-Let $a,b \in \reals$ with $a< b$. Then $(a,b)$ is an open set and $[a,b]$ is a closed set.
+Let $a,b \in \reals$ with $a< b$. Then $(a,b)$ is an open set and $[a,b]$ is a closed set. %%%%%%%%%%%%%%%
 \end{label lemma}
 \begin{my proof}{m}
-This is a nearly trivial statement but worth formalizing regardless. The open interval $(a,b)$ satisfies the property of open sets since for any $x \in (a,b)$, trivially there exists an interval $I \subseteq (a,b)$ which is $I = (a,b)$, meaning that $x \in I$ automatically.
+A point $c \in (a,b)$ allows us to choose $\varepsilon = \min\{c - a,b-c\}$, i.e. the distance between $c$ and the endpoint of the interval closer to $c$, thus having $(c - \varepsilon, c + \varepsilon) \subseteq (a,b)$. We should show this formally however, and to do that, we take the property of being in $(c - \varepsilon, c + \varepsilon)$, i.e. all $z \in (c - \varepsilon, c + \varepsilon)$ satisfy $c - \varepsilon <z < c + \varepsilon$ and show that it satisfies $ a < z < b$. Let us treat the inequalities separately, as $c - \varepsilon < z $ and $z < c + \varepsilon$. Then we manipulate these inequalities as follows. \begin{gather*}
+c-\varepsilon < z \implies c-z  <\varepsilon \\
+z < c + \varepsilon \implies z - c  < \varepsilon.
+\end{gather*}
+Using $\varepsilon = \min\{c - a,b-c\}$, we know $\varepsilon \le c-a$ and $ \varepsilon \le b - c$, since $\varepsilon$ is the minimum of the two and thus either equal in the inequality or less than it, we may apply transitivity using the two different inequalities, \begin{gather*}
+c-z  <\varepsilon \le c - a \\
+z - c  < \varepsilon \le b - c
+\end{gather*}
+deriving \begin{gather*}
+c-z  < c - a \implies a < z\\
+z - c  < b - c \implies z < b
+\end{gather*}
+as desired. So we have shown that $c - \varepsilon <z < c + \varepsilon$ implies $a < z < b$, meaning $(c - \varepsilon, c + \varepsilon) \subseteq (a,b)$.
 
 Every closed interval $[a,b]$ also has the open set $A = (-\infty,a) \cup (b, \infty)$ so that $[a,b] = \reals \setminus A$.
 \end{my proof}
@@ -297,8 +309,33 @@ For the final step of the proof, we must show that the region of convergence lim
 In the other direction, our proof is similarly simple. Since all open intervals are open sets, when we are given some $(x,y)$ with $a \in (x,y)$, we immediately set $A = (x,y)$ to induce some $N_2$ where $n > N_2$ implies $a_n \in A$. Setting $N_1 = N_2$, we have $n > N_1$ implying $a_n \in (x,y)$ since $a_n \in A = (x,y)$.
 \end{my proof}
 
-This proof in some sense shows how all along our use of $\varepsilon$ in proofs as a bound, a way of saying \squote{the distance between $a_n$ and $a$ is at least $\varepsilon$ small} was in fact a proxy for speaking about open sets. In the region of convergence limit and topological limit we see that we can similarly define limits not with a notion of \squote{small} defined by \emph{distance} but rather by choosing our own \emph{small set}. Recalling our earlier analogy about limits as checking a 
+This proof in some sense shows how all along our use of $\varepsilon$ in proofs as a bound, a way of saying \squote{the distance between $a_n$ and $a$ is at least $\varepsilon$ small} was in fact a proxy for speaking about open sets. In the region of convergence limit and topological limit we see that we can similarly define limits not with a notion of \squote{small} defined by \emph{distance} but rather by choosing our own \emph{small set}. Recalling our earlier analogy about limits as checking a property with a measurement instrument at some resolution corresponding to $\varepsilon$, we lose the more obvious manner of improving our precision where we simply make $\varepsilon$ \emph{smaller} (although indeed we can still simply scale down an open set) and instead gain the ability to check the precision in arbitrary other ways. For instance, where previously we had $|a_n - a| \le \varepsilon$ meaning that $a_n \in (a - \varepsilon, a + \varepsilon)$, this region of convergence could only be defined as centered around $a$, buffered by $\varepsilon$ on either side, but our region of convergence limit shows that in fact $a$ does not need to be the center of the interval, it only needs to be in the interval.
 
+But most of all, this proof should perhaps inform us what is meant by an open set in general. In some sense, what we have shown above, the notion of open sets as a region within which a sequence converges, could be argued in a sense to be what open sets are \emph{for}. Indeed we will show in a later section that in other kinds of spaces where notions of ordering or other ways of structuring the space no longer make sense, the notion of an open set still exists such that it remains meaningful to take limits. If someone asks you \squote{what \emph{is} an open set} and you simply must reply in only two seconds, your mind should go to \squote{a set that can be used to define convergence}. And even when our notions of what sets count as open are radically distorted in future exampls, our definition of which sequences converge and to what limits will still be defined by those distorted notions of open sets, precisely because which sets count as open define limits in abstract.
+
+Now, if we are to say that what we have just done is demonstrated the fundamental purpose of open sets, then it should make sense to immediately follow with the fundamental purpose of clsoed sets as we promised earlier. More specifically, if open sets are sets containing some limit point and the tail of an infinite sequence converging to that limit point, closed sets are sets which contain the limits corresponding to each and every sequence contained within them. If we take this to be what we think closed sets \emph{are}, it immediately follows why closed intervals must contain their endpoints, since any monotone increasing sequence in the interval bounded by it must converge to the supremum, which must then be included, and vice versa for the infimum. You could also say that this is the reason why these sets are called \emph{closed}, not in opposition to open sets, but in the same sense that a set $A$ may be \emph{closed under addition}, meaning that $a,b\in A$ implies $a+b \in A$, closed sets are \emph{closed under limits}, in that any sequences in the set converges to a point in the limit.
+
+\begin{label proposition}[Closed Sets are Closed Under Limits in $\reals$]{ClosedSetsClosedUnderLimitsR}
+Let $B \subset \reals$ be a set. We say that a point $a \in B$ is a \textbf{limit point} of $B$ if there exists a sequence $(a_n)_{n\in \nats}$ with $a_n \in B$ for all $n \in \nats$ with $a = \lim_{n\to\infty} a_n$.
+
+$B$ is then closed if and only if it contains all of its limit points.
+\end{label proposition}
+
+\begin{my proof}{mo}
+To prove that closed sets contain their limit points, we must proceed by contradiction. If $B$ is closed, then there exists an open set $A = \reals \setminus B$ which is open by definition. what we want to prove is that all sequences $(a_n)_{n\in \nats}$ which are $a_n \notin A$ (and thus $a_n \in B$) have limits $a \notin A$ (and thus $a \in B$, meaning it contains its limit points) so our proof by contradiction will presume that there exists a sequence $(a_n)_{n\in \nats}$ with $a_n \in B$ converging to $a \in A$ (a limit point which is not in $B$).
+
+In fact the violation of a known fact occurs immediately. When we described the \hyperref[thm:SeqLimCharacterizationsR]{topological limit} it was that for any open set $A$ containing the limit $a$, there exists a $N\in \nats$ such that for all $n > N$, we have $a_n \in A$. And yet we have presumed that $a_n \notin A$ for all $n \in \nats$, so there cannot exist any $N \in \nats$ with that property, violating the assumption that $a_n \to a$ as $n \to \infty$. So such a sequence cannot exist, and all sequences in $B$ must converge in $B$.
+
+For the converse, we proceed by proof of contradiction again. That is, we are trying to prove that if $B$ contains all its limit points, then the set $A = \reals \setminus B$ is an open set. So we'll presume for the sake of contradiction that $A$ is not open, i.e. there exists a point $z\in A$ for which no open interval centered on $z$ is contained in $A$, or equivalently, for every interval $I = (z - \varepsilon,z + \varepsilon)$, the intersection $I \cap B$ is nonempty.
+
+Let $(x_n)_{n\in \nats}$ and $(y_n)_{n\in \nats}$ be sequences that both converge to $z$ with $z - x_n = y_n - z$, in effect defining by proxy a sequence $(\varepsilon_n)_{n\in \nats}$ defining the nested intervals $(z - \varepsilon_n, z + \varepsilon_n) = (x_n,y_n)$, each candidate intervals which we would say are in $A$ if $A$ were open. As above, we stated that every interval containing $z$ intersects $B$, so every $(x_n,y_n) \cap B$ is non-empty, but this means that from each non-empty set $(x_n,y_n) \cap B$ we may choose some $a_n \in (x_n,y_n) \cap B$ to define a sequence $(a_n)_{n\in \nats}$ which must also converge to $z$ due to the \hyperref[thm:SeqSqueezeTheorem]{squeeze theorem} (namely since $x_n < a_n < y_n$ and $x_n,y_n \to z$ as $n \to \infty$). What we have constructed then is a sequence $(a_n)_{n\in \nats}$ which is $a_n \in B$ (since $a_n \in (x_n,y_n) \cap B$, i.e. $\big(a_n \in (x_n,y_n)\big) \wedge (a_n\in B) $) for all $n\in \nats$ yet converges to $z \in A = \reals \setminus B$, i.e. $z \notin B$, contradicting the assumption that $B$ contains all its limit points. We conclude that $B$ must be closed. 
+\end{my proof}
+
+Understanding this property, that closed sets are sets which are \emph{closed under limits}, and that open sets are sets which sequences converge into and that contain intervals around their points, we can now ask if open and closed sets are even opposites. Obviously they are defined in such a way that a closed set is the absence of an open set, and yet these properties seem somewhat disconnected from each other. It is worth noting that it is indeed possible for a set to be either open and closed or neither open nor closed; the archetypal example of an open and closed set (colloquially \textbf{clopen}) is $\reals$ itself: just as we think of $\{a\} = [a,a]$ as a closed interval, we think of $\{\} = \emptyset = (a,a)$, the empty set, as open, thus $\reals = \reals \setminus \emptyset$ must be closed. Yet we also think of $\reals = (-\infty,\infty)$ so we think of it as open. Both $\emptyset$ and $\reals$ are then clopen sets. For a set which is neither open nor closed, take the rational numbers as a subset of the real numbers. The rational numbers are a collection of infinite \emph{points} with no intervals, and so it cannot be open, and yet as discussed earlier, it does not contain limit points such as irrational numbers, so it is neither open nor closed.
+
+\subsection{Some musings on Countability and Uncountability}
+
+(rewrite first draft here)
 
 
 \end{document}
