@@ -79,7 +79,9 @@ executable ClocksSugarsBlog
                      SiteStructure.Manifest,
                      SiteStructure.ContentsPage,
                      SiteStructure.WorkHorse,
-                     SiteStructure.MainTools
+                     SiteStructure.MainTools,
+                     LatexToPdf.WorkHorse,
+                     LatexToPdf.MainTools
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -98,7 +100,8 @@ executable ClocksSugarsBlog
                      containers,
                      aeson,
                      directory,
-                     filepath
+                     filepath,
+                     bytestring
 
 
     -- Directories containing source files.

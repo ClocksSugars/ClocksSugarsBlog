@@ -22,7 +22,7 @@ import Text.LaTeX.Base.Parser (parseLaTeX)
 --    Most of the work here is in turning the manifest into a big IO
 --    monad program that will only at the end do anything.
 
-
+---   TODO: SEPARATE WRITECALLS INTO SEPARATE PROGRAM SO WE CAN DO ANALYTICS
 
 parseSubChapter ::
    FolderPath ->
@@ -62,6 +62,7 @@ parseSubChapter address subchapter = let
          writeFile ("logs/" <> folderPathRender docaddress <> "1.txt") (logs !! 1)
          writeFile ("logs/" <> folderPathRender docaddress <> "2.txt") (logs !! 2)
          copyassets subchapter.depends
+         putStrLn $ "Success on " ++ subchapter.name
          return newrefs
       in do
       handle <- openFile
@@ -103,7 +104,10 @@ parseChapter address chapter = let
          case mayberefs of
             Nothing -> do {putStrLn "Exiting chapter"; return Nothing}
             Just refout -> do {programtail refout}
-      in (theprogram , indexedsechead:indexedsectail)
+      in (
+         theprogram, --- We want to be able to make webpages without necessarily documenting them here
+         if x.showonpage then indexedsechead:indexedsectail else indexedsectail
+      )
    (endprogram, listofindexsections) = sectionWorker chapter.sections
    in (endprogram, theindex listofindexsections)
 

@@ -3,19 +3,57 @@
 --{-# LANGUAGE DeriveGeneric #-}
 
 module SiteStructure.Manifest (
-   tempappliuni,
+   makeAppliUniManifestFromFile,
+   getAppliUniManifest,
+   withManifest,
+   getWithManifest
    ) where
 
 --import GHC.Generics
 --import aeson
+import System.IO
 import SiteStructure.RecordTypes
-import Data.Text (Text)
+-- import Data.Text (Text)
+import Data.String
+import Data.Aeson (decodeFileStrict,encodeFile)
 
---- make this file turn a json into the structure below!
+--- obviously would prefer this to just import a byte string but im stuggling to
+---   figure out which kind of byte string it uses
 
---- This should all be moved to a json file later!!
-tempappliuni :: WrittenWorkBook
-tempappliuni = WrittenWorkBook {
+getWithManifest :: (WrittenWorkBook -> IO (Maybe a)) -> IO (Maybe a)
+getWithManifest func = do
+   mManifest <- getAppliUniManifest
+   result <- case mManifest of
+      Just manifest -> do
+         putStrLn "Good appliuni Manifest"
+         func manifest
+      Nothing -> do
+         putStrLn "Bad appliuni Manifest"
+         return Nothing
+   putStrLn "Goodbye"
+   return result
+
+withManifest :: (WrittenWorkBook -> IO a) -> IO ()
+withManifest func = do
+   mManifest <- getAppliUniManifest
+   case mManifest of
+      Just manifest -> do
+         putStrLn "Good appliuni Manifest"
+         _ <- func manifest
+         return ()
+      Nothing -> do
+         putStrLn "Bad appliuni Manifest"
+   putStrLn "Goodbye"
+
+getAppliUniManifest :: IO (Maybe WrittenWorkBook)
+getAppliUniManifest = decodeFileStrict "APPLIUNIMANIFEST.json"
+
+---contingency for if json parsing on handmade json keeps failing
+makeAppliUniManifestFromFile :: IO ()
+makeAppliUniManifestFromFile = encodeFile "APPLIUNIMANIFEST.json" appliunistruct
+
+appliunistruct :: WrittenWorkBook
+appliunistruct = WrittenWorkBook {
    name = "appliuni",
    title = "Application Unification",
    chapters = [
@@ -27,6 +65,7 @@ tempappliuni = WrittenWorkBook {
             SubChapter {
                name = "philofmath",
                title = "Nascent's Philosophy of Mathematics",
+               showonpage = True,
                description = "(11 PDF Pages) A philosophical discussion of what a theory does for us, what mathematical thought is as a category for theories, and how to read the language of mathematical texts.",
                depends = [
                   "bentcylinder.svg"
@@ -35,12 +74,14 @@ tempappliuni = WrittenWorkBook {
             SubChapter {
                name = "proptypes",
                title = "Propositional Logic: A Programming Inspired Approach",
+               showonpage = True,
                description = "(28 PDF Pages) An introduction to dependent type theory and a basic discussion of proofs-as-programs, illustrating the reasoning style of propositional logic in a programmatic way.",
                depends = []
                },
             SubChapter {
                name = "maththink",
                title = "Rewrites and Sets: The Cognitive Weapons of Math",
+               showonpage = True,
                description = "(24 PDF Pages) in draft 1.5 stage. a mostly philosophical engagement on mathematical thinking + some basic set theory and what we mean by equivalence in a non-constructive world. Towards the end we tie off some notational loose ends and explicitly specify some more conventions.",
                depends = []
                }
@@ -54,20 +95,30 @@ tempappliuni = WrittenWorkBook {
                SubChapter {
                   name = "realnumsaxioms",
                   title = "Real Numbers from Axioms",
+                  showonpage = True,
                   description = "(17 PDF Pages) A discussion of the properties of real numbers as derived by rewrites on their axioms, as well as our earliest focus on the concerns and mentality of real analysis.",
                   depends = []
                   },
                SubChapter {
-                  name = "seqlimitsinR",
+                  name = "seqlimsinR",
                   title = "Sequences and Limits in $\\mathbb{R}$",
+                  showonpage = True,
                   description = "(19 PDF Pages) Here we introduce the notion of limits on sequences, taking great care to both establish them as formal objects and as intuitive ones. In this section we begin the process of thinking about the study of limits as the study of what happens when you look very close to a point. For our Section appendix we discuss the similarities between real numbers as a number system and convergent sequences, and how limits preserve these similarities.",
                   depends = ["basicconvergence.svg"]
                   },
                SubChapter {
                   name = "openlimsR",
                   title = "Intervals in $\\mathbb{R}$ and Limit Characterizations",
-                  description = "(WIP) In this section we formally discuss intervals in $\\mathbb{R}$, introducing notions of open and closed intervals, and open and closed sets. This will be our very first little taste of (non-algebraic) topological concerns, and accordingly we introduce the topological limit characterization, before paying off earlier promised theorems such as Bolzano-Weierstraß and the convergence of Cauchy sequences. For our section appendix we give a much more informal discussion on cardinality, explaining uncountable infinity and when we need to be concerned about it.",
+                  showonpage = True,
+                  description = "(15 PDF Pages, no appendix yet) In this section we formally discuss intervals in $\\mathbb{R}$, introducing notions of open and closed intervals, and open and closed sets. This will be our very first little taste of (non-algebraic) topological concerns, and accordingly we introduce the topological limit characterization, before paying off earlier promised theorems such as Bolzano-Weierstraß and the convergence of Cauchy sequences. For our section appendix we give a much more informal discussion on cardinality, explaining uncountable infinity and when we need to be concerned about it.",
                   depends = ["metricopensetproperty.svg"]
+                  },
+               SubChapter {
+                  name = "funclimsR",
+                  title = "Limits on $\\mathbb{R} \\to \\mathbb{R}$ Functions",
+                  showonpage = False,
+                  description = "(WIP)",
+                  depends = []
                   }
                ]
             }

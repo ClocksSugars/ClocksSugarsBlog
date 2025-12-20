@@ -2,6 +2,7 @@
 module Main where
 
 import System.IO
+import System.Environment ( getArgs )
 -- import Data.String
 -- import Data.Text (Text)
 -- import Control.Monad.Trans.Except
@@ -13,18 +14,48 @@ import System.IO
 -- import System.Directory
 
 import LatexToHtml.MainTools
-import LatexToHtml.Utils
 import SiteStructure.MainTools
+import LatexToPdf.MainTools
+
+import LatexToHtml.Utils
 import Text.LaTeX.Base.Parser
 import System.Directory (copyFile, createDirectoryIfMissing)
+import Data.Aeson (decodeFileStrict,encodeFile)
+import Data.String (fromString)
 
 main :: IO ()
 main = do
-   refsIfSuccess <- webBookFromManifest tempappliuni blankIndex
-   -- do weird studies of this reference list at your leisure
-   copyAssetDepends assetDepends
-   putStrLn "Goodbye"
+   commandlineargs <- getArgs
+   --putStrLn $ "Command line args were: " ++ show commandlineargs
+   if "-h" `elem` commandlineargs || commandlineargs == [] then
+      putStrLn "-h for help, -e to write default json, -m to make site from json file, -l to make latex pdf. -e and -m together always encodes json first."
+      else return ()
 
+   if "-e" `elem` commandlineargs then
+      do
+         makeAppliUniManifestFromFile
+         putStrLn "wrote manifest json"
+      else return ()
+
+   if "-m" `elem` commandlineargs then
+      makeSite
+      else return ()
+
+   if "-l" `elem` commandlineargs then
+      withManifest pdfBookFromManifest
+      else return ()
+
+
+makeSite :: IO ()
+makeSite = do
+   _ <- getWithManifest $ \manifest -> do
+      refsIfSuccess <- webBookFromManifest manifest blankIndex
+      copyAssetDepends assetDepends
+      return refsIfSuccess
+   return ()
+
+
+--- This is only for files which the entire site depends on
 assetDepends :: [String]
 assetDepends = [
    "tribackgrey.png"
@@ -40,27 +71,3 @@ copyAssetDepends stuff = let
    in do
       createDirectoryIfMissing True "public/assets"
       worker stuff
-
-
--- main :: IO ()
--- main = do
---    handle <- openFile "latexraw/anatomyRn/proptypes.tex" ReadMode
---    xs <- hGetContents handle
---    let doc = extractDocument . fromRight . parseLaTeX . fromString $ xs
---    writeFile "inspect0.txt" $ show doc
---    let part1 = processOne doc
---    writeFile "inspect1.txt" $ show part1
---    let part2 = processTwo part1
---    writeFile "inspect2.txt" $ show part2
---    let (part3, index) = processThree "proptypes" part2 blankIndex
---    writeFile "test.html" $ R.renderHtml $ pageHTML "Propositional Logic: A Constructive Approach" part3 --"Nascent's Philosophy of Mathematics" part3
---    writeFile "CumulativeReferences.txt" $ show . references $ index
---    hClose handle
-
-
--- main :: IO ()
--- main = do
---    writeFile "test.html" $ R.renderHtml $ pageHTML "some bs im testing" $ do
---       H.div ! class_ "definition" $ do
---          H.div ! class_ "definitiontitle" $ "Definition 1: Test"
---          p "here we would put some definition text etc etc"

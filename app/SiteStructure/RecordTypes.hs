@@ -1,12 +1,20 @@
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE DeriveGeneric #-}
+
+{-# LANGUAGE OverloadedStrings #-}
+
 module SiteStructure.RecordTypes (
    IndexedSection(..),
    IndexedChapter(..),
    ChapterIndex(..),
    SubChapter(..),
    Chapter(..),
-   WrittenWorkBook(..)
+   WrittenWorkBook(..),
+   tempappliuni
 ) where
+
+import GHC.Generics
+import Data.Aeson
 
 import Data.Text (Text)
 
@@ -34,19 +42,104 @@ data ChapterIndex = ChapterIndex {
 data SubChapter = SubChapter {
    name :: String,
    title :: Text,
+   showonpage :: Bool,
    description :: Text,
    depends :: [String]
-}
+} deriving (Generic)
 
 data Chapter = Chapter {
    name :: String,
    title :: Text,
    description :: Text,
    sections :: [SubChapter]
-}
+} deriving (Generic)
 
 data WrittenWorkBook = WrittenWorkBook {
    name :: String,
    title :: Text,
    chapters :: [Chapter]
-}
+} deriving (Generic)
+
+instance FromJSON SubChapter
+instance FromJSON Chapter
+instance FromJSON WrittenWorkBook
+
+instance ToJSON SubChapter where
+   toEncoding = genericToEncoding defaultOptions
+instance ToJSON Chapter where
+   toEncoding = genericToEncoding defaultOptions
+instance ToJSON WrittenWorkBook where
+   toEncoding = genericToEncoding defaultOptions
+
+tempappliuni :: WrittenWorkBook
+tempappliuni = WrittenWorkBook {
+   name = "appliuni",
+   title = "Application Unification",
+   chapters = [
+      Chapter {
+         name = "prelims",
+         title = "Preliminaries",
+         description = "This chapter acts as an introduction to every concept that mathematicians intrinsically know but never say out loud that I could think of. The ultimate goal of this chapter is that you should come out the other side with enough awareness of what mathematicians are doing that you could read a math book, namely, my math book.",
+         sections = [
+            SubChapter {
+               name = "philofmath",
+               title = "Nascent's Philosophy of Mathematics",
+               showonpage = True,
+               description = "(11 PDF Pages) A philosophical discussion of what a theory does for us, what mathematical thought is as a category for theories, and how to read the language of mathematical texts.",
+               depends = [
+                  "bentcylinder.svg"
+                  ]
+               },
+            SubChapter {
+               name = "proptypes",
+               title = "Propositional Logic: A Programming Inspired Approach",
+               showonpage = True,
+               description = "(28 PDF Pages) An introduction to dependent type theory and a basic discussion of proofs-as-programs, illustrating the reasoning style of propositional logic in a programmatic way.",
+               depends = []
+               },
+            SubChapter {
+               name = "maththink",
+               title = "Rewrites and Sets: The Cognitive Weapons of Math",
+               showonpage = True,
+               description = "(24 PDF Pages) in draft 1.5 stage. a mostly philosophical engagement on mathematical thinking + some basic set theory and what we mean by equivalence in a non-constructive world. Towards the end we tie off some notational loose ends and explicitly specify some more conventions.",
+               depends = []
+               }
+            ]
+         },
+         Chapter {
+            name = "anatomyRn",
+            title = "Anatomy of $\\mathbb{R}^n$: A Brief Introduction to Real Analysis",
+            description = "In this chapter we discuss some topics from real analysis with a focus on how these topics reflect on the nature of $\\mathbb{R}^n$ as a space and its deeper, stranger, properties. Throughout the chapter, we develop tools to study mathematical objects in $\\mathbb{R}^n$ as well as increasingly describing properties you'd never thought to point out, and discussing what happens in a space without that property. In this way, we slowly build up what the real numbers are from what they would be if they were not.",
+            sections = [
+               SubChapter {
+                  name = "realnumsaxioms",
+                  title = "Real Numbers from Axioms",
+                  showonpage = True,
+                  description = "(17 PDF Pages) A discussion of the properties of real numbers as derived by rewrites on their axioms, as well as our earliest focus on the concerns and mentality of real analysis.",
+                  depends = []
+                  },
+               SubChapter {
+                  name = "seqlimsinR",
+                  title = "Sequences and Limits in $\\mathbb{R}$",
+                  showonpage = True,
+                  description = "(19 PDF Pages) Here we introduce the notion of limits on sequences, taking great care to both establish them as formal objects and as intuitive ones. In this section we begin the process of thinking about the study of limits as the study of what happens when you look very close to a point. For our Section appendix we discuss the similarities between real numbers as a number system and convergent sequences, and how limits preserve these similarities.",
+                  depends = ["basicconvergence.svg"]
+                  },
+               SubChapter {
+                  name = "openlimsR",
+                  title = "Intervals in $\\mathbb{R}$ and Limit Characterizations",
+                  showonpage = True,
+                  description = "(15 PDF Pages, no appendix yet) In this section we formally discuss intervals in $\\mathbb{R}$, introducing notions of open and closed intervals, and open and closed sets. This will be our very first little taste of (non-algebraic) topological concerns, and accordingly we introduce the topological limit characterization, before paying off earlier promised theorems such as Bolzano-Weierstraß and the convergence of Cauchy sequences. For our section appendix we give a much more informal discussion on cardinality, explaining uncountable infinity and when we need to be concerned about it.",
+                  depends = ["metricopensetproperty.svg"]
+                  },
+               SubChapter {
+                  name = "funclimsR",
+                  title = "Limits on $\\mathbb{R} \\to \\mathbb{R}$ Functions",
+                  showonpage = False,
+                  description = "(WIP)",
+                  depends = []
+                  }
+               ]
+            }
+      ]
+   }

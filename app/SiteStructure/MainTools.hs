@@ -2,8 +2,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module SiteStructure.MainTools (
-   tempappliuni,
-   webBookFromManifest
+   getAppliUniManifest,
+   webBookFromManifest,
+   makeAppliUniManifestFromFile,
+   withManifest,
+   getWithManifest
 ) where
 
 import System.Directory (copyFile)
