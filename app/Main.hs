@@ -28,7 +28,7 @@ main = do
    commandlineargs <- getArgs
    --putStrLn $ "Command line args were: " ++ show commandlineargs
    if "-h" `elem` commandlineargs || commandlineargs == [] then
-      putStrLn "-h for help, -e to write default json, -m to make site from json file, -l to make latex pdf. -e and -m together always encodes json first."
+      putStrLn "-h for help, -e to write default json, -m to make site from json file, -l to make latex for pdf. -e and -m or -l together always does -e first."
       else return ()
 
    if "-e" `elem` commandlineargs then
