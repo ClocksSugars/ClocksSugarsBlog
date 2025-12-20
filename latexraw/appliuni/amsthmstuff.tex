@@ -1,5 +1,6 @@
 \newcounter{statements}[section]
-\renewcommand{\thestatements}{\thesection.\arabic{statements}}
+%\renewcommand{\thestatements}{\thesection.\arabic{statements}}
+\labelformat{statements}{\thesection.\arabic{statements}}
 
 \usepackage{tcolorbox}
 \usepackage{amsthm}
@@ -20,7 +21,7 @@
 		colback=white,%
 		colframe=LightGreen,%
 		coltitle=black,%
-		title=Definition \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		title=Definition \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 		label=def:#2%
 	}
 
@@ -33,7 +34,7 @@
 		colback=white,%
 		colframe=LightGreen,%
 		coltitle=black,%
-		title=Definition \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		title=Definition \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 	}
 	
 \newtcolorbox[use counter=statements]%
@@ -45,7 +46,7 @@
 		colback=white,%
 		colframe=LightCoral,%
 		coltitle=black,%
-		title=Theorem \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		title=Theorem \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 		label=thm:#2%
 	}
 
@@ -58,7 +59,7 @@
 		colback=white,%
 		colframe=LightCoral,%
 		coltitle=black,%
-		title=Theorem \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		title=Theorem \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 	}
 	
 \newtcolorbox[use counter=statements]%
@@ -70,7 +71,7 @@
 		colback=white,%
 		colframe=Violet,%
 		coltitle=black,%
-		title=Proposition \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		title=Proposition \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 		label=pro:#2%
 	}
 
@@ -83,7 +84,7 @@
 		colback=white,%
 		colframe=Violet,%
 		coltitle=black,%
-		title=Proposition \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		title=Proposition \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 	}
 
 \newtcolorbox%
@@ -125,7 +126,7 @@
 		colback=white,%
 		colframe=LightPink,%
 		coltitle=black,%
-		title=Lemma \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		title=Lemma \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 		label=lem:#2%
 	}
 
@@ -137,7 +138,7 @@
 		colback=white,%
 		colframe=LightPink,%
 		coltitle=black,%
-		title=Lemma \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		title=Lemma \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 	}
 	
 \newtcolorbox[use counter=statements]%
@@ -148,7 +149,7 @@
 		colback=white,%
 		colframe=Khaki,%
 		coltitle=black,%
-		title=Corollary \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		title=Corollary \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 		label=crl:#2,%
 		breakable%
 	}
@@ -161,7 +162,7 @@
 		colback=white,%
 		colframe=Khaki,%
 		coltitle=black,%
-		title=Corollary \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		title=Corollary \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 		breakable%
 	}
 	
@@ -173,7 +174,7 @@
 		colback=white,%
 		colframe=LightGrey,%
 		coltitle=black,%
-		title=Notation \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		title=Notation \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 		label=not:#2%
 	}
 
@@ -185,7 +186,7 @@
 		colback=white,%
 		colframe=LightGrey,%
 		coltitle=black,%
-		title=Notation \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		title=Notation \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 	}
 	
 \newtcolorbox[use counter=statements]%
@@ -197,7 +198,7 @@
 		colback=white,%
 		colframe=Orange,%
 		coltitle=black,%
-		title=Example \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		title=Example \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 		label=exa:#2%
 	}
 
@@ -210,7 +211,7 @@
 		colback=white,%
 		colframe=Orange,%
 		coltitle=black,%
-		title=Example \thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		title=Example \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
 	}	
 	
 	

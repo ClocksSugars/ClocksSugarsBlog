@@ -2,6 +2,7 @@
 module LatexToPdf.WorkHorse where
 
 import System.IO
+import System.Directory (copyFile)
 import Data.String (fromString)
 import Text.LaTeX.Base.Syntax (LaTeX(..),TeXArg(..))
 import Text.LaTeX.Base.Parser (parseLaTeX)
@@ -13,6 +14,11 @@ import SiteStructure.RecordTypes
 parseSubChapter :: FolderPath -> SubChapter -> IO (Maybe LaTeX)
 parseSubChapter address subchapter = let
    docaddress = (subchapter.name : address)
+   copyassets :: [String] -> IO()
+   copyassets [] = return ()
+   copyassets (x:xs) = (do
+      copyFile ("latexraw/" <> folderPathRender address <> "/" <> x) ("latexvomit/" <> x)
+      ) >> copyassets xs
    theprogram :: IO (Maybe LaTeX)
    theprogram = do
       handle <- openFile
@@ -25,6 +31,7 @@ parseSubChapter address subchapter = let
             return Nothing
          Right doc -> do
             putStrLn ("Success on " ++ subchapter.name)
+            copyassets subchapter.depends
             return $ Just $ extractDocument doc
       parsedTitle <- case (parseLaTeX $ subchapter.title) of
          Left _ -> do

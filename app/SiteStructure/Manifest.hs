@@ -93,7 +93,7 @@ appliunistruct = WrittenWorkBook {
             description = "In this chapter we discuss some topics from real analysis with a focus on how these topics reflect on the nature of $\\mathbb{R}^n$ as a space and its deeper, stranger, properties. Throughout the chapter, we develop tools to study mathematical objects in $\\mathbb{R}^n$ as well as increasingly describing properties you'd never thought to point out, and discussing what happens in a space without that property. In this way, we slowly build up what the real numbers are from what they would be if they were not.",
             sections = [
                SubChapter {
-                  name = "realnumsaxioms",
+                  name = "realnumsax",
                   title = "Real Numbers from Axioms",
                   showonpage = True,
                   description = "(17 PDF Pages) A discussion of the properties of real numbers as derived by rewrites on their axioms, as well as our earliest focus on the concerns and mentality of real analysis.",
