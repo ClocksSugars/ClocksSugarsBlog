@@ -10,8 +10,20 @@ import SiteStructure.AddressManagement
 import SiteStructure.RecordTypes
 import LatexToHtml.MainTools
 
-import Text.LaTeX.Base (LaTeX)
-import Text.LaTeX.Base.Parser (parseLaTeX)
+import Text.LaTeX.Base (LaTeX, readFileTex)
+import Text.LaTeX.Base.Parser (parseLaTeXWith, ParserConf(..), ParseError)
+
+import Data.Text (Text)
+
+-- we need a custom parser that will ignore lstlisting envs
+ourParseConf :: ParserConf
+ourParseConf = ParserConf {
+   verbatimEnvironments = ["verbatim", "lstlisting"]
+}
+
+parseLaTeX :: Text -> Either ParseError LaTeX
+parseLaTeX = parseLaTeXWith ourParseConf
+
 
 --- Here is the way this is intended to work:
 --    The address argument (where present) is intended
@@ -23,6 +35,7 @@ import Text.LaTeX.Base.Parser (parseLaTeX)
 --    monad program that will only at the end do anything.
 
 ---   TODO: SEPARATE WRITECALLS INTO SEPARATE PROGRAM SO WE CAN DO ANALYTICS
+
 
 parseSubChapter ::
    FolderPath ->
@@ -65,17 +78,13 @@ parseSubChapter address subchapter = let
          putStrLn $ "Success on " ++ subchapter.name
          return newrefs
       in do
-      handle <- openFile
-         ("latexraw/" <> folderPathRender docaddress <> ".tex")
-         ReadMode
-      xs <- hGetContents handle
-      outc <- case (parseLaTeX . fromString $ xs) of
-         Left _ -> do
-            putStrLn ("Failure on " <> folderPathRender docaddress)
-            return Nothing
-         Right doc -> Just <$> parseSuccessCase doc
-      hClose handle
-      return outc
+         xs <- readFileTex ("latexraw/" <> folderPathRender docaddress <> ".tex")
+         case (parseLaTeX xs) of
+            Left theerror -> do
+               putStrLn ("Failure on " <> folderPathRender docaddress)
+               print theerror
+               return Nothing
+            Right doc -> Just <$> parseSuccessCase doc
    in (theprogram, theindex)
 
 parseChapter ::

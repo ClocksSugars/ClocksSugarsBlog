@@ -42,12 +42,56 @@ We define the \textbf{natural numbers}, denoted $\nats$, to be a type with the f
    \mathbf{Z}\colon \nats, \\
    \mathbf{S}\colon \nats \to \nats
 \end{gather*}
-which we call \emph{zero} and the \emph{successor} respectively. That is, $\mathbf{Z}$ can be thought of as a function that takes nothing and always produces the same result as a constructor, thus defining one single element of the type; $\mathbf{S}$ can also be thought of a function that takes any other member $n \colon \nats$ and uniquely defines a new member $\mathbf{S}(n) \colon \nats$. By unique, we mean that if $\mathbf{S}(a) = \mathbf{S}(b)$ then $a = b$ and vice versa.
+which we call \emph{zero} and the \emph{successor} respectively. That is, $\mathbf{Z}$ can be thought of as a function that takes nothing and always produces the same result as a constructor, thus defining one single element of the type; $\mathbf{S}$ can also be thought of a function that takes any other member $n \colon \nats$ and uniquely defines a new member $\mathbf{S}(n) \colon \nats$. By unique, we mean that if $\mathbf{S}(a) = \mathbf{S}(b)$ then $a = b$ and vice versa. 
 
 Outside of this section, we consider the natural numbers to start \emph{from one} not zero.
 \end{label definition}
 
 It is reasonable to see this and wonder how this definition of the natural numbers, defined ostensibly from only two rules, populates the entire set of counting numbers we know. The simple answer to this is that you would read $\mathbf{S}$ as a function $n \mapsto n + 1$, however instead of being a function, it is in this instance \emph{the definition} of what it means to count forward one number. What we have done, really, is to define the counting numbers distinctly as \squote{the first number} and \squote{the number we count after that}. What that means is that a number like $3$ would be written in its full form as $\mathbf{S}(\mathbf{S}(\mathbf{S}(\mathbf{Z})))$, and we would \squote{read} the number based on counting the successor functions, i.e. counting how many times we counted up one.
+
+\begin{my proof}[Inductive Natural Types as Code (e.g. Rust Enums)]{m}
+If you're familiar with rust then you may have seen something like the above before. In fact the corresponding code to recreate this in rust would look something like this:
+\begin{lstlisting}[language=Rust]
+enum NaturalNumber {
+	Z,
+	S(Box<NaturalNumber>)
+}
+\end{lstlisting}
+
+Where we have \squote{boxed} the natural number purely because the rust compiler does not allow enums constructors to contain instances of themselves since this can lead to not knowing the size of the constructor; by holding a box, we know that the size of $\mathbb{S}$ is equal to or slightly greater than a pointer to our boxed natural number within. Such a constraint does not exist in languages such as Haskell; see below the equivalent construction.
+
+\begin{lstlisting}[language=Haskell]
+data NatNum = Z | S NatNum
+\end{lstlisting}
+
+On its own a construction like this is not very useful in rust or haskell; in fact languages that literally use the construction above for the sake of proofs (lean, agda, coq, generally proof languages) will usually have some behind the scenes tool to substitute anything that looks roughly like a natural number with an unsigned integer. However if you say that the \squote{number} can hold one other thing, then it starts to look more like a linked list.
+
+\begin{lstlisting}[language=Rust]
+enum SimpleLinkedList<T> {
+	Z,
+	S(Box<T>, Box<SimpleLinkedList>)
+}
+\end{lstlisting}
+
+More importantly to our purposes however, it is then the case that any object in code that looks roughly like a linked list in this sort of way also represents natural numbers, i.e. $\mathtt{NaturalNumbers}$ is virtually identical to $\mathtt{SimpleLinkedList<()>}$ where we have used the unit type in our generic type.
+
+Accordingly, we would then define equivalence of two natural numbers in the following way:
+\begin{lstlisting}[language=Rust]
+impl PartialEq for NaturalNumber {
+	fn eq(&self, other: &Self) -> bool {
+		match (self, other) {
+			(Z,Z) => true
+			(S(m), S(n)) => (m == n)
+			_ => false
+		}
+	}
+}
+impl Eq for NaturalNumber {}
+\end{lstlisting}
+
+where we have literally encoded the statement that $\mathbb{Z} = \mathbb{Z}$ and that \dquote{if $\mathbf{S}(a) = \mathbf{S}(b)$ then $a = b$} as we had said above. This pattern of defining behaviours or properties of natural numbers recursively will show up a lot as we continue through this section, and is in a sense what we mean when we say \squote{inductive} natural numbers (think \squote{proof by \emph{induction}}).
+
+\end{my proof}
 
 You could reasonably ask now \squote{but what is $\mathbf{Z}$?} or \squote{but what does $\mathbf{S}$ do?} in a deeper sense of what they \emph{are} rather than merely what we intend these symbols to mean. The answer to that, as in a similar fashion we will keep encountering, is \emph{whatever works}. You could define a notion of natural numbers such as these in python using the notion of a list, or an array in other languages, defining $\mathbf{Z} = \mathtt{[]}$ the empty list, and $\mathbf{S}(n) = \mathtt{[n]}$ as the numeral contained in a list, such that $3 = \mathtt{[[[[]]]]}$, an empty list contained in a list, repeated three times. You could do a similar thing with nested pairs so that $2 = \mathtt{([],([],[]))}$. The instantiation of these constructors does not matter, and they can correspond \squote{really} (insofar as one rationalizes that there is something \emph{real} about the constructs of programming languages or stories about what a CPU does with those constructs) to anything you like as long as you are able and willing to \emph{read} that function as symbolizing what we intend it to mean.
 
@@ -63,6 +107,19 @@ We define the function $\mathtt{add}\colon \nats \to \nats \to \nats$, which we 
    \mathtt{add}(m, \mathbf{S}(p)) = \mathtt{add}(\mathbf{S}(m),p).
 \end{gather*}
 \end{label definition}
+
+\begin{my proof}[(Rust Code) Inductive Addition for Natural Numbers]{m}
+If you are so inclined, the above definition can be thought of as saying the following:
+\begin{lstlisting}[language=Rust]
+fn add(m: NaturalNumber, n: NaturalNumber) {
+	match n {
+		Z => m
+		S(p) => add(S(m),p)
+	}
+}
+\end{lstlisting}
+It will be valuable as we continue to remember that most of what we do can be likened directly to code that you may be familiar with.
+\end{my proof}
 
 What we have done then is to define addition in terms of the notion of counting upwards, just as we defined natural numbers in terms of counting upwards. Where a natural number can be thought of a tally of each successor function applied to a zero, we define addition to move each of these tally marks from the right hand side to the left hand side, until we are left with zero on the right and the sum on the left. Only then does our recursion terminate, with all \squote{plus one}s moved to one number. Cumbersome as it may seem to define addition in such a way, the upshot is that now everything we could hope to do with a counting number is now almost exactly that hard, including some much more complicated operations.
 
@@ -151,6 +208,10 @@ P + Q \to \neg P \to Q
 i.e. \dquote{if the ground was wet or we played basketball, then if the ground was \emph{not} wet, then we played basketball}.
 \end{theorem}
 
+This will be our first ever proof and so I would like to note and emphasize some things. First, for the love of god, please do not let the proofs frighten you. In a proof, we merely step through a series of reasoned logical statements to deduce a conclusion. If you are following with the background of a programmer, then you should think of all proofs in this section as programs; indeed all of them can be written verbatim as code in at least some language, and many of them can be written in rust.
+
+The following proof is such a case, and so if matching rust code will make this make sense to you, please see the code below the proof. In either case, this proof most of all is to be regarded as merely a program which we take cares to explain the writing of.
+
 \begin{my proof}{}
 Let $f$ denote the witness of type $P + Q \to \neg P \to Q$ that we construct. It has as its input a member of $P + Q$ and outputs a function of type $\neg P \to Q$, or $(P \to \bot) \to Q$. Since $P + Q$ has two constructors, let us define $f$ for both: if the constructor passed to $f$ is $r \colon Q \to P + Q$ then it must have been passed $q \colon Q$ as $r \hspace{2pt} q$. In that case, we have our witness of $Q$ and may pass it directly, defining \begin{gather*}
 f \hspace{2pt} (r \hspace{2pt} q) = (g \mapsto q)
@@ -165,6 +226,36 @@ f \hspace{2pt} (l \hspace{2pt} p) \hspace{2pt} g = h \hspace{2pt} (g \hspace{2pt
 where $h \colon \bot \to Q$ is the trivial function. This can be interpretted as \dquote{If $P$ or $Q$ via $P$, and $P$ implies \emph{false}, then since we know $P$, imply \emph{false}. Since \emph{false} implies anything, imply $Q$}. In the process of this we have momentarily allowed there to be a fictitious element of the \emph{empty} type, as is natural in the counterfactual case.
 
 Then for any $P + Q$ we have constructed $f \colon P + Q \to \neg P \to Q$. \qed
+\end{my proof}
+
+\begin{my proof}[(Rust Code) Proof.]{m}
+To write this code in rust, we'll need a way to substantiate our notions of a sum type and a negation type. The sum type will be the easy one here.
+\begin{lstlisting}[language=Rust]
+enum SumType<S,T> {
+	inl(S),
+	inr(T)
+}
+\end{lstlisting}
+with $\mathtt{inl}$ and $\mathtt{inr}$ corresponding to our $l$ and $r$ constructors. The negation type is a little trickier but we can write something rusty enough to follow, although don't expect it to compile. In rust, we have a type called the \href{https://doc.rust-lang.org/std/primitive.never.html}{never type}, represented with an exclamation mark $\mathtt{!}$. This type is actually useful for exactly the same thing we use it for here, that is, it is used when we want to guarentee that its type is never the output. If, for instance, we need to pass a \texttt{Result<Q,P>} then setting \texttt{P = !} means that our result type will never be an $\mathtt{Err}$ constructor.
+
+For our purposes, we'll imagine that our fantasy land rust compiler allows functions \texttt{fn(p: P) -> !} to exist when \texttt{P == !}, as evidence that it is true. Similarly, we'll imagine that we can write functions from the empty type without specifying how they work since they are unreachable code anyway.
+
+Then our proof is merely the following:
+\begin{lstlisting}[language=Rust]
+fn trivial_function(x: !) -> Q { _ }
+
+fn theorem<P,Q>(
+	s: SumType<P,Q>,
+	g: impl Fn(p: P) -> !
+) -> Q
+{
+	match s {
+		inl(p) => trivial_function(g(p))
+		inr(q) => q
+	}
+}
+\end{lstlisting}
+In fact this is exactly what we have written above. Of course this program, while helpful for writing and giving structure to the proof, does not give us a corresponding notion of \emph{why} the proof is true. This is precisely why the proof is not written in two lines, although of course we see it could be in theory.
 \end{my proof}
 
 Part of the power of using type theory is that, as discussed before but more obvious now, a function (and thus a theorem) is defined so long as one can account only for every constructor the function may receive. This case is simple, asking what constructors $P + Q$ could have and then taking any member of $\neg P$ absent a question about which constructor it is exactly, however as we will see going forward, theorems of arbitrary complexity will yield to this kind of case analysis since we are merely fulfilling our obligation to provide an output for every input. Thus the question \squote{which witnesses did we receive?} is merely to divide our sets of inputs/witnesses/circumstances into classes which may individually have easier proofs.

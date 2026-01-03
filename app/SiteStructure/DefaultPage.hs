@@ -42,10 +42,22 @@ defaultPageHTML
       meta ! name "viewport" ! content "width=device-width"
       link ! rel "stylesheet" ! href "https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css"
       link ! rel "stylesheet" ! href (fromString whereCSS)
+
+      link ! rel "stylesheet" ! href "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css"
+
       script ! defer "" ! src "https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" $ Empty ()
       script katexArgs
+
+      script ! src "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js" $ Empty ()
+      script ! src "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/rust.min.js" $ Empty ()
+      script ! src "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/haskell.min.js" $ Empty ()
+
       script ! defer "" ! src "https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js"
-         ! onload "renderMathInElement(document.body, katexargs);" $ Empty ()
+         ! (onload $
+               "renderMathInElement(document.body, katexargs);"
+            <> "hljs.highlightAll();"
+         ) $ Empty ()
+
       H.title $ toHtml pagetitle
    body $ do
       H.section ! class_ "pagebound" $ do

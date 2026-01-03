@@ -12,6 +12,7 @@ data HtmlVers =
    |  Paragraph [HtmlVers]
    |  Emphasize Text
    |  Bold Text
+   |  TTtext Text
    |  Itemize [HtmlVers]
    |  Enumerate Text [HtmlVers]
    |  ListItem [HtmlVers]
@@ -21,5 +22,6 @@ data HtmlVers =
    |  ReferenceNum String
    |  HLink Text [HtmlVers]
    |  HRefLink String [HtmlVers]
+   |  CodeBlock String Text
    deriving ( Show )
 --   |  Env Text [HtmlVers]

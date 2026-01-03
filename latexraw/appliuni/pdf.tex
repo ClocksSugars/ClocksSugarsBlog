@@ -37,30 +37,3 @@
 
 \newcommand{\inv}{{-1}}
 
-\usepackage{tocloft}
-\setlength\cftsecnumwidth{7em}
-\setlength\cftsubsecnumwidth{7em}
-%\setlength\cftsubsecnumwidth{10em}
-%\cftsetpnumwidth{5em}
-\renewcommand\cftchapafterpnum{\vspace{7pt}}
-\renewcommand\cftsecafterpnum{\vspace{5pt}}
-\renewcommand\cftsubsecafterpnum{\vspace{3.5pt}}
-
-\newcommand{\CreateFirstPage}{%
-\maketitle%
-\thispagestyle{empty}%
-\tableofcontents%
-\label{TableOfContents}%
-}
-
-\counterwithout*{section}{chapter}
-
-\makeatletter
-\def\appliunisecs#1{\expandafter\@appliunisecs\csname c@#1\endcsname}
-\def\@appliunisecs#1{%
-  \ifcase#1\or philofmath\or proptypes\or maththink\or realnumsax\or seqlimsinR\or openlimsR\or funclimsR\or UNNAMED\or UNNAMED\or UNNAMED\or
-   UNNAMED\or UNNAMED\or UNNAMED\or UNNAMED\or UNNAMED\or UNNAMED\or UNNAMED\or UNNAMED\or UNNAMED\or UNNAMED\or UNNAMED\or UNNAMED\or UNNAMED\or UNNAMED\or
-    UNNAMED\or UNNAMED\else\@ctrerr\fi}
-\makeatother
-
-\renewcommand*{\thesection}{\appliunisecs{section}}

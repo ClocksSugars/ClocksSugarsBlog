@@ -34,6 +34,7 @@ pdfBookFromManifest workbook = let
                   <> (TeXCommS "the") <> (TeXCommS "year")
                ])
             <> (TeXComm "input" [FixArg $ TeXRaw "../latexraw/appliuni/pdf.tex"])
+            <> (TeXComm "input" [FixArg $ TeXRaw "../latexraw/appliuni/pdf_only.tex"])
             <> (TeXComm "input" [FixArg $ TeXRaw "../latexraw/appliuni/webmacros.tex"])
             <> (TeXComm "input" [FixArg $ TeXRaw "../latexraw/appliuni/amsthmstuff.tex"])
             <> contents

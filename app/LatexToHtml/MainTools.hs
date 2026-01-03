@@ -100,12 +100,14 @@ processThree pagename theaddress content indexstate = let
       RawText x -> (toHtml x, propind)
       Emphasize x -> (i $ toHtml x, propind)
       Bold x -> (b $ toHtml x, propind)
+      TTtext x -> (code $ toHtml x, propind)
       HLink turl tx -> (H.a ! href (fromString $ fromText turl) $ inlineProcessThree tx propind, propind)
       ListItem xs -> passFirst li $ repeatCase xs propind
       Itemize xs -> passFirst ul $ repeatCase xs propind
       Enumerate listkind xs -> passFirst (ol ! A.type_ (fromString $ fromText listkind)) $ repeatCase xs propind
       -- TODO MAKE THE OL TYPE MORE ROBUST
       Paragraph xs -> passFirst p $ repeatCase xs propind
+      CodeBlock language thecode -> (pre $ code ! class_ (fromString language) $ toHtml thecode, propind)
 
       HRefLink reflabel tx -> let
          droppedBoxTypeV  = drop 4 reflabel

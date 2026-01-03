@@ -69,10 +69,11 @@ data Htmllatexinter =
    |  IReference String
    |  ILink Text [Htmllatexinter]
    |  IRefLink String [Htmllatexinter]
+   |  ICodeBlock String Text
    deriving (Eq, Show)
 
 inlineCommands :: [String]
-inlineCommands = ["emph","textbf"]
+inlineCommands = ["emph","textbf","texttt"]
 
 processOne :: LaTeX -> [Htmllatexinter]
 processOne arg = let
@@ -103,6 +104,8 @@ processOne arg = let
             -- there is 2 since this should have compiled in latex thus having at least one \item
          ("enumerate", _) -> Right $ List "enumerate" Nothing $
             map processOne (drop 1 $ splitByDelimiterLaTeX (TeXCommS "item") content)
+         ("lstlisting", [OptArg (TeXRaw "language=Rust")]) -> Right $ ICodeBlock "language-rust" $ render content
+         ("lstlisting", [OptArg (TeXRaw "language=Haskell")]) -> Right $ ICodeBlock "language-haskell" $ render content
 
          ("gather*", _) -> Right . RawPrint . render $
             TeXMath DoubleDollar $ TeXEnv kind texargs $ applyMathCommands content
@@ -158,6 +161,7 @@ addLineBreaks stuff = let
 inLineTranslation :: Htmllatexinter -> HtmlVers
 inLineTranslation (InLineEffect (TeXComm "emph" [FixArg (TeXRaw content)])) = Emphasize content
 inLineTranslation (InLineEffect (TeXComm "textbf" [FixArg (TeXRaw content)])) = Bold content
+inLineTranslation (InLineEffect (TeXComm "texttt" [FixArg (TeXRaw content)])) = TTtext content
 inLineTranslation (InLineEffect (TeXMath sign content)) = RawText . render $ TeXMath sign content
 inLineTranslation (InLineEffect otherwise) = RawText . render $ otherwise -- Just displays invalid commands so we can see
 inLineTranslation (Prose xs) = RawText xs
@@ -176,6 +180,7 @@ processTwo ((RawPrint content):xs) = RawText content : processTwo xs
 processTwo ((RawLaTeX content):xs) = (RawText $ render content) : processTwo xs
 processTwo ((Section content):xs) = Subheading (map inLineTranslation content) : processTwo xs
 processTwo ((IFigure location content):xs) = Figure location (processTwo content) : processTwo xs
+processTwo ((ICodeBlock lang content):xs) = CodeBlock lang content : processTwo xs
 -- processTwo ((IReference reference):xs) = ReferenceNum reference : processTwo xs
 processTwo ((List kind margs items):xs) = case kind of
    "itemize" -> Itemize (map (ListItem . processTwo) items) : processTwo xs
