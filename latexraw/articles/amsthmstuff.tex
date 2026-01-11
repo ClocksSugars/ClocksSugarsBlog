@@ -1,0 +1,218 @@
+\newcounter{statements}[section]
+%\renewcommand{\thestatements}{\thesection.\arabic{statements}}
+\labelformat{statements}{\thesection.\arabic{statements}}
+
+\usepackage{tcolorbox}
+\usepackage{amsthm}
+
+\tcbuselibrary{breakable}
+
+
+\makeatletter
+\newcommand{\@myifempty}[3]{\if\relax\detokenize{#1}\textnormal{#2}\else\textnormal{#3}\fi}
+
+
+\newtcolorbox[use counter=statements]%
+	{label definition}%
+	[2]%
+	[]%
+	{%
+		breakable,%
+		colback=white,%
+		colframe=LightGreen,%
+		coltitle=black,%
+		title=Definition \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		label=def:#2%
+	}
+
+\newtcolorbox[use counter=statements]%
+	{definition}%
+	[1]%
+	[]%
+	{%
+		breakable,%
+		colback=white,%
+		colframe=LightGreen,%
+		coltitle=black,%
+		title=Definition \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+	}
+	
+\newtcolorbox[use counter=statements]%
+	{label theorem}%
+	[2]%
+	[]%
+	{%
+		breakable,%
+		colback=white,%
+		colframe=LightCoral,%
+		coltitle=black,%
+		title=Theorem \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		label=thm:#2%
+	}
+
+\newtcolorbox[use counter=statements]%
+	{theorem}%
+	[1]%
+	[]
+	{%
+		breakable,%
+		colback=white,%
+		colframe=LightCoral,%
+		coltitle=black,%
+		title=Theorem \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+	}
+	
+\newtcolorbox[use counter=statements]%
+	{label proposition}%
+	[2]%
+	[]%
+	{%
+		breakable,%
+		colback=white,%
+		colframe=Violet,%
+		coltitle=black,%
+		title=Proposition \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		label=pro:#2%
+	}
+
+\newtcolorbox[use counter=statements]%
+	{proposition}%
+	[1]%
+	[]
+	{%
+		breakable,%
+		colback=white,%
+		colframe=Violet,%
+		coltitle=black,%
+		title=Proposition \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+	}
+
+\newtcolorbox%
+	{label proof}%
+	[3]%
+	[Proof.]%
+	{%
+		colback=white,%
+		colframe=LightBlue,%
+		coltitle=black,%
+		title=#1,%
+		label=prf:#3,%
+		breakable%
+	}
+
+%\newenvironment{label proof}%
+%	[3][Proof.][]%
+%	{\begin{@ label proof}[#1]{#3}}%
+%	{\end{@ label proof}}
+	
+
+\newtcolorbox%
+	{my proof}%
+	[2]%
+	[Proof.]
+	{%
+		colback=white,%
+		colframe=LightBlue,%
+		coltitle=black,%
+		title=#1,%
+		breakable%
+	}
+	
+\newtcolorbox[use counter=statements]%
+	{label lemma}%
+	[2]%
+	[]%
+	{%
+		colback=white,%
+		colframe=LightPink,%
+		coltitle=black,%
+		title=Lemma \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		label=lem:#2%
+	}
+
+\newtcolorbox[use counter=statements]%
+	{lemma}%
+	[1]%
+	[]
+	{%
+		colback=white,%
+		colframe=LightPink,%
+		coltitle=black,%
+		title=Lemma \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+	}
+	
+\newtcolorbox[use counter=statements]%
+	{label corollary}%
+	[2]%
+	[]%
+	{%
+		colback=white,%
+		colframe=Khaki,%
+		coltitle=black,%
+		title=Corollary \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		label=crl:#2,%
+		breakable%
+	}
+
+\newtcolorbox[use counter=statements]%
+	{corollary}%
+	[1]%
+	[]
+	{%
+		colback=white,%
+		colframe=Khaki,%
+		coltitle=black,%
+		title=Corollary \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		breakable%
+	}
+	
+\newtcolorbox[use counter=statements]%
+	{label notation}%
+	[2]%
+	[]%
+	{%
+		colback=white,%
+		colframe=LightGrey,%
+		coltitle=black,%
+		title=Notation \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		label=not:#2%
+	}
+
+\newtcolorbox[use counter=statements]%
+	{notation}%
+	[1]%
+	[]
+	{%
+		colback=white,%
+		colframe=LightGrey,%
+		coltitle=black,%
+		title=Notation \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+	}
+	
+\newtcolorbox[use counter=statements]%
+	{label example}%
+	[3]%
+	[]%
+	{%
+		breakable,%
+		colback=white,%
+		colframe=Orange,%
+		coltitle=black,%
+		title=Example \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+		label=exa:#2%
+	}
+
+\newtcolorbox[use counter=statements]%
+	{example}%
+	[2]%
+	[]
+	{%
+		breakable,%
+		colback=white,%
+		colframe=Orange,%
+		coltitle=black,%
+		title=Example \thesection.\thestatements\@myifempty{#1}{}{\quad---\quad (#1)},%
+	}	
+	
+	
+\makeatother

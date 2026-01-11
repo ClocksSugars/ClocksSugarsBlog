@@ -1,0 +1,89 @@
+\documentclass[11pt]{article}
+    \title{\textbf{Default Doc}}
+
+    \date{\the\day/\the\month/\the\year}
+
+\input{../pdf.tex}
+\input{../webmacros.tex}
+\input{../amsthmstuff.tex}
+
+
+\begin{document}
+
+In the modern computing landscape, it has become common knowledge that many compute-heavy operations should be run on GPUs. This of course extends to attempts to do numerical modelling of physical systems, one of the great industry applications of a mathematics education. And in the course of that industry application, it will often become necessary to deploy these models, and the computational tools to simulate them, to consumer devices or, heaven forbid, non-x86 devices.
+
+To that end, a friend provided me with an example problem to build an mac app in swift that could solve the heat equation on apple silicon. The heat equation is an especially simple differential equation, but if the math is the easy part here then we are free to focus on any software and hardware difficulties. Alas I do not have a macbook at the moment. In the spirit of the problem however, I figured the closest thing I could do to implementing it in swift is implementing it in rust, a language I am told is quite similar. And if I could not make a solver that ran on apple silicon, I would instead build one using WebGPU that would run on \emph{everything}*.
+
+$*$ : see \hyperlink{https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API\#browser_compatibility}{mozilla MDN WebGPU API browser compatibility table}. Most desktop browsers support WebGPU on windows, and on other operating systems can be \hyperlink{https://github.com/gpuweb/gpuweb/wiki/Implementation-Status\#implementation-status}{coerced to with the proper browser launch arguments}; on mobile, chrome for android should work just fine as will safari for ios. You can check your browser's compatibility \hyperlink{https://webgpureport.org/}{here}.
+
+Here we will discuss what I learned about WebGPU and Wasm (Web-Assembly) in this project, and some details of rust. I have used rust before, but I am relatively new to web development; in a very real sense, this project marks my first time using javascript (although I have committed to taking all available measures to \emph{never} install npm or node.js). Moreover my relationship to rust has historically been as a sort of \dquote{discount haskell} that suffers the compromises of a language designed closer to the hardware, although of course, since we aim to do some \emph{GPU programming}, that will be exactly what we need. And of course since I can't help myself, this article will secondarily perform as a tutorial on the heat equation as well as how to implement something like what I ended up making.
+
+\subsection{The Heat Equation}
+I must first confess that, as I said earlier, the problem was specified for me. This includes the particular numerical scheme that we'll discuss how to implement soon. However, I am of course no mere codemonkey and happen to have a penchant for pedagogy, so we will begin with a discussion of the heat equation which will clarify many details of our particular implementation later on.
+
+The derivation of the heat equation is one of the more obvious examples of mathematics acting as analytic natural philosophy in a trench coat. One asks \squote{given a distribution of thermal energy in a system, how is it to evolve over time?} and immediately has two threads to pull on: that since we are concerned with the \emph{evolution}, we are expressing our insight in terms of the time derivative (i.e. the instaneous change-per-unit-time); and that what we fundamentally want to encode is that heat spreads out. So what we are trying to find is a function $T(x,t)$ of position $x$ and time $t$ that is specified by an initial distribution $T(x,0)$, and we can try assuming that whatever binding property will define this relationship for us will relate the change in time to something. \begin{gather*}
+\frac{\partial T}{\partial t} = ?
+\end{gather*}
+
+Consider a one dimensional thermal distribution, and imagine that this line-of-material is divided up into very small segments, with one such a segment between positions $x$ and $x + \Delta x$, with segment length $\Delta x$ (although the idea is to make $\Delta x$ very small). With its two points of contact, one to the material segment in the negative direction (less than $x$) and one in the positive direction (greater than $x+\Delta x$), we have two other things which can change the temperature of our segment by conducting heat with it.
+
+We'll now identify each segment by the point it starts at, so let us imagine that the segment we are describing is the one whose temperature at time $t$ is $T(x,t)$ while the next segment is $T(x + \Delta x, t)$ and the previous one is $T(x - \Delta x, t)$. As above, we expect the change of the temperature per unit time in our segment to be proportional to the difference between its temperature and the temperature of the two segments besides it. That means we want our relationship to look something like this: \begin{gather*}
+\frac{\partial T}{\partial t}(x,t) \propto \big[ T(x + \Delta x, t) - T(x, t) \big] + \big[ T(x - \Delta x, t) - T(x, t) \big].
+\end{gather*}
+
+I've used the symbol $\propto$ here, meaning that instead of speaking of an equivalence, we speak of a proportional relation. Whatever relationship we're discovering here, we know only that these quantities are related to one another (and we'll assume that relationship is linear) but we certainly won't say that they are literally equal yet.
+
+Marked in square brackets are the contributions to the change in temperature in our segment by the two segments adjacent to it. We see in the first term $T(x + \Delta x, t) - T(x, t)$: this is because if the segment to the right is hotter than our segment then this quantity will be positive corresponding to the idea that it should conduct heat \emph{into} our segment, and thus \emph{increase} our segment's temperature. Similar reasoning applies to the other segment: when the segment to the left of ours is hotter, it conducts heat \emph{into} ours, increasing the temperature over time, and so we have $T(x - \Delta x, t) - T(x, t)$ positive. The logic reverses; if $T(x,t)$ is hotter than either of its adjacent segments, we expect it to conduct heat out of itself and thus cool. These two bracketed quantities are thus in opposition. If the difference between the temperature of our segment and the one on its right is the negative of the one on its left, our change over time will be zero and heat will simply \emph{flow through} the segment without its temperature changing.
+
+Since we spoke of proportionality rather than equivalence, we are at liberty to multiply or divide factors in the above relation. The true coefficient will be discussed shortly, but in the mean time it will do us well to divide our right-hand side by $\Delta x$. Doing so reveals that we have something of the form of a partial derivative when we take our $\Delta x$ toward zero. \begin{align*}
+& \lim_{\Delta x \to 0} \frac{\big[ T(x + \Delta x, t) - T(x, t) \big]}{\Delta x} + \frac{\big[ T(x - \Delta x, t) - T(x, t) \big]}{\Delta x} \\
+=& \lim_{\Delta x \to 0} \frac{\big[ T(x + \Delta x, t) - T(x, t) \big]}{\Delta x} - \frac{\big[ T(x, t) - T(x - \Delta x, t) \big]}{\Delta x} \\
+\approx& \frac{ \partial T }{\partial x} (x,t) - \frac{\partial T}{\partial x} (x - \Delta x, t)
+\end{align*}
+
+We'll want to avoid absolutely bringing $\Delta x$ to zero as doing so would tell us the above quantity is also zero; we are certainly doing what I'd call \dquote{physicist-brained} math but in the spirit of physics, as long as our metaphor remains coherent under our manipulations, the math will be relatively forgiving (and we are in luck since the formula we will derive shortly is two hundred years old). 
+
+What this tells us is that the change of temperature of our segment can now be considered proportional to the \emph{heat flux}, or rather the negative-direction moving heat, to it from the next segment minus the heat flux to the previous segment. The reason for the derivative in space to be the negative-direction moving heat is obvious when you think about what the graph of temperature looks like.
+
+\figuresvgwithcaption{./heatflux}{A positive gradient means that the right is hotter than the left, and if we are to say heat moves from hot to cold, then a positive gradient must mean heat moving in a negative direction.}
+
+We can divide this by $\Delta x$ again to take our two derivatives, separated in their $x$ argument by a $\Delta x$, and turn them into a single second derivative.
+\begin{gather*}
+\lim_{\Delta x \to 0} \frac{1}{\Delta x} \left( \frac{ \partial T }{\partial x} (x,t) - \frac{\partial T}{\partial x} (x - \Delta x, t) \right) = \frac{\partial^2 T}{\partial x^2} (x , t) \\
+\frac{\partial T}{ \partial t} \propto \frac{\partial^2 T}{\partial x^2}
+\end{gather*}
+
+The last thing we need to decide is what the proportionality constant is so we can turn $\propto$ into $=$. However this is a choice depending on the given material. For instance consider that the dynamics we describe above equally apply to a block of steel just as well as it does to a block of compacted feathers. But we know that steel conducts heat very well, and so we expect temperature differentials within a block of steel to diffuse quickly, whereas a block of compacted feathers (assuming they are sufficiently compacted so that heat conducts through it uniformly) might insulate somewhat and thus diffuse more slowly. So this is a choice we make about our material of study: we encode this choice in the parameter $\kappa$ (greek \squote{kappa}), representing the thermal conductivity of our material of study, and form the heat equation.
+
+\begin{gather*}
+\frac{\partial T}{ \partial t} = \kappa \frac{\partial^2 T}{\partial x^2}
+\end{gather*}
+
+Something amusing which we may want to note before we implement a method to solve this differential equation from initial conditions is what that means. We happen to have a \hyperlink{https://en.wikipedia.org/wiki/Green\%27s_function}{Green's function} solution to the one dimensional heat equation, meaning here a solution that applies when the initial condition is infinite heat concentration at $x=0$ corresponding to some finite total heat. Such a solution can be used as a convolution on an initial condition $g(x)$ to give a solution \begin{gather*}
+T(x,t) = \frac{1}{\sqrt{4 \pi \kappa t}} \int_{-\infty}^{\infty} \exp\left( - \frac{(x - \tau)^2}{4 \kappa t}\right) g(\tau) d\tau
+\end{gather*}
+where it becomes obvious that this convolution is with a gaussian. The accusation is almost appropriate then that what we proceed to implement here is but a fancy gaussian blur. Almost. Indeed what we implement here is \emph{also} a fancy gaussian blur, however it is a gaussian blur that works \emph{precisely} so that if we set the parameters accordingly to a real life thermal-conducting material and a real life initial condition, it will roughly produce the correct thermal distribution at the appropriate time.
+
+\subsection{Our Numerical Scheme: Explicit FTCS RK2}
+
+Of course at the point that we encode the heat equation in a computer for simulation, we must begin undoing the limits in our derivatives, inserting $\Delta x$ back into things and figuring out how we want to make this work in two dimensions.
+
+In our model, we'll discretize space as a grid of rectangles; note here that this is already an assumption, since we are saying that heat never moves directly diagonally. This assumption will however enable us to reason certain things out, for instance, in moving to two dimensions we don't have that many more considerations as in one dimension since we know heat can only enter or exit a rectangle through one of four sides, two more opposing directions to previous two with similar heat-flow effects at play. So prior to anything particular to our discritization, we may simply add a second heat-flow term for our second dimension and say that \begin{gather*}
+\frac{\partial T}{ \partial t} = \kappa  \left( \frac{\partial^2 T}{\partial x^2} + \frac{\partial^2 T}{\partial y^2} \right),
+\end{gather*}
+a statement which happens to remain true regardless of the particular discretization we're using here (see \hyperlink{https://en.wikipedia.org/wiki/Laplace_operator}{laplace operator}). 
+
+Next we need to ask \emph{how} we want to calculate our derivatives. Obviously this will involve some form of treating, for instance $\partial T/\partial t$ as $\big(T(x,t + \Delta t) - T(x, t) \big)/\Delta t$, but the question is if we use that expression or instead go for $\big(T(x,t) - T(x - \Delta t, t) \big)/\Delta t$. Both will have the two temperatures separated by a $\Delta t$ but whether to define this relationship forward or backwards has different effects. In this instance, we will use \emph{forward time}, meaning the former.
+
+We have to make this choice twice for our spatial derivatives. For instance, we can consider $\partial^2 T/\partial x^2$ three different ways. \begin{gather*}
+\frac{\big(T(x, t) - T(x - \Delta x, t) \big) - \big( T(x - \Delta x, t) - T(x - 2 \Delta x, t) \big)}{\Delta x^2} \\
+\\
+\frac{\big(T(x + \Delta x, t) - T(x, t) \big) - \big( T(x, t) - T(x - \Delta x, t) \big)}{\Delta x^2} \\
+\\
+\frac{\big(T(x + 2 \Delta x, t) - T(x + \Delta x, t) \big) - \big( T(x + \Delta x, t) - T(x, t) \big)}{\Delta x^2}
+\end{gather*}
+
+These correspond to the backwards-space, 
+
+
+\end{document}
