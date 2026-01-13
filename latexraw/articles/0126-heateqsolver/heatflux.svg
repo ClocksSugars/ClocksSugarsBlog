@@ -1,2 +1,21 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<svg width="600" height="400" viewBox="0 0 600 400" class="max-w-full h-auto" xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink"><defs data-fg-d3bl3="0.8:1.2316:/src/app/App.tsx:6:9:308:676:e:defs"><linearGradient id="temperatureGradient" x1="0%" y1="0%" x2="100%" y2="0%" data-fg-d3bl4="0.8:1.2316:/src/app/App.tsx:7:11:325:319:e:linearGradient"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.7" data-fg-d3bl5="0.8:1.2316:/src/app/App.tsx:8:13:413:58:e:stop"></stop><stop offset="50%" stop-color="#ffffff" stop-opacity="0.3" data-fg-d3bl6="0.8:1.2316:/src/app/App.tsx:9:13:484:59:e:stop"></stop><stop offset="100%" stop-color="#ef4444" stop-opacity="0.7" data-fg-d3bl7="0.8:1.2316:/src/app/App.tsx:10:13:556:60:e:stop"></stop></linearGradient><marker id="arrowhead" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto" data-fg-d3bl9="0.8:1.2316:/src/app/App.tsx:14:11:711:257:e:marker"><polygon points="10 5, 0 0, 0 10" fill="#1f2937" data-fg-d3bl10="0.8:1.2316:/src/app/App.tsx:22:13:897:51:e:polygon"></polygon></marker></defs><line x1="100" y1="320" x2="100" y2="50" stroke="#1f2937" stroke-width="2" data-fg-d3bl12="0.8:1.2316:/src/app/App.tsx:27:9:1036:76:e:line"></line><line x1="100" y1="320" x2="550" y2="320" stroke="#1f2937" stroke-width="2" data-fg-d3bl14="0.8:1.2316:/src/app/App.tsx:30:9:1166:77:e:line"></line><text x="560" y="325" font-size="20" fill="#1f2937" font-style="italic" data-fg-d3bl16="0.8:1.2316:/src/app/App.tsx:33:9:1289:78:e:text">x</text><text x="95" y="35" font-size="20" fill="#1f2937" font-style="italic" text-anchor="end" data-fg-d3bl18="0.8:1.2316:/src/app/App.tsx:34:9:1376:93:e:text">T</text><line x1="100" y1="200" x2="500" y2="100" stroke="#1f2937" stroke-width="3" data-fg-d3bl21="0.8:1.2316:/src/app/App.tsx:37:9:1564:77:e:line"></line><polygon points="100,200 500,100 500,320 100,320" fill="url(#temperatureGradient)" data-fg-d3bl23="0.8:1.2316:/src/app/App.tsx:40:9:1704:113:e:polygon"></polygon><line x1="360" y1="100" x2="260" y2="125" stroke="#1f2937" stroke-width="2.5" marker-end="url(#arrowhead)" data-fg-d3bl25="0.8:1.2316:/src/app/App.tsx:46:9:1899:192:e:line"></line><text x="310" y="90" font-size="16" fill="#1f2937" text-anchor="middle" data-fg-d3bl27="0.8:1.2316:/src/app/App.tsx:57:9:2141:106:e:text">heat flow</text></svg>
+<svg width="600" height="400" viewBox="0 0 600 400" class="max-w-full h-auto" xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs data-fg-d3bl3="0.8:1.2316:/src/app/App.tsx:6:9:308:676:e:defs">
+   <linearGradient id="temperatureGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.7"></stop>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.3"></stop>
+      <stop offset="100%" stop-color="#ef4444" stop-opacity="0.7"></stop>
+   </linearGradient>
+   <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+      <polygon points="10 5, 0 0, 0 10" fill="#1f2937" data-fg-d3bl10="0.8:1.2316:/src/app/App.tsx:22:13:897:51:e:polygon"></polygon>
+   </marker>
+</defs>
+<line x1="100" y1="320" x2="100" y2="50" stroke="#1f2937" stroke-width="2"></line>
+<line x1="100" y1="320" x2="550" y2="320" stroke="#1f2937" stroke-width="2"></line>
+<text x="560" y="325" font-size="20" fill="#1f2937" font-style="italic">x</text>
+<text x="95" y="35" font-size="20" fill="#1f2937" font-style="italic" text-anchor="end">T</text>
+<line x1="100" y1="200" x2="500" y2="100" stroke="#1f2937" stroke-width="3"></line>
+<polygon points="100,200 500,100 500,320 100,320" fill="url(#temperatureGradient)"></polygon>
+<line x1="360" y1="100" x2="260" y2="125" stroke="#1f2937" stroke-width="2.5" marker-end="url(#arrowhead)"></line>
+<text x="310" y="90" font-size="16" fill="#1f2937" text-anchor="middle">heat flow</text>
+</svg>

@@ -8,6 +8,7 @@
 \input{../amsthmstuff.tex}
 
 
+\usepackage{amsmath}
 \begin{document}
 
 In the modern computing landscape, it has become common knowledge that many compute-heavy operations should be run on GPUs. This of course extends to attempts to do numerical modelling of physical systems, one of the great industry applications of a mathematics education. And in the course of that industry application, it will often become necessary to deploy these models, and the computational tools to simulate them, to consumer devices or, heaven forbid, non-x86 devices.
@@ -59,7 +60,9 @@ The last thing we need to decide is what the proportionality constant is so we c
 \frac{\partial T}{ \partial t} = \kappa \frac{\partial^2 T}{\partial x^2}
 \end{gather*}
 
-Something amusing which we may want to note before we implement a method to solve this differential equation from initial conditions is what that means. We happen to have a \hyperlink{https://en.wikipedia.org/wiki/Green\%27s_function}{Green's function} solution to the one dimensional heat equation, meaning here a solution that applies when the initial condition is infinite heat concentration at $x=0$ corresponding to some finite total heat. Such a solution can be used as a convolution on an initial condition $g(x)$ to give a solution \begin{gather*}
+It must be emphasized then that we will be able to proceed through our reasoning under the assumption that if we know the state of a system's temperature (its temperature at each $x$) then we know its time derivative. Its time derivative is defined \emph{autonomously} by the state at a present time.
+
+Something amusing which we may want to note before we implement a method to solve this differential equation from initial conditions is what that equation intuitively means. We happen to have a \hyperlink{https://en.wikipedia.org/wiki/Green\%27s_function}{Green's function} solution to the one dimensional heat equation, meaning here a solution that applies when the initial condition is infinite heat concentration at $x=0$ corresponding to some finite total heat. Such a solution can be used as a convolution on an initial condition $g(x)$ to give a solution \begin{gather*}
 T(x,t) = \frac{1}{\sqrt{4 \pi \kappa t}} \int_{-\infty}^{\infty} \exp\left( - \frac{(x - \tau)^2}{4 \kappa t}\right) g(\tau) d\tau
 \end{gather*}
 where it becomes obvious that this convolution is with a gaussian. The accusation is almost appropriate then that what we proceed to implement here is but a fancy gaussian blur. Almost. Indeed what we implement here is \emph{also} a fancy gaussian blur, however it is a gaussian blur that works \emph{precisely} so that if we set the parameters accordingly to a real life thermal-conducting material and a real life initial condition, it will roughly produce the correct thermal distribution at the appropriate time.
@@ -83,7 +86,1091 @@ We have to make this choice twice for our spatial derivatives. For instance, we 
 \frac{\big(T(x + 2 \Delta x, t) - T(x + \Delta x, t) \big) - \big( T(x + \Delta x, t) - T(x, t) \big)}{\Delta x^2}
 \end{gather*}
 
-These correspond to the backwards-space, 
+Each of these descriptions of the second derivative have consequences, that is, since we can only calculate the second derivative using two other points, do we use the two points behind, the two points beside the central one, or the two points ahead? It is typical to use the two points beside a central one, and so we use the one in the middle and call our scheme \emph{forward time centered space} (or FTCS), simplifying it to the following.
+
+\begin{gather*}
+\frac{T(x, t + \Delta t) - T(x,t)}{\Delta t} \approx \frac{T(x + \Delta x, t) - 2 T(x, t) + T(x - \Delta x, t) }{\Delta x^2}
+\end{gather*}
+
+The vague idea then would be to rearrange this approximate equation so that we have $T(x,t + \Delta t)$ on one side and all temperatures at time $t$ on the other, meaning that we would program some state (i.e. the temperature at all positions we care about) which we know at time $t$ and use this to predict time $t+\Delta t$, moving forward in time. This is what we would call the \emph{forward Euler method}, and roughly corresponds to the idea that we can take a formula for the derivative $f'$ of a function $f$ and relate it approximately to the formula that is used in its limit. \begin{align*}
+&\lim_{\Delta t \to 0 }\frac{f(t + \Delta t) - f(t)}{\Delta t} = f'(t) \\
+\implies & f(t+\Delta t) \approx f(t) + f'(t)\Delta t
+\end{align*}
+
+We can also state the backwards Euler method which is similar, but notice here that we check the derivative not at time $t$ but instead at time $t + \Delta t$; naively, this would allow us to run the simulation backwards. \begin{gather*}
+f(t+\Delta t) - f'(t + \Delta t)\Delta t \approx f(t)
+\end{gather*}
+
+Of course it is unlikely that we'd want to run the simulation backwards. The true value of the backwards Euler method to us is that if we are calculating across position and time variables and our derivative function is a linear function of $f$ (or to us, $T$) at different positions, then the idea that we are computing $T(x,t)$ as a function of $T(x,t + \Delta t)$ is not merely a computation backwards in time, it is computed \emph{linearly}. This means we can express it as a problem of the form $\mathbf{Ax} = \mathbf{b}$ in linear algebra, and use the widely explored class of linear solver algorithms to find $\mathbf{x}$ (which in this case is our $T(x,t + \Delta t)$ at some fixed $t$, thought of as a vector of different positions) that solves $\mathbf{Ax} = \mathbf{b}$ (where $\mathbf{b}$ is $T(x,t)$ which we assume to be known for time $t$). Thus our method which appears to move backwards in time has implicitly specified a method to move forward in time, and so we call the backwards Euler method an \emph{Implicit method}.
+
+By contrast our forward Euler method is a \emph{Explicit method}. Explicit methods are of course easier to implement (since one need not implement a linear solver, nor convert their numerical method into a linear problem and back again after solving) but our explicit forward Euler method has a problem: our differential equations were defined under the assumption that $\Delta t$ and $\Delta x$ were basically infinitely small, and when they are not small enough, the forward euler method tends towards an error where it undershoots or overshoots the true function it should approximate.
+
+\figuresvgwithcaption{./wiki_forward_Euler_method}{ (The above image is from wikipedia's Euler method page) In blue we see a function and in red its forward Euler method approximation. The function's rate of increase is decreasing and our numerical method sees this decrease too late, leading to an overshoot.}
+
+And this should be apparent to us merely from the equation for the forward Euler method since the point we compute the derivative for (remembering that this is how much the function changes) is taken at time $t$ and then only checked again after $\Delta t$ time has passed. If our derivative is increasing or decreasing in this period then our model can't see that change until after the period has passed. Fortunately, for exactly the reason we describe, the backwards euler method has \emph{almost exactly the opposite problem}, and so we can average the two methods to get something much better, called the Crank-Nicolson method. For our one dimensional heat equation, that looks something like this:
+
+\begin{gather*}
+\frac{T(x, t + \Delta t) - T(x,t)}{\Delta t} \approx \frac{1}{2} \left( \frac{\partial^2 T}{\partial x^2}(x, t + \Delta t) + \frac{\partial^2 T}{\partial x^2}(x, t)\right).
+\end{gather*}
+
+For brevity we have used the partial derivatives in space as the full expressions of our centered-space second derivatives is quite long, however we can expand the right hand side of the above as broken across two lines:
+
+\begin{align*}
+\approx \frac{1}{2} \Bigg(
+	\frac{T(x + \Delta x, t+ \Delta t) - 2 T(x, t + \Delta t) + T(x - \Delta x, t + \Delta t) }{\Delta x^2} \\
+	+ \frac{T(x + \Delta x, t) - 2 T(x, t) + T(x - \Delta x, t) }{\Delta x^2}
+\Bigg)
+\end{align*}
+
+As you can see, this is not an explicit method, but it is linear in space so it constitutes an implicit method.
+
+There are other ways to remedy this problem of the forward euler method that will still give us an explicit method however. What the Crank-Nicolson method did for us was allowed us to iterate forward in time using a time derivative which was defined as the average of our $f'(t)$ and $f'(t + \Delta t)$ (which are $\partial_t T(x,t)$ and $\partial_t T(x,t + \Delta t)$ in our case). We might, instead of taking an average, attempt to compute $f'(t + \Delta t/2)$, taking the derivative in the middle of our two timesteps instead. This is fine if we know $f'$ explicitly, but adds a minor complication in our case of the heat equation since we do not know $T(x, t + \Delta t/2)$; our time derivative is dependent on our spatial configuration.
+
+To solve this, for each $\Delta t$ step of our iteration, we need to take a forward Euler half-step to compute a rough approximation of the state at time $t + \Delta t/2$ and then go back and use that as the derivative in a not-quite forward Euler method. This is what we call \emph{Runge-Kutta-2} (RK2), Runge-Kutta refering to the class of methods like this one and $2$ refering to how we compute our iteration in two steps (although it is common to do it in four steps as RK4). Our method then looks something like this in one dimension: \begin{align*}
+\frac{\partial^2 T}{\partial x^2}(x,t) &= \frac{T(x + \Delta x, t) - 2 T(x, t) + T(x - \Delta x, t) }{\Delta x^2} \\
+T(x, t + \Delta t/2) &=  T(x,t) + \frac{\Delta t}{2} \cdot \frac{\partial^2 T}{\partial x^2}(x,t) \\
+T(x, t + \Delta t) &= T(x,t) + \Delta t \cdot \frac{\partial^2 T}{ \partial x^2} (x, t + \Delta t/2)
+\end{align*}
+
+Of course we may merely add the corresponding term for our second dimension, and we get the method we will actually implement.
+
+\begin{align*}
+\frac{\partial^2 T}{\partial x^2}(x,t) &= \frac{T(x + \Delta x,y, t) - 2 T(x,y,t) + T(x - \Delta x,y, t) }{\Delta x^2} \\
+\nabla^2 T(x,y,t) &= \frac{\partial^2 T}{\partial x^2}(x,y,t) + \frac{\partial^2 T}{\partial y^2}(x,y,t) \\
+T(x,y, t + \Delta t/2) &=  T(x,y,t) + \frac{\Delta t}{2} \cdot \nabla^2 T(x,y,t) \\
+T(x,y, t + \Delta t) &= T(x,y,t) + \Delta t \cdot \nabla^2 T(x,y,t + \Delta t /2)
+\end{align*}
+
+This is the titular explicit FTCS RK2 method. We should actually check if any of the methods described here work as we would like them to, and indeed we have methods for discussing this which we describe soon. But now that we have our method, we'll implement it before our understanding goes stale.
+
+To do that, we'll need one more thing: a boundary condition. Our centered space scheme allows us to calculate how our state should evolve over time, but to do so it requires knowledge of adjacent points; if our simulation has an edge (which it must) then that edge doesn't have adjacent points to draw on which tell us how the edge should evolve. We have a few options here. We can set the edge as a constant, meaning that our simulation assumes our material is in some thermal bath that keeps its exterior at a constant temperature. We could make the edges wrap around on each other, drawing on the opposite side of our rectangle to inform how the edge evolves.
+
+What we'll do instead though is to assume that the boundary is insulating. This means that at the edge, we expect the temperature gradient to always be zero so our $T(x,t)$ $x$-$T$ graph looks like a flat line at its edge. Recalling our earlier discussion of the heat equation, this constant gradient at the edge means that there is no heat-flow out of the edge, and thus it is insulating.
+
+Setting our simulation zone to be the square patch of space $[0,1] \times [0,1]$, we'll implement this constant gradient by setting the boundary to be equal to its second-inner-most line. That means $T(0,0,t)$ is set to $T(\Delta x, \Delta y, t)$ and $T(1,0.5,t)$ is set to $T(1 - \Delta x, 0.5, t)$ for example. Setting the temperature in this way should violate conservation of energy more than the periodic condition mentioned above (and certainly less than the constant edge temperature condition), but as the edge heats up to its interior, the total thermal energy in the system should stabilize, giving us a good sense of whether the simulation is working correctly.
+
+\subsection{Rust Setup and An Introduction To WGPU}
+
+This was also my first time with many of these rust crates, so we'll focus on some important ones we'll need to understand soon. \begin{itemize}
+\item (\texttt{wgpu}) The WGPU crate exposes a GPU API corresponding to the WebGPU spec. My understanding is that this API is, while simpler, not particularly in conflict with many other APIs, and so WGPU acts primarily as a way to run Vulkan, Metal, DirectX or WebGPU GPU code from rust.
+\item (\texttt{tokio}) Since the GPU is separate from the CPU, our rust code will have to send jobs to the GPU and often wait for their results to return. This means that many GPU operations run asynchronously, and so we'll need something to deal with that. Rust provides language utilities to deal with asynchronous programming, but not the runtime itself, and so \texttt{tokio} will provide our asynchronous runtime as well as many helpful tools.
+\item (\texttt{wasm-bindgen}) The plan is to get this running in a browser, so we'll need a way to compile our rust code to something that runs on the web as well as a way to run our code once it's there. The crate \texttt{wasm-bindgen} provides macros that instructs our web-assembly compiler how to make our rust functions available in javascript to be run in browser, acting as our FFI.
+\item (\texttt{web-sys}) Of course the above crates are built with the intent that they can run on the web (with the partial exception of tokio, although certainly the features we require run fine in wasm) which means when we use them on the web, we'll need to have rust types corresponding to javascript objects. The crate \texttt{web-sys} provides these types along with methods corresponding to many typical javascript functions.
+\end{itemize}
+
+We'll also make frequent use of \texttt{bytemuck} for casting our data as unsigned 8-bit integer arrays when moving them back and forth from the GPU, and a combination of the crates \texttt{log} and \texttt{console\_log} will enable us to display data on our browser's console for debugging.
+
+The calculation itself can be done without a browser so we'll start by just setting up our simulation absent any graphical considerations. Our way of thinking about stored data corresponding to our temperature state will be as follows.
+
+\begin{lstlisting}[language=Rust]
+pub struct RectGrid {
+	array: Vec<f32>,
+	imax: usize,
+	jmax: usize
+}
+
+impl RectGrid {
+	pub fn new(width: usize, height: usize) -> Self
+	{
+		Self {
+			array: [0.].repeat(width * height),
+			imax: width,
+			jmax: height
+		}
+	}
+	pub fn arrayasslice<S>(&self) -> &[S]
+	where
+	S: bytemuck::AnyBitPattern
+	{
+		bytemuck::cast_slice(&(self.array))
+	}
+
+	fn setelement(&mut self, i: usize, j: usize, newval: f32) {
+		self.array[i + j * self.imax] = newval
+	}
+
+	pub fn setbyfunc(&mut self, f: impl Fn(f32,f32) -> f32) {
+		for n in 0..(self.imax*self.jmax) {
+			let i: usize = n % self.imax;
+			let j: usize = n / self.imax;
+			// SINCE (1,1) IS INCLUDED WE MUST SUBTRACT 1 FROM IJMAX
+			//   OR ELSE X=1 AND Y=1 WILL NOT OCCUR
+			let x: f32 = (i as f32) / ((self.imax -1) as f32);
+			let y: f32 = (j as f32) / ((self.jmax -1) as f32);
+			self.setelement(i,j, f(x,y))
+		}
+	}
+}
+\end{lstlisting}
+
+Here I'm omitting the various getter functions as well as other auxillary functions, but this is roughly our model. We should know what the width $W$ and height $H$ of our temperature grid is in rectangular \squote{pixels} and we will have an array of length \texttt{width * height}. A given $n \in \{0,...,(W \cdot H - 1)\}$ (as typical of array indexing to include zero and exclude the end) will correspond to $(i,j)$ integer coordinates on the grid with $i = n\mod W$ and $j = \lfloor n/W \rfloor$, that is, when we divide $n$ by the width of our grid, the remainder will be the $i$-coordinate and the result of this division rounded down will be the $j$-coordinate. In other words, our array will be one dimensional holding each \squote{row} of data one after another, so to divide by the row length (with rounding) is to ask which row we're on, and the remainder of that division is where in the row we are. Of course this means that $i \in \{0,...,W - 1\}$ and $j \in \{0,...,H - 1\}$ where $n=W$ would mean we are at $i=0$ and $j=1$ for example. This also means that if we want to include the $(x,y)$ coordinate $(1,1)$ (and indeed the other $(1,y)$ and $(x,1)$ positions) we'll need to subtract one from the width and height before we divide $i$ and $j$ by them to obtain $(x,y)$ positions, as seen in the comment. 
+
+In the above code we have the functions \texttt{arrayasslice} and $\texttt{setbyfunc}$ mentioned. Of course rust's vector types have their own function for returning their contents as an array slice but this is generally as an array slice corresponding to the type they contain; we'll need to deal with arrays that are cast to \texttt{\&[u8]} for GPU purposes. The function \texttt{setbyfunc} will enable us to turn a function into initial conditions for the simulation. In the absence of a user specified initial condition, we'll use a hard-cutoff function which sets the grid equal to some constant temperature inside of a circle and zero outside of that.
+
+\begin{lstlisting}[language=Rust]
+pub fn makemiddleRatTinitconds(r: f32, t:f32 )
+-> (impl Fn(f32,f32) -> f32) {
+	let rsquared = sqnum(r);
+	move |x:f32,y:f32| -> f32 {
+		match (sqnum(x-0.5) + sqnum(y-0.5)) < rsquared {
+			true => t,
+			false => 0.
+		}
+	}
+}
+\end{lstlisting}
+
+Of course, since most of what we do is on the GPU, we won't use the above code very much. It will remain as a working model for us when we move to the GPU though. For instance, we will continue to one dimensional arrays to store our data on the GPU, and while we won't often explicitly calculate $(i,j)$ coordinates, we think in terms of that grid. More often than not, we'll simply use an index $i + j\cdot W$ corresponding to the point we care about, or how we want to move through the grid.
+
+\subsubsection{Setting Up the GPU}
+
+Our manipulation of the GPU starts with the \text{wgpu} type \texttt{Instance}. This exists as our entrypoint to asking the GPU what it can do for us, and we'll use it to get an \texttt{Adapter}, which is our connection to a physical device. In order to get that \texttt{Adapter}, we'll first need to specify how we want to interact with the GPU; I mentioned earlier that rust's \texttt{wgpu} uses a WebGPU style API but can also run using Vulkan, Metal, DirectX and WebGPU. We specify which of those modes we're interested in when we create our instance, and this instance will then select an adapter corresponding to needs we've specified.
+
+\begin{lstlisting}[language=Rust]
+let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
+		#[cfg(not(target_arch = "wasm32"))]
+		backends: wgpu::Backends::PRIMARY,
+		#[cfg(target_arch = "wasm32")]
+		backends: wgpu::Backends::BROWSER_WEBGPU,
+		..Default::default()
+	});
+      
+let adapter = instance
+	.request_adapter(&wgpu::RequestAdapterOptions
+		{
+			power_preference: wgpu::PowerPreference::default(),
+			compatible_surface: None,
+			force_fallback_adapter: false,
+		})
+		.await?;
+\end{lstlisting}
+
+The macros \texttt{\#[cfg(target\_arch = "wasm32")]} let us enable or disable code based on our compile target. We'll want to use the \texttt{BROWSER\_WEBGPU} backend if we're compiling for web and \texttt{PRIMARY} otherwise, which corresponds to telling the instance we're okay with any of Vulkan, Metal, or DirectX12 or WebGPU. There are also exists a backend corresponding to openGL, however that backend won't let us use compute shaders.
+
+The request for an \texttt{adapter} then specifies more things we care about. How high power do we want to run the GPU? What should we do if we can't find an adapter we want? Most importantly to us (although later) is what kind of graphical surface does out adapter need to be compatible with? Since we'll be outputting to a Html canvas later, we'll need some way to specify that. But for now we'll set that to \texttt{None}.
+
+Once we have our adapter, we can get \texttt{Device} and \texttt{Queue} objects, which we'll use to allocate buffers and send instructions to the GPU.
+
+\begin{lstlisting}[language=Rust]
+let (device, queue) = adapter
+	.request_device(&wgpu::DeviceDescriptor {
+		label: None,
+		required_features: wgpu::Features::empty(),
+		experimental_features: wgpu::ExperimentalFeatures::disabled(),
+		required_limits: if cfg!(target_arch = "wasm32") {
+			adapter.limits()
+		} else {
+			wgpu::Limits::defaults()
+		},
+		memory_hints: Default::default(),
+		trace: wgpu::Trace::Off,
+	})
+	.await?;
+	
+fn error_capture(error: wgpu::Error) {
+	println!(error.to_string());
+}
+device.on_uncaptured_error(Arc::new(error_capture));
+\end{lstlisting}
+
+As seen here, you may want to use the \texttt{on\_uncaptured\_error} method so you aren't left in the dark if you get a strange error. We'll discuss how to set up more general logging later.
+
+We can now use this \texttt{device} to create \emph{buffers}, \emph{shader modules}, and \emph{pipelines}. These buffers are our way of storing data on the GPU; there are also textures, which behave mostly like buffers but with some differences in the API. Shaders and pipelines together act as the GPU's functions which we'll call from the CPU later when we add them to the queue. It'll be important to remember as we continue that many of these terms got their names as tools in \emph{graphics} programming, and so even though we are doing computation, we still speak in terms of \emph{compute shaders}.
+
+\begin{lstlisting}[language=Rust]
+fn helper_basic_compute_shader(
+	device: &wgpu::Device,
+	label: Option<&str>,
+	shader_module: &wgpu::ShaderModule
+) -> wgpu::ComputePipeline {
+	device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+		 label: label,
+		 layout: None,
+		 module: shader_module,
+		 entry_point: None,
+		 compilation_options: Default::default(),
+		 cache: Default::default(),
+	})
+}
+
+let laplacian_shader = device.create_shader_module(
+	wgpu::include_wgsl!("laplacian.wgsl"));
+let iterate_shader = device.create_shader_module(
+	wgpu::include_wgsl!("iterate_heat.wgsl"));
+let buffer_move_shader = device.create_shader_module(
+	wgpu::include_wgsl!("buffer_move.wgsl"));
+let fix_boundary_conditions_shdr = device.create_shader_module(
+	wgpu::include_wgsl!("boundary_cond.wgsl"));
+
+let laplacian_pipeline = helper_basic_compute_shader(
+	device,
+	Some("Laplacian Pipeline"),
+	&laplacian_shader
+);
+let iterate_pipeline = helper_basic_compute_shader(
+	device,
+	Some("Iteration Pipeline"),
+	&iterate_shader
+);
+let buffer_move_pipeline = helper_basic_compute_shader(
+	device,
+	Some("Relocation Pipeline"),
+	&buffer_move_shader
+);
+let fix_boundary_conditions_ppln = helper_basic_compute_shader(
+	device,
+	Some("Boundary Conds Pipeline"),
+	&fix_boundary_conditions_shdr
+);
+\end{lstlisting}
+
+Each shader module corresponds to a WGSL file we write, and the pipelines (for our purposes) correspond to individual functions within those wgsl files that we call. We'll get to how we write those files later (I promise it's relatively simple) but for now let's break down the relevant arguments in our helper function's \texttt{ComputePipelineDescriptor}. Many of these arguments are options since it's not strictly necessary to set them. \begin{itemize}
+\item \texttt{label}: This doesn't matter too much, but for debugging purposes you'll want to set a label so \emph{when} you make a mistake, you'll know where it happened.
+\item \texttt{layout}: The pipeline layout argument is set to match the bind group the pipeline will use, but we'll have to discuss bind groups after we discuss buffers. Setting this argument simply allows us to set what the pipeline layout should look like so we'll throw an error if we violate our own expectations later. With it set to \texttt{None}, wgpu looks at the file for us to figure out a suitable default.
+\item \texttt{module}: This one just corresponds to the wgsl shader module we plan to extract the pipeline from.
+\item \texttt{entry\_point}: Our wgsl file can have multiple functions in it, some of which might be for use in other functions, but multiple of which might be the function we want to call from rust. For this project I've kept every pipeline in its own file, hence the need to set up multiple shader modules, and so we don't need to specify this. We could have instead put all of our pipelines in the one shader module, in which case we would need to specify this entry point.
+\end{itemize}
+
+These wgsl files will need to be compiled into gpu instructions on the individual client device due to the vast differences between device GPUs. Although WASM magic seems to package them away somewhere into the resulting web-assembly during compilation.
+
+Recalling the the method we described earlier, we'll need to encode the following equations in our code:\begin{align*}
+\frac{\partial^2 T}{\partial x^2}(x,t) &= \frac{T(x + \Delta x,y, t) - 2 T(x,y,t) + T(x - \Delta x,y, t) }{\Delta x^2} \\
+\nabla^2 T(x,y,t) &= \frac{\partial^2 T}{\partial x^2}(x,y,t) + \frac{\partial^2 T}{\partial y^2}(x,y,t) \\
+T(x,y, t + \Delta t/2) &=  T(x,y,t) + \frac{\Delta t}{2} \cdot \nabla^2 T(x,y,t) \\
+T(x,y, t + \Delta t) &= T(x,y,t) + \Delta t \cdot \nabla^2 T(x,y,t + \Delta t /2)
+\end{align*}
+and the insulating boundary condition we discussed. We'll get to the actual wgsl code later, but for now what you should know is that of the four pipelines above, the \squote{Laplacian Pipeline} corresponds to the first two equations above, i.e. how do we calculate $\nabla^2 T(x,y,t)$ for all $(x,y)$ if we know $T(x,y,t)$. The iteration pipeline will do the latter two equations, since you might notice they have a very similar form; to reuse the iteration pipeline in these two instances, we need to replace $\Delta t$ with $\Delta t/2$ and $\nabla^2T(x,y,t)$ with our midpoint $\nabla^2 T(x,y,t + \Delta t/2)$ in one of our iteration pipeline uses. We of course have a pipeline for our boundary conditions, and due to the way that shader calls work, I've elected to have a shader that copies our output buffer corresponding to $T(x,y,t + \Delta t)$ into our input buffer $T(x,y,t)$. There are of course a myriad of ways to avoid having to do this with a shader pipeline, but it will serve later as a very simple example of how our shaders work.
+
+\begin{lstlisting}[language=Rust]
+fn helper_compute_interim_data_buffer(
+   device: &wgpu::Device,
+   label: Option<&str>,
+   size: u64,
+) -> wgpu::Buffer {
+   device.create_buffer(&wgpu::BufferDescriptor {
+      label: label,
+      size: size,
+      usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::STORAGE,
+      mapped_at_creation: false,
+   })
+}
+
+let data_buffer = device.create_buffer_init(&BufferInitDescriptor {
+	label: Some("data"),
+	contents: bytemuck::cast_slice(&initial_data),
+	usage: wgpu::BufferUsages::COPY_DST
+		| wgpu::BufferUsages::COPY_SRC
+		| wgpu::BufferUsages::STORAGE,
+});
+
+let export_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+	label: Some("export"),
+	size: data_buffer.size(),
+	usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+	mapped_at_creation: false,
+});
+
+let output_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+	label: Some("output"),
+	size: data_buffer.size(),
+	usage: wgpu::BufferUsages::COPY_SRC | wgpu::BufferUsages::STORAGE,
+	mapped_at_creation: false
+});
+let laplacian_buffer = helper_compute_interim_data_buffer(
+	device, Some("laplacian buffer"), data_buffer.size()
+);
+let midpoint_buffer = helper_compute_interim_data_buffer(
+	device, Some("midpoint buffer"), data_buffer.size()
+);
+let midpoint_laplacian_buffer = helper_compute_interim_data_buffer(
+	device, Some("midpoint laplacian buffer"), data_buffer.size()
+);
+\end{lstlisting}
+
+To define a buffer, we have two tools depending on whether we want to initialize the buffer with some specific data in it. You can see these in the difference between \texttt{data\_buffer} and \texttt{export\_buffer}, which are created with \texttt{create\_buffer\_init} vs \texttt{create\_buffer}, taking different kinds of struct arguments. You'll see in \texttt{data\_buffer}, we initialize with an argument called \texttt{contents}, to which we have provided an \texttt{initial\_data} which is simply our \texttt{RectGrid.array} from earlier, a \texttt{Vec<f32>} which we convert to a \texttt{\&[u8]} using bytemuck. When we don't specify what data we want to store on the GPU, we'll need to instead say how many bytes we want to allocate, but we can also do this by just copying the size of a previous buffer.
+
+In our use of \texttt{create\_buffer} with the \texttt{BufferDescriptor} struct, we have an argument \texttt{mapped\_at\_creation}, which corresponds to whether the buffer is \squote{mapped}, meaning available both to the GPU and to the CPU such that we may write directly to it outside of queuing a write operation. Obviously sharing memory in this way is much slower, but this argument allows us create buffers that may be written to one time when they are made no matter what other permissions or status they have as a way to get data in.
+
+Those permissions are set by the \texttt{usage} argument, and indicates what properties the buffer needs to have in the GPU. For instance, \texttt{COPY\_SRC} and \texttt{COPY\_DST} indicate that we might later want to queue a copy between buffers treating the buffer in question as a data source or a data destination, a read or write permission. The \texttt{STORAGE} flags correspond to making the buffer readable and writable to the shaders, i.e. allowing our wgsl code to modify the buffer; in the absence of a need to write to these buffers in our WGSL code, we can use \texttt{UNIFORM} instead, and we'll do that shortly. See that we've made the \texttt{data\_buffer} both a copy source and a copy destination, as well as marking it as storage, whereas our output buffer is only a copy source and a storage, since we never need to copy \emph{into} it, as it is an output. \texttt{MAP\_READ} will enable us to make our buffer mapped again at a later time so we can read data out of it to non-GPU memory, and there is of course a matching \texttt{MAP\_WRITE} flag that we don't particularly need.
+
+These permissions are simply sets of flags, and so to combine them we use the bitwise \texttt{OR} operation. It was suggested in the tutorial I originally got these flags from that some sets of flags are contradictory, but I haven't seen anything since then that suggests that too many flags does anything other than slowing down the buffer.
+
+\begin{lstlisting}[language=Rust]
+fn helper_param_buffer(
+	device: &wgpu::Device,
+	label: Option<&str>,
+	size: u64,
+) -> wgpu::Buffer {
+	device.create_buffer(&wgpu::BufferDescriptor {
+		label: label,
+		size: size,
+		usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+		mapped_at_creation: false,
+	})
+}
+
+let width_buffer = device.create_buffer_init(&BufferInitDescriptor {
+	label: Some("width"),
+	contents: bytemuck::cast_slice(&[width]),
+	usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+});
+let height_buffer = device.create_buffer_init(&BufferInitDescriptor {
+	label: Some("height"),
+	contents: bytemuck::cast_slice(&[height]),
+	usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+});
+let kappa_buffer = helper_param_buffer(device,Some("kappa"),4);
+let delta_t_buffer = helper_param_buffer(device,Some("delta_t"),4);
+// this is just the same number divided by two so we can reuse the pipeline
+let delta_t_2_buffer = helper_param_buffer(device,Some("delta_t_2"),4);
+\end{lstlisting}
+
+It is of course possible to also define buffers which hold only a single value, and so we have multiple buffers storing parameters for our simulation. Our thermal conductivity parameter $\kappa$, our simulation width and height, and our timestep $\Delta t$. As mentioned earlier, we also store a buffer which is just $\Delta t$ divide by two, but we could have just as easily made this value merely a flag that indicates whether the GPU should divide $\Delta t$ by two itself; since it would need to do so individually on every single thread, I thought I'd save the trouble and cache that calculation.
+
+Since these are parameters, we won't need to change them and can thus use the \texttt{UNIFORM} flags, and we'll set their sizes to four bytes for \texttt{f32} (our width and height buffers are also four bytes for \texttt{u32}).
+
+These values, both the parameters and the larger arrays, will appear not directly as function arguments to our pipelines but rather more like global variables. What sets these global variables for a pipeline, and thus what will allow us to reuse the iteration pipeline, is called a bind group. For instance, here is the code right at the top of our \dquote{Laplacian Pipeline}.
+
+\begin{lstlisting}[language=Rust]
+@group(0) @binding(0) var<storage, read> data: array<f32>;
+@group(0) @binding(1) var<storage, read_write> laplacian: array<f32>;
+@group(0) @binding(2) var<uniform> width: u32;
+@group(0) @binding(3) var<uniform> height: u32;
+\end{lstlisting}
+
+This means that as far as our laplacian pipeline is concerned, we have four global variables: \texttt{data}, which is an array of \texttt{f32} values which we may read from, \texttt{laplacian} which is a similar array which we may read from and write to, and then two uniform values which are simply \texttt{u32} values we only read from. The names of these variables don't matter on the CPU-side, they only matter to our WGSL code, whereas the way we indicate what data receives these names in our WGSL code from the CPU-side is by their group number and binding number. We specify these as follows.
+
+\begin{lstlisting}[language=Rust]
+fn helper_compute_bind_group(
+	device: &wgpu::Device,
+	label: Option<&str>,
+	pipeline: &wgpu::ComputePipeline,
+	buffer_sequence: &[&wgpu::Buffer]
+) -> wgpu::BindGroup {
+	let mut temp: Vec<wgpu::BindGroupEntry> = Vec::new();
+
+	for (n,val) in buffer_sequence.iter().enumerate() {
+		temp.push(
+			wgpu::BindGroupEntry {
+					binding: n as u32,
+					resource: val.as_entire_binding()
+			},
+		)
+	}
+
+	device.create_bind_group(&wgpu::BindGroupDescriptor {
+		label: label,
+		layout: &pipeline.get_bind_group_layout(0),
+		entries: &temp
+	})
+}
+
+// shader that fixes the insulating boundary conditions.
+// we want to apply this before we compute the laplacian
+//	since it effectively fixes the laplacian equal to zero on the boundary.
+let fix_boundary_conditions_bg = helper_compute_bind_group(
+	device, None, &fix_boundary_conditions_ppln,
+	&[&data_buffer, &width_buffer, &height_buffer]
+);
+
+// compute laplacian of data
+let stage_one_bind_group = helper_compute_bind_group(
+	device, None, &laplacian_pipeline,
+	&[&data_buffer, &laplacian_buffer, &width_buffer, &height_buffer]
+);
+// compute RK2 midpoint using laplacian
+let stage_two_bind_group = helper_compute_bind_group(
+	device, None, &iterate_pipeline,
+	&[
+		&data_buffer, &laplacian_buffer, &midpoint_buffer,
+		&width_buffer, &height_buffer, &kappa_buffer, &delta_t_2_buffer
+	]
+);
+// reuse laplacian pipeline to compute laplacian using midpoint buffer
+let stage_three_bind_group = helper_compute_bind_group(
+	device, None, &laplacian_pipeline,
+	&[&midpoint_buffer, &midpoint_laplacian_buffer, &width_buffer, &height_buffer]
+);
+// reuse RK2 midpoint pipeline but with delta_t
+//	instead of delta_t/2 to compute RK2 result
+let stage_four_bind_group = helper_compute_bind_group(
+	device, None, &iterate_pipeline,
+	&[
+		&data_buffer, &midpoint_laplacian_buffer, &output_buffer,
+		&width_buffer, &height_buffer, &kappa_buffer, &delta_t_buffer
+	]
+);
+// send output buffer to data buffer so we can repeat this
+let stage_five_bind_group = helper_compute_bind_group(
+	device, None, &buffer_move_pipeline,
+	&[&output_buffer, &data_buffer, &width_buffer, &height_buffer]
+);
+\end{lstlisting}
+
+We'll assign a bind group to each use of pipelines we'll need, and for that reason we name them based on the order they'll apply in. A bind group is consisted of a series of \texttt{BindGroupEntry}s which are individally numbered, and so the numbers within a bind group do not necessarily need to occur in order or continuously. Here, that does not matter to us, so we have a little helper function to just assign our bind group entries numbers sequentially.
+
+Notice also that our bind groups require a bind group layout, and this we inherit from the pipeline we plan to use the bind group for. Since we're specialising our bind groups to a pipeline, you can see that we use the laplacian pipeline for two different bind groups and the iterate pipeline for two different bind groups, but with different buffers each time. For instance in the stage one bind group we use the laplacian pipeline so we can calculate the laplacian of our data buffer in our laplacian buffer, but on the second go around, we provide the midpoint buffer in place of the data buffer, and the midpoint laplacian buffer in place of the laplacian buffer. We do a similar thing for our iterate pipeline, but on the second go around we replace the midpoint buffer with the output buffer, the laplacian buffer with the midpoint laplacian buffer, and the \texttt{delta\_t\_2\_buffer} with the \texttt{delta\_t\_buffer}. Once again, that is because our operation to calculate $T(x,y,t + \Delta t /2)$ is very similar to our operation to calculate $T(x,y,t + \Delta t)$, as is our operation to calculate $\nabla^2 T(x,y,t)$ to calculating $\nabla^2 T(x,y,t + \Delta t /2)$.
+
+Let's now take a look inside our wgsl code. The full code for our laplcian pipeline looks like this: 
+\begin{lstlisting}[language=Rust]
+@group(0) @binding(0) var<storage, read> data: array<f32>;
+@group(0) @binding(1) var<storage, read_write> laplacian: array<f32>;
+@group(0) @binding(2) var<uniform> width: u32;
+@group(0) @binding(3) var<uniform> height: u32;
+
+@compute// Entrypoint
+@workgroup_size(64,1,1)
+fn main(
+	//we use these to get which workgroup and where inside workgroup we are
+	//@builtin(workgroup_id) wid: vec3<u32>,
+	//@builtin(local_invocation_id) lid: vec3<u32>
+	//
+	// but this will just give us a global id equivalent to
+	// wid * workgroup_size + lid
+	@builtin(global_invocation_id) gid: vec3<u32>
+) {
+	// valuable reference: https://www.w3.org/TR/WGSL/#arithmetic-expr
+
+	// for ij indices. getting i requires % but we dont need it
+	let roughj = gid.x / width;
+
+	// exit if on boundary. might be inefficient but easier to call too many workers
+	if (gid.x <= width) {return;}						// i.e. y=0
+	if (gid.x >= width * (height - 1)) {return;}		// i.e. y=1
+	if (gid.x == roughj * width) {return;}				// i.e. x=0
+	if (gid.x == (roughj + 1) * width - 1) {return;}  	// i.e. x=1
+
+	let widthfloatmin1 = f32(width);
+	let heightfloatmin1 = f32(height);
+	let delta_x_sq = 1.0f / widthfloatmin1 / widthfloatmin1;
+	let delta_y_sq = 1.0f / heightfloatmin1 / heightfloatmin1;
+
+	laplacian[gid.x] =
+		(
+			data[gid.x + 1]
+			-2.0f * data[gid.x]
+			+ data[gid.x - 1]
+		) / delta_x_sq
+		+ (
+			data[gid.x + width]
+			-2.0f * data[gid.x]
+			+ data[gid.x - width]
+		) / delta_y_sq;
+}
+\end{lstlisting}
+
+At the top we see our buffers provided as global variables provided. Next we see the function that is actually run on our GPU threads, marked with \texttt{@compute} so wgpu knows this is an entrypoint. Next we specify the \texttt{workgroup\_size}; this is how many threads are run together on the GPU. Workgroups have sizes in three different dimensions which correspond to how they're identified once in flight; we organized our data in a line so we'll just stick to using the one dimension. Workgroups are then deployed later in \emph{dispatches}, where many workgroups are set about running together, and with a large number of dispatches each containing workgroups with many threads, we can get whatever we need done. In my research, the understanding I've found is that \emph{workgroup threads are guarenteed to run in parallel} while \emph{dispatched workgroups may or may not be broken up to facilitate a device's maximum thread count}. To that end, more threads per work group is better because it means less dispatches (which have some amount of overhead), and the WebGPU spec guarentees that a fully compliant device will provide a maximum of 256 threads per work group which may be distributed amongst an $x$, $y$ and $z$ axis which may individually hold 256, 256, and 64 threads respectively. Some devices can run dramatically more than that, but many devices are not \emph{fully} WebGPU compliant, and so it is recommended to set the workgroup size to 64. (see \hyperlink{https://gpuweb.github.io/gpuweb/\#dom-supported-limits-maxcomputeworkgroupsizex}{the spec})
+
+The next relevant item is how we identify which thread is running when it's in flight. We have a few ways to do this; the first way would be to figure out which thread is running using a \texttt{local\_invocation\_id} which will tell us which thread we're running on within a workgroup, together with a \texttt{workgroup\_id} which tells us where we are in all of the dispatches. We would then calculate which thread we are using $64 \cdot \texttt{workgroup\_id} + \texttt{local\_invocation\_id}$, but fortunately WebGPU will also do this for us with the \texttt{global\_invocation\_id}.
+
+Once we know which thread we're on, we're ready to actually do something useful. We'll use our thread number, indicated as the $x$ component of our global invocation ID (remembering that this can be three dimensional, but we're only using one of those dimensions) as the ID for which pixel on our grid we want to compute the laplacian for. As long as we dispatch a total of \texttt{width} times \texttt{height} threads, we'll have one for every pixel. But that is too much, as we must remember calculating the laplacian for pixel on our grid involves using adjacent pixels, so we can't do this calculation on the edge without using a value on the next row by accident or drawing from memory outside of the bounds of \texttt{data\_buffer}. More generally, it will often be easier to call too many threads than too few (since they come in blocks of 64), and so most of our shaders will start with some condition to dismiss excess threads. In this case, we dismiss threads smaller than \texttt{width} (i.e. threads on the first row) and threads greater than the width times the height minus one (in the final row or beyond it). We also calculate a $j$ (the vertical position of our thread within the grid, or row number) as an integer, meaning it is rounded down \hyperlink{https://www.w3.org/TR/WGSL/\#arithmetic-expr}{per the wgsl spec}; if we multiply this number by the width again, we'll get back not the number we started with but the ID corresponding to the left-most pixel on the row, and so this can tell us if we're on the left-hand border of our grid. Subtract one from that, and we'll know if we're on the right-hand border of our grid, since at the end of each row we loop over to the next row.
+
+We can finally calculate the actual laplacian, and this will almost straightforwardly correspond to the formulas we wrote earlier, with adjacent rows or columns acting as $\Delta x$ or $\Delta y$ distant points. The only note to make here is that since we express our data in a line, instead of adding one or subtracting one from our $j$ coordinate, we simply add or subtract a whole width to move between rows, while we add or subtract one to move between columns.
+\begin{align*}
+\frac{\partial^2 T}{\partial x^2}(x,t) &= \frac{T(x + \Delta x,y, t) - 2 T(x,y,t) + T(x - \Delta x,y, t) }{\Delta x^2} \\
+\nabla^2 T(x,y,t) &= \frac{\partial^2 T}{\partial x^2}(x,y,t) + \frac{\partial^2 T}{\partial y^2}(x,y,t)
+\end{align*}
+
+The pattern discussed above then follows us to our other shaders.
+
+\begin{lstlisting}[language=Rust]
+@group(0) @binding(0) var<storage, read> data: array<f32>;
+@group(0) @binding(1) var<storage, read> laplacian: array<f32>;
+@group(0) @binding(2) var<storage, read_write> output: array<f32>;
+@group(0) @binding(3) var<uniform> width: u32;
+@group(0) @binding(4) var<uniform> height: u32;
+@group(0) @binding(5) var<uniform> kappa: f32;
+@group(0) @binding(6) var<uniform> delta_t: f32;
+
+@compute @workgroup_size(64,1,1)
+fn main(
+   @builtin(global_invocation_id) gid: vec3<u32>
+) {
+   if (gid.x > (width * height)) {return;}
+
+   output[gid.x] = data[gid.x] + delta_t * kappa * laplacian[gid.x];
+}
+
+\end{lstlisting}
+
+This is our iterate shader, and it corresponds to the latter two steps: \begin{align*}
+T(x,y, t + \Delta t/2) &=  T(x,y,t) + \frac{\Delta t}{2} \cdot \nabla^2 T(x,y,t) \\
+T(x,y, t + \Delta t) &= T(x,y,t) + \Delta t \cdot \nabla^2 T(x,y,t + \Delta t /2)
+\end{align*}
+
+Remember when we set up the bind groups that \texttt{delta\_t} may not literally be \texttt{delta\_t}. Indeed, even with the laplacian pipeline, many of these variables will correspond to different data buffers to facilitate doing the proper step of the RK2 calculation as necessary.
+
+If any of this is confusing to you, the following is the quintessential example of a simple pipeline, which copies the contents of one buffer to another. The process for setting up and running this pipeline is explained in great deal \hyperlink{https://sotrh.github.io/learn-wgpu/compute/introduction/\#why-gpu-compute-is-fast}{here}.
+
+\begin{lstlisting}[language=Rust]
+@group(0) @binding(0) var<storage, read> data: array<f32>;
+@group(0) @binding(1) var<storage, read_write> out: array<f32>;
+@group(0) @binding(2) var<uniform> width: u32;
+@group(0) @binding(3) var<uniform> height: u32;
+
+@compute
+@workgroup_size(64,1,1)
+fn main(
+   @builtin(global_invocation_id) gid: vec3<u32>
+) {
+   if (gid.x > (width * height)) {return;}
+
+   out[gid.x] = data[gid.x];
+}
+\end{lstlisting}
+
+The second most complex buffer we'll discuss here (however certainly the most irritating) is the one that enforces the insulating boundary conditions. This is a rather irritating collection of cases, since we have four sides which must set themselves equal to their closest neighbor on the interior of the grid, not to mention corners which must be set to the corner of the interior of the grid, and then we have to avoid double-counting corners. I'll spare you the details of this one, but if you're interested in how it works, you can inspect the copious collection of comments.
+
+\begin{my proof}[The Boundary Condition WGSL Code]{m}
+\begin{lstlisting}[language=Rust]
+@group(0) @binding(0) var<storage, read_write> data: array<f32>;
+@group(0) @binding(1) var<uniform> width: u32;
+@group(0) @binding(2) var<uniform> height: u32;
+
+@compute// Entrypoint
+@workgroup_size(64,1,1)
+fn main(
+	@builtin(global_invocation_id) gid: vec3<u32>
+) {
+
+	// we need 2 * width + 2 * height with different behaviours for each side.
+	// regard adding width as ostensibly y+=delta_y since each y coordinate
+	//	position is separated by a width. 
+
+
+	if (gid.x < width) {						 // side 1, y=0, horizontal
+		if (gid.x == 0) {
+			//corner, set (0,0) value to (delta_x,delta_y) value
+			data[0] = data[width + 1];
+		} else if (gid.x == width){
+			//corner, set (1,0) value to (1 - delta_x,delta_y) value
+			data[width] = data[2 * width - 2];
+		} else {
+			// set (x,0) values to (x,delta_y) values
+			data[gid.x] = data[gid.x + width];
+		}
+		return;
+	} else if (gid.x < width + height ){		// side 2, x=0, vertical
+		// in these cases we must regard gid.x as j+width since we havent subtracted that
+		if ((gid.x == width) | (gid.x == ((width + height) - 1))) {
+			return; // corners, handled by sides 1 and 3
+		}
+		// set (0,y) values to (delta_x, y) values
+		let indexwecareabout = (gid.x - width) * width; // y axis
+		data[indexwecareabout] = data[indexwecareabout + 1];
+		return;
+	} else if (gid.x < (2*width) + height ){	// side 3, y=1, horizontal
+		// in these cases we must regard gid.x as
+		//	x+width+height since we havent subtracted that
+		if (gid.x == width + height) {
+			// corner, set (0,1) value to (delta_x, 1 - delta_y) value
+			data[width * (height - 1)] = data[width * (height - 2) + 1];
+		} else if (gid.x == (2*width) + height - 1) {
+			// corner, set (1,1) value to (1 - delta_x, 1 - delta_y) value
+			data[width * height] = data[width * (height - 1) - 2];
+		} else {
+			// set (x,1) values to (x, 1 - delta_y) values
+			let indexwecareabout = (gid.x - width - height ) + (width * (height - 1));
+			data[indexwecareabout] = data[indexwecareabout - width];
+		}
+		return;
+	} else if (gid.x < 2 * width + 2 * height ){// side 4, x=1, vertical
+		if ((gid.x == (2*width) + height) | (gid.x == 2 * width + 2 * height - 1)) {
+			return; // corners, handled by sides 1 and 3
+		} else {
+			// the +1 before we multiply by width is so we are one more row than we want,
+			//	then the -1 takes us to the y=1 side of the previous row
+			let indexwecareabout = (gid.x - ((2*width) + height) + 1) * width - 1;
+			data[indexwecareabout] = data[indexwecareabout - 1];
+			return;
+		}
+	} else { return; }
+}
+\end{lstlisting}
+
+There are a few other ways we could implement this, for instance we could improve readability dramatically if we simply calculated $i$ and $j$ using $i = n \mod W$ and $j = n \mod H$ like I described earlier. The reason I've not done this is because I've heard that calculating a remainder is a particularly expensive GPU operation (although its possible this is no longer the case), and we don't actually need it if we're willing to simply imagine our grid. This is actually also true of integer division, but that's a little tougher to get around in the way we've set this up other than by moving from linear workgroups and dispatches to square workgroups and dispatches, which itself is not too hard once you understand this. Moreover that doesn't simplify our boundary condition code since the perimeter of our square is still a line and we aren't going to call threads for every pixel on our grid just to dismiss the ones that aren't on the boundary.
+
+Strictly speaking the caveats for the corners of the boundary also aren't necessary, but we might want to fix them anyway for graphical considerations later.
+\end{my proof}
+
+With the bind groups and the shaders now both explained, we're ready to actually run our computation. 
+
+\begin{lstlisting}[language=Rust]
+let mut encoder = device.create_command_encoder(&Default::default());
+
+// these braces are to make sure we return any refs borrowed in them.
+//	 principly, encoder must be returned since it is borrowed by
+//	 begin_compute_pass, and is needed so we can call encoder.finish().
+{
+	let mut gputodo = encoder.begin_compute_pass(&Default::default());
+
+	let workgroup_quantity = (width * height).div_ceil(64) as u32;
+	let boundary_conds_wg_quant =
+		(width*2 + height*2).div_ceil(workgroup_size);
+
+	for _ in 0..iteration_quantity {
+	gputodo.set_pipeline(&fix_boundary_conditions_ppln);
+	gputodo.set_bind_group(0, &fix_boundary_conditions_bg, &[]);
+	gputodo.dispatch_workgroups(boundary_conds_wg_quant, 1 , 1);
+
+	gputodo.set_pipeline(&laplacian_pipeline);
+	gputodo.set_bind_group(0, &stage_one_bind_group, &[]);
+	gputodo.dispatch_workgroups(workgroup_quantity, 1, 1);
+
+	gputodo.set_pipeline(&iterate_pipeline);
+	gputodo.set_bind_group(0, &stage_two_bind_group, &[]);
+	gputodo.dispatch_workgroups(workgroup_quantity, 1, 1);
+
+	gputodo.set_pipeline(&laplacian_pipeline);
+	gputodo.set_bind_group(0, &stage_three_bind_group, &[]);
+	gputodo.dispatch_workgroups(workgroup_quantity, 1, 1);
+
+	gputodo.set_pipeline(&iterate_pipeline);
+	gputodo.set_bind_group(0, &stage_four_bind_group, &[]);
+	gputodo.dispatch_workgroups(workgroup_quantity, 1, 1);
+
+	gputodo.set_pipeline(&buffer_move_pipeline);
+	gputodo.set_bind_group(0, &stage_five_bind_group, &[]);
+	gputodo.dispatch_workgroups(workgroup_quantity, 1, 1);
+	}
+}
+
+queue.submit([encoder.finish()]);
+\end{lstlisting}
+
+As you can see, we create an object called a command encoder. This encoder is highly stateful, as is the queue object and the compute pass object that I've called \texttt{gputodo}. During the compute pass, we're able to run compute pipelines, which we'll recall act as our functions. We tell our GPU to-do list which pipeline we want to run, instruct it which bind group to use (and what to label that bind group, recalling all of our bind group variables were \texttt{@group(0)} so we use the argument 0), and then give the instruction to dispatch the workgroups. Since this is just a to-do list, we can then add these instructions to the to-do list many many times, before we let our \texttt{gputodo} go out of scope, releasing \texttt{encoder}, then submit it to the queue.
+
+The steps in this order ensure that we apply the boundary condition first so that the edge of the interior of our grid isn't cooled by the boundary but rather the boundary is set to precisely the temperature that won't influence the simulation at all; we do this step first ostensibly so that the laplacian (i.e. the second derivative in two dimensions) is zero at the edge of the interior. Next we calculate the laplacian of $T(x,y,t)$ in stage one, which we use in stage two to calculate $T(x,y,t + \Delta t/2)$. In stage three we calculate the laplacian of $T(x,y,t+\Delta t/2)$, and then we use that to calculate $T(x,y,t + \Delta t)$. Finally, we move that output back into our data buffer so that its correctly positioned to repeat the process. As mentioned earlier, there are a myrid of ways to avoid this move, indeed one of them would be simply to use a different set of bind groups and a different first iteration shader for the first pass that uses the data buffer, then every other pass could just use the output buffer as its data buffer. We have options.
+
+The process you see above of creating a to-do list for the GPU then submitting an encoder that carries it to the queue is just one of many things we can tell the queue to do. For instance, we can set our parameters, or instructing the GPU to make a buffer ready to read from CPU, although these steps won't actually happen until we submit the queue to the GPU. This submission can be resource intensive, and so it is generally considered bad practice for a graphical application to submit more than once per frame; this can be remedied by keeping a queue of our own, a \texttt{Vec<CommandBuffer>} which we submit as a slice to the queue when we are ready.
+
+\begin{lstlisting}[language=Rust]
+queue.write_buffer(&kappa_buffer, 0, cast_slice(&[kappa]));
+queue.write_buffer(&delta_t_buffer, 0, cast_slice(&[delta_t.clone()]));
+queue.write_buffer(&delta_t_2_buffer, 0, cast_slice(&[delta_t / 2.0]));
+queue.submit([]);
+\end{lstlisting}
+
+Once we've completed a computation to our satisfaction, we'll have to decide what we want to do with the final result. We have two options that we might be interested in: we can either export the data, or try to display it to the screen in some way. We'll do both, but I'll talk through the exporting side of things first since there are reasons we might want to do this other than just displaying to the screen, i.e. perhaps we want to check the total temperature to make sure it's staying roughly constant.
+
+This is where we'll have to begin discussing the \texttt{tokio} crate.
+
+Earlier, when we requested an \texttt{Adapter}, \texttt{Device}, and \texttt{Queue}, we used a \text{.await} method. This is because the process of asking our GPU for these items doesn't happen on the CPU, and so our CPU might need to wait to get a response back. This meant I had to do some reading about how rust asynchronous processes worked, and what I learned was first and foremost that async is not necessarily about threads. The age old joke about \squote{what does your CPU do when it's told to sleep for a millisecond other than check if a millisecond has passed on every tick?} comes to mind. The answer to that, as far as the thinking about async functions, turns out to be that the CPU does something else.
+
+\begin{lstlisting}[language=Rust]
+impl SetupCompute {
+   pub async fn new(
+      initial_data: &Vec<f32>,
+      width: u32,
+      height: u32,
+	) -> Self {
+	...
+	}
+}
+\end{lstlisting}
+
+You can imagine much of what we've discussed so far going in a function like this one, where we've specified an async function. When we call an async function, you can imagine the processor being given permission to do this task at its leasure. That might involve threading (this depends on how your asyncs are being handled, and indeed rust itself does not weigh in on this which is why we need tokio) or equally it might involve simply performing the function until such a point that it starts a process that takes too long, at which point we start working on something else in the same thread. The way we think about this is that async functions don't return values, they return \texttt{Future<Output = ...>} generic types which will probably eventually return a value. Since javascript also supports asynchronicity with Promises instead of Futures, we can call these kinds of functions from javascript using wasm.
+
+When we need the value from a future, we can use the \texttt{await} method, and this will halt the function it's running in from continuing until the future has returned its value. This is called \emph{blocking}, in the sense that the function is blocked from doing anything else other than waiting for the returned value; consequently, rust won't let us \texttt{await} in any function that isn't also an async function, since any function that can block should be ignorable while it's waiting for something else so that the function it runs within can continue. Not even in our \texttt{main} function can block without awaiting, and so if you want to run our code downstream of a \texttt{main} function (we don't, since what we'll do is run via wasm FFI), we'd need the following macro to specify how async will be handled in the program.
+
+\begin{lstlisting}[language=Rust]
+#[tokio::main]
+async fn main() {
+	...
+}
+\end{lstlisting}
+
+The \texttt{tokio} crate also provides other facilities, such as the \texttt{sender}/\texttt{receiver} abstraction. Due to rust's memory protections, it can be annoying to send information between threads in a way that perhaps C would allow, since one thread needs to hold on to a mutable reference to write a message and another needs to read it constantly to see if its changed; not allowed in rust since this property more broadly could lead to race conditions. The \texttt{sender}/\texttt{receiver} abstraction remedies this, and we'll need it in order to export data from the GPU, since the GPU needs to tell us that its ready for the export to happen.
+
+\begin{lstlisting}[language=Rust]
+let mut encoder = device.create_command_encoder(&Default::default());
+let (sender,receiver) = tokio::sync::oneshot::channel();
+
+// if the buffer was previously mapped, we'll have to unmap before we can copy into it
+export_buffer.unmap();
+
+encoder.copy_buffer_to_buffer(
+	&output_buffer, 0,
+	&export_buffer, 0,
+	output_buffer.size()
+);
+
+// We'll either need to instruct the GPU to have our export buffer mapped here, 
+//		in which case this closure takes sender
+encoder.map_buffer_on_submit(
+	&export_buffer,
+	wgpu::MapMode::Read,
+	..,
+	move |result| {sender.send(result).unwrap()}
+);
+
+queue.submit([encoder.finish()]);
+
+let our_final_data: Vec<f32> = {
+	// OR alternatively we'll do it here after we submit. do not do both
+	self.export_buffer.map_async(wgpu::MapMode::Read, ..,
+		move |result| sender.send(result).unwrap());
+
+	// this device polling step is unnecessary in WASM since device is polled
+	//	automatically, but we'll need it if running on desktop and using the
+	//	latter mapping method; the former does not require a poll since we submit.
+	device.poll(wgpu::PollType::wait_indefinitely())?;
+
+   _ = receiver.await?;
+
+   let output_data = self.export_buffer.get_mapped_range(..);
+
+   bytemuck::cast_slice(&output_data).to_vec()
+};
+\end{lstlisting}
+
+Here, we copy the contents of our output buffer into our export buffer (since output doesn't have the flags to read to CPU and export doesn't have the flags to be used in a shader pipeline) and \texttt{tokio} gives us a channel with a sender and a receiver. Ownership of this sender is moved into a closure which WGPU activates for us when our export buffer is ready. All we have to do is tell the receiver to wait for its signal, and we'll know that we're ready to \texttt{get\_mapped\_range} on the contents of the export buffer.
+
+The only other relevant thing here to pay attention to is the zeros in our \texttt{copy\_buffer\_to\_buffer} call: it is common to want to copy only parts of a buffer, so those numbers are our byte offsets. Since we want to copy the whole buffer to another buffer of trhe same size, we set those to zero, but you can easily imagine moving only (a contiguous) part of a buffer.
+
+\subsubsection{Setting Up The Graphics}
+
+If all we wanted to do was run our computation without a graphical interface, we'd be done now. We could write the whole program in one async \texttt{main} and run it on the command line. But not only would that not be as fun, many devices won't give us a command line quite as easily. Our user interface of choice today will be the web, and to do that we'll need a few things.
+
+WGPU is made to conform mostly with the WebGPU spec and provide an interface with the GPU to rust that looks a lot like this spec, however since it is made with WebGPU in mind, it is also made with certain facilities for the web in mind. This was my first time using many features of the web (whether that was input elements in HTML or javascript basically at all), but WGPU knows what to do with an HTML canvas element if we can provide one. \emph{Getting} that canvas element, bare in mind a HTML element, would be something easier done in javascript, and so for this we need the facilities of the \texttt{web-sys} crate. 
+
+\begin{lstlisting}[language=Rust]
+let window = wgpu::web_sys::window().unwrap_throw();
+let document = window.document().unwrap_throw();
+
+// many tutorials get the canvas like this. DO NOT DO IT
+let canvas = body.get_element_by_id(CANVAS_ID_IN_HTML).unwrap_throw();
+
+let canvas: Element = document
+   .query_selector("canvas")
+   .expect("could not find canvas")
+   .expect("canvas query returned empty");
+
+let html_canvas_element: HtmlCanvasElement = canvas
+   .dyn_into()
+   .expect("man your canvas is bonked or somethin");
+\end{lstlisting}
+
+Now, I could not tell you \emph{why}, but for whatever reason getting the canvas by element ID will catastrophically fail later on, with little sign that this is what went wrong. In fact, in my investigation into why, I found that the actual error that was being thrown was on a step that had a comment saying \dquote{Not returning this error because it is a type error that shouldn't happen unless the browser, JS builtin objects, or wasm bindings are misbehaving somehow.} In fact many tutorials use exactly that method, and this exact error is then \emph{not thrown} but only if you use the openGL backend, and throwing an error in near identical code only in the WebGPU backend. Inconceivably, changing this particular method of getting the canvas solved everything for me although needless to say this cost me time and motivation; since you are reading this now, we pushed through it.
+
+The crate \texttt{web-sys} ostensibly exposes javascript methods such as \texttt{get\_element\_by\_id} and \texttt{query\_selector}, returning results as rust analogs. Since javascript has a different type system to rust, we need to convert them to a rust type such as \texttt{Element} or \texttt{HtmlCanvasElement} using the \texttt{dyn\_into} method which will of course fail if we pick a type that doesn't match closely enough. It should be noted that \texttt{web-sys} doesn't expose basically anything by default, hiding most functionality between features which must be manually specified. Consequently my rust toml file looks like this
+
+\begin{lstlisting}
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+tokio = { version = "1", features = ["sync"] }
+console_error_panic_hook = "0.1.6"
+console_log = "1.0"
+wasm-bindgen = "0.2.106"
+wasm-bindgen-futures = "0.4.56"
+web-sys = { version = "0.3.83", features = [
+    "Document",
+    "Window",
+    "Element",
+    "Element",
+    "HtmlElement",
+    "HtmlCanvasElement",
+]}
+
+\end{lstlisting}
+
+Now remember way back at the beginning when we requested our adapter, and there was that one argument \texttt{compatible\_surface} which we ignored? We'll need that now, as we actually have a surface we'll want to draw to. If you're doing this on the desktop, you'll want to create your surface in a different way outlined \hyperlink{https://sotrh.github.io/learn-wgpu/beginner/tutorial2-surface/}{here}, probably using the \texttt{winit} crate.
+
+\begin{lstlisting}[language=Rust]
+#[cfg(target_arch = "wasm32")]
+let surface: wgpu::Surface = {
+	let surface_target = wgpu::SurfaceTarget::Canvas(html_canvas_element);
+	instance.create_surface(surface_target).expect("failed to create surface")
+};
+
+let adapter = instance
+	.request_adapter(&wgpu::RequestAdapterOptions
+		{
+			power_preference: wgpu::PowerPreference::default(),
+			compatible_surface: Some(surface),
+			force_fallback_adapter: false,
+		})
+		.await?;
+\end{lstlisting}
+
+Most of the steps I described above then apply just the same as before, with the only real caveat being that we we'll want to wait to submit our compute job so that it can be submitted together with instructions to render a frame (which we'll discuss now) and limit our number of iterations to something we can get done in a frame.
+
+What follows will look a lot like how we prepared buffers, shader modules, and pipelines for our computation, except this time we'll have a bunch of extra details related to graphics. A texture is a lot like a buffer, but it has to be able to do certain things that our normal buffers don't do. Imagine using this code for a videogame; if your player gets real close to a texture in 3D space, what does the GPU do if the texture now occupies more of the screen than the resolution of the texture itself? Textures are responsible for dealing with many of these problems, and so I couldn't tell you what every argument of what follows does exactly.
+
+\begin{lstlisting}[language=Rust]
+let size = wgpu::Extent3d {
+	width: width,
+	height: height,
+	depth_or_array_layers: 1,
+};
+
+let surface_caps = surface.get_capabilities(&adapter);
+
+let surface_format = surface_caps
+	.formats
+	.iter()
+	.copied()
+	.find(|f| f.is_srgb())
+	.unwrap_or(surface_caps.formats[0]);
+
+let config = wgpu::SurfaceConfiguration {
+	usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+	format: surface_format,
+	width: size.width,
+	height: size.height,
+	present_mode: surface_caps.present_modes[0],
+	alpha_mode: surface_caps.alpha_modes[0],
+	desired_maximum_frame_latency: 2,
+	view_formats: vec![],
+};
+
+let texture = device.create_texture(&wgpu::TextureDescriptor {
+	label: Some("default texture"),
+	size,
+	mip_level_count: 1,
+	sample_count: 1,
+	dimension: wgpu::TextureDimension::D2,
+	format: wgpu::TextureFormat::Rgba8UnormSrgb,
+	usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+	view_formats: &[],
+});
+
+let default_texture: Vec<u8> = [0,255,0,255]
+	.repeat((size.width.div_ceil(64) * size.height * 64) as usize);
+
+queue.write_texture(
+		wgpu::TexelCopyTextureInfo {
+			aspect: wgpu::TextureAspect::All,
+			texture: &texture,
+			mip_level: 0,
+			origin: wgpu::Origin3d::ZERO,
+		},
+		&default_texture,
+		wgpu::TexelCopyBufferLayout {
+			offset: 0,
+			bytes_per_row: Some(256 * size.width.div_ceil(64)),
+			rows_per_image: Some(size.height),
+		},
+		size,
+);
+\end{lstlisting}
+
+Our config is where our window meaningfully learns how big it's supposed to be. As suggested earlier, the texture (although it is sized such that one of its pixels is probably a pixel on the canvas) must be able to be dynamically scaled, and so setting the texture size tells the GPU nothing about the actual output size.
+
+Defining the texture has many similarities to defining a buffer, and as you can see we specify usage flags just as we did with buffers, as well as indicating we'll want to copy into this texture. Finally, we write an initial value for the texture using a repeating RGBA vector of green pixels.
+
+Our first indication of irritating complexity related to textures comes in a requirement for the analogous method to \texttt{write\_buffer}, the \texttt{write\_texture} method. Rather than freely copying one set of data to another position in another buffer, the \texttt{write\_texture} method does this in blocks of 256 bytes for each row. Now since our texture consists of RGBA data, each pixel will be four bytes. This means we have to size anything we want to copy to our texture buffer in increments of 64 pixel widths. Not a problem now, we'll just oversize our default texture and WGPU won't copy anything that won't fit into the texture.
+
+\begin{lstlisting}[language=Rust]
+let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+let sampler = device.create_sampler(&wgpu::SamplerDescriptor {
+	address_mode_u: wgpu::AddressMode::ClampToEdge,
+	address_mode_v: wgpu::AddressMode::ClampToEdge,
+	address_mode_w: wgpu::AddressMode::ClampToEdge,
+	mag_filter: wgpu::FilterMode::Linear,
+	min_filter: wgpu::FilterMode::Nearest,
+	mipmap_filter: wgpu::FilterMode::Nearest,
+	..Default::default()
+});
+\end{lstlisting}
+
+The view and sampler are involved in that process of interpolating a texture if its resolution doesn't match how it's displaying on the screen. Since we're explicitly trying to avoid that, most of our settings here are linear or nearest-neighbor sampling, anything cheap that we'll hope doesn't need to actually run.
+
+\begin{lstlisting}[language=Rust]
+let texture_bind_group_layout =
+	device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+		entries: &[
+			wgpu::BindGroupLayoutEntry {
+					binding: 0,
+					visibility: wgpu::ShaderStages::FRAGMENT,
+					ty: wgpu::BindingType::Texture {
+						multisampled: false,
+						view_dimension: wgpu::TextureViewDimension::D2,
+						sample_type: wgpu::TextureSampleType::Float { filterable: true },
+					},
+					count: None,
+			},
+			wgpu::BindGroupLayoutEntry {
+					binding: 1,
+					visibility: wgpu::ShaderStages::FRAGMENT,
+					ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+					count: None,
+			},
+		],
+		label: Some("texture_bind_group_layout"),
+	});
+
+let texture_draw_bind_group =
+	device.create_bind_group(&wgpu::BindGroupDescriptor {
+		layout: &texture_bind_group_layout,
+		entries: &[
+			wgpu::BindGroupEntry {
+				binding: 0,
+				resource: wgpu::BindingResource::TextureView(&view),
+			},
+			wgpu::BindGroupEntry {
+				binding: 1,
+				resource: wgpu::BindingResource::Sampler(&sampler),
+			},
+		],
+		label: Some("diffuse_bind_group"),
+	});
+
+let shader = device.create_shader_module(
+	wgpu::ShaderModuleDescriptor {
+		label: Some("Shader"),
+		source: wgpu::ShaderSource::Wgsl(
+			include_str!("rectangle.wgsl").into()),
+	}
+);
+
+let render_pipeline_layout =
+	device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+		label: Some("Render Pipeline Layout"),
+		bind_group_layouts: &[&texture_bind_group_layout],
+		push_constant_ranges: &[]
+	});
+\end{lstlisting}
+
+The above should look familiar due to its similarity to the compute pipeline setup. The only striking difference is that we explicitly define a texture bind group layout. What will follow is a division between a vertex shader, which places polygons, and a fragment shader which colors our screen using information about where those polygons are and what they should look like. These shaders are written in a wgsl file called \texttt{rectangle}, and our bind group layout gives wgpu instructions on how we'll provide our view and sampler from earlier to our fragment shader.
+
+The job of our fragment shader is rather opaque; we have GPU steps for using the sampler and view to do whatever texture sampling WGPU finds appropriate. Our vertex shader we'll be significantly more hands on with. Since we want to simply draw our texture to the screen, we can achieve this with two triangles forming a square over the view. To specify those triangles, we'll need to give coordinates, but we might have to give those coordinates multiple times since these two triangles forming a square will share vertices. It's better practice when we're certain we want the edges of the triangles to line up to simply reuse the points together with an \emph{index buffer} which we'll use to say which triangles have which vertices as their points.
+
+It'll also be important to think about which vertices we specify for the triangle in which order, since our triangles have a front face and a back face. If we view a triangle through its back face, it will be culled to the viewport, so picking the order of vertices correctly is paramount to actually getting to see the thing. My implementation is inspired heavily by \hyperlink{https://sotrh.github.io/learn-wgpu/beginner/tutorial5-textures/}{sotrh's tutorial} which gives some details that I haven't, including how coordinates work for textures.
+
+\begin{lstlisting}[language=Rust]
+#[repr(C)]
+#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+struct Vertex {
+    position: [f32; 3],
+    tex_coords: [f32; 2],
+}
+
+const VERTICES: &[Vertex] = &[
+    Vertex {
+        position: [-1.0, -1.0, 0.0],
+        tex_coords: [0.0, 1.0],
+    }, // 0 bottom left
+    Vertex {
+        position: [1.0, -1.0, 0.0],
+        tex_coords: [1.0, 1.0],
+    }, // 1 bottom right
+    Vertex {
+        position: [1.0, 1.0, 0.0],
+        tex_coords: [1.0, 0.0],
+    }, // 2 top right
+    Vertex {
+        position: [-1.0, 1.0, 0.0],
+        tex_coords: [0.0, 0.0],
+    }, // 3 top left
+];
+
+// our rectangle is two triangles bisecting the screen on its anti-diagonal
+const INDICES: &[u16] = &[0, 1, 2, 0, 2, 3];
+
+...
+
+let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+	label: Some("Vertex Buffer"),
+	contents: bytemuck::cast_slice(VERTICES),
+	usage: wgpu::BufferUsages::VERTEX,
+});
+let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+	label: Some("Index Buffer"),
+	contents: bytemuck::cast_slice(INDICES),
+	usage: wgpu::BufferUsages::INDEX,
+});
+\end{lstlisting}
+
+\begin{my proof}[The render pipeline and shader code is minimized here]{m}
+The following is basically just \hyperlink{https://sotrh.github.io/learn-wgpu/beginner/tutorial5-textures/}{sotrh's code}, but if you have any interest in reproducing what I made, you'll need this.
+\begin{lstlisting}[language=Rust]
+let render_pipeline = device.create_render_pipeline(
+	&wgpu::RenderPipelineDescriptor {
+		label: Some("Render Pipeline"),
+		multiview: None,
+		layout: Some(&render_pipeline_layout),
+		vertex: wgpu::VertexState {
+			module: &shader,
+			entry_point: Some("vs_main"),
+			buffers: &[Vertex::desc()],
+			compilation_options: Default::default(),
+		},
+		fragment: Some(wgpu::FragmentState {
+			module: &shader,
+			entry_point: Some("fs_main"),
+			targets: &[Some(wgpu::ColorTargetState {
+				format: config.format,
+				blend: Some(wgpu::BlendState {
+					color: wgpu::BlendComponent::REPLACE,
+					alpha: wgpu::BlendComponent::REPLACE,
+			}),
+			write_mask: wgpu::ColorWrites::ALL,
+		})],
+		compilation_options: Default::default(),
+		}),
+		primitive: wgpu::PrimitiveState {
+			topology: wgpu::PrimitiveTopology::TriangleList,
+			strip_index_format: None,
+			front_face: wgpu::FrontFace::Ccw,
+			cull_mode: Some(wgpu::Face::Back),
+			polygon_mode: wgpu::PolygonMode::Fill,
+			unclipped_depth: false,
+			conservative: false,
+		},
+		depth_stencil: None,
+		multisample: wgpu::MultisampleState {
+			count: 1,
+			mask: !0,
+			alpha_to_coverage_enabled: false,
+		},
+		cache: None,
+	}
+);
+\end{lstlisting}
+We'll also need the shader code itself
+\begin{lstlisting}[language=Rust]
+// Vertex shader
+
+struct VertexInput {
+    @location(0) position: vec3<f32>,
+    @location(1) tex_coords: vec2<f32>,
+}
+
+struct VertexOutput {
+    @builtin(position) clip_position: vec4<f32>,
+    @location(0) tex_coords: vec2<f32>,
+}
+
+@vertex
+fn vs_main(
+    model: VertexInput,
+) -> VertexOutput {
+    var out: VertexOutput;
+    out.tex_coords = model.tex_coords;
+    out.clip_position = vec4<f32>(model.position, 1.0);
+    return out;
+}
+
+// Fragment shader
+
+@group(0) @binding(0)
+var t_diffuse: texture_2d<f32>;
+@group(0) @binding(1)
+var s_diffuse: sampler;
+
+@fragment
+fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
+    return textureSample(t_diffuse, s_diffuse, in.tex_coords);
+}
+
+\end{lstlisting}
+\end{my proof}
+
+Finally, we can get to my favorite part
+
+
+
+
 
 
 \end{document}

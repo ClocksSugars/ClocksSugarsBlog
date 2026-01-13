@@ -80,7 +80,7 @@ Accordingly, we would then define equivalence of two natural numbers in the foll
 impl PartialEq for NaturalNumber {
 	fn eq(&self, other: &Self) -> bool {
 		match (self, other) {
-			(Z,Z) => true
+			(Z,Z) => true,
 			(S(m), S(n)) => (m == n)
 			_ => false
 		}
@@ -95,7 +95,7 @@ where we have literally encoded the statement that $\mathbb{Z} = \mathbb{Z}$ and
 
 You could reasonably ask now \squote{but what is $\mathbf{Z}$?} or \squote{but what does $\mathbf{S}$ do?} in a deeper sense of what they \emph{are} rather than merely what we intend these symbols to mean. The answer to that, as in a similar fashion we will keep encountering, is \emph{whatever works}. You could define a notion of natural numbers such as these in python using the notion of a list, or an array in other languages, defining $\mathbf{Z} = \mathtt{[]}$ the empty list, and $\mathbf{S}(n) = \mathtt{[n]}$ as the numeral contained in a list, such that $3 = \mathtt{[[[[]]]]}$, an empty list contained in a list, repeated three times. You could do a similar thing with nested pairs so that $2 = \mathtt{([],([],[]))}$. The instantiation of these constructors does not matter, and they can correspond \squote{really} (insofar as one rationalizes that there is something \emph{real} about the constructs of programming languages or stories about what a CPU does with those constructs) to anything you like as long as you are able and willing to \emph{read} that function as symbolizing what we intend it to mean.
 
-In fact, this is almost literally the idea of Alonzo Church, the famous \emph{Church Numerals} as they have come to be known. In his construction, constructors were literally functions, but merely functions which we commit to never defining a way to compute. In such a way, you would read ${f \circ f \circ f = x \mapsto f(f(f(x)))}$ (we read $\circ$ as \squote{of} or \squote{compose} meaning to take the output of the second function as the input of the first, $f$ of $f$) as merely $f \circ f \circ f$ and no more, since there is nothing to be \emph{done} with the expression, and thus choose to read $f \circ f \circ f$ as $3$. However the idea to define natural numbers as a starting number followed by an operation to count forward is attributed to Giuseppe Peano, and typically considered a presentation of the \emph{Peano Axioms}, although in his day the language of type theory was in its cradle with Bertrand Russel, the commonly referred to originator of type theory of \emph{Russel's Paradox} fame. In truth, its origins stretch further back than even Russel's predecessor on the topic, Gottlob Frege, and has been a gradual progression in the development of logic. The school of thought we draw on in this section is downstream of that of the \emph{Intuitionists}, attributed to Martin-Löf and his various colleagues and successors.
+In fact, this is almost literally the idea of Alonzo Church, the famous \emph{Church Numerals} as they have come to be known. In his construction, constructors were literally functions, but merely functions which we commit to never defining a way to compute. In such a way, you would read ${f \circ f \circ f = x \mapsto f(f(f(x)))}$ (we read $\circ$ as \squote{of} or \squote{compose} meaning to take the output of the second function as the input of the first, $f$ of $f$) as merely $f \circ f \circ f$ and no more, since there is nothing to be \emph{done} with the expression, and thus choose to read $f \circ f \circ f$ as $3$. However the idea to define natural numbers as a starting number followed by an operation to count forward is attributed to Giuseppe Peano, and typically considered a presentation of the \emph{Peano Axioms}, although in his day the language of type theory was in its cradle with Bertrand Russel, the commonly referred to originator of type theory of \emph{Russel's Paradox} fame. In truth, its origins stretch further back than even Russel's predecessor on the topic, Gottlob Frege, and has been a gradual progression in the development of logic. The school of thought we draw on in this section is downstream of that of the \emph{Intuitionists}, in particular Martin-Löf and his various colleagues and successors.
 
 This framework has certain powers which we will appreciate soon. One often calls the kind of natural numbers we have defined an \emph{inductive type}, and it enables a suite of logical tools for which the famous \squote{proof by induction} is only one. However there is a general mental rule here that sums up its powers up here quite well: once a type has been defined as nothing but a collection of constructors, anything we want to do with that type need only be defined in terms of those few constructors. This introduces powers such as proof by induction, and indeed a more general form of it which apply to \emph{all} other inductive types, as well as some unfamiliar responsibilities.
 
@@ -113,7 +113,7 @@ If you are so inclined, the above definition can be thought of as saying the fol
 \begin{lstlisting}[language=Rust]
 fn add(m: NaturalNumber, n: NaturalNumber) {
 	match n {
-		Z => m
+		Z => m,
 		S(p) => add(S(m),p)
 	}
 }
@@ -127,7 +127,7 @@ I have slipped something by you however: we have not yet discussed formally what
 
 Most programming languages have a notion of a \emph{tuple} related to this, a generalization of an \emph{ordered pair} to as many terms as necessary, allowing one to combine objects into one without forcing them to interact or relate to one another; $x$ and $y$ could be different types entirely and this is fine. We also have a variety of similar notions in mathematics, chiefly the \emph{Cartesian Product} which we invoke when we say $(2,3)$ is a coordinate on a 2D plane combined of two mere numbers. It will also be necessary for us to define the notion of a \emph{Product type}, the type theory equivalent to the tuple which solves this problem by defining functions such as $\mathtt{add}$ as of type $(\nats,\nats) \to \nats$, however I pose to you that this is not, at this stage, necessary.
 
-But how then will we pass a second input into a function, if not to force it to ride in a pair with the first input? The answer lies in how one should read $\nats \to \nats \to \nats$. That is, what does the $\to$ operation do exactly? Let us for a moment compare it to our addition function, which also is written in the form $m + n$; then one might say that $\to$ is itself a function with two inputs, except that these inputs are not \emph{elements of a type}, they \emph{are types}, and it produces a function type. But if the function type it produces is to be thought of as \emph{new}, then by the rules we have established, $\to$ is not a function but a constructor!
+But how then will we pass a second input into a function, if not to force it to ride in a pair with the first input? The answer lies in how one should read $\nats \to \nats \to \nats$. That is, what does the $\to$ operation do exactly? Let us for a moment compare it to our addition function, which also is written in the form $m + n$; then one might say that $\to$ is itself a function with two inputs, except that these inputs are not \emph{elements of a type}, they \emph{are types}, and it produces a function type. But if the function type it produces is to be thought of as \emph{new}, then by the rules we have established, $\to$ is not merely a function but a constructor!
 
 \begin{definition}[Function Type]
 We define the symbol $\to$ to be a right-associative constructor of form $\mathtt{Type} \to \mathtt{Type} \to \mathtt{Type}$. It takes two types, $A, B \colon \mathtt{Type}$ and constructs the type of functions between them $A \to B$.
@@ -157,7 +157,7 @@ We have notions of true and false, which we denote $\top$ and $\bot$ respectivel
 
 In order to define propositions as types, we will need to consider, just like the counting numbers type $\nats$ is populated with the counting numbers themselves, what is it that populates a proposition? We call these elements of the proposition type \squote{witnesses} or \squote{evidence}; you might think of the members of the proposition type \dquote{is the ground wet} as testimony that \dquote{I went outside and touched the grass and it made my hand wet}, however a proposition's witness is never considered in doubt unlike real witnesses. 
 
-If we think of propositions as types which are populated (or indeed may not be if they are \emph{false} and thus have no witnesses) then we know some things about what our logical operations have to be. $\mathtt{AND}$ must create a new type which has witnesses only when both of its argument types have witnesses, $\mathtt{OR}$ must have the witnesses of both types so that it is true if either is true, and $\mathtt{NOT}$ must be a type that somehow has witnesses when its argument type has no witnesses. In fact, we have actually already discussed one of these!
+If we think of propositions as types which are populated (or \emph{not populated} if they are \emph{false} and thus have no witnesses) then we know some things about what our logical operations have to be. $\mathtt{AND}$ must create a new type which has witnesses only when both of its argument types have witnesses, $\mathtt{OR}$ must have the witnesses of both types so that it is true if either is true, and $\mathtt{NOT}$ must be a type that somehow has witnesses when its argument type has no witnesses. In fact, we have actually already discussed one of these!
 
 \begin{definition}[Product Type]
 For two types $A \colon \mathtt{Type}$ and $B \colon \mathtt{Type}$, define their \textbf{product type} denoted $A \times B$, to be a new type with the right-associative constructor $\mathtt{,} \hspace{1pt}\colon A \to B \to A \times B$, the comma. In this way, elements $a \colon A$ and $b \colon B$ form an element $(a,b) \colon A \times B$. We also define the \emph{projection operators} $\mathtt{pr}_1 \colon A \times B \to A$ and $\mathtt{pr}_2 \colon A \times B \to B$ which are $\mathtt{pr}_1 (a,b) = a$ and $\mathtt{pr}_2 (a,b) = b$.
@@ -193,7 +193,7 @@ The reverse is equally interesting: for a type $A$, just as $\bot \to A$ is \emp
 
 \begin{definition}[Logical Negation]
 For a type $A\colon \mathtt{Type}$, define the \emph{function} $\neg \colon \mathtt{Type} \to \mathtt{Type}$ by \begin{gather*}
-\neg A \mapsto (A \to \bot).
+\neg A := (A \to \bot).
 \end{gather*}
 \end{definition}
 
@@ -242,7 +242,7 @@ For our purposes, we'll imagine that our fantasy land rust compiler allows funct
 
 Then our proof is merely the following:
 \begin{lstlisting}[language=Rust]
-fn trivial_function(x: !) -> Q { _ }
+fn trivial_function(x: !) -> Q { match x {} }
 
 fn theorem<P,Q>(
 	s: SumType<P,Q>,
@@ -250,11 +250,13 @@ fn theorem<P,Q>(
 ) -> Q
 {
 	match s {
-		inl(p) => trivial_function(g(p))
+		inl(p) => trivial_function(g(p)),
 		inr(q) => q
 	}
 }
 \end{lstlisting}
+Notice here that the unreachable code in \texttt{trivial\_function} is never executed despite being used in the function. This is because the function \texttt{g} is evidence that \texttt{P} is empty, and thus we can be certain that no \texttt{inl(p)} is ever given; the entire branch is unreachable code. 
+
 In fact this is exactly what we have written above. Of course this program, while helpful for writing and giving structure to the proof, does not give us a corresponding notion of \emph{why} the proof is true. This is precisely why the proof is not written in two lines, although of course we see it could be in theory.
 \end{my proof}
 
@@ -409,7 +411,7 @@ f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.3em} \mathbf{S}(m
 defining a recursive function just as we had done for addition. What we have done on the right hand side is this: since $g\colon \forall (n : \nats), P(n) \Rightarrow P(\mathbf{S}(n))$, we provide it with $m \colon \nats$ so that we are discussing $g(m) \colon P(m) \Rightarrow P(\mathbf{S}(m))$. To complete the proof, we need only hand $g(m)$ some proof of $P(m)$, which we hand off recursively to $f$ itself in its specialized form, $f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.2em} m \colon P(m)$ as we described above. In this way, we hand the obligation of actually proving something off through recursion until finally the tally marks are taken off and we are in fact proving $f \hspace{0.2em} P \hspace{0.2em} p \hspace{0.2em} g \hspace{0.3em} \mathbf{Z} \colon P(\mathbf{Z})$, which has witness $p$ as was provided. \qed
 \end{my proof}
 
-\begin{proposition}
+\begin{corollary}
 We can use proof by induction to extend our earlier observation that $a \equiv b$ implies $\mathbf{S}(a) \equiv \mathbf{S}(b)$ to a general form that $b \equiv c$ implies $b + a \equiv c + a$ for all $a \colon \nats$. That is, we find a witness of \begin{gather*}
 \forall a, \forall b, \forall c, (b \equiv c) \Rightarrow (b + a \equiv c + a)
 \end{gather*}
@@ -439,7 +441,7 @@ f \hspace{0.2em}
 & (b \mapsto c \mapsto p \mapsto p) \\
 & \big(b \mapsto c \mapsto h \hspace{0.2em} (\mathbf{S}(b)) \hspace{0.2em} (\mathbf{S}(c)) \hspace{0.2em} (g \hspace{0.2em} b \hspace{0.2em} c)\big).
 \end{align*}
-\end{proposition}
+\end{corollary}
 
 In practice, we will rarely reason about mathematical objects themselves at the type constructor level. While it is a useful tool for being absolutely certain no logical error has been made, we typically try to adjust our intuitions so that we can reason such steps automatically. That is not to say, in this moment at least, that the rigidity we expect of pure mathematics is any weaker, but that statements such as $a = b \Rightarrow a + c = b + c$ is one we train our intuitions on so that we know automatically how to make \emph{algebraic} deductions.
 
