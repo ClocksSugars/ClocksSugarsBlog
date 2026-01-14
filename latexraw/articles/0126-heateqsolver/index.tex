@@ -740,6 +740,8 @@ queue.submit([encoder.finish()]);
 
 As you can see, we create an object called a command encoder. This encoder is highly stateful, as is the queue object and the compute pass object that I've called \texttt{gputodo}. During the compute pass, we're able to run compute pipelines, which we'll recall act as our functions. We tell our GPU to-do list which pipeline we want to run, instruct it which bind group to use (and what to label that bind group, recalling all of our bind group variables were \texttt{@group(0)} so we use the argument 0), and then give the instruction to dispatch the workgroups. Since this is just a to-do list, we can then add these instructions to the to-do list many many times, before we let our \texttt{gputodo} go out of scope, releasing \texttt{encoder}, then submit it to the queue.
 
+We should touch on the idea of race conditions, i.e. when deploying so many threads to the GPU, how can we know they wait for one another to finish working on data before proceeding to the next step? This can be more complicated if you want to deal with race conditions within a compute shader, but we can also solve this problem by separating those steps into different compute shaders, which is what I've done here. WGPU will finish each dispatch before it calls the next one, so we can guarentee that we don't have any race condition issues.
+
 The steps in this order ensure that we apply the boundary condition first so that the edge of the interior of our grid isn't cooled by the boundary but rather the boundary is set to precisely the temperature that won't influence the simulation at all; we do this step first ostensibly so that the laplacian (i.e. the second derivative in two dimensions) is zero at the edge of the interior. Next we calculate the laplacian of $T(x,y,t)$ in stage one, which we use in stage two to calculate $T(x,y,t + \Delta t/2)$. In stage three we calculate the laplacian of $T(x,y,t+\Delta t/2)$, and then we use that to calculate $T(x,y,t + \Delta t)$. Finally, we move that output back into our data buffer so that its correctly positioned to repeat the process. As mentioned earlier, there are a myrid of ways to avoid this move, indeed one of them would be simply to use a different set of bind groups and a different first iteration shader for the first pass that uses the data buffer, then every other pass could just use the output buffer as its data buffer. We have options.
 
 The process you see above of creating a to-do list for the GPU then submitting an encoder that carries it to the queue is just one of many things we can tell the queue to do. For instance, we can set our parameters, or instructing the GPU to make a buffer ready to read from CPU, although these steps won't actually happen until we submit the queue to the GPU. This submission can be resource intensive, and so it is generally considered bad practice for a graphical application to submit more than once per frame; this can be remedied by keeping a queue of our own, a \texttt{Vec<CommandBuffer>} which we submit as a slice to the queue when we are ready.
@@ -781,6 +783,8 @@ async fn main() {
 \end{lstlisting}
 
 The \texttt{tokio} crate also provides other facilities, such as the \texttt{sender}/\texttt{receiver} abstraction. Due to rust's memory protections, it can be annoying to send information between threads in a way that perhaps C would allow, since one thread needs to hold on to a mutable reference to write a message and another needs to read it constantly to see if its changed; not allowed in rust since this property more broadly could lead to race conditions. The \texttt{sender}/\texttt{receiver} abstraction remedies this, and we'll need it in order to export data from the GPU, since the GPU needs to tell us that its ready for the export to happen.
+
+Note that in general, \texttt{tokio} will not work in web-assembly, but the particular feature of senders and receivers in \texttt{tokio::sync} will.
 
 \begin{lstlisting}[language=Rust]
 let mut encoder = device.create_command_encoder(&Default::default());
@@ -851,7 +855,7 @@ let html_canvas_element: HtmlCanvasElement = canvas
    .expect("man your canvas is bonked or somethin");
 \end{lstlisting}
 
-Now, I could not tell you \emph{why}, but for whatever reason getting the canvas by element ID will catastrophically fail later on, with little sign that this is what went wrong. In fact, in my investigation into why, I found that the actual error that was being thrown was on a step that had a comment saying \dquote{Not returning this error because it is a type error that shouldn't happen unless the browser, JS builtin objects, or wasm bindings are misbehaving somehow.} In fact many tutorials use exactly that method, and this exact error is then \emph{not thrown} but only if you use the openGL backend, and throwing an error in near identical code only in the WebGPU backend. Inconceivably, changing this particular method of getting the canvas solved everything for me although needless to say this cost me time and motivation; since you are reading this now, we pushed through it.
+Now, I could not tell you \emph{why}, but for whatever reason getting the canvas by element ID will catastrophically fail later on, with little sign that this is what went wrong. In fact, in my investigation into why, I found that the actual error that was being thrown was on a step that had a comment saying \dquote{Not returning this error because it is a type error that shouldn't happen unless the browser, JS builtin objects, or wasm bindings are misbehaving somehow.} In fact many tutorials use exactly that method, and this exact error is then \emph{not thrown} but only if you use the openGL backend, and throwing an error in near identical code only in the WebGPU backend. Inconceivably, changing this particular method of getting the canvas solved everything for me although needless to say this cost me time and motivation.
 
 The crate \texttt{web-sys} ostensibly exposes javascript methods such as \texttt{get\_element\_by\_id} and \texttt{query\_selector}, returning results as rust analogs. Since javascript has a different type system to rust, we need to convert them to a rust type such as \texttt{Element} or \texttt{HtmlCanvasElement} using the \texttt{dyn\_into} method which will of course fail if we pick a type that doesn't match closely enough. It should be noted that \texttt{web-sys} doesn't expose basically anything by default, hiding most functionality between features which must be manually specified. Consequently my rust toml file looks like this
 
@@ -1081,7 +1085,8 @@ let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
 });
 \end{lstlisting}
 
-\begin{my proof}[The render pipeline and shader code is minimized here]{m}
+\begin{my proof}
+[Render pipeline shader code and render function is minimized here]{m}
 The following is basically just \hyperlink{https://sotrh.github.io/learn-wgpu/beginner/tutorial5-textures/}{sotrh's code}, but if you have any interest in reproducing what I made, you'll need this.
 \begin{lstlisting}[language=Rust]
 let render_pipeline = device.create_render_pipeline(
@@ -1126,6 +1131,8 @@ let render_pipeline = device.create_render_pipeline(
 		cache: None,
 	}
 );
+
+surface.configure(&device, &config);
 \end{lstlisting}
 We'll also need the shader code itself
 \begin{lstlisting}[language=Rust]
@@ -1164,12 +1171,383 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 }
 
 \end{lstlisting}
+
+Notice above the texture sample function that the fragment shader calls. In my reading about this, one of the key things that separates a fragment shader from other kinds of shaders, resulting amongst other things in differences in computational performance, is that fragment shaders need access to these kinds of facilities.
+
+We'll also need a way to \emph{render} the texture to the screen. You'll want a function somewhere that does something like the following that you are able to call on each frame. Don't let this function be async or it will cause problems; even though we do a GPU call in here, that doesn't mean the function itself is async, just that the GPU knows to get pixels to the screen as soon as it can.
+\begin{lstlisting}[language=Rust]
+let output = self.surface.get_current_texture()?;
+let view = output
+   .texture
+   .create_view(&wgpu::TextureViewDescriptor::default());
+
+let mut encoder = self
+   .device
+   .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+      label: Some("Render Encoder"),
+      });
+
+{
+   let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+      label: Some("Render Pass"),
+      //multiview_mask: None,
+      color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+         view: &view,
+         resolve_target: None,
+         ops: wgpu::Operations {
+            load: wgpu::LoadOp::Clear(wgpu::Color::GREEN),
+            store: wgpu::StoreOp::Store,
+         },
+         depth_slice: None,
+      })],
+      depth_stencil_attachment: None,
+      occlusion_query_set: None,
+      timestamp_writes: None,
+   });
+
+   render_pass.set_pipeline(&self.render_pipeline);
+   render_pass.set_bind_group(0, &self.texture_draw_bind_group, &[]);
+   render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+   render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+   render_pass.draw_indexed(0..6, 0, 0..1);
+};
+
+queue.submit([encoder.finish()]);
+output.present();
+\end{lstlisting}
 \end{my proof}
 
-Finally, we can get to my favorite part
+Finally, we can get to my favorite part, which is how we turn our simulation into something that displays on the screen. If we set up the code I've given you so far, we'd get a simulation and a separate blank green screen. Since we're doing the heat equation, we'll probably want a heatmap so that color can tell us how hot a part of our simulation is.
 
+\figuresvgwithcaption{./wiki_Hsl-rgb_models}{(From wikipedia's HSL and HSV page) At the top we see a \squote{color wheel} and how we get it as a function of RGB; it turns out that each color simply linearly turns on then off again. To get a nice color that represents a heat, we'll need to set value and saturation to maximum, and we'll let hue range between $0^\circ$ and $240^\circ$ so that we get red for hot and blue for cold but no magenta.}
 
+To do that, we'll need to pick a notion of what temperature range we're displaying, i.e. how cold is blue and how hot is red. We can set up a shader pipeline and a buffer for computing a texture into, which we'll then copy into our texture with \texttt{queue.write\_texture}: 
 
+\begin{lstlisting}[language=Rust]
+let pad_per_line: u32 = width.div_ceil(64) * 64 - width;
+let pad_buffer = device.create_buffer_init(&BufferInitDescriptor {
+	label: Some("pad_per_line"),
+	contents: bytemuck::cast_slice(&[pad_per_line]),
+	usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+});
+
+#[allow(non_snake_case)]
+let vis_minT_buffer = helper_param_buffer(device,Some("minT"),4);
+#[allow(non_snake_case)]
+let vis_maxT_buffer = helper_param_buffer(device,Some("maxT"),4);
+let heat_hue_shader = device.create_shader_module(
+	wgpu::include_wgsl!("heatcolor.wgsl"));
+let heat_hue_pipeline = helper_basic_compute_shader(
+	device,
+	Some("Heatmap Pipeline"),
+	&heat_hue_shader
+);
+let heat_hue_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+	label: Some("heatmap"),
+	size: (256 * width.div_ceil(64) * height) as u64,
+	usage: wgpu::BufferUsages::COPY_SRC | wgpu::BufferUsages::STORAGE,
+	mapped_at_creation: false
+});
+let heat_hue_bind_group = helper_compute_bind_group(
+	device, None, &heat_hue_pipeline,
+	&[
+		&data_buffer,
+		&heat_hue_buffer,
+		&vis_minT_buffer,
+		&vis_maxT_buffer,
+		&width_buffer,
+		&height_buffer,
+		&pad_buffer
+	]
+);
+\end{lstlisting}
+
+Something's come back to haunt us here. Remember when I said that the \texttt{write\_texture} operation only works in increments of 64 pixels per row? This means we'll need to pad each row of our heatmap buffer, and then we'll need to tell our shader how much padding we're using so it can ignore those pixels. On writing the texture, WGPU knows not to copy the padded region because our heatmap buffer will have more pixels per row than texture can fit. Everything else here should seem familiar, but we now need to get into writing the shader itself.
+
+There's just one other problem: we'll need to write our pixels as RGBA, four unsigned single byte integers, but WGSL doesn't support the \texttt{u8} type. We'll need to do some bit level hacking to get around that.
+
+\begin{lstlisting}[language=Rust]
+@group(0) @binding(0) var<storage, read> data: array<f32>;
+@group(0) @binding(1) var<storage, read_write> rgba_out: array<u32>;
+@group(0) @binding(2) var<uniform> minT: f32;
+@group(0) @binding(3) var<uniform> maxT: f32;
+@group(0) @binding(4) var<uniform> width: u32;
+@group(0) @binding(5) var<uniform> height: u32;
+@group(0) @binding(6) var<uniform> pad_per_line: u32;
+
+// GOING TO HAVE TO DO SOME EVIL BITWISE MANIPULATION HERE
+
+@compute
+@workgroup_size(8,8,1)
+fn main(
+	@builtin(global_invocation_id) gid: vec3<u32>
+) {
+
+	if ((gid.x >= width) | (gid.y >= height)) {return;}
+
+	let range = clamp((data[gid.x + gid.y * width] - minT)/(maxT - minT), 0.0f, 1.0f);
+
+	var red: f32 = 0;
+	var green: f32 = 0;
+	var blue: f32 = 0;
+
+	// we ignore the part of the colorwheel outside of 0-240 degrees
+	switch u32(floor(range * 4)) {
+		case 0: {
+			blue = 1.0f;
+			green = 4.0f * range;
+		}
+		case 1: {
+			green = 1.0f;
+			blue = 1.0f - 4.0f * (range - 0.25);
+		}
+		case 2: {
+			green = 1.0f;
+			red = 4.0f * (range - 0.5);
+		}
+		case 3: {
+			green = 1.0f - 4.0f * (range - 0.5);
+			red = 1.0f;
+		}
+		default: {
+			red = 1.0f;
+		}
+	}
+
+	// we use floating point multiplication on f32 representatives of the u8 255 
+	//	 numbers we want then bitwise clamp them so color bits dont leak into each 
+	//	 other. due to evil bit reversed storage shenanigans the RGBA is actually ABGR
+	var color: u32 = 0xFF000000 // 255 in opacity column
+		+ (u32(0000000255.0f * red) 	& 0x000000FF)	// 0000000255 is 0x000000FF
+		+ (u32(0000065280.0f * green)	& 0x0000FF00)	// 0000065280 is 0x0000FF00
+		+ (u32(0016711680.0f * blue) 	& 0x00FF0000)	// 0016711680 is 0x00FF0000
+	;
+
+	rgba_out[gid.x + gid.y * (pad_per_line + width)] = color;
+}
+\end{lstlisting}
+
+This time I'm giving you an example of a 2D workgroup call so we can avoid an integer division to get our rough approximation of the $j$ coordinate from earlier; our \texttt{workgroup\_size} is $(8,8,1)$ and we have to use \texttt{gid.y} as well. See at the top each of the variables we passed in through the bind group.
+
+We can write our four \texttt{u8} values in using one \texttt{u32} value which wgsl will support, just so long as we dont let the data leak into other bit columns it doesn't belong in. In this way, we construct our $4\times\texttt{u8}$ by limiting four different \texttt{u32} values to integers that can be expressed only using their eight bits of the larger \texttt{u32}. Since computes store bits within a value backwards, our RGBA needs to be written in as ABGR. We need not pay mind to reversing the bits within our \texttt{u8}s though since whatever arithmetic we do to get them will also be reversed. (I learned that tidbit playing \hyperlink{https://microcorruption.com/}{microcorruption} a few years ago, a puzzle game about bit-hacking embedded systems.)
+
+So, referring to our above graph, our procedure will involve fixing our temperature from the \texttt{data\_buffer} in the range from \texttt{minT} to \texttt{maxT} (the temperatures corresponding to coldest blue and hottest red) which we do with wgsl's clamp operation so \texttt{range} is never more than one or less than zero. We check which quadrant of the part of the color wheel we're interested in that our temperature should go in, and based on that we apply the appropriate linear functions to get a $[0,1]$ range floating point number for how red, green, or blue our color should be. Then we multiply this floating point ratio with a floating point number corresponding to all-bits-in-byte-on in the \texttt{u8} we care about. The smaller our ratio is, the more these bits will be shifted down (e.g. a ratio 0.5 is roughly a single bit shift), and that's fine but we'll need to switch off any on-bits that are shifted in the wrong columns with a bitwise-And. Finally, we add these up into our RGBA \texttt{u32}, and send it into the proper pixel slot in our heatmap buffer, making sure to ignore padding pixels.
+
+We'll want to call this shader before before we render, then use a command encoder to instruct the buffer-to-texture copy rather than asking the queue to do it so that the instruction is put on the encoder's to-do-list in order.
+
+\begin{lstlisting}[language=Rust]
+let mut pending_queue: Vec<CommandBuffer> = Vec::new()
+
+let mut compute_encoder = device.create_command_encoder(&Default::default());
+
+// ... Our compute shader instructions go here.
+
+pending_queue.push(compute_encoder.finish());
+let mut color_encoder = device.create_command_encoder(&Default::default());
+
+let x_workgroup_quantity = self.width.div_ceil(8) as u32;
+let y_workgroup_quantity = self.height.div_ceil(8) as u32;
+
+{
+   let mut gputodo = color_encoder.begin_compute_pass(&Default::default());
+
+   gputodo.set_pipeline(&self.heat_hue_pipeline);
+   gputodo.set_bind_group(0, &self.heat_hue_bind_group, &[]);
+   gputodo.dispatch_workgroups(x_workgroup_quantity, y_workgroup_quantity, 1);
+}
+
+color_encoder.copy_buffer_to_texture(
+	wgpu::TexelCopyBufferInfo {
+		buffer: &self.heat_map_buffer,
+		layout: wgpu::TexelCopyBufferLayout {
+			offset: 0,
+			bytes_per_row: Some(256 * self.width.div_ceil(64)),
+			rows_per_image: Some(self.height)
+		}
+	},
+	wgpu::TexelCopyTextureInfo {
+		aspect: wgpu::TextureAspect::All,
+		texture: texture,
+		mip_level: 0,
+		origin: wgpu::Origin3d::ZERO
+	},
+	textureBuffer.size()
+);
+
+pending_queue.push(color_encoder.finish());
+
+let mut render_encoder = device.create_command_encoder(&Default::default());
+
+// ... Our render shader instructions go here
+
+pending_queue.push(render_encoder.finish());
+queue.submit(pending_queue.into_boxed_slice());
+\end{lstlisting}
+Since we'll need to call some version of this every frame (and consider we might not want to be running the calculation every frame as well) we'll need a function we can wrap it in, and we'll want this function distinct from the function that gets our device and queue since we only need to do that once. This necessitates some kind of program state struct, and the fine details of how you lay that out don't matter too much so long as you keep your buffers and pipelines in scope. When their rust lifetime ends, wgpu will free the memory, and this also means that if we want to reinitialize everything we can just drop the struct in some scope and that'll clear our buffers rather than any manual steps we might need in another language. In my code, I separated each of these steps into their own method of the state struct.
+
+No matter what you do, you'll need a way to make this state accessible to javascript. One way to do this is to make the state itself into a javascript object, which can then have its methods called over there. The way to do something like that is outlined \hyperlink{https://wasm-bindgen.github.io/wasm-bindgen/reference/types/exported-rust-types.html}{here}. What I elected to do to keep as much inside rust as possible is to maintain a persisting state variable. This can be achieved with the \texttt{thread\_local} macro and the \texttt{RefCell} type.
+
+\begin{lstlisting}[language=Rust]
+use std::cell::{RefCell};
+
+pub enum WebApp {
+   Uninitialized,
+   Idle(WgpuState),
+}
+
+thread_local! {
+   pub static THE_STATE : RefCell<WebApp> = RefCell::new(WebApp::Uninitialized);
+}
+\end{lstlisting}
+
+Rust obviously doesn't like the idea of a global mutable variable such as this since if any thread can access this at any time, it would be the peak of race/write conflicts. The compromise lies in the \texttt{Cell} model, in which we have a rust object which holds on to our state and will only make it available by swapping out the contents. When we swap the value, we don't have merely a mutable reference to the value but for the time being we actually have ownership of the value itself, while an \texttt{WebApp::Uninitialized} sits in its place in \texttt{THE\_STATE}. Incidentally, we also need a structure like this for our \texttt{pending\_queue} object, since when we're done with the queue we'll need to let our queue fully eat the value rather than copying it by reference. The functions we expose to javascript then look something like this with \texttt{\#[wasm\_bindgen]} to indicate we want them exposed.
+
+\begin{lstlisting}[language=Rust]
+#[wasm_bindgen]
+pub fn run_a_compute_iter() -> Result<(), JsValue> {
+	let globalstate = THE_STATE.replace(WebApp::Uninitialized);
+
+	let mut state: WgpuState = match globalstate {
+		WebApp::Uninitialized => {
+			// we'll discuss this shortly
+			log::info!("Can not do! Uninitialized");
+			return Err(JsValue::from_str("Can not do! Uninitialized"));
+		}
+		WebApp::Idle(state) => state
+	};
+
+	let mut pending_queue = state.pending_queue.replace(vec![]);
+
+	state.heateq.send_compute_job(&mut pending_queue,&state.device);
+	state.heateq.send_color_job(&mut pending_queue,&state.device);
+	state.heateq.color_to_texture(
+		&mut pending_queue,
+		&state.device,&state.texture_buffer
+	);
+
+	_ = state.pending_queue.replace(pending_queue);
+	THE_STATE.set(WebApp::Idle(state));
+
+	Ok(())
+}
+\end{lstlisting}
+
+As long as we write our javascript well, we should never encounter the kind of issue that \texttt{RefCell} protects against in which we're trying to access the state while another function is using it.
+
+We're almost ready to actually call some functions from javascript, but first we need to discuss the initialization. This is not as simple as our GPU initialization since WASM needs a distinct entrypoint where it can also set up everything WASM itself needs to run in javascript. That entry point must be marked \texttt{\#[wasm\_bindgen(start)]}. This is also a good time to initialize the logging tools that will let us write to the browser console if we want to do some debugging.
+
+\begin{lstlisting}[language=Rust]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen(start)]
+pub async fn run_web() -> Result<(), wasm_bindgen::JsValue> {
+    console_log::init_with_level(log::Level::Info).unwrap_throw();
+    log::info!{"initialized log"};
+
+    let (sender, receiver) = 
+    	tokio::sync::oneshot::channel::<Result<(), wgpu::BufferAsyncError>>();
+    _ = web_app::INTERNAL_MESSAGE.replace(Some(receiver));
+
+   let window = wgpu::web_sys::window().unwrap_throw();
+   let document = window.document().unwrap_throw();
+   //let canvas = body.get_element_by_id(CANVAS_ID).unwrap_throw();
+   let canvas: web_sys::Element = document
+      .query_selector("canvas")
+      .expect("could not find canvas")
+      .expect("canvas query returned empty");
+   let html_canvas_element: HtmlCanvasElement = canvas
+      .dyn_into()
+      .expect("man your canvas is bonked or somethin");
+
+    let mut webstate = wgpuworkhorse::WgpuState::new(html_canvas_element)
+        .await
+        .map_err(|e| JsValue::from_str(&format!("error {}",e)))?;
+
+    webstate.render().map_err(|e| JsValue::from_str(&format!("error {}",e)));
+
+    console_error_panic_hook::set_once();
+    web_app::THE_STATE.set(web_app::WebApp::Idle(webstate));
+
+    sender.send(Ok(()));
+
+    Ok(())
+}
+\end{lstlisting}
+
+Here we see a few things we've mentioned before, the obtaining of the canvas element, as well as the sender-receiver abstraction (into another \texttt{RefCell} called \texttt{INTERNAL\_MESSAGE} which holds a receiver) which can be useful for insisting that javascript wait until this initialization is done before trying to access the GPU. I ran into some problems with that since something about packing the WASM initialization into this \texttt{init} function can make javascript ignore \texttt{await} instructions on the promise it returns. You'll also see here that our \texttt{wasm\_bindgen(start)} function must have the output type \texttt{Result<(), wasm\_bindgen::JsValue>}, since if it fails it will need to output a javascript error. There are a few examples here of creating a \texttt{JsValue} error from strings.
+
+The top of my javascript code then looks like this: \begin{lstlisting}[language=Rust]
+import init from "./pkg/pet_webgpusolver.js";
+
+async function run() {
+   await init();
+}
+
+await run();
+
+console.log("WASM Loaded");
+
+import {
+   run_a_compute_iter,
+   render_a_frame,
+   update_values,
+   send_output_to_export,
+   is_receiver_ready,
+   get_export_to_num,
+   junk_current_state,
+   rinit_with_xy,
+   parse_csv,
+   give_current_width,
+   give_current_height,
+   init_from_csv_buffer,
+   get_total_energy_in_one
+} from "./pkg/pet_webgpusolver.js";
+
+async function init_energy() {
+   var init_energy_val = await get_total_energy_in_one();
+   document.getElementById("total_energy_goes_here").textContent = init_energy_val;
+}
+init_energy();
+\end{lstlisting}
+
+We need to call \texttt{init} before we use anything from WASM or else it will fail. As I mentioned earlier, we can use both graphics and export the buffer which I do here in \texttt{get\_total\_energy\_in\_one} when we sum the temperature across all grid cells so we can check if our simulation is conserving energy, hence we make use of receiver stored in \texttt{INTERNAL\_MESSAGE}.
+
+Now as for calling for a simulation and render each frame, we'll want to use javascript's utilities for this. There are other ways to schedule renders on the rust side, but I've been warned javascript has some particularities about when it wants its new frames and may fight us if we try to conflict with it, but all of that is handled for us if we just use the \texttt{requestAnimationFrame} function.
+
+\begin{lstlisting}[language=Rust]
+var max_N = 52488;
+var N_add = 100;
+var current_N = 0;
+var current_time = 0;
+var current_delta_t = parseFloat(document.getElementById("delta_t").value);
+var stop_compute = false;
+var get_total_temp = true;
+
+function run_compute() {
+   run_a_compute_iter();
+   if (get_total_temp) {
+      send_output_to_export();
+      render_a_frame();
+      get_total_temp = false;
+   } else {
+      render_a_frame();
+   }
+
+   current_N = current_N + N_add
+   current_time = current_time + current_delta_t * N_add;
+
+   let receiver_response = is_receiver_ready();
+   if (receiver_response) {
+      let total_energy = get_export_to_num();
+      document.getElementById("total_energy_goes_here").textContent = `${total_energy}`
+      document.getElementById("total_time_goes_here").textContent = `${current_time}`
+      get_total_temp = true;
+   }
+
+   if ((current_N < max_N) & (~stop_compute)) {requestAnimationFrame(run_compute);}
+}
+\end{lstlisting}
+
+The rest of the features I implemented, including the ability to implement an initial configuration from a CSV, amount to details you can find on my \hyperlink{https://github.com/ClocksSugars/pet_webgpusolver/tree/main}{github repo for this project}.
 
 
 
