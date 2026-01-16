@@ -1677,7 +1677,62 @@ It suffices to notice by inspection that swapping $x$ and $y$ in this expression
 	+16 \sin^2(k_y \Delta y /2) \\
 \end{pmatrix}
 \end{align*}
-Oof. We can now turn this into a bound but to make that useful we'll have to figure out how we turn our $\sin^2$ terms into their \squote{worst case scenario}s. 
+Oof. We can now turn this into a bound but to make that useful we'll have to figure out how we turn our $\sin^2$ terms into their \squote{worst case scenario}s. But there's something important to note here. Look at the inequality which we derive from this in the way we did for the non-RK2 case. \begin{align*}
+2 \ge & \kappa \Delta t \begin{pmatrix}
+	\frac{4}{\Delta x^2} \sin^2(k_x \Delta x /2) \\
+	\frac{4}{\Delta y^2} \sin^2(k_y \Delta y /2) \\
+\end{pmatrix} +
+\frac{\kappa^2 \Delta t^2 }{2\Delta x^4} \begin{pmatrix}
+	4 \sin^2(k_x \Delta x) \\
+	-16 \sin^2(k_x \Delta x /2) \\
+\end{pmatrix} \\ &+
+\frac{\kappa^2 \Delta t^2 }{\Delta x^2 \Delta y^2} \begin{pmatrix}
+	4 \sin^2(k_x \Delta x/2 + k_y \Delta y/2) \\
+	+4 \sin^2(k_x \Delta x/2 - k_y \Delta y/2) \\
+	-8 \sin^2(k_x \Delta x/2) \\
+	-8 \sin^2( k_y \Delta y/2) \\
+\end{pmatrix} \\
+& + \frac{\kappa^2 \Delta t^2 }{2\Delta y^4} \begin{pmatrix}
+	4 \sin^2(k_y \Delta y) \\
+	-16 \sin^2(k_y \Delta y /2) \\
+\end{pmatrix} \ge 0
+\end{align*}
+We have a term of order $O(\kappa \Delta t/ \Delta x^2) + O(\kappa \Delta t/ \Delta y^2)$, which is the same term as in the non-RK2 case, and all other terms have the corresponding coefficient squared or some variation of that involving swapping $\Delta x^2$ or $\Delta y^2$. So already, we expect our bound to be \emph{close} to the normal stability bound because the standard term dominates. Moreover, many of the sine arguments are related, which is important since $\sin^2$ has all of its peaks at odd number multiples of $\pi/2$ and zeros for even multiples. So if we were to maximise the standard non-RK2 sine squared terms, we'd zero out many of the other ones in the following way: \begin{align*}
+\kappa \Delta t \begin{pmatrix}
+	\frac{4}{\Delta x^2} \\
+	\frac{4}{\Delta y^2} \\
+\end{pmatrix} +
+\frac{\kappa^2 \Delta t^2 }{2\Delta x^4} \begin{pmatrix}
+	0 \\
+	-16 \\
+\end{pmatrix} 
+& + \frac{\kappa^2 \Delta t^2 }{2\Delta y^4} \begin{pmatrix}
+	0 \\
+	-16 \\
+\end{pmatrix}
++
+\frac{\kappa^2 \Delta t^2 }{\Delta x^2 \Delta y^2} \begin{pmatrix}
+	0 \\
+	+ 0 \\
+	-8 \\
+	-8  \\
+\end{pmatrix}
+\end{align*}
+Notice here we also zero out sine squared terms with arguments that are the sums or differences of the $k_x \Delta x / 2$ or $k_y \Delta y / 2$ terms, since irrespective of their sums and differences, if they are maximising the non-RK2 sine squared terms, then they are odd number multiples of $\pi/2$ and thus sum and difference to even multiples.
+
+We'll set $A = \kappa \Delta t$, $B = 1/\Delta x^2$ and $C = 1/\Delta y^2$ now and simplify this relation to the following: \begin{gather*}
+2 \ge 4AB + 4AC - 8 A^2B^2 - 8 A^2 C^2 -16 A^2 B C \ge 0.
+\end{gather*}
+If we want to get a bound with $\Delta t$ on one side of this, we'll need to solve this as a quadratic in $A$. We can apply the quadratic equation on both inequalities that form this transitive chain, but if we do this for the $2 \ge $ side we get complex solutions. Proceeding with the other inequality, the $\ge 0$ branch, \begin{gather*}
+A^2 \left( -8 B^2 -8C^2 -16 BC \right) + A(4B + 4C) \ge 0 \\
+A \Big( A \left( -8 B^2 -8 C^2 -16 BC \right) + 4B + 4C \Big) \ge 0
+\end{gather*}
+The solutions, and thus the terminals of the range $A$ must remain inside, are $\kappa \Delta t = 0$ (meaning things are unstable if $\kappa \Delta t$ is negative) and \begin{align*}
+\kappa \Delta t = \frac{4B + 4C}{8B^2 + 8 C^2 + 16 BC} =&
+\frac{4/\Delta x^2 + 4/\Delta y^2}{8/\Delta x^2  + 8/\Delta y^2 + 16/ \Delta x^2 \Delta y^2} \\
+=& \frac{1/\Delta x^2 + 1/\Delta y^2}{ (2\Delta x^2 + 2 \Delta y^2 + 4)/ \Delta x^2 \Delta y^2}
+\end{align*}
+
 \end{my proof}
 
 %\frac{\delta^2 T^{i,j}_k}{\delta x^2} +\frac{\kappa \Delta t^2}{2} \nabla_\square^2 \frac{\delta^2 T^{i,j}_k}{\delta y^2} 
