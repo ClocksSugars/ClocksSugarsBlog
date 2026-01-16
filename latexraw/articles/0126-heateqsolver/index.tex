@@ -1556,6 +1556,132 @@ To compile the project, you'll need to install \hyperlink{https://github.com/dra
 
 Now that we know how to build the simulation, we need to ask some basic questions about when it will give us a correct answer and how correct that answer will be. Those two basic considerations correspond to the truncation error and the stability analysis.
 
+We'll start with the stability analysis. The rational for how this works can be a bit conceptually deceptive but it comes down to two fundemental observations.
+
+First, our method revolves around allowing pixels on our grid to conduct heat into adjacent pixels. If we recall the Green's function solution, \begin{gather*}
+T(x,t) = \frac{1}{\sqrt{4 \pi \kappa t}} \int_{-\infty}^{\infty} \exp\left( - \frac{(x - \tau)^2}{4 \kappa t}\right) g(\tau) d\tau
+\end{gather*}
+we'll see that there's a gaussian, which in a sense means that for our simulation to be perfectly accurate we need a way to make every pixel affect every other pixel simultaneously, even if only a little. In practice, since the exponential falls off, well, exponentially, each part of our grid doesn't meaningfully affect evvery other one. But in principle we must now pose the question if it is possible for the true solution to meaningfully spread out, more than what might merely be a rounding error, faster than our adjacent-effector time step allows? If that were to happen, we'd have no reason to think that our model would predict something sensible. In fact the simulation might try to guess that heat should flow more than the difference between temperatures, meaning that we'd see net heat-difference creation; this would be like watching a system's entropy go down in a sense. No good.
+
+So how are we to know when our timestep is small enough? The solution comes to us through history; we must remember that fourier analysis is famed early on for its contributions to the study of the heat equation, and so our method of attack will be to study our solutions $T(x,y,t)$ in terms of a wave basis of functions $T(x,y,t) = E(t) e^{i k_x x + i k_y y}$, composed of a magnitude term $E(t)$ and a complex wave. We're using a complex wave but that doesn't mean we're necessarily thinking about some notion of complex temperature, just that we're decomposing our functions that way, with $k_x$ and $k_y$ standing for the frequency of the wave in different axes. Since the heat equation is linear, any solution of this form will have a corresponding $E(t) e^(-ik_x x - i k_y y)$ solution which will add to make $E(t) cos(k_x x + k_y y)$ for example.
+
+Let's try this for the heat equation in two dimensions without RK2 applied. The initial assumption is \begin{align*}
+\frac{T(x,y,t + \Delta t) - T(x,y,t) }{\Delta t} =& \kappa \frac{T(x+\Delta x,y,t) - 2 T(x,y,t) + T(x - \Delta x,y,t)}{\Delta x^2} \\
+&+ \kappa \frac{T(x,y + \Delta y,t) - 2 T(x,y,t) + T(x,y - \Delta y,t)}{\Delta y^2} 
+\end{align*}
+and we'll now divide both sides by $T(x,y,t)$, assuming the complex plane wave solution. This is why we wanted a basis function of that form, because dividing complex waves by each other allow you to subtract the phase arguments. This will amount to a clever trick that creates a bound for us. \begin{align*}
+\frac{\frac{T(x,y,t + \Delta t)}{T(x,y,t)} - \frac{T(x,y,t)}{T(x,y,t)} }{\Delta t} =& \kappa \frac{\frac{T(x+\Delta x,y,t)}{T(x,y,t)} - 2 \frac{T(x,y,t)}{T(x,y,t)} + \frac{T(x - \Delta x,y,t)}{T(x,y,t)}}{\Delta x^2} \\
+&+ \kappa \frac{\frac{T(x,y +\Delta y,t)}{T(x,y,t)} - 2 \frac{T(x,y,t)}{T(x,y,t)} + \frac{T(x,y - \Delta x,t)}{T(x,y,t)}}{\Delta y^2} \\
+\frac{\frac{E(t+\Delta t)}{E(t)} - 1 }{\Delta t} =& \kappa \frac{\frac{e^{ik_x (x+\Delta x) + i k_y y}}{e^{ik_x x + i k_y y}} - 2 + \frac{e^{ik_x (x-\Delta x) + i k_y y}}{e^{ik_x x + i k_y y}}}{\Delta x^2} \\
+&+ \kappa \frac{\frac{e^{ik_x x + i k_y (y+ \Delta y)}}{e^{ik_x x + i k_y y}} - 2 + \frac{e^{ik_x x + i k_y (y - \Delta y )}}{e^{ik_x x + i k_y y}}}{\Delta y^2}
+\end{align*}
+Now using $e^x/e^y = e^{x-y}$ and moving $\Delta t$ and $1$ to the other side, \begin{align*}
+\frac{E(t+\Delta t)}{E(t)} =& 1 + \kappa \Delta t \frac{e^{ik_x \Delta x} - 2 + e^{-ik_x \Delta x}}{\Delta x^2} + \kappa \Delta t \frac{e^{ik_x \Delta y} - 2 + e^{-ik_x \Delta y}}{\Delta y^2}
+\end{align*}
+we obtain an expression for the ratio of $E(t)$ growth. Since this was the magnitude over time, this ratio tells us whether or not the magnitude of the wave component is growing, and so any unstable solution will need that to be positive in order to produce the weird heat propogation effects of an unstable simulation. One might infer that we can simply demand that this growth rate is less than one, i.e. that the magnitude of plane waves in the simulation only declines, and in turns out this works great in this case. So let's assert \begin{gather*}
+\frac{E(t+\Delta t)}{E(t)} \leq 1.
+\end{gather*}
+To get something meaningful out of this, we'll have to use a property of complex plane waves that $e^{ix} - e^{-ix} = 2i\sin(x)$, and moreover that squaring this, $e^{i2x} + e^{-i2x} - 2= -4 \sin^2(x)$. We have some terms that have a very similar form in our expression, so we can write \begin{gather*}
+\left| \frac{E(t+\Delta t)}{E(t)} \right| = \left|1 - 4\kappa \Delta t \frac{\sin^2(k_x \Delta x / 2)}{\Delta x^2} - 4\kappa \Delta t \frac{\sin^2(k_y \Delta y / 2)}{\Delta y^2} \right| \leq 1
+\end{gather*}
+
+\hyperlink{https://clockssugars.blog/appliuni/anatomyRn/realnumsaxioms.html\#RAbsoluteValueProperties}{Elsewhere on this site} I've explained why $|x|\leq y$ implies $-y \leq x \leq y$, so we'll apply that here to get two inequalities. \begin{gather*}
+-1 \leq 1 - 4\kappa \Delta t \frac{\sin^2(k_x \Delta x / 2)}{\Delta x^2} - 4\kappa \Delta t \frac{\sin^2(k_y \Delta y / 2)}{\Delta y^2} \leq 1 \\
+-2 \leq  -4 \kappa \Delta t \frac{\sin^2(k_x \Delta x / 2)}{\Delta x^2} - 4\kappa \Delta t \frac{\sin^2(k_y \Delta y / 2)}{\Delta y^2} \leq 0
+\end{gather*}
+
+This is really two inequalities, principly revolving around our two $\sin^2$ terms. We actually don't have to pay any attention to what's in them, only noting that because they're squared sines, they can be anywhere in the range $[0,1]$. In this way, the $\leq 0$ branch actually doesn't tell us anything (since we have two non-positive terms), but the $2 \le $ branch does. Let's rewrite it.
+\begin{gather*}
+ 4\kappa \Delta t \frac{\sin^2(k_x \Delta x / 2)}{\Delta x^2} + 4 \kappa \Delta t \frac{\sin^2(k_y \Delta y / 2)}{\Delta y^2} \leq 2 \\
+\end{gather*}
+One way to analyse this is to completely ignore our $\sin^2$ terms, considering only their \squote{worst case scenario} when they go closest to the bound we're trying not to violate. Since $\sin^2$ ranges in $[0,1]$, our worst case is for them both to be $1$, so we'll assume that.
+\begin{gather*}
+4 \kappa \Delta t \frac{1}{\Delta x^2} + 4 \kappa \Delta t \frac{1}{\Delta y^2} \leq 2 \\
+4\kappa \Delta t \left( \frac{1}{\Delta x^2} + \frac{1}{\Delta y^2} \right) \leq 2 \\
+\Delta t \le \frac{1}{2 \kappa \left( \frac{1}{\Delta x^2} + \frac{1}{\Delta y^2}\right)}
+\end{gather*}
+
+And there is a stability criteria! Of course, using the stability criteria as an equality would be a bad idea since our calculation is done using floating point arithmetic rather than exact arithmetic, but we can healthily satisfy the bound by setting $\Delta t$ to say, half that.
+
+The real question is whether or not our RK2 method can do better!
+
+\begin{my proof}[Theorem: RK2 Does not provide Stability Improvements]{}
+No it can't.
+\end{my proof}
+\begin{my proof}{m}
+This proof will require a \emph{lot} of terms, and there won't be as much time for hand holding as I'd normally do since there's so much to do and this proof is unlikely to be of interest to anyone except those who \emph{can} understand it in this form. To make expressions fit, we'll start writing $T(x,y,t)$ as $T^{i,j}_{k}$ to denote grid position $(i,j)$ at timestep $k$. So we'd write $T(x + \Delta x, y, t + \Delta t /2)$ as $T^{i+1,j}_{k+1/2}$. I'll also introduce the notation here that $\nabla_\square^2$ denotes our centered space numerical laplacian as distinct from the true laplacian, with $\delta^2/\delta x^2$ and $\delta^2/\delta y^2$ standing for the partial derivatives as expressed in our numerical scheme rather than the true derivatives. Now let's get going.
+
+Our iteration method in RK2 can be expressed as \begin{align*}
+T^{i,j}_{k+1} &= T^{i,j}_k + \kappa \Delta t \nabla_\square^2 T^{i,j}_{k+1/2} \\
+&= T^{i,j}_k  + \kappa \Delta t \nabla_\square^2 \left( T^{i,j}_k + \frac{\Delta t}{2} \nabla_\square^2 T^{i,j}_{k} \right)  \\
+&= T^{i,j}_k + \kappa \Delta t \nabla_\square^2 T^{i,j}_k + \frac{\kappa \Delta t^2}{2} \nabla_\square^2 \nabla_\square^2 T^{i,j}_k
+\end{align*}
+It's best we analyse these terms individually or else we'll end up with some very long expressions. We'll study the ratio in the latter two terms assuming plane wave solutions as above. \begin{align*}
+\frac{\nabla_\square^2 T^{i,j}_k}{T^{i,j}_k} &= \frac{1}{T^{i,j}_k}\left(\frac{\delta^2 T^{i,j}_k}{\delta x^2} +  \frac{\delta^2 T^{i,j}_k}{\delta y^2}\right) \\
+&= \frac{e^{i k_x \Delta x} + e^{-i k_x \Delta x} - 2}{\Delta x^2} + \frac{e^{i k_y \Delta y} + e^{-i k_y \Delta y} - 2}{\Delta y^2} \\
+&= \frac{- 4 \sin^2(k_x \Delta x / 2) }{\Delta x^2} + \frac{- 4 \sin^2(k_y \Delta y / 2)}{\Delta y^2}
+\end{align*}
+And for the next term we'll have to reuse some parts and proceed to break the problem down further.
+\begin{align*}
+\frac{\nabla_\square ^2\nabla_\square^2 T^{i,j}_k}{T^{i,j}_k} = \frac{1}{T^{i,j}_k}\left(\frac{\delta^2}{\delta x^2} \frac{\delta^2 T^{i,j}_k}{\delta x^2} +  \frac{\delta^2}{\delta x^2} \frac{\delta^2 T^{i,j}_k}{\delta y^2} + \frac{\delta^2}{\delta y^2} \frac{\delta^2 T^{i,j}_k}{\delta x^2} +  \frac{\delta^2}{\delta y^2} \frac{\delta^2 T^{i,j}_k}{\delta y^2} \right)
+\end{align*}
+This will be easier solved if we focus on the first two terms, since the latter two will be mirror-images in the way we write them.
+\begin{align*}
+\frac{1}{T^{i,j}_k} \frac{\delta^2}{\delta x^2} \frac{\delta^2 T^{i,j}_k}{\delta x^2} &= \frac{1}{T^{i,j}_k} \frac{\delta^2}{\delta x^2} \frac{T^{i+1,j}_k - 2 T^{i,j}_k + T^{i-1,j}_k}{\Delta x^2} \\
+&= \frac{1}{T^{i,j}_k \Delta x^4} \big( T^{i+2,j}_k - 4 T^{i+1,j}_k + 6 T^{i,j}_k - 4 T^{i-1,j}_k + T^{i-2,j}_k \big) \\
+&= \frac{1}{\Delta x^4} \big( e^{i 2 k_x \Delta x} - 4 e^{i k_x \Delta x} + 6 - 4 e^{- i k_x \Delta x}+ e^{- i 2 k_x \Delta x}\big) \\
+&= \frac{1}{\Delta x^4} \big( e^{i 2 k_x \Delta x} + e^{- i 2 k_x \Delta x} -2 - 4 e^{i k_x \Delta x} - 4 e^{- i k_x \Delta x} + 8 \big) \\
+&= \frac{1}{\Delta x^4} \big( -4 \sin^2(k_x \Delta x) + 16 \sin^2{k_x \Delta x / 2} \big)
+\end{align*}
+We'll adopt a version of this for $\Delta y$. \begin{gather*}
+\frac{1}{T^{i,j}_k} \frac{\delta^2}{\delta y^2} \frac{\delta^2 T^{i,j}_k}{\delta y^2} = \frac{1}{\Delta y^4} \big( -4 \sin^2(k_y \Delta y) + 16 \sin^2{k_y \Delta y / 2} \big)
+\end{gather*}
+Now we repeat this for the cross term. \begin{align*}
+\frac{1}{T^{i,j}_k} \frac{\delta^2}{\delta x^2} \frac{\delta^2 T^{i,j}_k}{\delta y^2} &= \frac{1}{T^{i,j}_k} \frac{\delta^2}{\delta x^2} \frac{T^{i,j+1}_k - 2 T^{i,j}_k + T^{i,j-1}_k}{\Delta y^2} \\
+&= \frac{1}{T^{i,j}_k \Delta x^2 \Delta y^2} \begin{pmatrix}
+	T^{i+1,j+1}_k & - 2 T^{i,j+1}_k & + T^{i-1,j+1}_k \\
+	-2 T^{i+1,j}_k & +4T^{i,j}_k & -2 T^{i-1,j}_k \\
+	+ T^{i+1,j-1}_k & -2 T^{i,j-1}_k & +T^{i-1,j-1}_k\\
+\end{pmatrix} \\
+&= \frac{1}{\Delta x^2 \Delta y^2} \begin{pmatrix}
+	e^{i k_x \Delta x + i k_y \Delta y} & - 2e^{i k_y \Delta y} & + e^{-i k_x \Delta x + i k_y \Delta y} \\
+	-2 e^{i k_x \Delta x} & +4 & -2 e^{- i k_x \Delta x} \\
+	+ e^{i k_x \Delta x - i k_y \Delta y} & -2 e^{- i k_y \Delta y} & +e^{-i k_x \Delta x - i k_y \Delta y}\\
+\end{pmatrix}
+\end{align*}
+Here we've written the terms in a matrix but this is purely so we can stack them better. The pairings we'll exploit to get our $-4 \sin^2$ relation are the pairings across the center of this 3x3 set of terms. For the two diagonal pairings we'll have to subtract two each, which will make our constant term $8$, just enough for our horizontal and vertical pairings. \begin{align*}
+\frac{1}{T^{i,j}_k} \frac{\delta^2}{\delta x^2} \frac{\delta^2 T^{i,j}_k}{\delta y^2} &= \frac{1}{\Delta x^2 \Delta y^2} \begin{pmatrix}
+	-4 \sin^2(k_x \Delta x/2 + k_y \Delta y/2) \\
+	-4 \sin^2(k_x \Delta x/2 - k_y \Delta y/2) \\
+	+8 \sin^2(k_x \Delta x/2) \\
+	+8 \sin^2( k_y \Delta y/2) \\
+\end{pmatrix}
+\end{align*}
+It suffices to notice by inspection that swapping $x$ and $y$ in this expression would keep it the same, so we also know the other cross term. Now let's return to our original ratio equality. \begin{align*}
+\frac{E(t + \Delta t)}{E(t)} = \frac{T^{i,j}_{k+1}}{T^{i,j}_k} =& 1 + \kappa \Delta t \begin{pmatrix}
+	\frac{-4}{\Delta x^2} \sin^2(k_x \Delta x /2) \\
+	\frac{-4}{\Delta y^2} \sin^2(k_y \Delta y /2) \\
+\end{pmatrix} +
+\frac{\kappa^2 \Delta t^2 }{2\Delta x^4} \begin{pmatrix}
+	-4 \sin^2(k_x \Delta x) \\
+	+16 \sin^2(k_x \Delta x /2) \\
+\end{pmatrix} \\ &+
+\frac{\kappa^2 \Delta t^2 }{\Delta x^2 \Delta y^2} \begin{pmatrix}
+	-4 \sin^2(k_x \Delta x/2 + k_y \Delta y/2) \\
+	-4 \sin^2(k_x \Delta x/2 - k_y \Delta y/2) \\
+	+8 \sin^2(k_x \Delta x/2) \\
+	+8 \sin^2( k_y \Delta y/2) \\
+\end{pmatrix} \\
+& + \frac{\kappa^2 \Delta t^2 }{2\Delta y^4} \begin{pmatrix}
+	-4 \sin^2(k_y \Delta y) \\
+	+16 \sin^2(k_y \Delta y /2) \\
+\end{pmatrix}
+\end{align*}
+Oof. We can now turn this into a bound but to make that useful we'll have to figure out how we turn our $\sin^2$ terms into their \squote{worst case scenario}s. 
+\end{my proof}
+
+%\frac{\delta^2 T^{i,j}_k}{\delta x^2} +\frac{\kappa \Delta t^2}{2} \nabla_\square^2 \frac{\delta^2 T^{i,j}_k}{\delta y^2} 
+
 The truncation error stems from a basic fact of calculus known in relation to the Taylor series. That is, in general, \begin{gather*}
 f(x+h) = f(x) + h \frac{d f}{d x}(x) + \frac{h^2}{2!} \frac{d^2 f}{d x^2}(x) + \frac{h^3}{3!} \frac{d^3 f}{d x^3}(x) + ...
 \end{gather*}
@@ -1596,17 +1722,6 @@ We must recall that the latter two of these equations were derived from the foll
 \frac{T(x,y, t + \Delta t/2) - T(x,y,t)}{\Delta t / 2} &=   \kappa \nabla^2 T(x,y,t) \\
 \frac{T(x,y, t + \Delta t) - T(x,y,t)}{\Delta t} &=   \kappa \nabla^2 T(x,y,t + \Delta t / 2)
 \end{align*}
-
-We \emph{can} substitute all of these equations into one, move terms to one side and set that to the truncation error, but doing this results in a \emph{very} long formula. Let's separate that error into three parts $\text{TE}_x$, $\text{TE}_y$ and $\text{TE}_t$. \begin{gather*}
-\text{TE} = \text{TE}_t + \Delta_t(\text{TE}_x + \text{TE}_y)
-\end{gather*}
-
-It is also insightful to notice that the iteration step of our method, although divided into two parts, can be written in just one: \begin{gather*}
-T(x,y,t + \Delta t) = T(x,y,t) + \kappa \Delta t \big( T(x,y,t) + \frac{\Delta t}{2} \cdot \nabla^2 T(x,y,t) \big)
-\end{gather*}
-
-Another thing we need to look out for is whether or not our method converges at all; consider the possibility that our simulated system ends up in some state that is able to cause a run-away feedback loop
-
 
 
 
