@@ -128,8 +128,8 @@ There are other ways to remedy this problem of the forward euler method that wil
 
 To solve this, for each $\Delta t$ step of our iteration, we need to take a forward Euler half-step to compute a rough approximation of the state at time $t + \Delta t/2$ and then go back and use that as the derivative in a not-quite forward Euler method. This is what we call \emph{Runge-Kutta-2} (RK2), Runge-Kutta refering to the class of methods like this one and $2$ refering to how we compute our iteration in two steps (although it is common to do it in four steps as RK4). Our method then looks something like this in one dimension: \begin{align*}
 \frac{\partial^2 T}{\partial x^2}(x,t) &= \frac{T(x + \Delta x, t) - 2 T(x, t) + T(x - \Delta x, t) }{\Delta x^2} \\
-T(x, t + \Delta t/2) &=  T(x,t) + \frac{\Delta t}{2} \cdot \frac{\partial^2 T}{\partial x^2}(x,t) \\
-T(x, t + \Delta t) &= T(x,t) + \Delta t \cdot \frac{\partial^2 T}{ \partial x^2} (x, t + \Delta t/2)
+T(x, t + \Delta t/2) &=  T(x,t) + \frac{\Delta t}{2} \cdot \kappa \frac{\partial^2 T}{\partial x^2}(x,t) \\
+T(x, t + \Delta t) &= T(x,t) + \Delta t \cdot \kappa \frac{\partial^2 T}{ \partial x^2} (x, t + \Delta t/2)
 \end{align*}
 
 Of course we may merely add the corresponding term for our second dimension, and we get the method we will actually implement.
@@ -137,8 +137,8 @@ Of course we may merely add the corresponding term for our second dimension, and
 \begin{align*}
 \frac{\partial^2 T}{\partial x^2}(x,t) &= \frac{T(x + \Delta x,y, t) - 2 T(x,y,t) + T(x - \Delta x,y, t) }{\Delta x^2} \\
 \nabla^2 T(x,y,t) &= \frac{\partial^2 T}{\partial x^2}(x,y,t) + \frac{\partial^2 T}{\partial y^2}(x,y,t) \\
-T(x,y, t + \Delta t/2) &=  T(x,y,t) + \frac{\Delta t}{2} \cdot \nabla^2 T(x,y,t) \\
-T(x,y, t + \Delta t) &= T(x,y,t) + \Delta t \cdot \nabla^2 T(x,y,t + \Delta t /2)
+T(x,y, t + \Delta t/2) &=  T(x,y,t) + \frac{\Delta t}{2} \cdot \kappa \nabla^2 T(x,y,t) \\
+T(x,y, t + \Delta t) &= T(x,y,t) + \Delta t \cdot \kappa \nabla^2 T(x,y,t + \Delta t /2)
 \end{align*}
 
 This is the titular explicit FTCS RK2 method. We should actually check if any of the methods described here work as we would like them to, and indeed we have methods for discussing this which we describe soon. But now that we have our method, we'll implement it before our understanding goes stale.
@@ -336,8 +336,8 @@ These wgsl files will need to be compiled into gpu instructions on the individua
 Recalling the the method we described earlier, we'll need to encode the following equations in our code:\begin{align*}
 \frac{\partial^2 T}{\partial x^2}(x,t) &= \frac{T(x + \Delta x,y, t) - 2 T(x,y,t) + T(x - \Delta x,y, t) }{\Delta x^2} \\
 \nabla^2 T(x,y,t) &= \frac{\partial^2 T}{\partial x^2}(x,y,t) + \frac{\partial^2 T}{\partial y^2}(x,y,t) \\
-T(x,y, t + \Delta t/2) &=  T(x,y,t) + \frac{\Delta t}{2} \cdot \nabla^2 T(x,y,t) \\
-T(x,y, t + \Delta t) &= T(x,y,t) + \Delta t \cdot \nabla^2 T(x,y,t + \Delta t /2)
+T(x,y, t + \Delta t/2) &=  T(x,y,t) + \frac{\Delta t}{2} \cdot \kappa \nabla^2 T(x,y,t) \\
+T(x,y, t + \Delta t) &= T(x,y,t) + \Delta t \cdot \kappa \nabla^2 T(x,y,t + \Delta t /2)
 \end{align*}
 and the insulating boundary condition we discussed. We'll get to the actual wgsl code later, but for now what you should know is that of the four pipelines above, the \squote{Laplacian Pipeline} corresponds to the first two equations above, i.e. how do we calculate $\nabla^2 T(x,y,t)$ for all $(x,y)$ if we know $T(x,y,t)$. The iteration pipeline will do the latter two equations, since you might notice they have a very similar form; to reuse the iteration pipeline in these two instances, we need to replace $\Delta t$ with $\Delta t/2$ and $\nabla^2T(x,y,t)$ with our midpoint $\nabla^2 T(x,y,t + \Delta t/2)$ in one of our iteration pipeline uses. We of course have a pipeline for our boundary conditions, and due to the way that shader calls work, I've elected to have a shader that copies our output buffer corresponding to $T(x,y,t + \Delta t)$ into our input buffer $T(x,y,t)$. There are of course a myriad of ways to avoid having to do this with a shader pipeline, but it will serve later as a very simple example of how our shaders work.
 
@@ -594,8 +594,8 @@ fn main(
 \end{lstlisting}
 
 This is our iterate shader, and it corresponds to the latter two steps: \begin{align*}
-T(x,y, t + \Delta t/2) &=  T(x,y,t) + \frac{\Delta t}{2} \cdot \nabla^2 T(x,y,t) \\
-T(x,y, t + \Delta t) &= T(x,y,t) + \Delta t \cdot \nabla^2 T(x,y,t + \Delta t /2)
+T(x,y, t + \Delta t/2) &=  T(x,y,t) + \frac{\Delta t}{2} \cdot \kappa \nabla^2 T(x,y,t) \\
+T(x,y, t + \Delta t) &= T(x,y,t) + \Delta t \cdot \kappa\nabla^2 T(x,y,t + \Delta t /2)
 \end{align*}
 
 Remember when we set up the bind groups that \texttt{delta\_t} may not literally be \texttt{delta\_t}. Indeed, even with the laplacian pipeline, many of these variables will correspond to different data buffers to facilitate doing the proper step of the RK2 calculation as necessary.
@@ -1306,7 +1306,7 @@ fn main(
 			red = 4.0f * (range - 0.5);
 		}
 		case 3: {
-			green = 1.0f - 4.0f * (range - 0.5);
+			green = 1.0f - 4.0f * (range - 0.75);
 			red = 1.0f;
 		}
 		default: {
@@ -1331,7 +1331,7 @@ This time I'm giving you an example of a 2D workgroup call so we can avoid an in
 
 We can write our four \texttt{u8} values in using one \texttt{u32} value which wgsl will support, just so long as we dont let the data leak into other bit columns it doesn't belong in. In this way, we construct our $4\times\texttt{u8}$ by limiting four different \texttt{u32} values to integers that can be expressed only using their eight bits of the larger \texttt{u32}. Since computes store bits within a value backwards, our RGBA needs to be written in as ABGR. We need not pay mind to reversing the bits within our \texttt{u8}s though since whatever arithmetic we do to get them will also be reversed. (I learned that tidbit playing \hyperlink{https://microcorruption.com/}{microcorruption} a few years ago, a puzzle game about bit-hacking embedded systems.)
 
-So, referring to our above graph, our procedure will involve fixing our temperature from the \texttt{data\_buffer} in the range from \texttt{minT} to \texttt{maxT} (the temperatures corresponding to coldest blue and hottest red) which we do with wgsl's clamp operation so \texttt{range} is never more than one or less than zero. We check which quadrant of the part of the color wheel we're interested in that our temperature should go in, and based on that we apply the appropriate linear functions to get a $[0,1]$ range floating point number for how red, green, or blue our color should be. Then we multiply this floating point ratio with a floating point number corresponding to all-bits-in-byte-on in the \texttt{u8} we care about. The smaller our ratio is, the more these bits will be shifted down (e.g. a ratio 0.5 is roughly a single bit shift), and that's fine but we'll need to switch off any on-bits that are shifted in the wrong columns with a bitwise-And. Finally, we add these up into our RGBA \texttt{u32}, and send it into the proper pixel slot in our heatmap buffer, making sure to ignore padding pixels.
+So, referring to our above graph, our procedure will involve fixing our temperature from the \texttt{data\_buffer} in the range from \texttt{minT} to \texttt{maxT} (the temperatures corresponding to coldest blue and hottest red) which we do with wgsl's clamp operation so \texttt{range} is never more than one or less than zero. We check which quadrant of the part of the color wheel we're interested in that our temperature should go in, and based on that we apply the appropriate linear functions to get a $[0,1]$ range floating point number for how red, green, or blue our color should be. Then we multiply this floating point ratio with a floating point number corresponding to all-bits-in-byte-on in the \texttt{u8} we care about. The smaller our ratio is, the more these bits will be shifted down once we convert to \texttt{u8} (e.g. a ratio 0.5 is roughly a single bit shift), and that's fine but we'll need to switch off any on-bits that are shifted in the wrong columns with a bitwise-And. Finally, we add these up into our RGBA \texttt{u32} (although the way we've set this up we could equally use bitwise-Or), and send it into the proper pixel slot in our heatmap buffer, making sure to ignore padding pixels.
 
 We'll want to call this shader before before we render, then use a command encoder to instruct the buffer-to-texture copy rather than asking the queue to do it so that the instruction is put on the encoder's to-do-list in order.
 
@@ -1548,6 +1548,66 @@ function run_compute() {
 \end{lstlisting}
 
 The rest of the features I implemented, including the ability to implement an initial configuration from a CSV, amount to details you can find on my \hyperlink{https://github.com/ClocksSugars/pet_webgpusolver/tree/main}{github repo for this project}. As you can imagine it's not that hard to parse a CSV, and all other functions are merely derivative of what I've described above. There is the matter of how you run this on desktop, in which case \hyperlink{https://sotrh.github.io/learn-wgpu/beginner/tutorial1-window/\#boring-i-know}{sotrh's tutorial} using \texttt{winit} applies more; my code also does both, but doesn't implement the full suite of features made available on the web for the desktop app at this stage.
+
+To compile the project, you'll need to install \hyperlink{https://github.com/drager/wasm-pack}{wasm-pack} and run the command \texttt{wasm-pack build --target web}.
+
+
+\subsection{Numerics Considerations}
+
+Now that we know how to build the simulation, we need to ask some basic questions about when it will give us a correct answer and how correct that answer will be. Those two basic considerations correspond to the truncation error and the stability analysis.
+
+The truncation error stems from a basic fact of calculus known in relation to the Taylor series. That is, in general, \begin{gather*}
+f(x+h) = f(x) + h \frac{d f}{d x}(x) + \frac{h^2}{2!} \frac{d^2 f}{d x^2}(x) + \frac{h^3}{3!} \frac{d^3 f}{d x^3}(x) + ...
+\end{gather*}
+
+And in fact we invoke this whenever we take a derivative. When we say $(f(x+h)-f(x))/h$ what we're doing is subtracting that first term, $f(x)$, dividing the $h$ off of $df/dx$ and then in the limit of $h \to 0$, all the other terms are set to zero. That's all fine and dandy but it's in direct contradiction to the central presumption of, say, the forward Euler method. In order to derive the forward euler method, $f(x+h)=f(x) + hf'(x)$, we necessarily presume that \begin{gather*}
+\frac{f(x+ \Delta x) - f(x)}{\Delta x} = \frac{d f}{dx}
+\end{gather*}
+which completely ignores those other terms in the Taylor series. If our $\Delta x$ (or our $\Delta t$ for that matter) is small enough then ignoring these terms may merely be a rounding error, but this error is sure to add up over time.
+
+We can use this as a method for comparing numerical techniques; essentially we ask the question, for a given technique, how much does our error reduction decrease when we make our calculation more expensive.
+
+Let's do this for the forward Euler method. The central presumption of the forward Euler method for our heat equation is ostensibly what is written above, so we'll move all terms to one side and define this as the Truncation Error (TE). Since if the presumption we use to derive the Euler method is true then the other side of the equation above is zero, we know that the truncation error \emph{should} be zero, and its failure to be zero is error.
+
+\begin{gather*}
+\text{TE} = \frac{T(x,y,t + \Delta t) - T(x,y,t)}{\Delta t} - \frac{\partial T}{\partial t} \approx 0
+\end{gather*}
+
+The true value of $T(x,y,t + \Delta t)$ is, as above, known in relation to $T(x,y,t)$ and derivatives of $T$ at $(x,y,t)$ as the taylor series \begin{gather*}
+T(x,y,t + \Delta t) = T(x,y,t) + \Delta t \frac{\partial T}{\partial t} + \frac{\Delta t^2}{2} \frac{\partial^2 T}{\partial t^2 } + \frac{\Delta t^3}{3!} \frac{\partial^3 T}{\partial t^3} + ...
+\end{gather*}
+
+which we may substitute into the truncation error relation to get the error \begin{align*}
+\frac{T(x,y,t + \Delta t) - T(x,y,t)}{\Delta t} - \frac{\partial T}{\partial t} &= \frac{\Delta t \frac{\partial T}{\partial t} + \frac{\Delta t^2}{2} \frac{\partial^2 T}{\partial t^2 } + \frac{\Delta t^3}{3!} \frac{\partial^3 T}{\partial t^3} + ...}{\Delta t} - \frac{\partial T}{\partial t} \\
+&= \frac{\Delta t}{2} \frac{\partial^2 T}{\partial t^2 } + \frac{\Delta t^3}{3!} \frac{\partial^3 T}{\partial t^3} + \frac{\Delta t^4}{4!} \frac{\partial^4 T}{\partial t^4} + ...
+\end{align*}
+
+We can't do anything further with this but we don't really need to. This is where we break out the big-O notation and say that the forward euler method is $O(\Delta t)$, a first order method, meaning that when we half the time step we half the error. This is of course not accounting for error from our spatial resolution $\Delta x$ and $\Delta y$ but we can perform those analyses separately.
+
+The better question is what this method says about our RK2 method. Are we actually getting any improvements out of it? Let's see.
+
+Recall our iteration method again: \begin{align*}
+\frac{\partial^2 T}{\partial x^2}(x,t) &= \frac{T(x + \Delta x,y, t) - 2 T(x,y,t) + T(x - \Delta x,y, t) }{\Delta x^2} \\
+\nabla^2 T(x,y,t) &= \frac{\partial^2 T}{\partial x^2}(x,y,t) + \frac{\partial^2 T}{\partial y^2}(x,y,t) \\
+T(x,y, t + \Delta t/2) &=  T(x,y,t) + \frac{\Delta t}{2} \cdot \kappa \nabla^2 T(x,y,t) \\
+T(x,y, t + \Delta t) &= T(x,y,t) + \Delta t \cdot \kappa \nabla^2 T(x,y,t + \Delta t /2)
+\end{align*}
+We must recall that the latter two of these equations were derived from the following assumptions: \begin{align*}
+\frac{T(x,y, t + \Delta t/2) - T(x,y,t)}{\Delta t / 2} &=   \kappa \nabla^2 T(x,y,t) \\
+\frac{T(x,y, t + \Delta t) - T(x,y,t)}{\Delta t} &=   \kappa \nabla^2 T(x,y,t + \Delta t / 2)
+\end{align*}
+
+We \emph{can} substitute all of these equations into one, move terms to one side and set that to the truncation error, but doing this results in a \emph{very} long formula. Let's separate that error into three parts $\text{TE}_x$, $\text{TE}_y$ and $\text{TE}_t$. \begin{gather*}
+\text{TE} = \text{TE}_t + \Delta_t(\text{TE}_x + \text{TE}_y)
+\end{gather*}
+
+It is also insightful to notice that the iteration step of our method, although divided into two parts, can be written in just one: \begin{gather*}
+T(x,y,t + \Delta t) = T(x,y,t) + \kappa \Delta t \big( T(x,y,t) + \frac{\Delta t}{2} \cdot \nabla^2 T(x,y,t) \big)
+\end{gather*}
+
+Another thing we need to look out for is whether or not our method converges at all; consider the possibility that our simulated system ends up in some state that is able to cause a run-away feedback loop
+
+
 
 
 
