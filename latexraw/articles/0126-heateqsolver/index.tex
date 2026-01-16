@@ -1556,7 +1556,9 @@ To compile the project, you'll need to install \hyperlink{https://github.com/dra
 
 Now that we know how to build the simulation, we need to ask some basic questions about when it will give us a correct answer and how correct that answer will be. Those two basic considerations correspond to the truncation error and the stability analysis.
 
-We'll start with the stability analysis. The rational for how this works can be a bit conceptually deceptive but it comes down to two fundemental observations.
+\subsubsection{Stability Analysis of Forward Euler and RK2 HE}
+
+The rational for how this works can be a bit conceptually deceptive but it comes down to two fundemental observations.
 
 First, our method revolves around allowing pixels on our grid to conduct heat into adjacent pixels. If we recall the Green's function solution, \begin{gather*}
 T(x,t) = \frac{1}{\sqrt{4 \pi \kappa t}} \int_{-\infty}^{\infty} \exp\left( - \frac{(x - \tau)^2}{4 \kappa t}\right) g(\tau) d\tau
@@ -1605,7 +1607,7 @@ And there is a stability criteria! Of course, using the stability criteria as an
 
 The real question is whether or not our RK2 method can do better!
 
-\begin{my proof}[Theorem: RK2 Does not provide Stability Improvements]{}
+\begin{my proof}[Proposition: RK2 Does not provide Stability Improvements On Forward Euler]{}
 No it can't.
 \end{my proof}
 \begin{my proof}{m}
@@ -1727,15 +1729,23 @@ If we want to get a bound with $\Delta t$ on one side of this, we'll need to sol
 A^2 \left( -8 B^2 -8C^2 -16 BC \right) + A(4B + 4C) \ge 0 \\
 A \Big( A \left( -8 B^2 -8 C^2 -16 BC \right) + 4B + 4C \Big) \ge 0
 \end{gather*}
-The solutions, and thus the terminals of the range $A$ must remain inside, are $\kappa \Delta t = 0$ (meaning things are unstable if $\kappa \Delta t$ is negative) and \begin{align*}
-\kappa \Delta t = \frac{4B + 4C}{8B^2 + 8 C^2 + 16 BC} =&
-\frac{4/\Delta x^2 + 4/\Delta y^2}{8/\Delta x^2  + 8/\Delta y^2 + 16/ \Delta x^2 \Delta y^2} \\
-=& \frac{1/\Delta x^2 + 1/\Delta y^2}{ (2\Delta x^2 + 2 \Delta y^2 + 4)/ \Delta x^2 \Delta y^2}
-\end{align*}
-
+The solutions, and thus the terminals of the range $A$ must remain inside, are $\kappa \Delta t = 0$ (meaning things are unstable if $\kappa \Delta t$ is negative) and \begin{gather*}
+\kappa \Delta t = \frac{4B + 4C}{8B^2 + 8 C^2 + 16 BC} =
+\frac{B + C}{2(B + C)^2} = \frac{1}{2(1/\Delta x^2 + 1/\Delta y^2)} \\
+\Delta t = \frac{1}{2 \kappa (1/\Delta x^2 + 1/\Delta y^2)}
+\end{gather*}
+so altogether we have
+\begin{gather*}
+0 \le \Delta t \le \frac{1}{2 \kappa (1/\Delta x^2 + 1/\Delta y^2)}
+\end{gather*}
+just as in the forward Euler stability criterion.
 \end{my proof}
 
-%\frac{\delta^2 T^{i,j}_k}{\delta x^2} +\frac{\kappa \Delta t^2}{2} \nabla_\square^2 \frac{\delta^2 T^{i,j}_k}{\delta y^2} 
+Garbage!!
+
+But there is another consideration we have to make when choosing our method which may show RK2 to be better than forward Euler.
+
+\subsubsection{Truncation Error for Forward Euler and RK2 HE}
 
 The truncation error stems from a basic fact of calculus known in relation to the Taylor series. That is, in general, \begin{gather*}
 f(x+h) = f(x) + h \frac{d f}{d x}(x) + \frac{h^2}{2!} \frac{d^2 f}{d x^2}(x) + \frac{h^3}{3!} \frac{d^3 f}{d x^3}(x) + ...
@@ -1763,22 +1773,87 @@ which we may substitute into the truncation error relation to get the error \beg
 &= \frac{\Delta t}{2} \frac{\partial^2 T}{\partial t^2 } + \frac{\Delta t^3}{3!} \frac{\partial^3 T}{\partial t^3} + \frac{\Delta t^4}{4!} \frac{\partial^4 T}{\partial t^4} + ...
 \end{align*}
 
-We can't do anything further with this but we don't really need to. This is where we break out the big-O notation and say that the forward euler method is $O(\Delta t)$, a first order method, meaning that when we half the time step we half the error. This is of course not accounting for error from our spatial resolution $\Delta x$ and $\Delta y$ but we can perform those analyses separately.
+We can't do anything further with this but we don't really need to. This is where we break out the big-O notation and say that the forward euler method is $O(\Delta t)$, a first order method, meaning that when we half the time step we half the error. And that error is precisely the second, third, and higher order derivative terms that we haven't accounted for when we express the derivative as a difference. This is of course not accounting for error from our spatial resolution $\Delta x$ and $\Delta y$ but we can perform those analyses separately.
 
 The better question is what this method says about our RK2 method. Are we actually getting any improvements out of it? Let's see.
 
-Recall our iteration method again: \begin{align*}
-\frac{\partial^2 T}{\partial x^2}(x,t) &= \frac{T(x + \Delta x,y, t) - 2 T(x,y,t) + T(x - \Delta x,y, t) }{\Delta x^2} \\
-\nabla^2 T(x,y,t) &= \frac{\partial^2 T}{\partial x^2}(x,y,t) + \frac{\partial^2 T}{\partial y^2}(x,y,t) \\
-T(x,y, t + \Delta t/2) &=  T(x,y,t) + \frac{\Delta t}{2} \cdot \kappa \nabla^2 T(x,y,t) \\
-T(x,y, t + \Delta t) &= T(x,y,t) + \Delta t \cdot \kappa \nabla^2 T(x,y,t + \Delta t /2)
+Recall our iteration method again, but this time we'll use $\square$ as a subscript and $\delta/\delta x^2$ to denote our numerical versions of things, since we're principly interested in the difference between the numerical scheme and the true solution with real derivatives. \begin{align*}
+\frac{\delta^2 T}{\delta x^2}(x,t) &= \frac{T(x + \Delta x,y, t) - 2 T(x,y,t) + T(x - \Delta x,y, t) }{\Delta x^2} \\
+\nabla_\square^2 T(x,y,t) &= \frac{\delta^2 T}{\delta x^2}(x,y,t) + \frac{\delta^2 T}{\delta y^2}(x,y,t) \\
+T_\square(x,y, t + \Delta t/2) &=  T(x,y,t) + \frac{\Delta t}{2} \cdot \kappa \nabla_\square^2 T(x,y,t) \\
+T_\square(x,y, t + \Delta t) &= T(x,y,t) + \Delta t \cdot \kappa \nabla_\square^2 T_\square(x,y,t + \Delta t /2)
 \end{align*}
-We must recall that the latter two of these equations were derived from the following assumptions: \begin{align*}
-\frac{T(x,y, t + \Delta t/2) - T(x,y,t)}{\Delta t / 2} &=   \kappa \nabla^2 T(x,y,t) \\
-\frac{T(x,y, t + \Delta t) - T(x,y,t)}{\Delta t} &=   \kappa \nabla^2 T(x,y,t + \Delta t / 2)
+In fact our core interest will ultimately be in the differences between these quantities and their non-numerical versions. \begin{align*}
+\text{TE}_{x} &= \frac{\delta^2 T}{\delta x^2}(x,t) - \frac{\partial^2 T}{\partial x^2} \\
+\text{TE}_{\nabla} &= \nabla_\square^2 T(x,y,t) - \nabla^2 T(x,y,t)\\
+\text{TE}_{t/2} &= T_\square(x,y, t + \Delta t/2) - T(x,y,t + \Delta t/2) \\
+\text{TE}_t &= T_\square(x,y, t + \Delta t) - T(x,y,t + \Delta t)
 \end{align*}
 
+What follows is a lot of termwise manipulation, so I'll minimize it by default.
 
+\begin{my proof}[Proposition]{}
+The truncation errors are as follows:\begin{align*}
+\text{TE}_{x} &= \frac{\delta^2 T}{\delta x^2}(x,t) - \frac{\partial^2 T}{\partial x^2} \\
+\text{TE}_{\nabla} &= 2  \sum_{n=2}^\infty \frac{(\Delta x)^{2n-2}}{(2n)!} \frac{\partial^{2n} T}{\partial x^{2n}} + 2  \sum_{n=2}^\infty \frac{(\Delta y)^{2n-2}}{(2n)!} \frac{\partial^{2n} T}{\partial y^{2n}}
+\end{align*}
+Moreover, these errors appear whenever we use $\nabla_\square^2$ or $\delta^2/\delta x^2$ as linear operators. \begin{gather*}
+\nabla_\square^2 = \nabla^2 + 2  \sum_{n=2}^\infty \frac{(\Delta x)^{2n-2}}{(2n)!} \frac{\partial^{2n}}{\partial x^{2n}} + 2  \sum_{n=2}^\infty \frac{(\Delta y)^{2n-2}}{(2n)!} \frac{\partial^{2n}}{\partial y^{2n}}
+\end{gather*}
+So we'll define the linear operator \begin{gather*}
+L = 2  \sum_{n=2}^\infty \frac{(\Delta x)^{2n-2}}{(2n)!} \frac{\partial^{2n}}{\partial x^{2n}} + 2  \sum_{n=2}^\infty \frac{(\Delta y)^{2n-2}}{(2n)!} \frac{\partial^{2n}}{\partial y^{2n}}
+\end{gather*}
+and say $\text{TE}_{\nabla} = L(T)$ and $\nabla_\square^2 = \nabla^2 + L$.
+\end{my proof}
+\begin{my proof}{m}
+%Once again, we'll apply the notation that $T(x,y,t)$ is denoted $T^{i,j}_k$ corresponding to the $k$'th time step and the $(i,j)$ coordinate grid pixel, so our time is $k\Delta t$ and our position is $(i \Delta x, j \Delta y)$.
+We'll do these one by one, starting with $\text{TE}_x$. Immediately we'll apply the Taylor series $T(x + \Delta x,y,t) = \sum_{n=0}^\infty \frac{(\Delta x)^n}{n!} \frac{\partial^n T}{\partial x^n}$.
+\begin{align*}
+%\text{TE}_x = \frac{T_k^{i+1,j} - 2T_k^{i,j} + T^{i-1,j}_k }{\Delta x^2} - \frac{\partial^2 T^{i,j}_k}{\partial x^2}
+\text{TE}_x &= \frac{T(x + \Delta x, y, t) - 2T(x,y,t) + T(x - \Delta x, y, t)}{\Delta x^2} - \frac{\partial^2 T}{\partial x^2} (x,y,t) \\
+&= \frac{
+\sum_{n=0}^\infty \frac{(\Delta x)^n}{n!} \frac{\partial^n T}{\partial x^n} - 2T(x,y,t) + \sum_{n=0}^\infty \frac{(-\Delta x)^n}{n!} \frac{\partial^n T}{\partial x^n}
+}{\Delta x^2} - \frac{\partial^2 T}{\partial x^2}
+\end{align*}
+Our $-2T(x,y,t)$ allows us to eliminate the zeroth order terms on both series. \begin{align*}
+\text{TE}_x &= \frac{
+\sum_{n=1}^\infty \frac{(\Delta x)^n}{n!} \frac{\partial^n T}{\partial x^n} + \sum_{n=1}^\infty \frac{(-\Delta x)^n}{n!} \frac{\partial^n T}{\partial x^n}
+}{\Delta x^2} - \frac{\partial^2 T}{\partial x^2}
+\end{align*}
+The next thing we need to do is notice that the first series has a $(\Delta x)^n$ factor and the other has a $(-\Delta x)^n$ factor, meaning that every odd order term will be the negative of the other series. We'll express these series in terms of their even and odd components, \begin{align*}
+\sum_{n=1}^\infty \frac{(\Delta x)^n}{n!} \frac{\partial^n T}{\partial x^n} &= \sum_{n=1}^\infty \frac{(\Delta x)^{2n - 1}}{(2n - 1)!} \frac{\partial^{2 n - 1} T}{\partial x^{2 n - 1}} + \sum_{n=1}^\infty \frac{(\Delta x)^{2n}}{(2n)!} \frac{\partial^{2n} T}{\partial x^{2n}} \\
+\sum_{n=1}^\infty \frac{(-\Delta x)^n}{n!} \frac{\partial^n T}{\partial x^n} &= \sum_{n=1}^\infty \frac{(- \Delta x)^{2n - 1}}{(2n - 1)!} \frac{\partial^{2 n - 1} T}{\partial x^{2 n - 1}} + \sum_{n=1}^\infty \frac{(- \Delta x)^{2n}}{(2n)!} \frac{\partial^{2n} T}{\partial x^{2n}} \\
+&= - \sum_{n=1}^\infty \frac{(\Delta x)^{2n - 1}}{(2n - 1)!} \frac{\partial^{2 n - 1} T}{\partial x^{2 n - 1}} + \sum_{n=1}^\infty \frac{(\Delta x)^{2n}}{(2n)!} \frac{\partial^{2n} T}{\partial x^{2n}} 
+\end{align*}
+So let's cancel those odd order terms in our truncation error. Next we separate out the second order term, and then cancel that. \begin{align*}
+\text{TE}_x &= \frac{2}{\Delta x^2} \left( \sum_{n=1}^\infty \frac{(\Delta x)^{2n}}{(2n)!} \frac{\partial^{2n} T}{\partial x^{2n}} \right) - \frac{\partial^2 T}{\partial x^2} \\
+&= 2 \left( \sum_{n=1}^\infty \frac{(\Delta x)^{2n-2}}{(2n)!} \frac{\partial^{2n} T}{\partial x^{2n}} \right) - \frac{\partial^2 T}{\partial x^2} \\
+&= 2 \left(\frac{1}{2!} \frac{\partial^2 T}{\partial x^2} + \sum_{n=2}^\infty \frac{(\Delta x)^{2n-2}}{(2n)!} \frac{\partial^{2n} T}{\partial x^{2n}} \right) - \frac{\partial^2 T}{\partial x^2} \\
+&= 2  \sum_{n=2}^\infty \frac{(\Delta x)^{2n-2}}{(2n)!} \frac{\partial^{2n} T}{\partial x^{2n}}
+\end{align*}
+And we can of course repeat this process for $\text{TE}_y$ to get a similar result. \begin{gather*}
+\text{TE}_y = \frac{\delta^2 T}{\delta y^2} - \frac{\partial^2 T}{\partial y^2} = 2  \sum_{n=2}^\infty \frac{(\Delta y)^{2n-2}}{(2n)!} \frac{\partial^{2n} T}{\partial y^{2n}}
+\end{gather*}
+This also means we get $\text{TE}_\nabla$. \begin{align*}
+\text{TE}_\nabla &= \nabla_\square^2 T - \nabla^2 T \\
+&= \left( \frac{\delta^2 T}{\delta x^2} + \frac{\delta^2 T}{\delta y^2} \right) - \left( \frac{\partial^2 T}{\partial x^2} + \frac{\partial^2 T}{\partial y^2} \right) \\
+&= 2  \sum_{n=2}^\infty \frac{(\Delta x)^{2n-2}}{(2n)!} \frac{\partial^{2n} T}{\partial x^{2n}} + 2  \sum_{n=2}^\infty \frac{(\Delta y)^{2n-2}}{(2n)!} \frac{\partial^{2n} T}{\partial y^{2n}}
+\end{align*}
+\end{my proof}
 
+Here is where the fun begins. To get the total truncation error, we'll need to actually use the heat equation again, which we recall is \begin{gather*}
+\frac{\partial T}{\partial t} (x,y,t) = \kappa \nabla^2 T (x,y,t).
+\end{gather*}
+We have, fundamentally, two approximations for the two terms here; note that since we use RK2, we have an almost-forward-Euler method but with the time derivative shifted by $\Delta t /2$. \begin{gather*}
+\frac{T(x,y,t + \Delta t) - T(x,y,t)}{\Delta t} = \frac{\delta T}{\delta t} (x,y,t + \Delta t/2) \approx \frac{\partial T}{\partial t} (x,y,t + \Delta t/2) \\
+\nabla_\square^2 T_\square (x,y,t + \Delta t/2) \approx \nabla^2 T(x,y,t + \Delta t/2)
+\end{gather*}
+Now, the right hand sides are equal to one another via the heat equation, that is, the actual derivatives without error are the true heat equation, so we use that to set the two approximations approximately equal to one another, with their error this time being the real truncation error. \begin{align*}
+0 =& \frac{\partial T}{\partial t}(x,y,t+ \Delta t/2) - \kappa \nabla^2 T(x,y,t + \Delta t/2) \\
+\text{TE} =& \frac{\delta T}{\delta t}(x,y,t + \Delta t/2) - \kappa \nabla_\square^2 T_\square (x,y,t + \Delta t/2) \\
+=& \left(\frac{T(x,y,t+\Delta t) - T(x,y,t)}{\Delta t} \right) \\& - \kappa \left( \nabla^2 + L \right) \left( T(x,y,t) + \frac{\kappa \Delta t}{2} \nabla_\square^2 T(x,y,t) \right)
+\end{align*}
+
+Now we'll need to start expanding the second term here, but it is worth noting that in the time derivative term, we 
 
 \end{document}
