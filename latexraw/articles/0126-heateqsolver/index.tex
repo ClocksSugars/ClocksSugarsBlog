@@ -1854,6 +1854,37 @@ Now, the right hand sides are equal to one another via the heat equation, that i
 =& \left(\frac{T(x,y,t+\Delta t) - T(x,y,t)}{\Delta t} \right) \\& - \kappa \left( \nabla^2 + L \right) \left( T(x,y,t) + \frac{\kappa \Delta t}{2} \nabla_\square^2 T(x,y,t) \right)
 \end{align*}
 
-Now we'll need to start expanding the second term here, but it is worth noting that in the time derivative term, we 
+Now we'll need to start expanding the second term here, but it is worth noting that in the time derivative term, we are meant to use $T(x,y,t+ \Delta t)$ as though it were the true $T$ after a timestep. You might say that we don't have any way to know $T(x,y,t + \Delta t)$ and that is precisely why we have this method, but the expression we have for the truncation error subtracts exactly that method. If our method were perfect, this subtraction would literally be the heat equation with all terms moved to one side as above, equal to zero, and this is how the truncation error will tell us how off our solution is.
+
+Let's focus on the time derivative term. Now that we've done this a couple of times, I'll skip over exactly the process of separating the zeroth order term. We obtain \begin{align*}
+\frac{T(x,y,t+\Delta t) - T(x,y,t)}{\Delta t} = \frac{\sum_{n=1}^{\infty} \frac{\Delta t^n}{n!} \frac{\partial^n T}{\partial t^n}}{\Delta t} &= \frac{\partial T}{\partial t} + \frac{\sum_{n=2}^{\infty} \frac{\Delta t^n}{n!} \frac{\partial^n T}{\partial t^n}}{\Delta t} \\
+&= \frac{\partial T}{\partial t} + \sum_{n=2}^{\infty} \frac{\Delta t^{n-1}}{n!} \frac{\partial^n T}{\partial t^n}
+\end{align*}
+
+Now on the Laplacian term, we won't fully expand it yet but observe that we can at least separate out some terms.
+\begin{align*}
+\kappa \left( \nabla^2 + L \right) \left( T + \frac{\kappa \Delta t}{2} \nabla_\square^2 T \right)
+=& \kappa \nabla^2 T + \kappa L(T) + \frac{\kappa^2 \Delta t}{2} (\nabla^2 + L) \nabla_\square^2 T \\
+=& \kappa \nabla^2 T + \left( \frac{\Delta t}{2} \right) \big((\kappa \nabla^2) (\kappa \nabla^2) T \big) \\
+& + \frac{\kappa^2 \Delta t}{2} (L \nabla^2 + \nabla^2 L + LL) T 
+\end{align*}
+
+And my favorite step of this forsaken process is now observing that we can actually apply the heat equation on our real differential operators to swap all instances of $\kappa \nabla^2 T$ with time derivatives of $T$. In addition to that, we can apply a presumption of smoothness to swap the ordering of these differential operators. \begin{gather*}
+\kappa \nabla_\square^2 T_\square (x,y,t + \Delta t/2) = \frac{\partial T}{\partial t} + \frac{\Delta t}{2} \frac{\partial^2 T}{\partial t^2} + \frac{\kappa^2 \Delta t}{2} (2 L \nabla^2 + LL) T
+\end{gather*}
+Now we can start applying our subtraction in our truncation error. And in fact, our second time derivative which we got out of our Laplacian term will actually eat the second order term in our time derivative Taylor series. Observe:
+\begin{align*}
+\text{TE} =& \frac{\partial T}{\partial t} + \sum_{n=2}^{\infty} \frac{\Delta t^{n-1}}{n!} \frac{\partial^n T}{\partial t^n} - \frac{\partial T}{\partial t} - \frac{\Delta t}{2} \frac{\partial^2 T}{\partial t^2} - \frac{\kappa^2 \Delta t}{2} (2 L \nabla^2 + LL) T \\
+=& \sum_{n=2}^{\infty} \frac{\Delta t^{n-1}}{n!} \frac{\partial^n T}{\partial t^n} - \frac{\Delta t}{2} \frac{\partial^2 T}{\partial t^2} - \frac{\kappa^2 \Delta t}{2} (2 L \nabla^2 + LL) T \\
+=& \frac{\Delta t}{2} \frac{\partial^2 T}{\partial t^2} + \sum_{n=3}^{\infty} \frac{\Delta t^{n-1}}{n!} \frac{\partial^n T}{\partial t^n} - \frac{\Delta t}{2} \frac{\partial^2 T}{\partial t^2} - \frac{\kappa^2 \Delta t}{2} (2 L \nabla^2 + LL) T \\
+=& \sum_{n=3}^{\infty} \frac{\Delta t^{n-1}}{n!} \frac{\partial^n T}{\partial t^n}  - \frac{\kappa^2 \Delta t}{2} (2 L \nabla^2 + LL) T
+\end{align*}
+
+We're now ready for big-$O$ notation. Observe in our time peturbed Taylor series we have $n=3$ as the smallest term corresponding to a lowest order $\Delta t$ of $O(\Delta t^2)$. For our Laplacian error term, we must recall the definition of $L$,  \begin{gather*}
+L = 2  \sum_{n=2}^\infty \frac{(\Delta x)^{2n-2}}{(2n)!} \frac{\partial^{2n}}{\partial x^{2n}} + 2  \sum_{n=2}^\infty \frac{(\Delta y)^{2n-2}}{(2n)!} \frac{\partial^{2n}}{\partial y^{2n}}
+\end{gather*}
+Meaning that $L(T)$ has lowest order $O(\Delta x^2) + O(\Delta y^2)$. This also means that, since $\nabla^2$ doesn't contribute any factors of $\Delta x$ or $\Delta y$, we can ignore the contribution of $L(L(T))$ since it would be of order $O(\Delta x^4) + O(\Delta x^2 \Delta y^2) + O(\Delta y^4)$. Altogether then, our truncation error is written \begin{gather*}
+\text{TE} = O(\Delta t^2) + O(\Delta t \Delta x^2) + O(\Delta t \Delta y^2).
+\end{gather*}
 
 \end{document}
