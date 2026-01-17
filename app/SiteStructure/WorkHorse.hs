@@ -115,7 +115,7 @@ parseChapter address chapter = let
             Just refout -> do {programtail refout}
       in (
          theprogram, --- We want to be able to make webpages without necessarily documenting them here
-         if x.showonpage then indexedsechead:indexedsectail else indexedsectail
+         if "DoNotShowOnIndex" `elem` x.flags then indexedsechead:indexedsectail else indexedsectail
       )
    (endprogram, listofindexsections) = sectionWorker chapter.sections
    in (endprogram, theindex listofindexsections)

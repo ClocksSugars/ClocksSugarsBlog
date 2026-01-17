@@ -10,7 +10,7 @@ data RefIndexState = RefIndexState
    {  theorems    :: Int
    ,  figures     :: Int
    ,  expressions :: Int -- i.e. eq number
-   ,  subsection  :: Int
+   ,  subsection  :: Int -- Map String (String, (String, Int)) section-id (this can be pagename-number if none is given), title, (pagename, number)
    ,  references  :: Map String (String, String, String) -- pageaddress pagename theorem-number
    }
 
