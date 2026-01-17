@@ -16,7 +16,8 @@ data HtmlVers =
    |  Itemize [HtmlVers]
    |  Enumerate Text [HtmlVers]
    |  ListItem [HtmlVers]
-   |  Subheading [HtmlVers] -- <h2>
+   |  Subheading [HtmlVers] -- <h3>
+   |  Subsubheading [HtmlVers] -- <h4>
    |  Figure Text [HtmlVers]
    |  BoxedSec InfoBox (Maybe [HtmlVers]) [HtmlVers]
    |  ReferenceNum String

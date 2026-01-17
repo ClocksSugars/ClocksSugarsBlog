@@ -133,6 +133,10 @@ processThree pagename theaddress content indexstate = let
          processedtitle = inlineProcessThree x newind
          in (h3 ((>>) (toHtml $ show secnumber <> ". ") processedtitle) , newind)
 
+      Subsubheading x -> let
+         processedtitle = inlineProcessThree x propind
+         in (h4 processedtitle , propind)
+
       Figure location thing -> let
          fignumber = figures propind
          newind = propind { figures = fignumber + 1 }

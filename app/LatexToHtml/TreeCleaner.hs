@@ -62,6 +62,7 @@ data Htmllatexinter =
    |  Prose Text
    |  InLineEffect LaTeX -- for commands that belong in a paragraph
    |  Section [Htmllatexinter]
+   |  SubSection [Htmllatexinter]
    |  List Text (Maybe [TeXArg]) [[Htmllatexinter]] -- instead of having items, we put item stuff in each element
    |  IFigure Text [Htmllatexinter]
    |  IBoxedSec InfoBox (Maybe [Htmllatexinter]) [Htmllatexinter]
@@ -86,6 +87,7 @@ processOne arg = let
       (Right a, Left b) -> a:b
       (Right a, Right b) -> [a,b]
    subprocess (TeXComm "subsection" [FixArg stuff]) = Right . Section $ processOne stuff
+   subprocess (TeXComm "subsubsection" [FixArg stuff]) = Right . SubSection $ processOne stuff
    subprocess (TeXComm "figuresvgwithcaption" [FixArg (TeXRaw location), FixArg content]) =
       Right $ IFigure (location <> ".svg") $ processOne content
    subprocess (TeXComm "ref" [FixArg (TeXRaw referenceName)]) = Right $ IReference $ fromText referenceName
@@ -179,6 +181,7 @@ processTwo [] = []
 processTwo ((RawPrint content):xs) = RawText content : processTwo xs
 processTwo ((RawLaTeX content):xs) = (RawText $ render content) : processTwo xs
 processTwo ((Section content):xs) = Subheading (map inLineTranslation content) : processTwo xs
+processTwo ((SubSection content):xs) = Subsubheading (map inLineTranslation content) : processTwo xs
 processTwo ((IFigure location content):xs) = Figure location (processTwo content) : processTwo xs
 processTwo ((ICodeBlock lang content):xs) = CodeBlock lang content : processTwo xs
 -- processTwo ((IReference reference):xs) = ReferenceNum reference : processTwo xs
