@@ -1552,9 +1552,21 @@ The rest of the features I implemented, including the ability to implement an in
 To compile the project, you'll need to install \hyperlink{https://github.com/drager/wasm-pack}{wasm-pack} and run the command \texttt{wasm-pack build --target web}.
 
 
-\subsection{Numerics Considerations}
+\subsection{Conclusions}
 
-Now that we know how to build the simulation, we need to ask some basic questions about when it will give us a correct answer and how correct that answer will be. Those two basic considerations correspond to the truncation error and the stability analysis.
+This was ultimately a fun little project, but as I indicated at the beginning, it isn't super mathematically interesting; we are ultimately implementing a very precise gaussian blur. I was also surprised ultimately by how little deeper hardware considerations were made a problem for me; there were race conditions, which is a problem in all threaded work, and buffer sychronisation issues to worry about (\texttt{heat\_hue\_buffer} had to have rows in multiples of 256 bytes, etc.) and that was kind of it. The WebGPU style of GPU API is, all things considered, much more high level than I expected. There was a simple notion of \squote{a function} I could call, even if it was shuffled through a few layers of shader-module/pipeline and bind-group arguments, but no special attention had to be paid to lining the system of operations up in any special way. It just kind of worked.
+
+The one thing that didn't kind of just work was the explicitly web related components. Part of the reason I got to know WGPU as well as I did was because I had to spend a very long, demotivating, time figuring out why a canvas element rust-type \texttt{JsValue} was failing a type conversion while literally having a debug implementation that said it's type was correct, altogether with the comments in WGPU saying that error basically shouldn't occur. That was probably the greatest of my grievances, but it was of course an unwelcome surprise when javascript's \texttt{await} command simply didn't do the thing it was supposed to do if the thing it was doing was starting up WASM. I don't have resolutions for either of these errors, I can't say it was impossible for them not to have happened in retrospect and it's my fault in the way that you might like to in programming, the \texttt{wasm-bindgen} simply had a bizarre instability there.
+
+But having overcome those problems, and now understanding how to write make WebGPU work, I can't help but be drawn to doing something a bit more mathematically interesting. During my undergrad I'd taken a class on applied mathematics, where we spent half the course on continuum mechanics and methods for modelling it. I'd struggled back then, in part because of the lecturer, in part because of covid, and in part because I couldn't wrap my head around how the modelling methods we were using worked. I've since remedied that, as I read a book a couple of years ago detailing the motivations for how the FEniCS finite element solver worked; I was astounded at how simple it was. And now, aside from writing this, I can't help but wonder about how I could throw a meshing rust-crate together with some simple case setup, first order lagrange polynomials as basis vectors, assemble it as a $A \mathbf{x} = \mathbf{b}$ problem and throw a GPU linear solver algorithm at it. That last part is supposed to be the hard part, but at the bare minimum a conjugate gradient solver would work just fine, and I'd need that if I wanted to do an implicit finite-difference method anyway.
+
+Perhaps something to do next time.
+
+\subsection{Appendix: Numerics Considerations}
+
+Now that we know how to build the simulation, we need to ask some basic questions about when it will give us a correct answer and how correct that answer will be. Obviously this is a concern that goes beyond the mere building of the simulation, and so I've put this in an appendix so that you can stop reading if the code is all you're interested in. Personally I think there is no point
+
+So we will investigate the truncation error and the stability analysis.
 
 \subsubsection{Stability Analysis of Forward Euler and RK2 HE}
 
@@ -1758,7 +1770,7 @@ which completely ignores those other terms in the Taylor series. If our $\Delta 
 
 We can use this as a method for comparing numerical techniques; essentially we ask the question, for a given technique, how much does our error reduction decrease when we make our calculation more expensive.
 
-Let's do this for the forward Euler method. The central presumption of the forward Euler method for our heat equation is ostensibly what is written above, so we'll move all terms to one side and define this as the Truncation Error (TE). Since if the presumption we use to derive the Euler method is true then the other side of the equation above is zero, we know that the truncation error \emph{should} be zero, and its failure to be zero is error.
+Let's do this for the forward Euler method, using our heat-equation temperature as an example; this won't account for position variable truncation error but that's not what we're hoping to improve with RK2 anyway. The central presumption of the forward Euler method for our heat equation is ostensibly what is written above, so we'll move all terms to one side and define this as the Truncation Error (TE). Since if the presumption we use to derive the Euler method is true then the other side of the equation above is zero, we know that the truncation error \emph{should} be zero, and its failure to be zero is error.
 
 \begin{gather*}
 \text{TE} = \frac{T(x,y,t + \Delta t) - T(x,y,t)}{\Delta t} - \frac{\partial T}{\partial t} \approx 0
@@ -1886,5 +1898,7 @@ L = 2  \sum_{n=2}^\infty \frac{(\Delta x)^{2n-2}}{(2n)!} \frac{\partial^{2n}}{\p
 Meaning that $L(T)$ has lowest order $O(\Delta x^2) + O(\Delta y^2)$. This also means that, since $\nabla^2$ doesn't contribute any factors of $\Delta x$ or $\Delta y$, we can ignore the contribution of $L(L(T))$ since it would be of order $O(\Delta x^4) + O(\Delta x^2 \Delta y^2) + O(\Delta y^4)$. Altogether then, our truncation error is written \begin{gather*}
 \text{TE} = O(\Delta t^2) + O(\Delta t \Delta x^2) + O(\Delta t \Delta y^2).
 \end{gather*}
+
+So this tells us that our RK2 did in fact improve our truncation error! Now halving the time step reduces the error by a factor of four instead of by a factor of two. Our error improvements are quadratic instead of linear.
 
 \end{document}
