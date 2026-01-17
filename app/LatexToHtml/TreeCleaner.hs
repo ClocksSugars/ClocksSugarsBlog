@@ -76,6 +76,26 @@ data Htmllatexinter =
 inlineCommands :: [String]
 inlineCommands = ["emph","textbf","texttt"]
 
+charsWhichMayNeedEscape :: [String]
+charsWhichMayNeedEscape = ["#","%","_","&"]
+
+unescapeChars :: LaTeX -> LaTeX
+unescapeChars thearg = case thearg of
+   TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) (TeXRaw z)) -> if y `elem` charsWhichMayNeedEscape
+      then TeXRaw (x <> (fromString y) <> z)
+      else TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) (TeXRaw z))
+   TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) (TeXSeq (TeXRaw z) again)) -> if y `elem` charsWhichMayNeedEscape
+      then TeXSeq (TeXRaw (x <> (fromString y) <> z)) (unescapeChars again)
+      else TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) (TeXSeq (TeXRaw z) (unescapeChars again)))
+   TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) again) -> if y `elem` charsWhichMayNeedEscape
+      then TeXSeq (TeXRaw (x <> (fromString y))) (unescapeChars again)
+      else TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) (unescapeChars again))
+   TeXSeq (TeXCommS y) (TeXSeq (TeXRaw z) again) -> if y `elem` charsWhichMayNeedEscape
+      then TeXSeq (TeXRaw ((fromString y) <> z)) (unescapeChars again)
+      else TeXSeq (TeXCommS y) (TeXSeq (TeXRaw z) (unescapeChars again))
+   TeXSeq a again -> TeXSeq a (unescapeChars again)
+   xs -> xs
+
 processOne :: LaTeX -> [Htmllatexinter]
 processOne arg = let
    subprocess :: LaTeX -> Either [Htmllatexinter] Htmllatexinter
@@ -91,7 +111,12 @@ processOne arg = let
    subprocess (TeXComm "figuresvgwithcaption" [FixArg (TeXRaw location), FixArg content]) =
       Right $ IFigure (location <> ".svg") $ processOne content
    subprocess (TeXComm "ref" [FixArg (TeXRaw referenceName)]) = Right $ IReference $ fromText referenceName
-   subprocess (TeXComm "href" [FixArg (TeXRaw turl), FixArg tx]) = Right $ ILink turl $ processOne tx
+   subprocess (TeXComm "href" [FixArg (urlarg), FixArg tx]) = case (unescapeChars urlarg) of
+      TeXRaw turl -> Right $ ILink turl $ processOne tx
+      _ -> Right . RawPrint . render $ (TeXComm "href" [FixArg (urlarg), FixArg tx])
+   subprocess (TeXComm "hyperlink" [FixArg urlarg, FixArg tx]) = case (unescapeChars urlarg) of
+      TeXRaw turl -> Right $ ILink turl $ processOne tx
+      _ -> Right . RawPrint . render $ (TeXComm "hyperlink" [FixArg (urlarg), FixArg tx])
    subprocess (TeXComm "hyperref" [OptArg (TeXRaw tref), FixArg tx]) = Right $ IRefLink (fromText tref) $ processOne tx
    subprocess (TeXComm "dquote" [FixArg dquotearg]) = subprocess $
       TeXSeq (TeXRaw "\"") $ attachRightMostLaTeX dquotearg $ TeXRaw"\""
