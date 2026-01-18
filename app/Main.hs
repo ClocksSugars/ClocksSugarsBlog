@@ -34,7 +34,8 @@ main = do
    if "-e" `elem` commandlineargs then
       do
          makeAppliUniManifestFromFile
-         putStrLn "wrote manifest json"
+         makeArticleManifestFromFile
+         putStrLn "wrote manifest jsons"
       else return ()
 
    if "-m" `elem` commandlineargs then

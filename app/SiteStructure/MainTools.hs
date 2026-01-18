@@ -6,6 +6,7 @@ module SiteStructure.MainTools (
    webBookFromManifest,
    articlesFromManifest,
    makeAppliUniManifestFromFile,
+   makeArticleManifestFromFile,
    withManifest,
    getWithManifest
 ) where
