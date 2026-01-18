@@ -10,6 +10,8 @@ module SiteStructure.RecordTypes (
    SubChapter(..),
    Chapter(..),
    WrittenWorkBook(..),
+   AllMyArticles(..),
+   AllMyArticlesIndex(..),
    tempappliuni
 ) where
 
@@ -39,6 +41,8 @@ data ChapterIndex = ChapterIndex {
    chapters :: [IndexedChapter]
 }
 
+newtype AllMyArticlesIndex = AllMyArticlesIndex [IndexedSection]
+
 -- data PageFlags = DoNotShowOnIndex
 --    | DoNotLoadKaTeX
 --    | LoadHighlightJs
@@ -67,15 +71,21 @@ data WrittenWorkBook = WrittenWorkBook {
    chapters :: [Chapter]
 } deriving (Generic)
 
+newtype AllMyArticles = AllMyArticles [SubChapter]
+   deriving (Generic)
+
 instance FromJSON SubChapter
 instance FromJSON Chapter
 instance FromJSON WrittenWorkBook
+instance FromJSON AllMyArticles
 
 instance ToJSON SubChapter where
    toEncoding = genericToEncoding defaultOptions
 instance ToJSON Chapter where
    toEncoding = genericToEncoding defaultOptions
 instance ToJSON WrittenWorkBook where
+   toEncoding = genericToEncoding defaultOptions
+instance ToJSON AllMyArticles where
    toEncoding = genericToEncoding defaultOptions
 
 tempappliuni :: WrittenWorkBook

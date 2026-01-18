@@ -3,7 +3,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module SiteStructure.ContentsPage (
-   makeChapterIndexPage
+   makeChapterIndexPage,
+   makeArticlesIndexPage
 ) where
 
 import Data.String
@@ -46,6 +47,25 @@ makeChapterIndex chapterindex = let
         H.p $ toHtml x.description -- make this toggleable later
         ul $ foldr (>>) (Empty ()) (secsWorker x.sections)
    in ol $ foldr (>>) (Empty ()) (chapWorker chapterindex.chapters)
+
+makeArticlesIndexPage :: AllMyArticlesIndex -> Html -> Html
+makeArticlesIndexPage articlesindex pageaddress = defaultPageHTML
+      "../styles.css"
+      "ClocksSugars' Blog"
+      "ClocksSugars' Blog"
+      "The home of Application Unification + These articles"
+      "Table of Contents"
+      pageaddress
+      (makeArticlesIndex articlesindex)
+
+makeArticlesIndex :: AllMyArticlesIndex -> Html
+makeArticlesIndex (AllMyArticlesIndex thearticles) = let
+   secsWorker :: [IndexedSection] -> [Html]
+   secsWorker [] = []
+   secsWorker (x : xs) = (\y -> y : secsWorker xs) . li $ do
+     H.a ! href (fromString x.address) $ toHtml x.title
+     H.p $ toHtml x.description
+   in ul $ foldr (>>) (Empty ()) (secsWorker thearticles)
 
 --- example of what we're aiming for
 

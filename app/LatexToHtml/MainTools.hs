@@ -53,8 +53,8 @@ import Text.LaTeX.Base (LaTeX)
 linknewtab :: Html -> Html
 linknewtab = H.a ! target "_blank" ! rel "noopener noreferrer"
 
-writePage :: Text -> String -> Html -> String -> [String] -> LaTeX -> RefIndexState -> (String, RefIndexState, [String])
-writePage pagetitle pagename addressline addressliteral pageFlags pagecontents indstate = let
+writePage :: String -> String -> [String] -> LaTeX -> RefIndexState -> (Html, RefIndexState, [String])
+writePage pagename addressliteral pageFlags pagecontents indstate = let
    inspect0 = myShow pagecontents
    part1 = processOne pagecontents
    inspect1 = show part1
@@ -63,13 +63,12 @@ writePage pagetitle pagename addressline addressliteral pageFlags pagecontents i
    (part3, newindstate) = processThree pagename addressliteral part2 indstate
    final :: Html
    final = do
-      if "DoNotShowOnIndex" `elem` pageFlags
+      if "IndexTopOfPage" `elem` pageFlags
          then (pageIndex newindstate pagename addressliteral)
          else Empty ()
       part3
    logs = [inspect0,inspect1,inspect2]
-   thepage = subchapterPageHtml pagetitle addressline final
-   in (renderHtml thepage, newindstate, logs)
+   in (final, newindstate, logs)
 
 
 processLatexToHtml :: String -> String -> LaTeX -> RefIndexState -> (Html, RefIndexState)

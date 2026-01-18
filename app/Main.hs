@@ -48,10 +48,15 @@ main = do
 
 makeSite :: IO ()
 makeSite = do
-   _ <- getWithManifest $ \manifest -> do
+   mrefstate <- getWithManifest $ \manifest -> do
       refsIfSuccess <- webBookFromManifest manifest blankIndex
       copyAssetDepends assetDepends
       return refsIfSuccess
+   _ <- case mrefstate of
+      Just refstate -> getWithManifest $ \manifest -> do
+         refsIfSuccess <- articlesFromManifest manifest refstate
+         return refsIfSuccess
+      Nothing -> return Nothing
    return ()
 
 

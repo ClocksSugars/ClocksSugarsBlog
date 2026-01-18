@@ -6,7 +6,9 @@ module SiteStructure.Manifest (
    makeAppliUniManifestFromFile,
    getAppliUniManifest,
    withManifest,
-   getWithManifest
+   getWithManifest,
+   getArticleManifest,
+   makeArticleManifestFromFile
    ) where
 
 --import GHC.Generics
@@ -20,30 +22,57 @@ import Data.Aeson (decodeFileStrict,encodeFile)
 --- obviously would prefer this to just import a byte string but im stuggling to
 ---   figure out which kind of byte string it uses
 
-getWithManifest :: (WrittenWorkBook -> IO (Maybe a)) -> IO (Maybe a)
-getWithManifest func = do
-   mManifest <- getAppliUniManifest
-   result <- case mManifest of
-      Just manifest -> do
-         putStrLn "Good appliuni Manifest"
-         func manifest
-      Nothing -> do
-         putStrLn "Bad appliuni Manifest"
-         return Nothing
-   putStrLn "Goodbye"
-   return result
+class SiteZoneManifest sitezone where
+   getWithManifest :: (sitezone -> IO (Maybe a)) -> IO (Maybe a)
+   withManifest :: (sitezone -> IO a) -> IO ()
 
-withManifest :: (WrittenWorkBook -> IO a) -> IO ()
-withManifest func = do
-   mManifest <- getAppliUniManifest
-   case mManifest of
-      Just manifest -> do
-         putStrLn "Good appliuni Manifest"
-         _ <- func manifest
-         return ()
-      Nothing -> do
-         putStrLn "Bad appliuni Manifest"
-   putStrLn "Goodbye"
+instance SiteZoneManifest WrittenWorkBook where
+   getWithManifest func = do
+      mManifest <- getAppliUniManifest
+      result <- case mManifest of
+         Just manifest -> do
+            putStrLn "Good appliuni Manifest"
+            func manifest
+         Nothing -> do
+            putStrLn "Bad appliuni Manifest"
+            return Nothing
+      putStrLn "Goodbye"
+      return result
+
+   withManifest func = do
+      mManifest <- getAppliUniManifest
+      case mManifest of
+         Just manifest -> do
+            putStrLn "Good appliuni Manifest"
+            _ <- func manifest
+            return ()
+         Nothing -> do
+            putStrLn "Bad appliuni Manifest"
+      putStrLn "Goodbye"
+
+instance SiteZoneManifest AllMyArticles where
+   getWithManifest func = do
+      mManifest <- getArticleManifest
+      result <- case mManifest of
+         Just manifest -> do
+            putStrLn "Good article Manifest"
+            func manifest
+         Nothing -> do
+            putStrLn "Bad article Manifest"
+            return Nothing
+      putStrLn "Goodbye"
+      return result
+
+   withManifest func = do
+      mManifest <- getArticleManifest
+      case mManifest of
+         Just manifest -> do
+            putStrLn "Good article Manifest"
+            _ <- func manifest
+            return ()
+         Nothing -> do
+            putStrLn "Bad article Manifest"
+      putStrLn "Goodbye"
 
 getAppliUniManifest :: IO (Maybe WrittenWorkBook)
 getAppliUniManifest = decodeFileStrict "APPLIUNIMANIFEST.json"
@@ -51,6 +80,12 @@ getAppliUniManifest = decodeFileStrict "APPLIUNIMANIFEST.json"
 ---contingency for if json parsing on handmade json keeps failing
 makeAppliUniManifestFromFile :: IO ()
 makeAppliUniManifestFromFile = encodeFile "APPLIUNIMANIFEST.json" appliunistruct
+
+getArticleManifest :: IO (Maybe AllMyArticles)
+getArticleManifest = decodeFileStrict "ARTICLEMANIFEST.json"
+
+makeArticleManifestFromFile :: IO ()
+makeArticleManifestFromFile = encodeFile "ARTICLEMANIFEST.json" appliunistruct
 
 appliunistruct :: WrittenWorkBook
 appliunistruct = WrittenWorkBook {
@@ -124,3 +159,18 @@ appliunistruct = WrittenWorkBook {
             }
       ]
    }
+
+blogArticles :: AllMyArticles
+blogArticles = AllMyArticles [
+   SubChapter {
+      name = "0126-heateq",
+      title = "Solving the Heat Equation in Rust WASM with WebGPU (Explicit FTCS RK2) + Numerical Analysis",
+      flags = ["IndexTopOfPage"],
+      description = "Detailing my experience and lessons-learned in writing a rust heat equation solver in WGPU to run on a browser, with a truncation error and fourier stability analysis derivation of the explicit RK2 FTCS method for the heat equation. Written in a pedagogical tone so it can be used as a tutorial.",
+      depends = [
+         "heatflux.svg",
+         "wiki_forward_Euler_method.svg",
+         "wiki_Hsl-rgb_models.svg"
+         ]
+      }
+   ]

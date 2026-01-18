@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedRecordDot #-}
+{-# LANGUAGE OverloadedStrings #-}
 module SiteStructure.WorkHorse where
 
 import System.IO
@@ -8,10 +9,12 @@ import Data.String
 
 import SiteStructure.AddressManagement
 import SiteStructure.RecordTypes
+import SiteStructure.DefaultPage
 import LatexToHtml.MainTools
 
 import Text.LaTeX.Base (LaTeX, readFileTex)
 import Text.LaTeX.Base.Parser (parseLaTeXWith, ParserConf(..), ParseError)
+import Text.Blaze.Html.Renderer.String (renderHtml)
 
 import Data.Text (Text)
 
@@ -40,12 +43,17 @@ parseLaTeX = parseLaTeXWith ourParseConf
 parseSubChapter ::
    FolderPath ->
    SubChapter ->
+   Bool ->
+   String ->
+   Text ->
+   Text ->
    (
       RefIndexState -> IO (Maybe RefIndexState),
       IndexedSection
    )
-parseSubChapter address subchapter = let
-   docaddress = (subchapter.name : address)
+parseSubChapter address subchapter isIndexStyle pagetitle pageh1 tagline = let
+   docaddress = if isIndexStyle then "index" : subchapter.name : address else subchapter.name : address
+   addressWeUse = if isIndexStyle then subchapter.name:address else address
    theindex :: IndexedSection
    theindex = IndexedSection
          ("/" <> folderPathRender docaddress <> ".html")
@@ -58,19 +66,28 @@ parseSubChapter address subchapter = let
       copyassets [] = return ()
       copyassets (x:xs) = (>>) (do
             copyFile
-               ("latexraw/" <> folderPathRender address <> "/" <> x)
-               ("public/" <> folderPathRender address <> "/" <> x)
+               ("latexraw/" <> folderPathRender addressWeUse <> "/" <> x)
+               ("public/" <> folderPathRender addressWeUse <> "/" <> x)
             ) $ copyassets xs
       parseSuccessCase :: LaTeX -> IO RefIndexState
       parseSuccessCase doc = do
-         let (thepage,newrefs,logs) = writePage
-               subchapter.title
+         let (thepagehtml,newrefs,logs) = writePage
+               -- subchapter.title
                subchapter.name
-               (addressListHtml docaddress)
+               -- (addressListHtml docaddress)
                (folderPathRender docaddress)
                subchapter.flags
                (extractDocument doc)
                resetAllButReferences
+         --let thepage = renderHtml $ subchapterPageHtml subchapter.title (addressListHtml docaddress) thepagehtml
+         let thepage = renderHtml $ defaultPageHTML
+               ((++ "../../styles.css") $ if isIndexStyle then "../" else "")
+               pagetitle
+               pageh1
+               "A Serialized Online Textbook by ClocksSugars"
+               subchapter.title
+               (addressListHtml (subchapter.name : address))
+               thepagehtml
          writeFileMakePath (docaddress ++ ["public"]) ".html" thepage
          writeFileMakePath (docaddress ++ ["logs"]) "0.txt" (logs !! 0)
          writeFile ("logs/" <> folderPathRender docaddress <> "1.txt") (logs !! 1)
@@ -106,7 +123,10 @@ parseChapter address chapter = let
       (RefIndexState -> IO (Maybe RefIndexState), [IndexedSection])
    sectionWorker [] = (\ x -> do {return (Just x)}, [])
    sectionWorker (x:xs) = let
-      (programhead, indexedsechead) = parseSubChapter chapaddress x
+      (programhead, indexedsechead) = parseSubChapter chapaddress x False
+         "Application Unification"
+         "Application Unification"
+         "A Serialized Online Textbook by ClocksSugars"
       (programtail, indexedsectail) = sectionWorker xs
       theprogram :: RefIndexState -> IO (Maybe RefIndexState)
       theprogram refstate = do
@@ -140,3 +160,26 @@ parseBook book = let
       in (theprogram , indexedchaphead:indexedchaptail)
    (endprogram, listofindexchapters) = chapterWorker book.chapters
    in (endprogram, ChapterIndex listofindexchapters)
+
+parseArticles :: AllMyArticles ->
+   (RefIndexState -> IO (Maybe RefIndexState), AllMyArticlesIndex)
+parseArticles (AllMyArticles thearticles) = let
+   address = ["articles"]
+   sectionWorker :: [SubChapter] ->
+      (RefIndexState -> IO (Maybe RefIndexState), [IndexedSection])
+   sectionWorker [] = (\ x -> do {return (Just x)}, [])
+   sectionWorker (x:xs) = let
+      (programhead, indexedarthead) = parseSubChapter address x True
+         "ClocksSugars' Blog"
+         "ClocksSugars' Blog"
+         "The home of Application Unification + These articles"
+      (programtail, indexedarttail) = sectionWorker xs
+      theprogram :: RefIndexState -> IO (Maybe RefIndexState)
+      theprogram refstate = do
+         mayberefs <- programhead refstate
+         case mayberefs of
+            Nothing -> do {putStrLn "Exiting chapter"; return Nothing}
+            Just refout -> do {programtail refout}
+      in (theprogram , indexedarthead:indexedarttail)
+   (endprogram, listofindexchapters) = sectionWorker thearticles
+   in (endprogram, AllMyArticlesIndex listofindexchapters)
