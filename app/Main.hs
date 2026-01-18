@@ -53,9 +53,8 @@ makeSite = do
       copyAssetDepends assetDepends
       return refsIfSuccess
    _ <- case mrefstate of
-      Just refstate -> getWithManifest $ \manifest -> do
-         refsIfSuccess <- articlesFromManifest manifest refstate
-         return refsIfSuccess
+      Just refstate -> getWithManifest $
+         \manifest -> articlesFromManifest manifest refstate
       Nothing -> return Nothing
    return ()
 

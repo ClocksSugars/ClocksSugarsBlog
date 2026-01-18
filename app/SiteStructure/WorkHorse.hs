@@ -172,7 +172,7 @@ parseArticles (AllMyArticles thearticles) = let
       (programhead, indexedarthead) = parseSubChapter address x True
          "ClocksSugars' Blog"
          "ClocksSugars' Blog"
-         "The home of Application Unification + These articles"
+         "My Blog and The home of Application Unification"
       (programtail, indexedarttail) = sectionWorker xs
       theprogram :: RefIndexState -> IO (Maybe RefIndexState)
       theprogram refstate = do
