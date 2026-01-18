@@ -53,7 +53,7 @@ makeArticlesIndexPage articlesindex pageaddress = defaultPageHTML
       "../styles.css"
       "ClocksSugars' Blog"
       "ClocksSugars' Blog"
-      "The home of Application Unification + These articles"
+      "My Blog and The home of Application Unification"
       "Table of Contents"
       pageaddress
       (makeArticlesIndex articlesindex)
