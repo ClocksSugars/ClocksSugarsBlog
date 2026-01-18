@@ -35,7 +35,7 @@ parseLaTeX = parseLaTeXWith ourParseConf
 --    monad program that will only at the end do anything.
 
 ---   TODO: SEPARATE WRITECALLS INTO SEPARATE PROGRAM SO WE CAN DO ANALYTICS
-
+--
 
 parseSubChapter ::
    FolderPath ->
@@ -53,7 +53,7 @@ parseSubChapter address subchapter = let
          subchapter.description
    theprogram :: RefIndexState -> IO (Maybe RefIndexState)
    theprogram refinds = let
-      resetAllButReferences = blankIndex {references = refinds.references}
+      resetAllButReferences = resetNoneMapInd refinds
       copyassets :: [String] -> IO ()
       copyassets [] = return ()
       copyassets (x:xs) = (>>) (do
@@ -68,6 +68,7 @@ parseSubChapter address subchapter = let
                subchapter.name
                (addressListHtml docaddress)
                (folderPathRender docaddress)
+               subchapter.flags
                (extractDocument doc)
                resetAllButReferences
          writeFileMakePath (docaddress ++ ["public"]) ".html" thepage

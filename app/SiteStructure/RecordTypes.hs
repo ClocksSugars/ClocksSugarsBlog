@@ -22,13 +22,6 @@ import Data.Text (Text)
 --    when record types across different files share names,
 --    we're gonna try moving them here
 
--- data PageFlags = DoNotShowOnIndex
---    | DoNotLoadKaTeX
---    | LoadHighlightJs
---    | IndexTopOfPage
---    | LoadJsScript
---    deriving (Generic, Show)
-
 data IndexedSection = IndexedSection {
    address :: String,
    title :: Text,
@@ -45,6 +38,13 @@ data IndexedChapter = IndexedChapter {
 data ChapterIndex = ChapterIndex {
    chapters :: [IndexedChapter]
 }
+
+-- data PageFlags = DoNotShowOnIndex
+--    | DoNotLoadKaTeX
+--    | LoadHighlightJs
+--    | IndexTopOfPage
+--    | LoadJsScript
+--    deriving (Generic, Show)
 
 data SubChapter = SubChapter {
    name :: String,

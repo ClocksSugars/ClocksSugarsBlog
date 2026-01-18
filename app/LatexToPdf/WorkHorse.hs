@@ -39,7 +39,7 @@ parseSubChapter address subchapter = let
             return Nothing
          Right finetitle -> return $ Just finetitle
       hClose handle
-      return $ case ("DoNotShowOnIndex" `elem` subchapter.flags, outc, parsedTitle) of
+      return $ case ("DoNotShowOnIndex" `elem` subchapter.flags , outc, parsedTitle) of
          (True, Just cont, Just finetitle) -> Just $ TeXSeq
             (TeXComm "section" [FixArg finetitle])
             cont

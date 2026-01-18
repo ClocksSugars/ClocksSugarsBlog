@@ -4,6 +4,9 @@ module LatexToHtml.MainTools (
    -- processThree,
    RefIndexState(RefIndexState),
    references,
+   section,
+   subsection,
+   resetNoneMapInd,
    blankIndex,
    extractDocument,
    -- processOne,
@@ -13,7 +16,8 @@ module LatexToHtml.MainTools (
    inlineCommands,
    -- HtmlVers,
    writePage,
-   subchapterPageHtml
+   subchapterPageHtml,
+
 ) where
 
 import LatexToHtml.ProcessingTypes
@@ -40,32 +44,80 @@ import Data.ListLike (fromText)
 import Data.String
 import Data.List (intercalate, drop)
 --import qualified Data.Map.Strict as Maps ((!))
-import Data.Map.Strict (Map, empty, insert, fromList, (!?))
+import Data.Map.Strict (Map, empty, insert, fromList, (!?), findWithDefault, toList)
 import Data.Text (Text)
+import Data.List (sortBy)
 
 import Text.LaTeX.Base (LaTeX)
 
 linknewtab :: Html -> Html
 linknewtab = H.a ! target "_blank" ! rel "noopener noreferrer"
 
-writePage :: Text -> String -> Html -> String -> LaTeX -> RefIndexState -> (String, RefIndexState, [String])
-writePage pagetitle pagename addressline addressliteral pagecontents indstate = let
+writePage :: Text -> String -> Html -> String -> [String] -> LaTeX -> RefIndexState -> (String, RefIndexState, [String])
+writePage pagetitle pagename addressline addressliteral pageFlags pagecontents indstate = let
    inspect0 = myShow pagecontents
    part1 = processOne pagecontents
    inspect1 = show part1
    part2 = processTwo part1
    inspect2 = show part2
    (part3, newindstate) = processThree pagename addressliteral part2 indstate
+   final :: Html
+   final = do
+      if "DoNotShowOnIndex" `elem` pageFlags
+         then (pageIndex newindstate pagename addressliteral)
+         else Empty ()
+      part3
    logs = [inspect0,inspect1,inspect2]
-   thepage = subchapterPageHtml pagetitle addressline part3
+   thepage = subchapterPageHtml pagetitle addressline final
    in (renderHtml thepage, newindstate, logs)
 
 
 processLatexToHtml :: String -> String -> LaTeX -> RefIndexState -> (Html, RefIndexState)
 processLatexToHtml pagename pageaddress x = processThree pagename pageaddress $ processOneTwo x
 
-
--- BoxedSec String (Maybe Text) (Maybe [HtmlVers]) [HtmlVers]
+pageIndex :: RefIndexState -> String -> String -> Html
+pageIndex refinds ourpagename ourpageaddress = let
+   subsections = subsectionMap refinds
+   subsubsections = subsubsectionMap refinds
+   subsectionList :: [(Html, String, Int)] -- title, id, number (for sorting)
+   subsectionList = sortBy (\ (_,_,a) (_,_,b) -> compare a b) [ let
+      (title, _, number) = snd thissubsec
+      in (
+         toHtml (show number <> ". ") >> title,
+         fst thissubsec,
+         number
+      )
+      |  thissubsec <- toList subsections,
+         (\(_,y,_)->y) (snd thissubsec) == ourpagename
+      ]
+   withsubsectionList :: [(Html, String, [(Html, String, Int)])]
+   withsubsectionList = (`Prelude.map` subsectionList) $ \ (sectitle, secid, secnumber) -> let
+      subsubsectionList = sortBy (\ (_,_,a) (_,_,b) -> compare a b) [ let
+         (title, _, _, number) = snd thissubsubsec
+         in (
+            toHtml (show secnumber <> "." <> show number <> " ") >> title,
+            fst thissubsubsec,
+            number
+         )
+         |  thissubsubsec <- toList subsubsections,
+            (\(_,y,_,_)->y) (snd thissubsubsec) == ourpagename,
+            (\(_,_,y,_)->y) (snd thissubsubsec) == secid
+         ]
+      in (sectitle, secid, subsubsectionList)
+   doSubSec :: (Html, String, Int) -> Html
+   doSubSec (subsectitle, subsecid, _) =
+      li $ H.a ! href (fromString $ ourpageaddress <> "#" <> subsecid) $ subsectitle
+   doSec :: (Html, String, [(Html, String, Int)]) -> Html
+   doSec (sectitle, secid, itssubsections) = do
+      li $ H.a ! href (fromString $ ourpageaddress <> "#" <> secid) $ sectitle
+      case itssubsections of
+         [] -> Empty ()
+         x:xs -> ul $ foldl (>>) (doSubSec x) $ Prelude.map doSubSec xs
+   in case withsubsectionList of
+      [] -> Empty ()
+      x:xs -> do
+         h3 "Page Index"
+         ul $ foldl (>>) (doSec x) $ Prelude.map doSec xs
 
 inlineProcessThree :: [HtmlVers] -> RefIndexState -> Html
 inlineProcessThree [] _ = Empty ()
@@ -127,15 +179,39 @@ processThree pagename theaddress content indexstate = let
                   toHtml $ refpagename ++ "." ++ thmnum
             Nothing -> ("REFERENCE-ERROR", propind)
 
-      Subheading x -> let
-         newind = propind { subsection = subsection propind + 1 }
-         secnumber = subsection newind
-         processedtitle = inlineProcessThree x newind
-         in (h3 ((>>) (toHtml $ show secnumber <> ". ") processedtitle) , newind)
-
-      Subsubheading x -> let
+      Subheading mlabel x -> let
+         secnumber = (1 +) $ (\ (y, _, _) -> y) $ subsection propind
+         newlabel = case mlabel of
+            Just label -> label
+            Nothing -> pagename <> "_" <> show secnumber
          processedtitle = inlineProcessThree x propind
-         in (h4 processedtitle , propind)
+         newind = propind { subsection = (
+            secnumber,
+            insert newlabel (processedtitle, pagename, secnumber) (subsectionMap propind),
+            newlabel
+         )
+         }
+         in (h3 ! A.id (fromString newlabel) $ ((>>) (toHtml $ show secnumber <> ". ") processedtitle) , newind)
+
+      Subsubheading mlabel x -> let
+         oversecnumber = (\(y,_,_)->y) $ subsection propind
+         secnumber = (1 +) $ fst $ subsubsection propind
+         newlabel = case mlabel of
+            Just label -> label
+            Nothing -> pagename <> "_" <> show oversecnumber <> "_" <> show secnumber
+         processedtitle = inlineProcessThree x propind
+         secitsunder = (\(_,_,y)->y) $ subsection propind
+         itsundernumber = (\(_,_,y)->y) $ findWithDefault (Empty (),"",-1) secitsunder (subsectionMap propind)
+         newind = propind { subsubsection = (
+            secnumber,
+            insert newlabel (processedtitle, pagename, secitsunder, secnumber) (snd $ subsubsection propind)
+         )
+         }
+         in (h4 ! A.id (fromString newlabel) $ ((>>) (toHtml $ show itsundernumber <> "." <> show secnumber <> " ") processedtitle) , newind)
+
+      -- Subsubheading x -> let
+      --    processedtitle = inlineProcessThree x propind
+      --    in (h4 processedtitle , propind)
 
       Figure location thing -> let
          fignumber = figures propind
