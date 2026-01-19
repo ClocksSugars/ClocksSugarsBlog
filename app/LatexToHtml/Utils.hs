@@ -2,6 +2,12 @@ module LatexToHtml.Utils where
 
 import Text.LaTeX.Base.Syntax
 
+
+flattenTeXTree :: LaTeX -> [LaTeX]
+flattenTeXTree tex = case tex of
+   TeXSeq x y -> flattenTeXTree x ++ flattenTeXTree y
+   x -> [x]
+
 -- climbs down the tree and attaches something at maximum right-most depth
 attachRightMostLaTeX :: LaTeX -> LaTeX -> LaTeX
 attachRightMostLaTeX (TeXSeq ex exs) attachment = TeXSeq ex (

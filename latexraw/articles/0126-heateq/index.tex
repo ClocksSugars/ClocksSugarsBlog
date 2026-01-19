@@ -7,6 +7,7 @@
 \input{../webmacros.tex}
 \input{../amsthmstuff.tex}
 
+\lstdefinelanguage{toml}{}[keywords,comments,strings]
 
 \usepackage{amsmath}
 \begin{document}
@@ -757,7 +758,7 @@ Once we've completed a computation to our satisfaction, we'll have to decide wha
 
 This is where we'll have to begin discussing the \texttt{tokio} crate.
 
-Earlier, when we requested an \texttt{Adapter}, \texttt{Device}, and \texttt{Queue}, we used a \text{.await} method. This is because the process of asking our GPU for these items doesn't happen on the CPU, and so our CPU might need to wait to get a response back. This meant I had to do some reading about how rust asynchronous processes worked, and what I learned was first and foremost that async is not necessarily about threads. The age old joke about \squote{what does your CPU do when it's told to sleep for a millisecond other than check if a millisecond has passed on every tick?} comes to mind. The answer to that, as far as the thinking about async functions, turns out to be that the CPU does something else.
+Earlier, when we requested an \texttt{Adapter}, \texttt{Device}, and \texttt{Queue}, we used a \texttt{.await} method. This is because the process of asking our GPU for these items doesn't happen on the CPU, and so our CPU might need to wait to get a response back. This meant I had to do some reading about how rust asynchronous processes worked, and what I learned was first and foremost that async is not necessarily about threads. The age old joke about \squote{what does your CPU do when it's told to sleep for a millisecond other than check if a millisecond has passed on every tick?} comes to mind. The answer to that, as far as the thinking about async functions, turns out to be that the CPU does something else.
 
 \begin{lstlisting}[language=Rust]
 impl SetupCompute {
@@ -859,7 +860,7 @@ Now, I could not tell you \emph{why}, but for whatever reason getting the canvas
 
 The crate \texttt{web-sys} ostensibly exposes javascript methods such as \texttt{get\_element\_by\_id} and \texttt{query\_selector}, returning results as rust analogs. Since javascript has a different type system to rust, we need to convert them to a rust type such as \texttt{Element} or \texttt{HtmlCanvasElement} using the \texttt{dyn\_into} method which will of course fail if we pick a type that doesn't match closely enough. It should be noted that \texttt{web-sys} doesn't expose basically anything by default, hiding most functionality between features which must be manually specified. Consequently my rust toml file looks like this
 
-\begin{lstlisting}
+\begin{lstlisting}[language=toml]
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 tokio = { version = "1", features = ["sync"] }
 console_error_panic_hook = "0.1.6"
@@ -1037,7 +1038,7 @@ let render_pipeline_layout =
 
 The above should look familiar due to its similarity to the compute pipeline setup. The only striking difference is that we explicitly define a texture bind group layout. What will follow is a division between a vertex shader, which places polygons, and a fragment shader which colors our screen using information about where those polygons are and what they should look like. These shaders are written in a wgsl file called \texttt{rectangle}, and our bind group layout gives wgpu instructions on how we'll provide our view and sampler from earlier to our fragment shader.
 
-The job of our fragment shader is rather opaque; we have GPU steps for using the sampler and view to do whatever texture sampling WGPU finds appropriate. Our vertex shader we'll be significantly more hands on with. Since we want to simply draw our texture to the screen, we can achieve this with two triangles forming a square over the view. To specify those triangles, we'll need to give coordinates, but we might have to give those coordinates multiple times since these two triangles forming a square will share vertices. It's better practice when we're certain we want the edges of the triangles to line up to simply reuse the points together with an \emph{index buffer} which we'll use to say which triangles have which vertices as their points.
+The job of our fragment shader is rather opaque; we have GPU steps for using the sampler and view to do whatever texture sampling WGPU finds appropriate. Our vertex shader we can be significantly more hands-on with. Since we want to simply draw our texture to the screen, we can achieve this with two triangles forming a square over the view. To specify those triangles, we'll need to give coordinates, but we might have to give those coordinates multiple times since these two triangles forming a square will share vertices. It's better practice when we're certain we want the edges of the triangles to line up to simply reuse the points together with an \emph{index buffer} which we'll use to say which triangles have which vertices as their points.
 
 It'll also be important to think about which vertices we specify for the triangle in which order, since our triangles have a front face and a back face. If we view a triangle through its back face, it will be culled to the viewport, so picking the order of vertices correctly is paramount to actually getting to see the thing. My implementation is inspired heavily by \href{https://sotrh.github.io/learn-wgpu/beginner/tutorial5-textures/}{sotrh's tutorial} which gives some details that I haven't, including how coordinates work for textures.
 
@@ -1085,8 +1086,7 @@ let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
 });
 \end{lstlisting}
 
-\begin{my proof}
-[Render pipeline shader code and render function is minimized here]{m}
+\begin{my proof}[Render pipeline shader code and render function is minimized here]{m}
 The following is basically just \href{https://sotrh.github.io/learn-wgpu/beginner/tutorial5-textures/}{sotrh's code}, but if you have any interest in reproducing what I made, you'll need this.
 \begin{lstlisting}[language=Rust]
 let render_pipeline = device.create_render_pipeline(
@@ -1434,7 +1434,7 @@ pub fn run_a_compute_iter() -> Result<(), JsValue> {
 
 As long as we write our javascript well, we should never encounter the kind of issue that \texttt{RefCell} protects against in which we're trying to access the state while another function is using it.
 
-We're almost ready to actually call some functions from javascript, but first we need to discuss the initialization. This is not as simple as our GPU initialization since WASM needs a distinct entrypoint where it can also set up everything WASM itself needs to run in javascript. That entry point must be marked \texttt{\#[wasm\_bindgen(start)]}. This is also a good time to initialize the logging tools that will let us write to the browser console if we want to do some debugging.
+We're almost ready to actually call some functions from javascript, but first we need to discuss the initialization. This is not as simple as running our GPU initialization function since WASM itself needs a distinct entrypoint where it can also set up everything WASM itself needs to run in javascript. That entry point must be marked \texttt{\#[wasm\_bindgen(start)]}. This is also a good time to initialize the logging tools that will let us write to the browser console if we want to do some debugging.
 
 \begin{lstlisting}[language=Rust]
 #[cfg(target_arch = "wasm32")]
@@ -1509,7 +1509,7 @@ async function init_energy() {
 init_energy();
 \end{lstlisting}
 
-We need to call \texttt{init} before we use anything from WASM or else it will fail. As I mentioned earlier, we can use both graphics and export the buffer which I do here in \texttt{get\_total\_energy\_in\_one} when we sum the temperature across all grid cells so we can check if our simulation is conserving energy, hence we make use of receiver stored in \texttt{INTERNAL\_MESSAGE}.
+We need to call \texttt{init}, which is the function we marked with \texttt{\#[wasm\_bindgen(start)]}, before we use anything from WASM or else it will fail. As I mentioned earlier, we can use both graphics and export the buffer which I do here in \texttt{get\_total\_energy\_in\_one} when we sum the temperature across all grid cells so we can check if our simulation is conserving energy, hence we make use of receiver stored in \texttt{INTERNAL\_MESSAGE}.
 
 Now as for calling for a simulation and render each frame, we'll want to use javascript's utilities for this. There are other ways to schedule renders on the rust side, but I've been warned javascript has some particularities about when it wants its new frames and may fight us if we try to conflict with it, but all of that is handled for us if we just use the \texttt{requestAnimationFrame} function.
 
@@ -1572,12 +1572,12 @@ So we will investigate the truncation error and the stability analysis.
 
 The rational for how this works can be a bit conceptually deceptive but it comes down to two fundemental observations.
 
-First, our method revolves around allowing pixels on our grid to conduct heat into adjacent pixels. If we recall the Green's function solution, \begin{gather*}
+First, our method revolves around allowing pixels on our grid to conduct heat into adjacent pixels. Recall the Green's function solution, \begin{gather*}
 T(x,t) = \frac{1}{\sqrt{4 \pi \kappa t}} \int_{-\infty}^{\infty} \exp\left( - \frac{(x - \tau)^2}{4 \kappa t}\right) g(\tau) d\tau
 \end{gather*}
-we'll see that there's a gaussian, which in a sense means that for our simulation to be perfectly accurate we need a way to make every pixel affect every other pixel simultaneously, even if only a little. In practice, since the exponential falls off, well, exponentially, each part of our grid doesn't meaningfully affect evvery other one. But in principle we must now pose the question if it is possible for the true solution to meaningfully spread out, more than what might merely be a rounding error, faster than our adjacent-effector time step allows? If that were to happen, we'd have no reason to think that our model would predict something sensible. In fact the simulation might try to guess that heat should flow more than the difference between temperatures, meaning that we'd see net heat-difference creation; this would be like watching a system's entropy go down in a sense. No good.
+together with my lamentation that this solution implies the time evolution of $T$ is actually just a gaussian blur. But in a sense means that for our simulation to be perfectly accurate we need a way to make every pixel affect every other pixel simultaneously, even if only a little, since a gaussian is never zero, just very very close to it. In practice, since the fall-off is exponential-squared, each part of our grid doesn't meaningfully need to affect every other one, just those nearby, or in our simulation actually adjacent. But in principle we must now pose the question if it is possible for the true solution to spread out in a way where non-adjacent grid points have larger-than-rounding-error increases, spreading faster than our adjacent-pixel-effector simulation allows in a single time step. If that were to happen, we'd have no reason to think that our model would predict something sensible. In fact the simulation might try to guess that heat should flow more than the difference between temperatures, meaning that we'd see net heat-difference creation; this would be like watching a system's entropy go down in a sense. No good.
 
-So how are we to know when our timestep is small enough? The solution comes to us through history; we must remember that fourier analysis is famed early on for its contributions to the study of the heat equation, and so our method of attack will be to study our solutions $T(x,y,t)$ in terms of a wave basis of functions $T(x,y,t) = E(t) e^{i k_x x + i k_y y}$, composed of a magnitude term $E(t)$ and a complex wave. We're using a complex wave but that doesn't mean we're necessarily thinking about some notion of complex temperature, just that we're decomposing our functions that way, with $k_x$ and $k_y$ standing for the frequency of the wave in different axes. Since the heat equation is linear, any solution of this form will have a corresponding $E(t) e^{-ik_x x - i k_y y}$ solution which will add to make $E(t) \cos(k_x x + k_y y)$ for example.
+So how are we to know when our timestep is small enough? Is there a way to show that the timestep is small enough that only enough time passes for pixels to meaningfully spread heat to only their neighbors? The solution comes to us through history; we must remember that fourier analysis is famed early on for its contributions to the study of the heat equation, and so our method of attack will be to study our solutions $T(x,y,t)$ in terms of a wave basis of functions $T(x,y,t) = E(t) e^{i k_x x + i k_y y}$, composed of a magnitude term $E(t)$ and a complex wave. We're using a complex wave but that doesn't mean we're necessarily thinking about some notion of complex temperature, just that we're decomposing our functions that way, with $k_x$ and $k_y$ standing for the frequency of the wave in different axes. Since the heat equation is linear, any solution of this form will have a corresponding $E(t) e^{-ik_x x - i k_y y}$ solution which will add to make $E(t) \cos(k_x x + k_y y)$ for example, and we can just require that we only consider real solutions of $T$ after our analysis is done.
 
 Let's try this for the heat equation in two dimensions without RK2 applied. The initial assumption is \begin{align*}
 \frac{T(x,y,t + \Delta t) - T(x,y,t) }{\Delta t} =& \kappa \frac{T(x+\Delta x,y,t) - 2 T(x,y,t) + T(x - \Delta x,y,t)}{\Delta x^2} \\
@@ -1592,7 +1592,7 @@ and we'll now divide both sides by $T(x,y,t)$, assuming the complex plane wave s
 Now using $e^x/e^y = e^{x-y}$ and moving $\Delta t$ and $1$ to the other side, \begin{align*}
 \frac{E(t+\Delta t)}{E(t)} =& 1 + \kappa \Delta t \frac{e^{ik_x \Delta x} - 2 + e^{-ik_x \Delta x}}{\Delta x^2} + \kappa \Delta t \frac{e^{ik_x \Delta y} - 2 + e^{-ik_x \Delta y}}{\Delta y^2}
 \end{align*}
-we obtain an expression for the ratio of $E(t)$ growth. Since this was the magnitude over time, this ratio tells us whether or not the magnitude of the wave component is growing, and so any unstable solution will need that to be positive in order to produce the weird heat propogation effects of an unstable simulation. One might infer that we can simply demand that this growth rate is less than one, i.e. that the magnitude of plane waves in the simulation only declines, and in turns out this works great in this case. So let's assert \begin{gather*}
+we obtain an expression for the ratio of $E(t)$ growth. Since this was the magnitude over time, this ratio tells us whether or not the magnitude of the wave component is growing, and so any unstable solution will need that to be greater than one in order to produce the weird heat propogation effects of an unstable simulation. One might infer that we can simply demand that this growth rate is less than one, i.e. that the magnitude of plane waves in the simulation only declines, and it turns out this can tell us how small $\Delta t$ needs to be. So let's assert \begin{gather*}
 \frac{E(t+\Delta t)}{E(t)} \leq 1.
 \end{gather*}
 To get something meaningful out of this, we'll have to use a property of complex plane waves that $e^{ix} - e^{-ix} = 2i\sin(x)$, and moreover that squaring this, $e^{i2x} + e^{-i2x} - 2= -4 \sin^2(x)$. We have some terms that have a very similar form in our expression, so we can write \begin{gather*}
@@ -1675,7 +1675,7 @@ It suffices to notice by inspection that swapping $x$ and $y$ in this expression
 \frac{E(t + \Delta t)}{E(t)} = \frac{T^{i,j}_{k+1}}{T^{i,j}_k} =& 1 + \kappa \Delta t \begin{pmatrix}
 	\frac{-4}{\Delta x^2} \sin^2(k_x \Delta x /2) \\
 	\frac{-4}{\Delta y^2} \sin^2(k_y \Delta y /2) \\
-\end{pmatrix} +
+\end{pmatrix} \\ &+ 
 \frac{\kappa^2 \Delta t^2 }{2\Delta x^4} \begin{pmatrix}
 	-4 \sin^2(k_x \Delta x) \\
 	+16 \sin^2(k_x \Delta x /2) \\
@@ -1711,7 +1711,7 @@ Oof. We can now turn this into a bound but to make that useful we'll have to fig
 	-16 \sin^2(k_y \Delta y /2) \\
 \end{pmatrix} \ge 0
 \end{align*}
-We have a term of order $O(\kappa \Delta t/ \Delta x^2) + O(\kappa \Delta t/ \Delta y^2)$, which is the same term as in the non-RK2 case, and all other terms have the corresponding coefficient squared or some variation of that involving swapping $\Delta x^2$ or $\Delta y^2$. So already, we expect our bound to be \emph{close} to the normal stability bound because the standard term dominates. Moreover, many of the sine arguments are related, which is important since $\sin^2$ has all of its peaks at odd number multiples of $\pi/2$ and zeros for even multiples. So if we were to maximise the standard non-RK2 sine squared terms, we'd zero out many of the other ones in the following way: \begin{align*}
+We have a term of order $O(\kappa \Delta t/ \Delta x^2) + O(\kappa \Delta t/ \Delta y^2)$, which are the same terms as in the non-RK2 case, and all other terms have that corresponding coefficient squared (e.g. $O(\kappa^2 \Delta t^2 / \Delta x^4)$) or some variation of that involving swapping $\Delta x^2$ or $\Delta y^2$. So already, we expect our bound to be \emph{close} to the normal stability bound because the foward euler stability terms dominate. Moreover, many of the sine arguments are related, which is important since $\sin^2$ has all of its peaks at odd number multiples of $\pi/2$ and zeros for even multiples. So if we were to maximise the standard non-RK2 sine squared terms, we'd zero out many of the other ones in the following way: \begin{align*}
 \kappa \Delta t \begin{pmatrix}
 	\frac{4}{\Delta x^2} \\
 	\frac{4}{\Delta y^2} \\
@@ -1737,7 +1737,7 @@ Notice here we also zero out sine squared terms with arguments that are the sums
 We'll set $A = \kappa \Delta t$, $B = 1/\Delta x^2$ and $C = 1/\Delta y^2$ now and simplify this relation to the following: \begin{gather*}
 2 \ge 4AB + 4AC - 8 A^2B^2 - 8 A^2 C^2 -16 A^2 B C \ge 0.
 \end{gather*}
-If we want to get a bound with $\Delta t$ on one side of this, we'll need to solve this as a quadratic in $A$. We can apply the quadratic equation on both inequalities that form this transitive chain, but if we do this for the $2 \ge $ side we get complex solutions. Proceeding with the other inequality, the $\ge 0$ branch, \begin{gather*}
+If we want to get a bound with $\Delta t$ on one side of this, we'll need to solve this as a quadratic in $A$. We can apply the quadratic equation on both inequalities that form this transitive chain, but if we do this for the $2 \ge $ side we get complex solutions; in fact this is because the $2 \ge$ inequality is trivially satisfied. Unlike in the forward Euler stability analysis, our terms that are quadratic in $A$ can now violate the $\ge 0$ condition under some circumstances when our $\sin^2$ terms are non-zero (i.e. in the case where we've maximised the $\sin^2$ terms). So studying that inequality, we must solve the quadratic equation to find the valid bounds on $\kappa \Delta t$. \begin{gather*}
 A^2 \left( -8 B^2 -8C^2 -16 BC \right) + A(4B + 4C) \ge 0 \\
 A \Big( A \left( -8 B^2 -8 C^2 -16 BC \right) + 4B + 4C \Big) \ge 0
 \end{gather*}
@@ -1766,11 +1766,11 @@ f(x+h) = f(x) + h \frac{d f}{d x}(x) + \frac{h^2}{2!} \frac{d^2 f}{d x^2}(x) + \
 And in fact we invoke this whenever we take a derivative. When we say $(f(x+h)-f(x))/h$ what we're doing is subtracting that first term, $f(x)$, dividing the $h$ off of $df/dx$ and then in the limit of $h \to 0$, all the other terms are set to zero. That's all fine and dandy but it's in direct contradiction to the central presumption of, say, the forward Euler method. In order to derive the forward euler method, $f(x+h)=f(x) + hf'(x)$, we necessarily presume that \begin{gather*}
 \frac{f(x+ \Delta x) - f(x)}{\Delta x} = \frac{d f}{dx}
 \end{gather*}
-which completely ignores those other terms in the Taylor series. If our $\Delta x$ (or our $\Delta t$ for that matter) is small enough then ignoring these terms may merely be a rounding error, but this error is sure to add up over time.
+which completely ignores those other terms in the Taylor series. If our $\Delta x$ (or our $\Delta t$ for that matter) is small enough then ignoring these terms may merely be a rounding error, as is the case in the derivative where we take the limit of that rounding error being zero, but failing that, this error is sure to add up over time.
 
-We can use this as a method for comparing numerical techniques; essentially we ask the question, for a given technique, how much does our error reduction decrease when we make our calculation more expensive.
+We can use this as a method for comparing numerical techniques; essentially we ask the question, for a given technique, how much does our error reduction decrease when we make our calculation more expensive. If we double the number of iteration steps and half the time step between those iterations, or perhaps divide each pixel of our grid into four, do we half the error? Perhaps quarter it? The answer differs for each technique.
 
-Let's do this for the forward Euler method, using our heat-equation temperature as an example; this won't account for position variable truncation error but that's not what we're hoping to improve with RK2 anyway. The central presumption of the forward Euler method for our heat equation is ostensibly what is written above, so we'll move all terms to one side and define this as the Truncation Error (TE). Since if the presumption we use to derive the Euler method is true then the other side of the equation above is zero, we know that the truncation error \emph{should} be zero, and its failure to be zero is error.
+Let's do this for the forward Euler method, using our heat-equation temperature as an example; the way we'll do the calculation won't account for position variable truncation error but that's not what we're hoping to improve with RK2 anyway. The central presumption of the forward Euler method for our heat equation is ostensibly what is written above, so we'll move all terms to one side and define this as the Truncation Error (TE). Since if the presumption we use to derive the Euler method is true then the other side of the equation above is zero, we know that the truncation error \emph{should} be zero, and its failure to be zero is error.
 
 \begin{gather*}
 \text{TE} = \frac{T(x,y,t + \Delta t) - T(x,y,t)}{\Delta t} - \frac{\partial T}{\partial t} \approx 0
@@ -1881,7 +1881,7 @@ Now on the Laplacian term, we won't fully expand it yet but observe that we can 
 & + \frac{\kappa^2 \Delta t}{2} (L \nabla^2 + \nabla^2 L + LL) T 
 \end{align*}
 
-And my favorite step of this forsaken process is now observing that we can actually apply the heat equation on our real differential operators to swap all instances of $\kappa \nabla^2 T$ with time derivatives of $T$. In addition to that, we can apply a presumption of smoothness to swap the ordering of these differential operators. \begin{gather*}
+And my favorite step of this forsaken process is now observing that we can actually apply the heat equation on our real differential operators. That is, since the heat equation asserts $\frac{\partial T}{\partial t} = \kappa \nabla^2 T$, and we assert this to be true of the real $T$ which our $T_\square$ approximates, we can apply that equation here to swap instances of $\kappa \nabla^2 T$ for $\frac{\partial T}{\partial t}$.  In addition to that, we can apply a presumption of smoothness to swap the ordering of these differential operators to make sure every $\kappa \nabla^2$ becomes a time derivative and our $\nabla^2 L$ and $L \nabla^2$ sum. \begin{gather*}
 \kappa \nabla_\square^2 T_\square (x,y,t + \Delta t/2) = \frac{\partial T}{\partial t} + \frac{\Delta t}{2} \frac{\partial^2 T}{\partial t^2} + \frac{\kappa^2 \Delta t}{2} (2 L \nabla^2 + LL) T
 \end{gather*}
 Now we can start applying our subtraction in our truncation error. And in fact, our second time derivative which we got out of our Laplacian term will actually eat the second order term in our time derivative Taylor series. Observe:

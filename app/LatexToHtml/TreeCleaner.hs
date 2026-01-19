@@ -77,24 +77,41 @@ inlineCommands :: [String]
 inlineCommands = ["emph","textbf","texttt"]
 
 charsWhichMayNeedEscape :: [String]
-charsWhichMayNeedEscape = ["#","%","_","&"]
+charsWhichMayNeedEscape = ["#","%","_","&",""]
 
 unescapeChars :: LaTeX -> LaTeX
-unescapeChars thearg = case thearg of
-   TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) (TeXRaw z)) -> if y `elem` charsWhichMayNeedEscape
-      then TeXRaw (x <> (fromString y) <> z)
-      else TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) (TeXRaw z))
-   TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) (TeXSeq (TeXRaw z) again)) -> if y `elem` charsWhichMayNeedEscape
-      then TeXSeq (TeXRaw (x <> (fromString y) <> z)) (unescapeChars again)
-      else TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) (TeXSeq (TeXRaw z) (unescapeChars again)))
-   TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) again) -> if y `elem` charsWhichMayNeedEscape
-      then TeXSeq (TeXRaw (x <> (fromString y))) (unescapeChars again)
-      else TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) (unescapeChars again))
-   TeXSeq (TeXCommS y) (TeXSeq (TeXRaw z) again) -> if y `elem` charsWhichMayNeedEscape
-      then TeXSeq (TeXRaw ((fromString y) <> z)) (unescapeChars again)
-      else TeXSeq (TeXCommS y) (TeXSeq (TeXRaw z) (unescapeChars again))
-   TeXSeq a again -> TeXSeq a (unescapeChars again)
-   xs -> xs
+unescapeChars thearg = let
+   worker :: LaTeX -> (Text, Bool)
+   worker x = case x of
+      TeXRaw y -> (y, True)
+      TeXSeq y z -> (\(a,b) (c,d) -> (a <> c, b && d)) (worker y) (worker z)
+      TeXCommS y -> if y `elem` charsWhichMayNeedEscape then (fromString y, True) else (fromString y, False)
+      _ -> ("", False)
+   in case (worker thearg) of
+      (thetext, True) -> TeXRaw thetext
+      (_, False) -> thearg
+
+-- case thearg of
+--    TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) (TeXRaw z)) -> if y `elem` charsWhichMayNeedEscape
+--       then TeXRaw (x <> (fromString y) <> z)
+--       else TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) (TeXRaw z))
+--    TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) (TeXSeq (TeXRaw z) again)) -> if y `elem` charsWhichMayNeedEscape
+--       then TeXSeq (TeXRaw (x <> (fromString y) <> z)) (unescapeChars again)
+--       else TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) (TeXSeq (TeXRaw z) (unescapeChars again)))
+--    TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) again) -> if y `elem` charsWhichMayNeedEscape
+--       then TeXSeq (TeXRaw (x <> (fromString y))) (unescapeChars again)
+--       else TeXSeq (TeXRaw x) (TeXSeq (TeXCommS y) (unescapeChars again))
+--    TeXSeq (TeXRaw x) (TeXCommS y) -> if y `elem` charsWhichMayNeedEscape
+--       then TeXRaw (x <> (fromString y))
+--       else TeXSeq (TeXRaw x) (TeXCommS y)
+--    TeXSeq (TeXCommS y) (TeXSeq (TeXRaw z) again) -> if y `elem` charsWhichMayNeedEscape
+--       then TeXSeq (TeXRaw ((fromString y) <> z)) (unescapeChars again)
+--       else TeXSeq (TeXCommS y) (TeXSeq (TeXRaw z) (unescapeChars again))
+--    TeXSeq (TeXCommS y) (TeXRaw z) -> if y `elem` charsWhichMayNeedEscape
+--       then TeXRaw ((fromString y) <> z)
+--       else TeXSeq (TeXCommS y) (TeXRaw z)
+--    TeXSeq a again -> TeXSeq a (unescapeChars again)
+--    xs -> xs
 
 processOne :: LaTeX -> [Htmllatexinter]
 processOne arg = let
@@ -133,6 +150,7 @@ processOne arg = let
             map processOne (drop 1 $ splitByDelimiterLaTeX (TeXCommS "item") content)
          ("lstlisting", [OptArg (TeXRaw "language=Rust")]) -> Right $ ICodeBlock "language-rust" $ render content
          ("lstlisting", [OptArg (TeXRaw "language=Haskell")]) -> Right $ ICodeBlock "language-haskell" $ render content
+         ("lstlisting", [OptArg (TeXRaw "language=toml")]) -> Right $ ICodeBlock "language-toml" $ render content
 
          ("gather*", _) -> Right . RawPrint . render $
             TeXMath DoubleDollar $ TeXEnv kind texargs $ applyMathCommands content
@@ -188,7 +206,9 @@ addLineBreaks stuff = let
 inLineTranslation :: Htmllatexinter -> HtmlVers
 inLineTranslation (InLineEffect (TeXComm "emph" [FixArg (TeXRaw content)])) = Emphasize content
 inLineTranslation (InLineEffect (TeXComm "textbf" [FixArg (TeXRaw content)])) = Bold content
-inLineTranslation (InLineEffect (TeXComm "texttt" [FixArg (TeXRaw content)])) = TTtext content
+inLineTranslation (InLineEffect (TeXComm "texttt" [FixArg texcontent])) = case (unescapeChars texcontent) of
+   TeXRaw content -> TTtext content
+   _ -> RawText $ render (TeXComm "texttt" [FixArg texcontent])
 inLineTranslation (InLineEffect (TeXMath sign content)) = RawText . render $ TeXMath sign content
 inLineTranslation (InLineEffect otherwise) = RawText . render $ otherwise -- Just displays invalid commands so we can see
 inLineTranslation (Prose xs) = RawText xs
