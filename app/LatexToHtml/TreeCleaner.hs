@@ -71,6 +71,7 @@ data Htmllatexinter =
    |  ILink Text [Htmllatexinter]
    |  IRefLink String [Htmllatexinter]
    |  ICodeBlock String Text
+   |  IJsEmbed String
    deriving (Eq, Show)
 
 inlineCommands :: [String]
@@ -139,6 +140,7 @@ processOne arg = let
       TeXSeq (TeXRaw "\"") $ attachRightMostLaTeX dquotearg $ TeXRaw"\""
    subprocess (TeXComm "squote" [FixArg dquotearg]) = subprocess $
       TeXSeq (TeXRaw "'") $ attachRightMostLaTeX dquotearg $ TeXRaw"'"
+   subprocess (TeXComm "embedfile" [FixArg (TeXRaw thefile)]) = Right . IJsEmbed . fromText $ thefile
    subprocess (TeXEnv kind texargs content) = let
       fallbackcase = Right . RawPrint $ render (TeXEnv kind texargs content) -- This is under the assumption that it is a math env
       in case (kind, texargs) of
@@ -229,6 +231,7 @@ processTwo ((Section mlabel content):xs) = Subheading mlabel (map inLineTranslat
 processTwo ((SubSection mlabel content):xs) = Subsubheading mlabel (map inLineTranslation content) : processTwo xs
 processTwo ((IFigure location content):xs) = Figure location (processTwo content) : processTwo xs
 processTwo ((ICodeBlock lang content):xs) = CodeBlock lang content : processTwo xs
+processTwo ((IJsEmbed thefile):xs) = JsEmbed thefile : processTwo xs
 -- processTwo ((IReference reference):xs) = ReferenceNum reference : processTwo xs
 processTwo ((List kind margs items):xs) = case kind of
    "itemize" -> Itemize (map (ListItem . processTwo) items) : processTwo xs

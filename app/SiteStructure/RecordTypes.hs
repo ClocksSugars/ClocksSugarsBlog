@@ -19,10 +19,22 @@ import GHC.Generics
 import Data.Aeson
 
 import Data.Text (Text)
+import Text.Blaze.Html5 (Html)
 
 ---- Due to the Duplicate Records Field pragma misbehaving
 --    when record types across different files share names,
 --    we're gonna try moving them here
+
+data PageConstructInfo = PageConstructInfo {
+   whereCSS :: String,
+   pagetitle :: String,
+   pageh1 :: Text,
+   undertitletext :: Text,
+   pageh2 :: Text,
+   pageaddresslinks :: Html,
+
+   pageContent :: Html
+}
 
 data IndexedSection = IndexedSection {
    address :: String,

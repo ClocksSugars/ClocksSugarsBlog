@@ -1,0 +1,53 @@
+<p>
+   <b>total energy: <span id="total_energy_goes_here">0</span></b><br />
+   <b>time: <span id="total_time_goes_here">0</span></b>
+</p>
+<p>
+   min_T: <input type="number", id="min_T", value="0.0" required /> (how cold is max blue)
+</p>
+<p>
+   max_T: <input type="number", id="max_T", value="400.0" required /> (how hot is max red)
+</p>
+<p>
+   $\kappa$: <input type="number", id="kappa", value="1.0" required />
+</p>
+<p>
+   $\Delta t$: <input type="number", id="delta_t", value="1.9073486328125e-06" required />
+</p>
+<p>
+   <button type="button" id="auto_delta_t"> Auto $\Delta t$ from $\kappa$ & $\Delta x$ / $\Delta y$ </button> with safety factor: <input type="number", id="safety_factor", value="0.5", style="width:5em" required /> (if greater than 1 expect numerical instability)
+</p>
+<p>
+   total timesteps: <input type="number", id="max_N", min="1", step="1", value="524288" required />
+</p>
+<p>
+   <button type="button" id="auto_max_N"> auto timesteps </button> from max time <input type="number", id="max_time", value="1.0", style="width:5em" required /> & $\Delta t$
+</p>
+<p>
+   timesteps per frame: <input type="number", id="N_add", min="1", step="1", value="100" required /> (do NOT make this too big)
+</p>
+<p>
+   <button type="button" id="update_vals"> Send Values to GPU </button>
+   <span style="padding:2em" />
+   <button type="button" id="compute"> Run Compute </button>
+   <span style="padding:2em" />
+   <button type="button" id="break"> Stop Compute </button>
+</p>
+<p>
+   $\Delta x$ <input type="number", id="delta_x", value="0.00390625" style="width:8em" required /> and $\Delta y$ <input type="number", id="delta_y", value="0.00390625" style="width:8em" required /> simulates a <input type="number", id="width_val", min="1", step="1" value="256" style="width:4em" required />x<input type="number", id="height_val", min="1", step="1" value="256" style="width:4em" required /> grid <br /> currently a <span id="current_grid_shape">256x256</span> grid
+</p>
+<p>
+   Import Initial Conditions and $\Delta x$/$\Delta y$ from .CSV file <input type="file" id="take_in_csv" accept=".csv"/> <br /> and <button type="button" id="send_csv_to_gpu">Reinitialize Sim With Condition</button> (Requires CSV delimter is comma )
+</p>
+<p>
+   <button type="button" id="send_xy"> Reinitialize Sim with $\Delta x$ and $\Delta y$ </button> With default Initial conditions
+</p>
+<p>
+   <b id="message_receiver">messages from the program will appear here </b>
+</p>
+<p>
+   Make sure when using auto buttons for generating parameters that you also click "Send Values to GPU" when you are done.
+</p>
+<p>
+   <button type="button" id="over_error_threshhold">Click Here to go 1/1000th over the Instability Threshhold</button> you really should click this at least once and then click run
+</p>

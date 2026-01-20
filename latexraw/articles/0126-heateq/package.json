@@ -1,0 +1,15 @@
+{
+  "name": "pet_webgpusolver",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "pet_webgpusolver_bg.wasm",
+    "pet_webgpusolver.js",
+    "pet_webgpusolver.d.ts"
+  ],
+  "main": "pet_webgpusolver.js",
+  "types": "pet_webgpusolver.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

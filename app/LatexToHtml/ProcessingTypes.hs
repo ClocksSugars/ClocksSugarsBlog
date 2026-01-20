@@ -24,5 +24,6 @@ data HtmlVers =
    |  HLink Text [HtmlVers]
    |  HRefLink String [HtmlVers]
    |  CodeBlock String Text
+   |  JsEmbed String
    deriving ( Show )
 --   |  Env Text [HtmlVers]

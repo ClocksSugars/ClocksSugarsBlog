@@ -109,7 +109,7 @@ appliunistruct = WrittenWorkBook {
             SubChapter {
                name = "proptypes",
                title = "Propositional Logic: A Programming Inspired Approach",
-               flags = [],
+               flags = ["LoadHighlightJs"],
                description = "(28 PDF Pages) An introduction to dependent type theory and a basic discussion of proofs-as-programs, illustrating the reasoning style of propositional logic in a programmatic way.",
                depends = []
                },
@@ -165,12 +165,19 @@ blogArticles = AllMyArticles [
    SubChapter {
       name = "0126-heateq",
       title = "Solving the Heat Equation in Rust WASM with WebGPU (Explicit FTCS RK2) + Numerical Analysis",
-      flags = ["IndexTopOfPage"],
+      flags = ["LoadHighlightJs","IndexTopOfPage"],
       description = "Detailing my experience and lessons-learned in writing a rust heat equation solver in WGPU to run on a browser, with a truncation error and fourier stability analysis derivation of the explicit RK2 FTCS method for the heat equation. Written in a pedagogical tone so it can be used as a tutorial.",
       depends = [
          "heatflux.svg",
          "wiki_forward_Euler_method.svg",
-         "wiki_Hsl-rgb_models.svg"
+         "wiki_Hsl-rgb_models.svg",
+         "loader1.js",
+         "loader2.html",
+         "pet_webgpusolver.d.ts",
+         "pet_webgpusolver.js",
+         "pet_webgpusolver_bg.wasm",
+         "pet_webgpusolver_bg.wasm.d.ts",
+         "package.json"
          ]
       }
    ]

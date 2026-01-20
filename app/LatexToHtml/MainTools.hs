@@ -158,7 +158,16 @@ processThree pagename theaddress content indexstate = let
       Enumerate listkind xs -> passFirst (ol ! A.type_ (fromString $ fromText listkind)) $ repeatCase xs propind
       -- TODO MAKE THE OL TYPE MORE ROBUST
       Paragraph xs -> passFirst p $ repeatCase xs propind
-      CodeBlock language thecode -> (pre $ code ! class_ (fromString language) $ toHtml thecode, propind)
+      CodeBlock language thecode -> (
+         pre $ code ! class_ (fromString language) $ toHtml thecode,
+         propind
+         )
+      JsEmbed thefile -> (do
+         H.div ! A.id (fromString thefile <> "_give_content") $ Empty ()
+         script ! A.type_ "module" ! src (fromString $ "./" ++ thefile ++ ".js") ! defer "" $ Empty()
+         ,
+         propind
+         )
 
       HRefLink reflabel tx -> let
          droppedBoxTypeV  = drop 4 reflabel
