@@ -12,6 +12,8 @@
 \usepackage{amsmath}
 \begin{document}
 
+\embedfile{heateq_loader}
+
 In the modern computing landscape, it has become common knowledge that many compute-heavy operations should be run on GPUs. This of course extends to attempts to do numerical modelling of physical systems, one of the great industry applications of a mathematics education. And in the course of that industry application, it will often become necessary to deploy these models, and the computational tools to simulate them, to consumer devices or, heaven forbid, non-x86 devices.
 
 To that end, a friend provided me with an example problem to build an mac app in swift that could solve the heat equation on apple silicon. The heat equation is an especially simple differential equation, but if the math is the easy part here then we are free to focus on any software and hardware difficulties. Alas I do not have a macbook at the moment. In the spirit of the problem however, I figured the closest thing I could do to implementing it in swift is implementing it in rust, a language I am told is quite similar. And if I could not make a solver that ran on apple silicon, I would instead build one using WebGPU that would run on \emph{everything}*.
@@ -1580,8 +1582,8 @@ together with my lamentation that this solution implies the time evolution of $T
 So how are we to know when our timestep is small enough? Is there a way to show that the timestep is small enough that only enough time passes for pixels to meaningfully spread heat to only their neighbors? The solution comes to us through history; we must remember that fourier analysis is famed early on for its contributions to the study of the heat equation, and so our method of attack will be to study our solutions $T(x,y,t)$ in terms of a wave basis of functions $T(x,y,t) = E(t) e^{i k_x x + i k_y y}$, composed of a magnitude term $E(t)$ and a complex wave. We're using a complex wave but that doesn't mean we're necessarily thinking about some notion of complex temperature, just that we're decomposing our functions that way, with $k_x$ and $k_y$ standing for the frequency of the wave in different axes. Since the heat equation is linear, any solution of this form will have a corresponding $E(t) e^{-ik_x x - i k_y y}$ solution which will add to make $E(t) \cos(k_x x + k_y y)$ for example, and we can just require that we only consider real solutions of $T$ after our analysis is done.
 
 Let's try this for the heat equation in two dimensions without RK2 applied. The initial assumption is \begin{align*}
-\frac{T(x,y,t + \Delta t) - T(x,y,t) }{\Delta t} =& \kappa \frac{T(x+\Delta x,y,t) - 2 T(x,y,t) + T(x - \Delta x,y,t)}{\Delta x^2} \\
-&+ \kappa \frac{T(x,y + \Delta y,t) - 2 T(x,y,t) + T(x,y - \Delta y,t)}{\Delta y^2} 
+\frac{T(x,y,t + \Delta t) - T(x,y,t) }{\Delta t} =& \kappa \textstyle{\frac{T(x+\Delta x,y,t) - 2 T(x,y,t) + T(x - \Delta x,y,t)}{\Delta x^2}} \\
+&+ \textstyle{\kappa \frac{T(x,y + \Delta y,t) - 2 T(x,y,t) + T(x,y - \Delta y,t)}{\Delta y^2} }
 \end{align*}
 and we'll now divide both sides by $T(x,y,t)$, assuming the complex plane wave solution. This is why we wanted a basis function of that form, because dividing complex waves by each other allow you to subtract the phase arguments. This will amount to a clever trick that creates a bound for us. \begin{align*}
 \frac{\frac{T(x,y,t + \Delta t)}{T(x,y,t)} - \frac{T(x,y,t)}{T(x,y,t)} }{\Delta t} =& \kappa \frac{\frac{T(x+\Delta x,y,t)}{T(x,y,t)} - 2 \frac{T(x,y,t)}{T(x,y,t)} + \frac{T(x - \Delta x,y,t)}{T(x,y,t)}}{\Delta x^2} \\
@@ -1663,7 +1665,7 @@ Now we repeat this for the cross term. \begin{align*}
 	+ e^{i k_x \Delta x - i k_y \Delta y} & -2 e^{- i k_y \Delta y} & +e^{-i k_x \Delta x - i k_y \Delta y}\\
 \end{pmatrix}
 \end{align*}
-Here we've written the terms in a matrix but this is purely so we can stack them better. The pairings we'll exploit to get our $-4 \sin^2$ relation are the pairings across the center of this 3x3 set of terms. For the two diagonal pairings we'll have to subtract two each, which will make our constant term $8$, just enough for our horizontal and vertical pairings. \begin{align*}
+Here we've written the terms in a matrix but this is purely so we can stack them better. The pairings we'll exploit to get our $-4 \sin^2$ relation are the pairings across the center of this 3x3 set of terms, and they'll need the corresponding constants $-2$ for each $-4 \sin^2$. For the two diagonal pairings we'll have to subtract two each, so adding a corresponding four to our constant term in the center to cancel that $-4$ we need will make it eight, just enough for our horizontal and vertical pairings. \begin{align*}
 \frac{1}{T^{i,j}_k} \frac{\delta^2}{\delta x^2} \frac{\delta^2 T^{i,j}_k}{\delta y^2} &= \frac{1}{\Delta x^2 \Delta y^2} \begin{pmatrix}
 	-4 \sin^2(k_x \Delta x/2 + k_y \Delta y/2) \\
 	-4 \sin^2(k_x \Delta x/2 - k_y \Delta y/2) \\
@@ -1737,7 +1739,7 @@ Notice here we also zero out sine squared terms with arguments that are the sums
 We'll set $A = \kappa \Delta t$, $B = 1/\Delta x^2$ and $C = 1/\Delta y^2$ now and simplify this relation to the following: \begin{gather*}
 2 \ge 4AB + 4AC - 8 A^2B^2 - 8 A^2 C^2 -16 A^2 B C \ge 0.
 \end{gather*}
-If we want to get a bound with $\Delta t$ on one side of this, we'll need to solve this as a quadratic in $A$. We can apply the quadratic equation on both inequalities that form this transitive chain, but if we do this for the $2 \ge $ side we get complex solutions; in fact this is because the $2 \ge$ inequality is trivially satisfied. Unlike in the forward Euler stability analysis, our terms that are quadratic in $A$ can now violate the $\ge 0$ condition under some circumstances when our $\sin^2$ terms are non-zero (i.e. in the case where we've maximised the $\sin^2$ terms). So studying that inequality, we must solve the quadratic equation to find the valid bounds on $\kappa \Delta t$. \begin{gather*}
+If we want to get a bound with $\Delta t$ on one side of this, we'll need to solve this as a quadratic in $A$. We could apply the quadratic equation on both inequalities that form this transitive chain, but if we do this for the $2 \ge $ side we get complex solutions; in fact this is because the $2 \ge$ inequality is unconditionally satisfied. Unlike in the forward Euler stability analysis, our terms that are quadratic in $A$, since they are negative, can now violate the $\ge 0$ condition when our $\sin^2$ terms are non-zero (i.e. in the case where we've maximised the $\sin^2$ terms). So studying that inequality, we must solve the quadratic equation to find the valid bounds on $\kappa \Delta t$. \begin{gather*}
 A^2 \left( -8 B^2 -8C^2 -16 BC \right) + A(4B + 4C) \ge 0 \\
 A \Big( A \left( -8 B^2 -8 C^2 -16 BC \right) + 4B + 4C \Big) \ge 0
 \end{gather*}
