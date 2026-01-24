@@ -61,3 +61,43 @@ articlesFromManifest thearticles refstate = let
       writeFile "public/articles/index.html" $
          renderHtml contentstablepage
       return $ Just refs
+
+parsePreface :: RefIndexState -> IO (Maybe RefIndexState)
+parsePreface refinds = let
+   addressWeUse = ["preface","appliuni"]
+   theprogram :: RefIndexState -> IO (Maybe RefIndexState)
+   theprogram refinds = let
+      resetAllButReferences = resetNoneMapInd refinds
+      parseSuccessCase :: LaTeX -> IO RefIndexState
+      parseSuccessCase doc = do
+         let (thepagehtml,newrefs,logs) = writePage
+               subchapter.name
+               (folderPathRender docaddress)
+               subchapter.flags
+               (extractDocument doc)
+               resetAllButReferences
+         let thepage = renderHtml $ defaultPageHTML $ PageConstructInfo
+               ((++ "../../styles.css") $ if isIndexStyle then "../" else "")
+               "Application Unification"
+               "Application Unification"
+               tagline
+               "Preface"
+               (addressListHtml addressWeUse)
+               []
+               thepagehtml
+         writeFileMakePath (docaddress ++ ["public"]) ".html" thepage
+         writeFileMakePath (docaddress ++ ["logs"]) "0.txt" (logs !! 0)
+         writeFile ("logs/" <> folderPathRender docaddress <> "1.txt") (logs !! 1)
+         writeFile ("logs/" <> folderPathRender docaddress <> "2.txt") (logs !! 2)
+         copyassets subchapter.depends
+         putStrLn $ "Success on " ++ subchapter.name
+         return newrefs
+      in do
+         xs <- readFileTex ("latexraw/appliuni_head.tex")
+         case (parseLaTeX xs) of
+            Left theerror -> do
+               putStrLn ("Failure on preface")
+               print theerror
+               return Nothing
+            Right doc -> Just <$> parseSuccessCase doc
+   in (theprogram, theindex)

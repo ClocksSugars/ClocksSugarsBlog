@@ -72,21 +72,19 @@ parseSubChapter address subchapter isIndexStyle pagetitle pageh1 tagline = let
       parseSuccessCase :: LaTeX -> IO RefIndexState
       parseSuccessCase doc = do
          let (thepagehtml,newrefs,logs) = writePage
-               -- subchapter.title
                subchapter.name
-               -- (addressListHtml docaddress)
                (folderPathRender docaddress)
                subchapter.flags
                (extractDocument doc)
                resetAllButReferences
-         --let thepage = renderHtml $ subchapterPageHtml subchapter.title (addressListHtml docaddress) thepagehtml
-         let thepage = renderHtml $ defaultPageHTML
+         let thepage = renderHtml $ defaultPageHTML $ PageConstructInfo
                ((++ "../../styles.css") $ if isIndexStyle then "../" else "")
                pagetitle
                pageh1
-               "A Serialized Online Textbook by ClocksSugars"
+               tagline
                subchapter.title
                (addressListHtml (subchapter.name : address))
+               subchapter.flags
                thepagehtml
          writeFileMakePath (docaddress ++ ["public"]) ".html" thepage
          writeFileMakePath (docaddress ++ ["logs"]) "0.txt" (logs !! 0)
@@ -140,6 +138,9 @@ parseChapter address chapter = let
       )
    (endprogram, listofindexsections) = sectionWorker chapter.sections
    in (endprogram, theindex listofindexsections)
+
+
+
 
 parseBook :: WrittenWorkBook ->
    (RefIndexState -> IO (Maybe RefIndexState), ChapterIndex)

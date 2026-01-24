@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{- HLINT ignore "Use when" "Use null" -}
 module Main where
 
 import System.IO
@@ -28,19 +29,31 @@ main = do
    commandlineargs <- getArgs
    --putStrLn $ "Command line args were: " ++ show commandlineargs
    if "-h" `elem` commandlineargs || commandlineargs == [] then
-      putStrLn "-h for help, -e to write default json, -m to make site from json file, -l to make latex for pdf. -e and -m or -l together always does -e first."
+      putStrLn "-h for help\n -eb to write default json for book\n -ea to write default json for articles\n -e to write both json files\n -m to make site from json file\n -mb to make just book part of site from json file\n -l to make latex for pdf\n\n -e and -m or -l together always does -e first."
       else return ()
 
-   if "-e" `elem` commandlineargs then
+   if "-e" `elem` commandlineargs || ("-ea" `elem` commandlineargs && "-eb" `elem` commandlineargs) then
       do
          makeAppliUniManifestFromFile
          makeArticleManifestFromFile
          putStrLn "wrote manifest jsons"
-      else return ()
+   else if "-eb" `elem` commandlineargs then do
+      makeAppliUniManifestFromFile
+      putStrLn "wrote appliuni manifest json"
+   else if "-ea" `elem` commandlineargs then do
+      makeArticleManifestFromFile
+      putStrLn "wrote articles manifest json"
+   else return ()
 
    if "-m" `elem` commandlineargs then
       makeSite
-      else return ()
+   else if "-mb" `elem` commandlineargs then do
+      _ <- getWithManifest $ \manifest -> do
+         refsIfSuccess <- webBookFromManifest manifest blankIndex
+         copyAssetDepends assetDepends
+         return refsIfSuccess
+      return ()
+   else return ()
 
    if "-l" `elem` commandlineargs then
       withManifest pdfBookFromManifest

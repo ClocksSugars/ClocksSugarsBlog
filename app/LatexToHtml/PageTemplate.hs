@@ -11,15 +11,17 @@ import Text.Blaze.Html5.Attributes as A
 import Text.Blaze.Internal (MarkupM(Empty))
 
 import SiteStructure.DefaultPage
+import SiteStructure.RecordTypes (PageConstructInfo(..))
 
 subchapterPageHtml :: Text -> Html -> Html -> Html
-subchapterPageHtml pageTitle pageaddress pageContent = defaultPageHTML
+subchapterPageHtml pageTitle pageaddress pageContent = defaultPageHTML $ PageConstructInfo
       "../../styles.css"
       "Application Unification"
       "Application Unification"
       "A Serialized Online Textbook by ClocksSugars"
       pageTitle
       pageaddress
+      []
       pageContent
 
 -- docTypeHtml $ do

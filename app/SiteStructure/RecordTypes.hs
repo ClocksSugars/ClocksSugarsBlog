@@ -12,6 +12,7 @@ module SiteStructure.RecordTypes (
    WrittenWorkBook(..),
    AllMyArticles(..),
    AllMyArticlesIndex(..),
+   PageConstructInfo(..),
    tempappliuni
 ) where
 
@@ -32,7 +33,7 @@ data PageConstructInfo = PageConstructInfo {
    undertitletext :: Text,
    pageh2 :: Text,
    pageaddresslinks :: Html,
-
+   pageflags :: [String],
    pageContent :: Html
 }
 

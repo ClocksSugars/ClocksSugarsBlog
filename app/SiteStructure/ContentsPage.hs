@@ -23,13 +23,14 @@ import Text.Blaze.Internal (MarkupM (Empty))
 --    pages and toggleable descriptions
 
 makeChapterIndexPage :: ChapterIndex -> Html -> Html
-makeChapterIndexPage chapterindex pageaddress = defaultPageHTML
+makeChapterIndexPage chapterindex pageaddress = defaultPageHTML $  PageConstructInfo
       "../styles.css"
       "Application Unification"
       "Application Unification"
       "A Serialized Online Textbook by ClocksSugars"
       "Table of Contents"
       pageaddress
+      []
       (makeChapterIndex chapterindex)
 
 makeChapterIndex :: ChapterIndex -> Html
@@ -46,16 +47,19 @@ makeChapterIndex chapterindex = let
         toHtml x.title -- if this were a link, nowhere to point to yet
         H.p $ toHtml x.description -- make this toggleable later
         ul $ foldr (>>) (Empty ()) (secsWorker x.sections)
-   in ol $ foldr (>>) (Empty ()) (chapWorker chapterindex.chapters)
+   in ol $ foldr (>>) (
+      H.a ! href "./preface.html" $ "Preface"
+   ) (chapWorker chapterindex.chapters)
 
 makeArticlesIndexPage :: AllMyArticlesIndex -> Html -> Html
-makeArticlesIndexPage articlesindex pageaddress = defaultPageHTML
+makeArticlesIndexPage articlesindex pageaddress = defaultPageHTML $ PageConstructInfo
       "../styles.css"
       "ClocksSugars' Blog"
       "ClocksSugars' Blog"
       "My Blog and The home of Application Unification"
       "Table of Contents"
       pageaddress
+      []
       (makeArticlesIndex articlesindex)
 
 makeArticlesIndex :: AllMyArticlesIndex -> Html

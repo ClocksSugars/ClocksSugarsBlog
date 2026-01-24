@@ -1,0 +1,35 @@
+
+\documentclass[11pt]{article}
+    \title{\textbf{Default Doc}}
+
+    \date{\the\day/\the\month/\the\year}
+
+\input{pdf.tex}
+\input{webmacros.tex}
+\input{amsthmstuff.tex}
+
+\usepackage{amsmath}
+\begin{document}
+
+Since this text is serialized, it is of course likely at any point that topics that I intend to cover which may be of interest to readers are not yet written about. In the interests of forecasting whether this text will be for you in the near future, the following is a loose plan of unwritten chapters and sections which are planned.
+
+\begin{itemize}
+\item Anatomy of $\mathbb{R}^n$: A Brief Introduction to Real Analysis \begin{itemize}
+	\item Following our discussion of limits, we proceed to construct basic versions of calculus operations, demonstrating both how effective our theory of limits is at simplifying proofs, and some early inklings that the derivative and integral are much more sophisticated than we may realise and made simple only by the fact we use them in $\reals$.
+	\item Wrapping our discussion of limits in $\reals$ with a bow, we cover series limits and limits of sequences of functions.
+	\item We begin the abstracting of already described concepts such as open and closed sets and intervals to \emph{metric spaces}, giving their multidimensional versions. It will become clear that most of our constructions around limits abstract immediately to higher dimensions.
+	\item This will also be an opportune time to discuss point-set topology, since our metric spaces also define a \emph{choice} about our notions of closeness, and how that defines the limit. In preparation for what is to come, we also introduce the idea of a topological manifold as a corresponding object to the quotient topology.
+	\item Our abstraction of a notion of a space continues to elementary measure theory. We develop the notion of volume measuring functions, or \emph{measures}, and measure spaces. Here we have the opportunity to clear up some common misconceptions about the Lebesgue integral as well as identify similarities between $\sigma$-fields and the field axioms of $\reals$. In the appendix, we explain a little about how measure theory formalizes the theory of probability.
+\end{itemize} 
+\item Chapter 3 will focus on Algebra, culminating in a focus of \dquote{Anatomy of Abstract Spaces}. As I have only outlined a loose plan for these bullet points, they are likely to take up more than one section each, or be reordered.\begin{itemize}
+	\item We begin with a basic discussion of group theory, induced by monoids on alphabets and constructed with generator and relation sets. Our principle goal in this section is to introduce the notion of groups, group homomorphisms, subgroups, normal subgroups, central subgroups, abelian groups, and quotient groups, touching briefly on group actions. An appendix discussing formal languages may also appear here.
+	\item We use our notion of formal groups to begin a discussion of vector spaces. By using the structure of groups as the backbone, we begin a discussion of matrices as explicitly linear operators, the group homomorphisms of vector-spaces-as-groups. This will assist us in constructing notions such as the null space, and the quotient space. In this way we cement linear algebra as a principly \emph{algebraic} discipline. Our discussion will of course not be complete without a study of eigenvalues and eigenvectors.
+	\item We begin with a \emph{very} light discussion of category theory, which we now have some background to discuss as we have seen the categories of sets, groups, and vector spaces. Our principle goal here is to extract the notion of dual spaces, which we use to begin a study of different kinds of tensor algebras, in particular the exterior algebra, and better motivate the matrix determinant.
+	\item We spend a bit of time talking about representations with the interest in separating algebraic constructions from their parameterised counterparts which we may be familiar with as column vectors or matrix linear operators. That is, we are interested in giving character to the idea of a thing which is distinct and has function yet is independent of how we describe it. This will probably also be a good place to continue our discussion of group actions, and consolidate some discussion of matrix groups.
+\end{itemize}
+\item Chapter 4 will focus on concepts that underlie undergraduate applied mathematics, paving the way for our discussion of differential geometry in chapter 5. We continue our discussion of (multivariable) calculus and real analysis, in particular Hilbert spaces, culminating in a proof of Picard-Lindelof, which we springboard off of into a discussion of differential equations. We will also have to take this opportunity to begin a discussion of classical mechanics and perhaps symplectic structure, which will help motivate much of what we do later on in differential geometry and control theory. It is possible in this chapter that we will introduce finite difference methods and finite element methods, depending on whether it seems thematically appropriate at that point, and or discuss stochastic differential equations.
+\item Chapter 5 begins our discussion of differential geometry in earnest. By the point I am writing this I hope to have developed a narration of how the concerns of differential geometry as well as the structure provided by it remain supremely relevant even to the engineer who is only concerned with $\reals^3$. This chapter will draw on all previous chapters, synthesizing an understanding of (co)tangent functors, flows, connections, Lie groups, and may culminate in a proof of symplectic reduction theorem. We may also be forced to briefly return to topology for a description of cohomology, from which the nature of the generalized stoke's theorem will become obvious to us (putting the chapter at risk of being split into two). This chapter is also likely to be written around the conceit that differential geomtry is as much a study of differential equations as it is of geometry, identifying the two discussions with one another and advocating for the use of differential forms in multivariable calculus.
+\item Chapter 6 will be where dragons I am yet to fully conquer lurk. I cannot say for certain what it will be about, but possible options are control theory, rewrite systems, numerical methods, or (dare I jinx myself) fluid dynamics. In a far less ambitious direction I could discuss quantum mechanics, but the danger then is that I have to go learn about quantum field theory properly this time.
+\end{itemize}
+
+\end{document}
