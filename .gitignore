@@ -6,3 +6,4 @@ assets/tribackraw.kra
 *.dvi
 *.log
 public/*
+logs/*

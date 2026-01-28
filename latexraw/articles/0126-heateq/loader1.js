@@ -14,7 +14,8 @@ import {
    give_current_width,
    give_current_height,
    init_from_csv_buffer,
-   get_total_energy_in_one
+   get_total_energy_in_one,
+   writeStateAsCSV
 } from "./pet_webgpusolver.js";
 
 function setup_loader1() {
@@ -226,7 +227,7 @@ document.getElementById("activate_sim_button").addEventListener("click", async (
             document.getElementById("width_val").value = width;
             document.getElementById("height_val").value = height;
             document.getElementById("delta_x").value = 1.0 / width;
-            document.getElementById("height_val").value = 1.0 / height;
+            document.getElementById("delta_y").value = 1.0 / height;
          } else {
             showMessage(result);
          };
@@ -253,5 +254,14 @@ document.getElementById("activate_sim_button").addEventListener("click", async (
          document.getElementById("min_T").value,
          document.getElementById("max_T").value,
       )
+   })
+
+   document.getElementById("export_csv").addEventListener("click", async (event) => {
+      const the_data = await writeStateAsCSV();
+      var link = document.createElement('a');
+      link.download = 'heateq_state.csv';
+      var blob = new Blob([the_data], { type: 'text/plain' });
+      link.href = window.URL.createObjectURL(blob);
+      link.click();
    })
 })

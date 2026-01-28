@@ -268,3 +268,28 @@ body {
 }*/
 
 pre {tab-size: 4;}
+
+a.bigbutton {
+  flex: 1;
+  text-decoration: none;
+  outline-color: transparent;
+  text-align: center;
+  line-height: 3;
+  color: black;
+}
+
+a.bigbutton:link,
+a.bigbutton:visited,
+a.bigbutton:focus {
+  background: lightcyan;
+  color: black;
+}
+
+a.bigbutton:hover {
+  background: paleturquoise;
+}
+
+a.bigbutton:active {
+  background: mediumslateblue;
+  color: white;
+}

@@ -137,9 +137,9 @@ processOne arg = let
       _ -> Right . RawPrint . render $ (TeXComm "hyperlink" [FixArg (urlarg), FixArg tx])
    subprocess (TeXComm "hyperref" [OptArg (TeXRaw tref), FixArg tx]) = Right $ IRefLink (fromText tref) $ processOne tx
    subprocess (TeXComm "dquote" [FixArg dquotearg]) = subprocess $
-      TeXSeq (TeXRaw "\"") $ attachRightMostLaTeX dquotearg $ TeXRaw"\""
+      TeXSeq (TeXRaw "\"") $ applyTextCommands $ attachRightMostLaTeX dquotearg $ TeXRaw"\""
    subprocess (TeXComm "squote" [FixArg dquotearg]) = subprocess $
-      TeXSeq (TeXRaw "'") $ attachRightMostLaTeX dquotearg $ TeXRaw"'"
+      TeXSeq (TeXRaw "'") $ applyTextCommands $ attachRightMostLaTeX dquotearg $ TeXRaw"'"
    subprocess (TeXComm "embedfile" [FixArg (TeXRaw thefile)]) = Right . IJsEmbed . fromText $ thefile
    subprocess (TeXEnv kind texargs content) = let
       fallbackcase = Right . RawPrint $ render (TeXEnv kind texargs content) -- This is under the assumption that it is a math env
@@ -206,8 +206,12 @@ addLineBreaks stuff = let
 --
 
 inLineTranslation :: Htmllatexinter -> HtmlVers
-inLineTranslation (InLineEffect (TeXComm "emph" [FixArg (TeXRaw content)])) = Emphasize content
-inLineTranslation (InLineEffect (TeXComm "textbf" [FixArg (TeXRaw content)])) = Bold content
+inLineTranslation (InLineEffect (TeXComm "emph" [FixArg content])) = case flattenTeXText content of
+   Just x -> Emphasize x
+   Nothing -> RawText . render $ TeXComm "emph" [FixArg content]
+inLineTranslation (InLineEffect (TeXComm "textbf" [FixArg content])) = case flattenTeXText content of
+   Just x -> Bold x
+   Nothing -> RawText . render $ TeXComm "textbf" [FixArg content]
 inLineTranslation (InLineEffect (TeXComm "texttt" [FixArg texcontent])) = case (unescapeChars texcontent) of
    TeXRaw content -> TTtext content
    _ -> RawText $ render (TeXComm "texttt" [FixArg texcontent])

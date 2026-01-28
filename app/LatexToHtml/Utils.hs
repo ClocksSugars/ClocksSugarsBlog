@@ -1,5 +1,6 @@
 module LatexToHtml.Utils where
 
+import Data.Text (Text)
 import Text.LaTeX.Base.Syntax
 
 
@@ -7,6 +8,12 @@ flattenTeXTree :: LaTeX -> [LaTeX]
 flattenTeXTree tex = case tex of
    TeXSeq x y -> flattenTeXTree x ++ flattenTeXTree y
    x -> [x]
+
+flattenTeXText :: LaTeX -> Maybe Text
+flattenTeXText tex = case tex of
+   TeXRaw x -> Just x
+   TeXSeq x y -> flattenTeXText x <> flattenTeXText y
+   _ -> Nothing
 
 -- climbs down the tree and attaches something at maximum right-most depth
 attachRightMostLaTeX :: LaTeX -> LaTeX -> LaTeX

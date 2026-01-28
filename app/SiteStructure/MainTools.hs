@@ -8,7 +8,8 @@ module SiteStructure.MainTools (
    makeAppliUniManifestFromFile,
    makeArticleManifestFromFile,
    withManifest,
-   getWithManifest
+   getWithManifest,
+   writeHomePage
 ) where
 
 import System.Directory (copyFile)
@@ -19,27 +20,35 @@ import Text.Blaze.Html.Renderer.String (renderHtml)
 import LatexToHtml.MainTools
 import SiteStructure.AddressManagement
 import SiteStructure.Manifest
-import SiteStructure.RecordTypes (WrittenWorkBook (..), AllMyArticles(..))
+import SiteStructure.RecordTypes (WrittenWorkBook (..), AllMyArticles(..), PageConstructInfo(..))
+import SiteStructure.DefaultPage
 import SiteStructure.WorkHorse
 import SiteStructure.ContentsPage
 
 webBookFromManifest :: WrittenWorkBook -> RefIndexState -> IO (Maybe RefIndexState)
 webBookFromManifest workbook refstate = let
    (contentprogram, chapterindex) = parseBook workbook
-   contentstablepage :: Html
-   contentstablepage = makeChapterIndexPage
-      chapterindex
-      (addressListHtml [workbook.name])
-   demaybe :: (RefIndexState -> IO (Maybe RefIndexState)) -> IO (Maybe RefIndexState)
+   demaybe :: (RefIndexState -> Html -> IO (Maybe RefIndexState)) -> IO (Maybe RefIndexState)
    demaybe x = do
       mfinalrefs <- contentprogram refstate
-      case mfinalrefs of
-         Nothing -> do {putStrLn "Ended in Failure"; return Nothing}
-         Just finalrefs -> x finalrefs
-   in demaybe $ \refs -> do
+      mgetTail <- parseTail
+      case (mfinalrefs, mgetTail) of
+         (Just finalrefs, Just thetail) -> do
+            _ <- parsePreface finalrefs
+            x finalrefs thetail
+         _ -> do {putStrLn "Ended in Failure"; return Nothing}
+   in demaybe $ \refs thetail -> do
       putStrLn "Pages Created Successfully in \"public\" folder"
       writeFile ("public/" <> workbook.name <> "/index.html") $
-         renderHtml contentstablepage
+         renderHtml $ defaultPageHTML $  PageConstructInfo
+               "../styles.css"
+               "Application Unification"
+               "Application Unification"
+               "A Serialized Online Textbook by ClocksSugars"
+               "Table of Contents"
+               (addressListHtml [workbook.name])
+               []
+               (makeChapterIndex chapterindex >> thetail)
       copyFile "styles.css" "public/styles.css"
       return $ Just refs
 
@@ -61,43 +70,3 @@ articlesFromManifest thearticles refstate = let
       writeFile "public/articles/index.html" $
          renderHtml contentstablepage
       return $ Just refs
-
-parsePreface :: RefIndexState -> IO (Maybe RefIndexState)
-parsePreface refinds = let
-   addressWeUse = ["preface","appliuni"]
-   theprogram :: RefIndexState -> IO (Maybe RefIndexState)
-   theprogram refinds = let
-      resetAllButReferences = resetNoneMapInd refinds
-      parseSuccessCase :: LaTeX -> IO RefIndexState
-      parseSuccessCase doc = do
-         let (thepagehtml,newrefs,logs) = writePage
-               subchapter.name
-               (folderPathRender docaddress)
-               subchapter.flags
-               (extractDocument doc)
-               resetAllButReferences
-         let thepage = renderHtml $ defaultPageHTML $ PageConstructInfo
-               ((++ "../../styles.css") $ if isIndexStyle then "../" else "")
-               "Application Unification"
-               "Application Unification"
-               tagline
-               "Preface"
-               (addressListHtml addressWeUse)
-               []
-               thepagehtml
-         writeFileMakePath (docaddress ++ ["public"]) ".html" thepage
-         writeFileMakePath (docaddress ++ ["logs"]) "0.txt" (logs !! 0)
-         writeFile ("logs/" <> folderPathRender docaddress <> "1.txt") (logs !! 1)
-         writeFile ("logs/" <> folderPathRender docaddress <> "2.txt") (logs !! 2)
-         copyassets subchapter.depends
-         putStrLn $ "Success on " ++ subchapter.name
-         return newrefs
-      in do
-         xs <- readFileTex ("latexraw/appliuni_head.tex")
-         case (parseLaTeX xs) of
-            Left theerror -> do
-               putStrLn ("Failure on preface")
-               print theerror
-               return Nothing
-            Right doc -> Just <$> parseSuccessCase doc
-   in (theprogram, theindex)

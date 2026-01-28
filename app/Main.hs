@@ -45,12 +45,14 @@ main = do
       putStrLn "wrote articles manifest json"
    else return ()
 
-   if "-m" `elem` commandlineargs then
+   if "-m" `elem` commandlineargs then do
       makeSite
+      writeHomePage
    else if "-mb" `elem` commandlineargs then do
       _ <- getWithManifest $ \manifest -> do
          refsIfSuccess <- webBookFromManifest manifest blankIndex
          copyAssetDepends assetDepends
+         writeHomePage
          return refsIfSuccess
       return ()
    else return ()

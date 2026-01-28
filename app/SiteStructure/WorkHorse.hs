@@ -15,6 +15,7 @@ import LatexToHtml.MainTools
 import Text.LaTeX.Base (LaTeX, readFileTex)
 import Text.LaTeX.Base.Parser (parseLaTeXWith, ParserConf(..), ParseError)
 import Text.Blaze.Html.Renderer.String (renderHtml)
+import Text.Blaze.Html (Html)
 
 import Data.Text (Text)
 
@@ -56,7 +57,8 @@ parseSubChapter address subchapter isIndexStyle pagetitle pageh1 tagline = let
    addressWeUse = if isIndexStyle then subchapter.name:address else address
    theindex :: IndexedSection
    theindex = IndexedSection
-         ("/" <> folderPathRender docaddress <> ".html")
+         ("/" <> folderPathRender (subchapter.name : address) <>
+            if isIndexStyle then "" else ".html")
          subchapter.title
          subchapter.description
    theprogram :: RefIndexState -> IO (Maybe RefIndexState)
@@ -134,7 +136,7 @@ parseChapter address chapter = let
             Just refout -> do {programtail refout}
       in (
          theprogram, --- We want to be able to make webpages without necessarily documenting them here
-         if "DoNotShowOnIndex" `elem` x.flags then indexedsechead:indexedsectail else indexedsectail
+         if "DoNotShowOnIndex" `elem` x.flags then indexedsectail else indexedsechead:indexedsectail
       )
    (endprogram, listofindexsections) = sectionWorker chapter.sections
    in (endprogram, theindex listofindexsections)
@@ -184,3 +186,62 @@ parseArticles (AllMyArticles thearticles) = let
       in (theprogram , indexedarthead:indexedarttail)
    (endprogram, listofindexchapters) = sectionWorker thearticles
    in (endprogram, AllMyArticlesIndex listofindexchapters)
+
+parsePreface :: RefIndexState -> IO (Maybe RefIndexState)
+parsePreface refinds = let
+   resetAllButReferences = resetNoneMapInd refinds
+   parseSuccessCase :: LaTeX -> IO RefIndexState
+   parseSuccessCase doc = do
+      let (thepagehtml,newrefs,logs) = writePage
+            "preface"
+            (folderPathRender ["preface","appliuni"])
+            []
+            (extractDocument doc)
+            resetAllButReferences
+      let thepage = renderHtml $ defaultPageHTML $ PageConstructInfo
+            "../styles.css"
+            "Application Unification"
+            "Application Unification"
+            "A Serialized Online Textbook by ClocksSugars"
+            "Preface"
+            (addressListHtml ["preface","appliuni"])
+            []
+            thepagehtml
+      writeFileMakePath ["preface","appliuni","public"] ".html" thepage
+      writeFileMakePath ["preface","appliuni","logs"] "0.txt" (logs !! 0)
+      writeFile "logs/appliuni/preface1.txt" (logs !! 1)
+      writeFile "logs/appliuni/preface2.txt" (logs !! 2)
+      putStrLn "Success on preface"
+      return newrefs
+   in do
+      xs <- readFileTex ("latexraw/appliuni/appliuni_head.tex")
+      case (parseLaTeX xs) of
+         Left theerror -> do
+            putStrLn ("Failure on preface")
+            print theerror
+            return Nothing
+         Right doc -> Just <$> parseSuccessCase doc
+
+parseTail :: IO (Maybe Html)
+parseTail = let
+   parseSuccessCase :: LaTeX -> IO Html
+   parseSuccessCase doc = do
+      let (thepagehtml,newrefs,logs) = processPage
+            "preface"
+            ""
+            (extractDocument doc)
+            blankIndex
+      -- writeFileMakePath ["preface","appliuni","public"] ".html" thepage
+      writeFileMakePath ["tail","appliuni","logs"] "0.txt" (logs !! 0)
+      writeFile "logs/appliuni/tail1.txt" (logs !! 1)
+      writeFile "logs/appliuni/tail2.txt" (logs !! 2)
+      putStrLn "Success on preface"
+      return thepagehtml
+   in do
+      xs <- readFileTex ("latexraw/appliuni/appliuni_tail.tex")
+      case (parseLaTeX xs) of
+         Left theerror -> do
+            putStrLn ("Failure on preface")
+            print theerror
+            return Nothing
+         Right doc -> Just <$> parseSuccessCase doc

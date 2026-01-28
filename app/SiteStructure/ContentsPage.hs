@@ -4,7 +4,8 @@
 
 module SiteStructure.ContentsPage (
    makeChapterIndexPage,
-   makeArticlesIndexPage
+   makeArticlesIndexPage,
+   makeChapterIndex
 ) where
 
 import Data.String
@@ -47,9 +48,11 @@ makeChapterIndex chapterindex = let
         toHtml x.title -- if this were a link, nowhere to point to yet
         H.p $ toHtml x.description -- make this toggleable later
         ul $ foldr (>>) (Empty ()) (secsWorker x.sections)
-   in ol $ foldr (>>) (
-      H.a ! href "./preface.html" $ "Preface"
-   ) (chapWorker chapterindex.chapters)
+   in do
+      ol $ foldr (>>)
+         (Empty ())
+         ((H.p $ H.a ! href "./preface.html" $ "Preface") : chapWorker chapterindex.chapters)
+
 
 makeArticlesIndexPage :: AllMyArticlesIndex -> Html -> Html
 makeArticlesIndexPage articlesindex pageaddress = defaultPageHTML $ PageConstructInfo

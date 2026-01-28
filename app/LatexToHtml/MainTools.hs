@@ -17,7 +17,7 @@ module LatexToHtml.MainTools (
    -- HtmlVers,
    writePage,
    subchapterPageHtml,
-
+   processPage
 ) where
 
 import LatexToHtml.ProcessingTypes
@@ -70,6 +70,17 @@ writePage pagename addressliteral pageFlags pagecontents indstate = let
    logs = [inspect0,inspect1,inspect2]
    in (final, newindstate, logs)
 
+
+processPage :: String -> String -> LaTeX -> RefIndexState -> (Html, RefIndexState, [String])
+processPage pagename addressliteral pagecontents indstate = let
+   inspect0 = myShow pagecontents
+   part1 = processOne pagecontents
+   inspect1 = show part1
+   part2 = processTwo part1
+   inspect2 = show part2
+   (part3, newindstate) = processThree pagename addressliteral part2 indstate
+   logs = [inspect0,inspect1,inspect2]
+   in (part3, newindstate, logs)
 
 processLatexToHtml :: String -> String -> LaTeX -> RefIndexState -> (Html, RefIndexState)
 processLatexToHtml pagename pageaddress x = processThree pagename pageaddress $ processOneTwo x
