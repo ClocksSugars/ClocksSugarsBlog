@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
 module LatexToHtml.MainTools (
    -- processLatexToHtml,
    -- processThree,
@@ -116,10 +117,10 @@ pageIndex refinds ourpagename ourpageaddress = let
       in (sectitle, secid, subsubsectionList)
    doSubSec :: (Html, String, Int) -> Html
    doSubSec (subsectitle, subsecid, _) =
-      li $ H.a ! href (fromString $ ourpageaddress <> "#" <> subsecid) $ subsectitle
+      li $ H.a ! href (fromString $ "/" <> ourpageaddress <> "#" <> subsecid) $ subsectitle
    doSec :: (Html, String, [(Html, String, Int)]) -> Html
    doSec (sectitle, secid, itssubsections) = do
-      li $ H.a ! href (fromString $ ourpageaddress <> "#" <> secid) $ sectitle
+      li $ H.a ! href (fromString $ "/" <> ourpageaddress <> "#" <> secid) $ sectitle
       case itssubsections of
          [] -> Empty ()
          x:xs -> ul $ foldl (>>) (doSubSec x) $ Prelude.map doSubSec xs
@@ -208,13 +209,14 @@ processThree pagename theaddress content indexstate = let
             secnumber,
             insert newlabel (processedtitle, pagename, secnumber) (subsectionMap propind),
             newlabel
-         )
+         ),
+            subsubsection = (0, snd propind.subsubsection)
          }
          in (h3 ! A.id (fromString newlabel) $ ((>>) (toHtml $ show secnumber <> ". ") processedtitle) , newind)
 
       Subsubheading mlabel x -> let
          oversecnumber = (\(y,_,_)->y) $ subsection propind
-         secnumber = (1 +) $ fst $ subsubsection propind
+         secnumber = (1 +) $ fst $ propind.subsubsection
          newlabel = case mlabel of
             Just label -> label
             Nothing -> pagename <> "_" <> show oversecnumber <> "_" <> show secnumber
@@ -223,7 +225,7 @@ processThree pagename theaddress content indexstate = let
          itsundernumber = (\(_,_,y)->y) $ findWithDefault (Empty (),"",-1) secitsunder (subsectionMap propind)
          newind = propind { subsubsection = (
             secnumber,
-            insert newlabel (processedtitle, pagename, secitsunder, secnumber) (snd $ subsubsection propind)
+            insert newlabel (processedtitle, pagename, secitsunder, secnumber) (snd $ propind.subsubsection)
          )
          }
          in (h4 ! A.id (fromString newlabel) $ ((>>) (toHtml $ show itsundernumber <> "." <> show secnumber <> " ") processedtitle) , newind)

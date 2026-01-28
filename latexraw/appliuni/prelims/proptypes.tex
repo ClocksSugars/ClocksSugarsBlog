@@ -18,7 +18,7 @@ I myself only discovered the seriousness of this discrepency in my first real an
 
 This \squote{true mathematics} is the programmatic legalese. In mathematics, we care very deeply about strict conditions and labels that tell us with certainty under what circumstances our tools will \emph{always work}. A peer once even said to me that the mathematics was not in symbols, but in all of the words around them.
 
-To that end, we will not spend this chapter discussing mathematics either; recalling the notion that mathematics sits in between logic and physics on an axis of rigor, we will swing all the way to the left and discuss a description of formal logic. In particular we are going to discuss formal logic in the context of type theory, which will allow us draw on programming metaphors which our society's culture has become much more familiar with in recent years.
+To that end, we will not spend this section discussing mathematics either; recalling the notion that mathematics sits in between logic and physics on an axis of rigor, we will swing all the way to the left and discuss a description of formal logic. In particular we are going to discuss formal logic in the context of type theory, which will allow us draw on programming metaphors which our society's culture has become much more familiar with in recent years.
 
 However I must confess that the programming metaphor has a special value to me, and I hope also soon to you. As I was first coming to understand that mathematics was inseparable from its legalese, the pattern of theorems and proofs in particular (and also due in part to my double major in physics), I had a notion that one does not truly understand a proof unless one sees clearly how the steps of the proof intuitively mean that the theorem must be obvious. I now see this as wrong, or at least far too physicist-brained. There was a period in my education when I was very ill, and although feeling like I had lost half my brain, I realised that as long as you are doing pure mathematics, you only need half a brain.
 
@@ -148,7 +148,7 @@ Since currying is so natural to the functional mode of operation, they dispense 
 
 \subsection{Proposition Types and Basic Propositional Logic}
 
-We are now ready to use type theory for its principle purpose in this chapter, bringing home multiple threads we have left open in the previous subsection. First, let us discuss basic logic so we can in some sense define our conceptual targets, what our theory of types must model in order to describe logic.
+We are now ready to use type theory for its principle purpose in this section, bringing home multiple threads we have left open in the previous subsection. First, let us discuss basic logic so we can in some sense define our conceptual targets, what our theory of types must model in order to describe logic.
 
 We have notions of true and false, which we denote $\top$ and $\bot$ respectively, and we have, famously three atomic logical operations we can do with them: $\mathtt{AND}$, $\mathtt{OR}$, and $\mathtt{NOT}$. In many programming languages, these are written $\mathtt{\&\&}$, $\mathtt{||}$ and $\mathtt{!}$, however in formal logic they are written $\wedge$, $\vee$ and $\neg$. Then if we have two propositions $P,Q$ (you can think of these as representing something like \dquote{the ground is wet} or \dquote{I played basketball}) then famously, their rules are: \begin{itemize}
 \item $P \wedge Q = \top$ only if both $P= \top$ \emph{and} $Q = \top$, otherwise $P \wedge Q = \bot$.

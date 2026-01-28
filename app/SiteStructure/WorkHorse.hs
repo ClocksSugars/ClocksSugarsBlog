@@ -75,7 +75,7 @@ parseSubChapter address subchapter isIndexStyle pagetitle pageh1 tagline = let
       parseSuccessCase doc = do
          let (thepagehtml,newrefs,logs) = writePage
                subchapter.name
-               (folderPathRender docaddress)
+               (folderPathRender $ if isIndexStyle then addressWeUse else docaddress)
                subchapter.flags
                (extractDocument doc)
                resetAllButReferences
