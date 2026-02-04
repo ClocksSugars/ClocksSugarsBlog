@@ -114,7 +114,7 @@ applyTextCommands = let
          in case ifthing of
             Just thing -> thing
             Nothing -> TeXCommS x
-      TeXMath kind x -> TeXRaw $ render $ TeXMath kind $ worker x
+      TeXMath kind x -> TeXRaw $ render $ TeXMath kind $ applyMathCommands x
       TeXLineBreak x y -> TeXLineBreak x y
       TeXBraces x -> TeXBraces $ worker x
       TeXComment x -> TeXComment x
