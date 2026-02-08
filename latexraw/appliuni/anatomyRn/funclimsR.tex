@@ -17,7 +17,68 @@ There are many more things that it will be appropriate to study about limits in 
 
 In that way at least, this section may be considered the apex of our discussion of limits. Here we move from limits on sequences, which we had previously discussed as standing in for \squote{paths}, and we move to studying limits on the paths themselves. Or rather, we will finally study limits on functions. These are exactly the limits that will make possible almost all discussion of derivatives in various forms of calculus, and many of our notions of integrals.
 
-We require a reframing though. When we studied sequences, we studied a path that is counted, and we considered a notion of infinity in \dquote{what happens to this sequence when we count on forever?} i.e. we put our infinity, the infinity in $\lim_{n\to\infty}$ at the end of the counting numbers. What a notion of limits on \emph{functions} will allow us to do is to study what happens when a function goes \emph{infinitely close} to a point. It will become possible to ask in some cases \dquote{what is a function $f$ at point $p$ for which $p$ is not a valid input?} 
+We require a reframing though. When we studied sequences, we studied a path that is counted (i.e. a path that takes steps $x_1$, $x_2$, etc.), and we considered a notion of infinity in \dquote{what happens to this sequence when we count on forever?} i.e. we put our infinity, the infinity in $\lim_{n\to\infty}$ at the end of the counting numbers. What a notion of limits on \emph{functions} will allow us to do is to study what happens when a function goes \emph{infinitely close} to a point. It will become possible to ask in some cases \dquote{what is a function $f$ at point $p$ for which $p$ is not a valid input?}
+
+In another manner of thinking, this is where we conclude part of our discussion about infinity. I went to great lengths to emphasize previously that there is no way for infinity or infinitessimals to be real numbers, and yet it is obviously possible to define a notion of orderings of infinity or infinitessimals. That is, we can simply \squote{say} that there is some object $\infty$ and it has the property that for all $x\in \reals$ (or $n \in \nats$ for that matter) it satisfies $x < \infty$; this is valid, so long as we remember that it is \emph{not} a real number, and so it also cannot participate in real number arithmetic (there is no intrinsic definition for $a + \infty$ for instance, but we can choose $a + \infty = \infty$ if it is appropriate in context).
+
+When one insists on asking \dquote{what is the largest natural number} such an object is immediately called upon; the infinity is nonsensical within the context of the natural numbers, but if we insist on pointing to it as a thing that exists, we merely say $\infty \notin \nats$ and thus expect that it does not obey the other properties of natural numbers. What is interesting about real numbers is that we are similarly faced with this problem when we discuss open sets. An open interval $(a,b)$ also has the problem that you cannot say it has a largest element. You might try to gesture at $b$, but by definition $b \notin (a,b)$, since open intervals exclude their endpoints. Of course, we have the can take the supremum, $\sup (a,b) = b$, but in doing so you escape the set you are speaking about, and moreover we cannot use the supremum on unbounded sets such as the whole $\nats$ or $\reals$ themselves. But this tells us that the excluded endpoints of an open set actually have a lot in common with the excluded infinities of number system sets, different only in that the number excluded is in fact real and can be examined arithmetically.
+
+So following our discussion from the previous section, what limits of functions will allow us to do is to find the \hyperref[pro:ClosedSetsClosedUnderLimitsR]{limit points} of sets which are the images of functions (outputs), corresponding to limit points of the function's domain (input set).
+
+\subsection{Limits of Functions Definitions}
+
+It is typical to begin a discussion of limits of functions with what is commonly referred to as the \squote{epsilon-delta} limit, which we will get to shortly. However, since we spent the last section coming to an understanding that limits are intrinsically topological, i.e. intrinsically about whether we can find an open set with some special property, I think we'll get some value out of leveraging this understanding and installing it as the primary intuition underlying the limit.
+
+\begin{label definition}[Topological Characterization of Trivial Function Limits]{TrivTopologicalFunctionLimitR}
+Let $f\colon \reals \to \reals$ be a function. We say that $f$ has limit $L \in \reals$ at point $p\in \reals$ if for any open set $V \subset \reals$ around $L \in V$, there exists an open set $U \subset \reals$ around $p \in U$ such that \begin{gather*}
+f(U) := \{f(u) \mid u \in U\} \subseteq V
+\end{gather*}
+i.e. the \emph{image} (the output set) of $U$ is contained in $V$. If this is the case then we write \begin{gather*}
+\lim_{x \to p} f(x) = L
+\end{gather*}
+and say that $f$ converges to $L$ at $p$.
+\end{label definition}
+
+This definition is not very useful practically, as implied in its title as a characterization of \emph{trivial} function limits. That is because we have defined it to work only for functions which take any number as an input, but we have done so because it will be easier here to see what the intuition should be.
+
+Imagine our previous limits in the following way: we say that a sequence converges if for any open set $V \subset \reals$ there exists a natural number open interval $(N,\infty)_\nats$ (this is nonsensical since intervals do not exist in countable sets, but lets imagine for a moment that $(N,\infty)_\nats$ is just the natural numbers component of the real interval $(N,\infty)_\nats := (N,\infty)_\reals \cap \nats$) such that the sequence $(a_n)_{n\in \nats}$ as a function $a\colon \nats \to \reals$ satisfies $a\big((N,\infty)_\nats\big) \subset V \subset \reals$. This is exactly our topological sequence limit, that every counting number $n$ after some $N$ corresponds to a sequence element $a_n$ in our $V$. Using this analogy, the function limit is, morally, exactly the same. All we have changed is the domain $\nats$ of $a\colon \nats \to \reals$ to $\reals$ for $f\colon \reals \to \reals$, and moved the point of convergence from infinity to $p\in \reals$.
+
+The core of the limit is simply that for any (sufficiently small) open set around a point we want to converge around, we need only guarentee that a (sufficiently smaller) open set exists in the set of inputs ($\nats$ for sequences, $\reals$ for functions) which has its image in the open set around our convergence point. Of course, infinity is not actually \emph{in} the natural numbers, but we can in a sense speak of an \squote{open set around $\infty$} by speaking of all $n > N$, and a similar thing applies for functions, a consideration that is not present in this trivial function limit definition.
+
+The simplest way to speak of what we want is this: imagine a function $f(x) = (x-1)/(x-1)$. Immediately one observes this simplifies to $x$, but if we are to treat the function as seriously defined this way, we must acknowledge that even though it \emph{should} simplify to $x$, it is nonetheless not defined at $x=1$ since we have a divide by zero at $x=1$. The function is then equivalent to \begin{gather*}
+f\colon (-\infty,1) \cup (1,\infty) \to \reals, \\
+f(x) = x
+\end{gather*}
+where it is equal to $x$ but only if we exclude the point where it is not defined. We want our limit to never explicitly ask what $f(1)$ is, but still to use the surrounding information that $f(x)$ is \squote{$x$ shaped} to conclude $\lim_{x \to 1} f(x) = 1$. Our resulting definition is just as the above trivial definition, but with various obfuscating qualifiers to ensure we never ask for $f(p)$ when $p$ is not in $f$'s domain.
+
+\begin{label definition}[Topological Characterization of Function Limits]{TopologicalFunctionLimitR}
+Let $f \colon A \to \reals$ be a function where the domain $A \subset \reals$ has \hyperref[pro:ClosedSetsClosedUnderLimitsR]{limit point} $p \in \reals$. We say that $f(x)$ has limit $L \in \reals$ as $x \to p$ if for any open set $V \subset \reals$ around $L \in V$, there exists an open set $U \subset \reals$ around $p \in U$ such that \begin{gather*}
+f\big((U \cap A) \setminus {p} \big) := \{ f(u) \mid u\in U, u\in A, u \neq p\} \subset V
+\end{gather*}
+i.e. the image of the set of points in both $U$ and $A$ which exception to $p$ itself is contained in $V$.
+
+If this is the case we write $\lim_{x\to p} f(x) = L$ and say that $f$ converges to $L$ at $p$.
+\end{label definition}
+
+This version of the limit will actually be useful to us, but as you can see, the mess of symbols is only particularly illustrative of what the limit is doing when we aren't hedging against the risk of asking what $f(p)$ is. In fact you can see that this definition of the limit is almost exactly the same as above, except that instead of asking that $p$ is in the domain, we merely ask that it is a limit point of the domain, and then we say both that we're only interested in the part of $U$ actually in our domain $A$, and we don't want $p$ included.
+
+\figuresvgwithcaption{./funcconvvsseqconv}{A depiction of four kinds of limits. The above two limits are the epsilon-N limit for sequences and the topological/region-of-convergence limit; in the epsilon-N limit we are concerned with a fixed radius $\varepsilon$ around the limit and we see with $N=4$, all future sequence points are within this radius; in the topological limit, an oval depicts that the shape of the open set $U$ does not matter, only that $U$ exists. Function limits are similar. In the bottom left we see a topological limit, mapping $U$ (oval to depict any open set) around $p$ into $f(U) \subset V$ around $L$. Likewise, the epsilon-delta limit (defined below) can do this with fixed radii $\delta$ and $\varepsilon$}
+
+We'll show convergence of our $f(x) = (x-1)/(x-1)$ example shortly, but before we do, we should describe a version of this limit that's a little easier to use. As seen in the diagram above, just like we showed that epsilon-N limits for sequences are merely a special case of choosing intervals centered on our limits as our open sets in a topological limit, we can do the same for function limits. This will allow us 
+
+\begin{example}[Showing convergence of $(x-1)/(x-1)$]{m}
+Let's c
+\end{example}
+
+
+
+
+
+
+
+
+
+
 
 
 
