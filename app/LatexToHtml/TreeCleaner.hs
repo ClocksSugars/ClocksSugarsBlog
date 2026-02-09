@@ -66,7 +66,9 @@ data Htmllatexinter =
    |  List Text (Maybe [TeXArg]) [[Htmllatexinter]] -- instead of having items, we put item stuff in each element
    |  IFigure Text [Htmllatexinter]
    |  IBoxedSec InfoBox (Maybe [Htmllatexinter]) [Htmllatexinter]
+   |  ParagraphBreak
    |  LineBreak
+   |  CenterEnv [Htmllatexinter]
    |  IReference String
    |  ILink Text [Htmllatexinter]
    |  IRefLink String [Htmllatexinter]
@@ -154,6 +156,8 @@ processOne arg = let
          ("lstlisting", [OptArg (TeXRaw "language=Haskell")]) -> Right $ ICodeBlock "language-haskell" $ render content
          ("lstlisting", [OptArg (TeXRaw "language=toml")]) -> Right $ ICodeBlock "language-toml" $ render content
 
+         ("center", _) -> Right $ CenterEnv $ processOne content
+
          ("gather*", _) -> Right . RawPrint . render $
             TeXMath DoubleDollar $ TeXEnv kind texargs $ applyMathCommands content
          ("align*", _) -> Right . RawPrint . render $
@@ -188,7 +192,7 @@ processOne arg = let
 addLineBreaks :: [Htmllatexinter] -> [Htmllatexinter]
 addLineBreaks stuff = let
    worker :: [Htmllatexinter] -> [Htmllatexinter]
-   worker ((Prose content):xs) = intersperse LineBreak (
+   worker ((Prose content):xs) = intersperse ParagraphBreak (
       map Prose (splitOn "\n\n" content)
       ) ++ worker xs
    worker (x:xs) = x: worker xs
@@ -222,6 +226,7 @@ inLineTranslation (RawPrint xs) = RawText xs
 inLineTranslation (IReference reference) = ReferenceNum reference
 inLineTranslation (ILink turl tx) = HLink turl $ map inLineTranslation tx
 inLineTranslation (IRefLink tref tx) = HRefLink tref $ map inLineTranslation tx
+inLineTranslation LineBreak = BreakLine
 inLineTranslation _ = RawText "failcase" -- this should NEVER HAPPEN since
 -- it is applied to the takeWhile in the below span which has as its
 -- condition that the constructor is Prose or InLineEffect
@@ -244,6 +249,7 @@ processTwo ((List kind margs items):xs) = case kind of
          Just [FixArg (TeXRaw x)] -> x
          _ -> "a"
    _ -> Paragraph [RawText "failed here"] : processTwo xs
+processTwo ((CenterEnv content):xs) = CenteredParagraph (processTwo content) : processTwo xs
 processTwo ((IBoxedSec infobox mtitle content):xs) = BoxedSec infobox (
    fmap (map inLineTranslation) mtitle
    ) (processTwo content) : processTwo xs
@@ -253,15 +259,16 @@ processTwo arg = let
       Prose _ -> True
       RawPrint _ -> True
       LineBreak -> True
+      ParagraphBreak -> True
       InLineEffect _ -> True
       IReference _ -> True
       ILink _ _ -> True
       IRefLink _ _ -> True
       _ -> False
    cond :: Htmllatexinter -> Bool
-   cond x= (x /= LineBreak)
+   cond x= (x /= ParagraphBreak)
    worker :: [Htmllatexinter] -> [HtmlVers]
-   worker (LineBreak:xs) = worker xs
+   worker (ParagraphBreak:xs) = worker xs
    worker [] = []
    worker xs = let
       (paragraph, remainder2) = span cond xs

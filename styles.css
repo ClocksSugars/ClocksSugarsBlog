@@ -293,3 +293,7 @@ a.bigbutton:active {
   background: mediumslateblue;
   color: white;
 }
+
+div.centerthis > p {
+   text-align: center;
+}

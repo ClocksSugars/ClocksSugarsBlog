@@ -30,9 +30,14 @@ So following our discussion from the previous section, what limits of functions 
 It is typical to begin a discussion of limits of functions with what is commonly referred to as the \squote{epsilon-delta} limit, which we will get to shortly. However, since we spent the last section coming to an understanding that limits are intrinsically topological, i.e. intrinsically about whether we can find an open set with some special property, I think we'll get some value out of leveraging this understanding and installing it as the primary intuition underlying the limit.
 
 \begin{label definition}[Topological Characterization of Trivial Function Limits]{TrivTopologicalFunctionLimitR}
-Let $f\colon \reals \to \reals$ be a function. We say that $f$ has limit $L \in \reals$ at point $p\in \reals$ if for any open set $V \subset \reals$ around $L \in V$, there exists an open set $U \subset \reals$ around $p \in U$ such that \begin{gather*}
+Let $f\colon \reals \to \reals$ be a function. We say that $f$ has limit $L \in \reals$ at point $p\in \reals$ if:
+
+\begin{center}
+for any open set $V \subset \reals$ around $L \in V$,\\
+there exists an open set $U \subset \reals$ around $p \in U$ such that \begin{gather*}
 f(U) := \{f(u) \mid u \in U\} \subseteq V
 \end{gather*}
+\end{center}
 i.e. the \emph{image} (the output set) of $U$ is contained in $V$. If this is the case then we write \begin{gather*}
 \lim_{x \to p} f(x) = L
 \end{gather*}
@@ -49,12 +54,15 @@ The simplest way to speak of what we want is this: imagine a function $f(x) = (x
 f\colon (-\infty,1) \cup (1,\infty) \to \reals, \\
 f(x) = x
 \end{gather*}
-where it is equal to $x$ but only if we exclude the point where it is not defined. We want our limit to never explicitly ask what $f(1)$ is, but still to use the surrounding information that $f(x)$ is \squote{$x$ shaped} to conclude $\lim_{x \to 1} f(x) = 1$. Our resulting definition is just as the above trivial definition, but with various obfuscating qualifiers to ensure we never ask for $f(p)$ when $p$ is not in $f$'s domain.
+where it is equal to $x$ but only on the ranges negative infinity to $1$ and 1 to infinity, excluding $1$, the point where it is not defined. We want our limit to never explicitly ask what $f(1)$ is, but still to use the surrounding information that $f(x)$ is \squote{$x$ shaped} to conclude $\lim_{x \to 1} f(x) = 1$. Our resulting definition is just as the above trivial definition, but with various obfuscating qualifiers to ensure we never ask for $f(p)$ when $p$ is not in $f$'s domain.
 
 \begin{label definition}[Topological Characterization of Function Limits]{TopologicalFunctionLimitR}
-Let $f \colon A \to \reals$ be a function where the domain $A \subset \reals$ has \hyperref[pro:ClosedSetsClosedUnderLimitsR]{limit point} $p \in \reals$. We say that $f(x)$ has limit $L \in \reals$ as $x \to p$ if for any open set $V \subset \reals$ around $L \in V$, there exists an open set $U \subset \reals$ around $p \in U$ such that \begin{gather*}
+Let $f \colon A \to \reals$ be a function where the domain $A \subset \reals$ has \hyperref[pro:ClosedSetsClosedUnderLimitsR]{limit point} $p \in \reals$. We say that $f(x)$ has limit $L \in \reals$ as $x \to p$ if
+\begin{center}
+for any open set $V \subset \reals$ around $L \in V$, there exists an open set $U \subset \reals$ around $p \in U$ such that \begin{gather*}
 f\big((U \cap A) \setminus {p} \big) := \{ f(u) \mid u\in U, u\in A, u \neq p\} \subset V
 \end{gather*}
+\end{center}
 i.e. the image of the set of points in both $U$ and $A$ which exception to $p$ itself is contained in $V$.
 
 If this is the case we write $\lim_{x\to p} f(x) = L$ and say that $f$ converges to $L$ at $p$.
@@ -64,7 +72,16 @@ This version of the limit will actually be useful to us, but as you can see, the
 
 \figuresvgwithcaption{./funcconvvsseqconv}{A depiction of four kinds of limits. The above two limits are the epsilon-N limit for sequences and the topological/region-of-convergence limit; in the epsilon-N limit we are concerned with a fixed radius $\varepsilon$ around the limit and we see with $N=4$, all future sequence points are within this radius; in the topological limit, an oval depicts that the shape of the open set $U$ does not matter, only that $U$ exists. Function limits are similar. In the bottom left we see a topological limit, mapping $U$ (oval to depict any open set) around $p$ into $f(U) \subset V$ around $L$. Likewise, the epsilon-delta limit (defined below) can do this with fixed radii $\delta$ and $\varepsilon$}
 
-We'll show convergence of our $f(x) = (x-1)/(x-1)$ example shortly, but before we do, we should describe a version of this limit that's a little easier to use. As seen in the diagram above, just like we showed that epsilon-N limits for sequences are merely a special case of choosing intervals centered on our limits as our open sets in a topological limit, we can do the same for function limits. This will allow us 
+We'll show convergence of our $f(x) = (x-1)/(x-1)$ example shortly, but before we do, we should describe a version of this limit that's a little easier to use. As seen in the diagram above, just like we showed that epsilon-N limits for sequences are merely a special case of choosing intervals (displayed as circles) centered on our limits as our open sets in a topological limit, we can do the same for function limits. This will allow us to prove our limits using orderings instead of set membership.
+
+\begin{label definition}[Epsilon-Delta Characterization of Function Limits]{MetricFunctionLimitR}
+Let $f\colon A \to \reals$ be a function where the domain $A \subset \reals$ has \hyperref[pro:ClosedSetsClosedUnderLimitsR]{limit point} $p\in \reals$. We say that $f(x)$ has limit $L\in \reals$ as $x \to p$ if
+
+\begin{center}
+for all $\varepsilon > 0$ there exists $\delta > 0$ such that for all $x \in A$ \\
+that satisfy $|x - p|< \delta$, we have $|f(x) - L| < \varepsilon$
+\end{center}
+\end{label definition}
 
 \begin{example}[Showing convergence of $(x-1)/(x-1)$]{m}
 Let's c

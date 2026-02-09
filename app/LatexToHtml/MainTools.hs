@@ -134,6 +134,7 @@ inlineProcessThree :: [HtmlVers] -> RefIndexState -> Html
 inlineProcessThree [] _ = Empty ()
 inlineProcessThree (x:xs) propind = (\y -> y >> (inlineProcessThree xs propind)) $ case x of
    Paragraph zs -> inlineProcessThree zs propind
+   BreakLine -> br
    RawText x -> toHtml x
    Bold x -> b $ toHtml x
    Emphasize x -> i $ toHtml x
@@ -164,12 +165,14 @@ processThree pagename theaddress content indexstate = let
       Emphasize x -> (i $ toHtml x, propind)
       Bold x -> (b $ toHtml x, propind)
       TTtext x -> (code $ toHtml x, propind)
+      BreakLine -> (br, propind)
       HLink turl tx -> (H.a ! href (fromString $ fromText turl) $ inlineProcessThree tx propind, propind)
       ListItem xs -> passFirst li $ repeatCase xs propind
       Itemize xs -> passFirst ul $ repeatCase xs propind
       Enumerate listkind xs -> passFirst (ol ! A.type_ (fromString $ fromText listkind)) $ repeatCase xs propind
       -- TODO MAKE THE OL TYPE MORE ROBUST
       Paragraph xs -> passFirst p $ repeatCase xs propind
+      CenteredParagraph xs -> passFirst (H.div ! A.class_ "centerthis") $ repeatCase xs propind
       CodeBlock language thecode -> (
          pre $ code ! class_ (fromString language) $ toHtml thecode,
          propind

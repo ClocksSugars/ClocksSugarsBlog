@@ -25,5 +25,7 @@ data HtmlVers =
    |  HRefLink String [HtmlVers]
    |  CodeBlock String Text
    |  JsEmbed String
+   |  BreakLine
+   |  CenteredParagraph [HtmlVers]
    deriving ( Show )
 --   |  Env Text [HtmlVers]
