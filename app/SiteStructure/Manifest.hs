@@ -151,7 +151,7 @@ appliunistruct = WrittenWorkBook {
                SubChapter {
                   name = "funclimsR",
                   title = "Limits on $\\mathbb{R} \\to \\mathbb{R}$ Functions",
-                  flags = ["DoNotShowOnIndex"],
+                  flags = [],
                   description = "(WIP)",
                   depends = ["funcconvvsseqconv.svg"]
                   }

@@ -57,10 +57,11 @@ f(x) = x
 where it is equal to $x$ but only on the ranges negative infinity to $1$ and 1 to infinity, excluding $1$, the point where it is not defined. We want our limit to never explicitly ask what $f(1)$ is, but still to use the surrounding information that $f(x)$ is \squote{$x$ shaped} to conclude $\lim_{x \to 1} f(x) = 1$. Our resulting definition is just as the above trivial definition, but with various obfuscating qualifiers to ensure we never ask for $f(p)$ when $p$ is not in $f$'s domain.
 
 \begin{label definition}[Topological Characterization of Function Limits]{TopologicalFunctionLimitR}
-Let $f \colon A \to \reals$ be a function where the domain $A \subset \reals$ has \hyperref[pro:ClosedSetsClosedUnderLimitsR]{limit point} $p \in \reals$. We say that $f(x)$ has limit $L \in \reals$ as $x \to p$ if
+Let $f \colon A \to \reals$ be a function where the domain $A \subset \reals$ has \hyperref[pro:ClosedSetsClosedUnderLimitsR]{limit point} $p \in \reals$. We say that $f(x)$ has limit $L \in \reals$ as $x \to p$ if:
 \begin{center}
-for any open set $V \subset \reals$ around $L \in V$, there exists an open set $U \subset \reals$ around $p \in U$ such that \begin{gather*}
-f\big((U \cap A) \setminus {p} \big) := \{ f(u) \mid u\in U, u\in A, u \neq p\} \subset V
+for any open set $V \subset \reals$ around $L \in V$,\\
+there exists an open set $U \subset \reals$ around $p \in U$ such that \begin{gather*}
+f\big((U \cap A) \setminus \{p\} \big) := \{ f(u) \mid u\in U, u\in A, u \neq p\} \subset V
 \end{gather*}
 \end{center}
 i.e. the image of the set of points in both $U$ and $A$ which exception to $p$ itself is contained in $V$.
@@ -68,9 +69,9 @@ i.e. the image of the set of points in both $U$ and $A$ which exception to $p$ i
 If this is the case we write $\lim_{x\to p} f(x) = L$ and say that $f$ converges to $L$ at $p$.
 \end{label definition}
 
-This version of the limit will actually be useful to us, but as you can see, the mess of symbols is only particularly illustrative of what the limit is doing when we aren't hedging against the risk of asking what $f(p)$ is. In fact you can see that this definition of the limit is almost exactly the same as above, except that instead of asking that $p$ is in the domain, we merely ask that it is a limit point of the domain, and then we say both that we're only interested in the part of $U$ actually in our domain $A$, and we don't want $p$ included.
+This version of the limit will actually be useful to us, but as you can see, the mess of symbols is only particularly illustrative of what the limit is doing when we aren't hedging against the risk of asking what $f(p)$ is. In fact you can see that this definition of the limit is almost exactly the same as above, except that instead of asking that $p$ is in the domain, we merely ask that it is a limit point of the domain, and then we say both that we're only interested in the part of $U$ actually in our domain $A$, and we don't want $p$ included. To exclude $p$, we use the \hyperlink{https://clockssugars.blog/appliuni/prelims/maththink.html\#maththink_4}{set-minus} notation introduced in the previous chapter to, in a sense, subtract all elements of some other set, which is in this case just the singleton set containing only $p$.
 
-\figuresvgwithcaption{./funcconvvsseqconv}{A depiction of four kinds of limits. The above two limits are the epsilon-N limit for sequences and the topological/region-of-convergence limit; in the epsilon-N limit we are concerned with a fixed radius $\varepsilon$ around the limit and we see with $N=4$, all future sequence points are within this radius; in the topological limit, an oval depicts that the shape of the open set $U$ does not matter, only that $U$ exists. Function limits are similar. In the bottom left we see a topological limit, mapping $U$ (oval to depict any open set) around $p$ into $f(U) \subset V$ around $L$. Likewise, the epsilon-delta limit (defined below) can do this with fixed radii $\delta$ and $\varepsilon$}
+\figuresvgwithcaption{./funcconvvsseqconv}{A depiction of four kinds of limits. The above two limits are the epsilon-N limit for sequences and the topological/region-of-convergence limit; in the epsilon-N limit we are concerned with a fixed radius $\varepsilon$ around the limit and we see with $N=4$, all future sequence points are within this radius; in the topological limit, an oval depicts that the shape of the open set $U$ does not matter, only that $U$ exists and is an open set. Function limits are similar. In the bottom left we see a topological limit, mapping $U$ (oval to depict any open set) around $p$ into $f(U) \subset V$ around $L$. Likewise, the epsilon-delta limit (defined below) can do this with fixed radii $\delta$ and $\varepsilon$}
 
 We'll show convergence of our $f(x) = (x-1)/(x-1)$ example shortly, but before we do, we should describe a version of this limit that's a little easier to use. As seen in the diagram above, just like we showed that epsilon-N limits for sequences are merely a special case of choosing intervals (displayed as circles) centered on our limits as our open sets in a topological limit, we can do the same for function limits. This will allow us to prove our limits using orderings instead of set membership.
 
@@ -79,9 +80,37 @@ Let $f\colon A \to \reals$ be a function where the domain $A \subset \reals$ has
 
 \begin{center}
 for all $\varepsilon > 0$ there exists $\delta > 0$ such that for all $x \in A$ \\
-that satisfy $|x - p|< \delta$, we have $|f(x) - L| < \varepsilon$
+that satisfy $|x - p|< \delta$, we have $|f(x) - L| < \varepsilon$.
 \end{center}
 \end{label definition}
+
+The obvious way to translate this limit definition into the language of the topological limit is to say $U = (p - \delta, p + \delta)$ and $V = (L - \varepsilon, L + \varepsilon)$, corresponding to $x \in U$ being the same statement as $|x - p| < \delta$ and $f(x) \in V$ being the same statement as $|f(x) - L| < \varepsilon$. You may also notice that this is roughly the function equivalent of the epsilon-N limit, where we have replaced the role of $n > N \in \nats$ with $|x - p|< \delta$, i.e. instead of \squote{the rest of the sequence past some point}, we now say \squote{any part of the domain sufficiently close}, is what is contained in $V$, or  We'll quickly prove that these limits are the same, but if the intuition for this is obvious to you then this proof is redundant.
+
+\begin{proposition}[Epsilon Delta and Topological Function Limits Are Equivalent]
+Let $f\colon A \to \reals$ be a function where the domain $A \subset \reals$ has \hyperref[pro:ClosedSetsClosedUnderLimitsR]{limit point} $p\in \reals$. Then the following statements are equivalent.
+
+\begin{enumerate}
+\item $\displaystyle{\lim_{x \to p} f(x) = L}.$
+\item for any open set $V \subset \reals$ around $L \in V$,
+there exists an open set $U \subset \reals$ around $p \in U$ such that $f\big((U \cap A) \setminus \{p\} \big) \subset V.$
+\item for all $\varepsilon > 0$ there exists $\delta > 0$ such that for all $x \in A$ \\
+that satisfy $|x - p|< \delta$, we have $|f(x) - L| < \varepsilon$
+\item (relaxed epsilon-delta) for all $\varepsilon > 0$ there exists $\delta > 0$ such that for all $x \in A$ \\
+that satisfy $|x - p| \le \delta$, we have $|f(x) - L| \le \varepsilon$
+\end{enumerate}
+\end{proposition}
+
+\begin{my proof}{m}
+Statements a and b are defined equal since a is merely the symbolic shorthand for the topological limit as defined in \ref{def:TopologicalFunctionLimitR}, and as described above it is clear that the topological limit implies the epsilon-delta limit. This proof will show the converse, as well as showing $c$ and $d$ are equivalent.
+
+Presume c, that is, say that for all $\varepsilon > 0$, there exists $\delta > 0$ such that for all $x \in A$ that satisfy $|x-p| < \delta$, we have $|f(x) - L| < \varepsilon$. Now say we are given some open set $V \subset \reals$ around $L \in V$, and we aim to show that there exists an open set $U \subset \reals$ around $p \in U$ which satisfies $f\big((U \cap A) \setminus {p} \big) \subset V$.
+
+Since $V$ is an open set, there exists some $\varepsilon > 0$ such that the interval $(L - \varepsilon, L + \varepsilon)$ is contained in $V$. We'll give this $\varepsilon$ to the epsilon-delta limit which is assumed true, and so we deduce there exists a $\delta > 0$ such that $|x - p| < \delta$ implies $|f(x) - L| < \varepsilon$, or equivalently, $x \in (p -\varepsilon, p + \varepsilon) \cap A$ (any $x$ satisfying that condition which is also valid as an input) implies $f(x) \in (L - \varepsilon, L + \varepsilon)$ which by $(L - \varepsilon, L + \varepsilon) \subset V$ implies $f(x) \in V$. Set $U = (p -\varepsilon, p + \varepsilon)$. Then, by the epsilon-delta limit as described, any $x \in U \cap A$ (and of course this remains true even when $p \notin A$ since it is true for all $x \in U \cap A$ so we are free to also remove $p$ anyway) implies $f(x) \in V$, as required for the topological limit. Stated in terms of set images, we say $f\big((U \cap A) \setminus \{p\} \big) \subset V$, satisfying the topological limit exactly.
+
+We next move to show equivalence between the epsilon-delta limit and the relaxed epsilon-delta limit. First assume the epsilon-delta limit as in c: for all $\varepsilon_1 > 0$ there exists $\delta_1 > 0$ such that for all $x \in A$ that satisfy $|x - p|< \delta_1$, we have $|f(x) - L| < \varepsilon_1$. Our principle challenge is to pick a new $\delta_2$ such that when we are given $\varepsilon_2$, our limit is tolerant to $|f(x)-L| < \varepsilon_1$ instead admitting an equals case $|f(x)-L| = \varepsilon_2$ and $|f(x)-L| < \varepsilon_2$ when $|x - p| \le \delta_2$. So say we are given some $\varepsilon_2 > 0$. Choose $\varepsilon_1 = \varepsilon_2$ so that we imply the existence of a $\delta_1$ with the appropriate properties for an epsilon-delta limit. If we then set $\delta_2 = \delta_1/2$, we have $\delta_2 < \delta_1$, and thus $|x - p| \le \delta_2 < \delta_1$, which by the epsilon-delta limit implies $|f(x) - L| < \varepsilon_1 \le \varepsilon_2$, exactly as required.
+
+The converse proof is similar; assume the relaxed epsilon-delta limit as in d, so for all $\varepsilon_2 > 0$ there exists $\delta_2 > 0$ such that for all $x \in A$ that satisfy $|x - p| \le \delta_2$, we have $|f(x) - L| \le \varepsilon_2$. This time, when we're given a $\varepsilon_1 > 0$ and we need to find a way to satisfy the normal epsilon-delta condition, we'll set $\varepsilon_2 = \varepsilon_1/2$ to induce some $\delta > 0$ via our assumed relaxed epsilon-delta limit, which has the property that $|x - p| \le \delta_2$ implies $|f(x)- L| \le \varepsilon_2$. Since $\varepsilon_2 = \varepsilon_1/2$, we say $\varepsilon_2 < \varepsilon_1$, and thus $|x - p| \le \delta_2$ implies $|f(x) - L| \le \varepsilon_2 < \varepsilon_1$. Since this is true for \emph{all} $x$ satisfying $|x - p| \le \delta_2$, we also say that this is true for all $x$ satisfying $|x - p| < \delta_2$ by merely choosing not to use the $x$ which satisfies $|x-p| = \delta_2$ (this is like merely noticing that $x \in (p - \delta_2, p+\delta_2)$ implies $x \in [p - \delta_2,p + \delta_2]$ since one is a subset of the other). Setting $\delta_1 = \delta_2$, we have then that $|x-p| < \delta_2 = \delta_1$ implies $|f(x)-L| \le \varepsilon_2 < \varepsilon_1$ as required for the normal epsilon-delta limit.
+\end{my proof}
 
 \begin{example}[Showing convergence of $(x-1)/(x-1)$]{m}
 Let's c
