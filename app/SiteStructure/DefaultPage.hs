@@ -107,7 +107,9 @@ homePageHtml = docTypeHtml $ do
          H.div ! A.id "barone" ! class_ "bar-one" $ do
             header ! class_ "flex-col margin15" $ do
                h1 ! class_ "marginsmall" $ "ClocksSugars' Blog"
-               p ! class_ "marginless" $ "My Blog and The home of Application Unification"
+               p ! class_ "marginless" $ do
+                  "My Blog and the home of "
+                  i "Application Unification"
          H.div ! A.id "bartwo" ! class_ "bar-two" $ do
             p ! class_ "marginless" $ "Home"
          h2 "Learn Math. Do it."

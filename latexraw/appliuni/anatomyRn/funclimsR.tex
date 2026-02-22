@@ -112,8 +112,10 @@ We next move to show equivalence between the epsilon-delta limit and the relaxed
 The converse proof is similar; assume the relaxed epsilon-delta limit as in d, so for all $\varepsilon_2 > 0$ there exists $\delta_2 > 0$ such that for all $x \in A$ that satisfy $|x - p| \le \delta_2$, we have $|f(x) - L| \le \varepsilon_2$. This time, when we're given a $\varepsilon_1 > 0$ and we need to find a way to satisfy the normal epsilon-delta condition, we'll set $\varepsilon_2 = \varepsilon_1/2$ to induce some $\delta > 0$ via our assumed relaxed epsilon-delta limit, which has the property that $|x - p| \le \delta_2$ implies $|f(x)- L| \le \varepsilon_2$. Since $\varepsilon_2 = \varepsilon_1/2$, we say $\varepsilon_2 < \varepsilon_1$, and thus $|x - p| \le \delta_2$ implies $|f(x) - L| \le \varepsilon_2 < \varepsilon_1$. Since this is true for \emph{all} $x$ satisfying $|x - p| \le \delta_2$, we also say that this is true for all $x$ satisfying $|x - p| < \delta_2$ by merely choosing not to use the $x$ which satisfies $|x-p| = \delta_2$ (this is like merely noticing that $x \in (p - \delta_2, p+\delta_2)$ implies $x \in [p - \delta_2,p + \delta_2]$ since one is a subset of the other). Setting $\delta_1 = \delta_2$, we have then that $|x-p| < \delta_2 = \delta_1$ implies $|f(x)-L| \le \varepsilon_2 < \varepsilon_1$ as required for the normal epsilon-delta limit.
 \end{my proof}
 
+Below I'll include a few examples so you get an idea of how a limit on a function is shown. In all likelihood, one of the examples here will later be important for some other proof, so it's likely to expand.
+
 \begin{example}[Showing convergence of $(x-1)/(x-1)$]{m}
-Let's c
+Let's continue our prior example first, although it will quickly become apparent that this is one of the easiest kinds of limits to show. 
 \end{example}
 
 
