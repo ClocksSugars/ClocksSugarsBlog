@@ -1,4 +1,4 @@
- @property --page-aesth {
+@property --page-aesth {
   syntax: "<color>";
   inherits: false;
   initial-value: lightblue;
@@ -14,6 +14,10 @@
   syntax: "<length>";
   inherits: false;
   initial-value: 640px;
+}
+
+@property --font-size-ratio {
+   initial-value: 1;
 }
 
 @property --def-color {
@@ -110,7 +114,7 @@ h1 {
    max-width: var(--page-width);
    margin-left: auto;
    margin-right: auto;
-   text-align: justify;
+   //font-size: calc(1em * var(--font-size-ratio));
    padding-right: var(--margin-size);
    padding-left: var(--margin-size);
    padding-bottom: 15px;
@@ -237,7 +241,7 @@ img.squareheight {
 }
 
 .katex-display {
-   font-size: 1.15em;
+   font-size: calc(1.15em * var(--font-size-ratio));
    /*max-width:100%;
    width:fit-content;
    transform: scale();*/

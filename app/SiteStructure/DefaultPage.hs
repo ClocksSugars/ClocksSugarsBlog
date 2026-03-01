@@ -67,6 +67,7 @@ defaultPageHTML PageConstructInfo {
 
       H.title $ toHtml pagetitle
    body $ do
+      script ! defer "" $ "if (window.screen.width <= 700) {document.documentElement.style.setProperty(\"--font-size-ratio\",(window.screen.width/640));}"
       H.section ! class_ "pagebound" $ do
          H.div ! A.id "barone" ! class_ "bar-one" $ do
             header ! class_ "flex-col margin15" $ do
