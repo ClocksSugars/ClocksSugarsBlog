@@ -1,0 +1,99 @@
+\documentclass[11pt]{article}
+    \title{\textbf{Default Doc}}
+
+    \date{\the\day/\the\month/\the\year}
+
+\input{../pdf.tex}
+\input{../webmacros.tex}
+\input{../programmingmacros.tex}
+\input{../amsthmstuff.tex}
+
+\usepackage{amsmath}
+\begin{document}
+
+\emph{The following is the article version of a talk given on 03/14/26. The intended audience of the talk is a split demographic of programmers/machine learning engineers and various levels of academicians/hardware engineers. Consequently the first part of this article will be focused on a highly pedagogical description of basic group theory and Lie groups absent much discussion of differential geometry. This article is not intended to give a one-to-one correspondance with the content of the talk, but rather to formally detail the scaffold of the talk. Accordingly, it is written to supplement the talk and to be able to stand on its own, but not as a transcript or as an equivalent.}
+
+\subsection{Part 1: Matrix Groups}
+To the engineer with a mild interest in mathematics (who has done well to avoid any serious algebraic courses), one's primary exposure to anything group-like is matrices. This is not exactly an accident on the part of the mathematicians who have come up with these formalisms; in fact the entire field of representation theory studies which groups can have their structure encoded in matrices (or rather linear maps) and what one can glean when this is possible. Additionally, some of the language of linear algebra is now standardized in such a way to match with the theory of groups; terms like the 'kernel' of a matrix show up meaning roughly the same thing in group theory.
+
+This creates a problem for any pedagogical efforts around group theory to a \squote{mature audience}, that is, a significant amount of theory must be developed before it becomes concrete to the engineer what exactly was gained from the theory of groups. After all, if you understand matrices, and matrices describe groups, surely you understand groups. In truth, there is simply much much more to be known about matrices, neverminding the depths to be known of groups.
+
+\subsubsection{What is a group?}
+We will focus here on an \emph{extrinsic} discussion of groups. That is, for better or for worse, most of this article will concede any argument one might want to have about representation or parametrization of groups and simply consider them to be sets of matrices. In this case, the necessary definition is as follows.
+
+\begin{label definition}[(Matrix) Group]{MatrixGroupsArticleGroup}
+Let $G \subset \reals^{m \times n}$ for some $m, n \in \nats$. We say that $G$ is a \emph{multiplicative group} if $m=n$ and the following conditions are satisfied. \begin{enumerate}
+\item (Closure) For any pair $A,B \in G$, their product $AB$ is also a member of $G$, so the group cannot be escaped with multiplication from within the group.
+\item (Identity) The identity matrix $I \in \reals^{n \times n}$ is present in the group, i.e. $I \in G$.
+\item (Inverses) All group members have their inverse elements present, i.e. for all $A \in G$, we have $A^\inv \in G$ such that $A A^\inv = A^\inv A = I$
+\end{enumerate}
+Otherwise, we may also define a \emph{additive group} if the following are satisfied. \begin{enumerate}
+\item (Closure) For any pair $A,B \in G$, their sum $A + B$ is also a member of the group $G$
+\item (Identity) The identity matrix $0 \in \reals^{m \times n}$ is present in the group, i.e. $0 \in G$
+\item (Inverses) All group members have their negative elements present, i.e. for all $A\in G$, we have $-A \in G$ such that $A + (-A) = (-A) + A = 0$.
+\end{enumerate}
+We try to keep our notation agnostic to additive and multiplicative groups, describing either as \emph{group multiplication} and denoting it $gh$ for any $g,h \in G$.
+\end{label definition}
+
+When defining a group in a more purely algebraic context, it is common instead of the closure requirement to instead describe a group multiplication operation $\square \cdot \square: G \times G \to G$ (implied to only be able to produce elements of the set $G$ by construction) with the property of \emph{associativity}, i.e. $(gh)k = ghk = g(hk)$ with the order of bracketing not mattering. It is also sometimes appropriate to emphasize the lack of commutativity, i.e. $gh \neq hg$ in general. However, these two properties are in some sense assumed if the reader knows anything about matrices. Matrix multiplication (and of course addition) are already associative (and generally known to not be commutative), but in such a context, it becomes important to emphasize that we are only interested in sets of matrices which multiply into themselves, i.e. are closed. This emphasis is doubly important once subgroups are introduced, but we'll hold that thought for now.
+
+Any discussion of groups is incomplete to the point of bordering dishonesty if the group homomorphism is not discussed. We owe to the homomorphic property most of the results of group theory.
+
+\begin{definition}[Group Homomorphism]
+Let $G$ and $H$ be groups. We say that a map $f\colon G \to H$ is a \emph{group homomorphism} if for any $g,h \in G$ and the corresponding $f(g),f(h) \in H$, they satisfy \begin{gather*}
+f(g\cdot h) = f(g) \cdot f(h)
+\end{gather*}
+that is, sending the multiplication as defined for $G$ between $g$ and $h$ to a multiplication as defined for $H$ between $f(g)$ and $f(h)$. Homomorphisms are so called because they are \emph{structure preserving maps}, in particular preserving the group structure.
+\end{definition}
+
+It is here that we must point out that all of linear algebra is a very special case of group theory, focused on the additive group of column matrices $\reals^{n \times 1}$. First, notice that the column matrices do in fact form a group under addition: we may freely add them to obtain another column matrix (satisfying closure), we have the zero vector (satisfying identity), and we have negative vectors (satisfying inverses). When the homomorphic property is expressed for the group of column matrices, we see that it is \begin{gather*}
+f(u + v) = f(u) + f(v)
+\end{gather*}
+for any $u,v \in \reals^{n\times 1}$. In other words, a homomorphic map on vectors is precisely a linear map. Such an example is useful in pointing out that aspects of group theory are far more pervasive than one might realise, but the simplicity of the example does us a disservice. Additive groups, because they are commutative, have little structure more than what you might think of as their \squote{dimension} (as well as how cyclic they are, but we'll get to that shortly). However this does mean we immediately have at least some intuition for subgroups. When we take a lower dimensional subspace in $\reals^n$, we know that addition within this subspace is \emph{closed}, so we cannot escape it from within, and that orthogonal subspaces should not interfere. Something very close to this will be the case for subgroups.
+
+This analogy also paints a good picture for how we should expect homomorphisms to help us in identifying subgroups. If we are to focus on vectors, not merely as a space of positions but as a space of \emph{actions}, principly concerned not with the end point of their arrow (and thus neither concerned with the \emph{starting point} of their arrow), then it should be obvious to us in our column matrix description that the directions of these arrows are innately separable. But absent that way of writing them, it is also obvious that the following linear operations actively separate dimensions from one another.
+
+\begin{gather*}
+\begin{bmatrix}
+1 & 0 & 0 \\ 0 & 1 & 0 \\  0 & 0 & 0
+\end{bmatrix}
+\begin{bmatrix}
+x \\ y \\ z
+\end{bmatrix}
+=
+\begin{bmatrix}
+x \\ y \\ 0
+\end{bmatrix} \\[0.7em]
+\begin{bmatrix}
+1 & 0 & 0 \\ 0 & 1 & 0
+\end{bmatrix}
+\begin{bmatrix}
+x \\ y \\ z
+\end{bmatrix}
+=
+\begin{bmatrix}
+x \\ y
+\end{bmatrix}
+\end{gather*}
+
+In fact, homomorphisms, when they are not \emph{isomorphisms} (i.e. bijective or invertible homomorphisms), act precisely in this way to flatten out or project down something approximating a dimension of a group. These two instances are listed separately because they also make distinct something that will become important to us. In the first equation, our linear map $A$ is $A: \reals^3 \to \reals^3$ but can only materially map outputs within a two dimensional subspace of $\reals^3$. In the latter, we eliminate any pretense of being in $\reals^3$ and speak of a linear map $B$ as $B\colon \reals^3 \to \reals^2$. Since we can just as easily insert elements of $\reals^3$ into $\reals^2$, one might think of the inclusion map $\iota \colon (x,y) \mapsto (x,y,0)$ in composition with our linear maps to define $A = \iota \circ B$. This is fine, useful even, but very importantly \emph{distinct} as we will also shortly see.
+
+A final remark must be made before we describe subgroups and their kinds in detail. I would argue that the description of a group as a set of actions is the proper one (as motivated by the theory of group actions), and this intuition will serve as a basis in this article. That is to say, when we think of a group, we should think that the group has some underlying \emph{thing} it acts on, in the case of linear maps this is a vector space by stretching, skewing, and rotating. In this frame, the property that a group must have an identity and inverses becomes contextualized; it must of course be able to \emph{do nothing} to the underlying object (hence we need an identity action), and in particular we are only interested in things we can do to this object which are reversable, lest we find our exploration of properties leading us to a stuck-state. But this also contextualizes our repeated interest in separable structure, thinks approximating dimensions, subgroups, etcetera. The theory of groups is built with the capability that it tells us which actions on an underlying object will not interfere with one another, or in what ways they will interfere. 
+
+\subsubsection{Subgroups}
+
+Above we spoke of additive matrix groups, namely vector spaces, but our principle interest going forward will be of square matrix groups under multiplication. So in order to speak of subgroups, we will need to define the maximal group from which those matrix groups come, and this is called the \emph{general linear group}, denoted $\mathrm{GL_n(\reals)}$ for the group of $n\times n$ matrices with real entries. The sole requirement for a matrix to be a member of this group will be realized from studying our first square matrix homomorphism, one you are hopefully already familiar with, the matrix determinant, which satisfies $\det(AB) = \det(A) \det(B)$, an obvious multiplicative homomorphism.
+
+It must be observed that this homomorphism, as a homomorphism, is mapping into a group, yet we think of the determinant as producing a mere number. The trick here is that numbers also form a group under multiplication, since we have an identity, the number one, and inverses for all $x \in \reals$, the number $1/x$, with exception only to zero. Accordingly, the multiplicative group of real numbers $\reals_\times$ must be built on the set $\reals \setminus\{0\}$, i.e. $\reals$ without zero, in order to satisfy the group axioms. Similarly, this also identifies the matrices which must be excluded from the general linear group, those with determinant zero, since if nothing else, those matrices are not invertible. 
+
+\begin{definition}[Subgroup]
+Let $G$ be a group and let $H$ be a subset of $G$. We say that $H$ is a subgroup of $G$ if it satisfies the group properties (i.e. closure, identity, inverses) under the same group multiplication operation. The closure property is of particular importance here since one must not be able to escape the subgroup from within it.
+\end{definition}
+
+Subgroups are immediately interesting to us from the perspective of matrix groups for their ability to preserve a relevant property within themselves. For instance it is immediately apparent to us that any two matrices $A,B \in \reals^{n \times n}$ which satisfy $\det(A) = 1$ and $\det(B) = 1$ will satisfy $\det(AB) = 1$, so we may speak of the subgroup of 
+
+
+
+
+
+\end{document}
