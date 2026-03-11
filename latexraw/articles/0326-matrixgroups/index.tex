@@ -21,7 +21,7 @@ This creates a problem for any pedagogical efforts around group theory to a \squ
 \subsubsection{What is a group?}
 We will focus here on an \emph{extrinsic} discussion of groups. That is, for better or for worse, most of this article will concede any argument one might want to have about representation or parametrization of groups and simply consider them to be sets of matrices. In this case, the necessary definition is as follows.
 
-\begin{label definition}[(Matrix) Group]{MatrixGroupsArticleGroup}
+\begin{label definition}[Matrix Group]{MatrixGroupsArticleGroup}
 Let $G \subset \reals^{m \times n}$ for some $m, n \in \nats$. We say that $G$ is a \emph{multiplicative group} if $m=n$ and the following conditions are satisfied. \begin{enumerate}
 \item (Closure) For any pair $A,B \in G$, their product $AB$ is also a member of $G$, so the group cannot be escaped with multiplication from within the group.
 \item (Identity) The identity matrix $I \in \reals^{n \times n}$ is present in the group, i.e. $I \in G$.
@@ -82,18 +82,125 @@ A final remark must be made before we describe subgroups and their kinds in deta
 
 \subsubsection{Subgroups}
 
-Above we spoke of additive matrix groups, namely vector spaces, but our principle interest going forward will be of square matrix groups under multiplication. So in order to speak of subgroups, we will need to define the maximal group from which those matrix groups come, and this is called the \emph{general linear group}, denoted $\mathrm{GL_n(\reals)}$ for the group of $n\times n$ matrices with real entries. The sole requirement for a matrix to be a member of this group will be realized from studying our first square matrix homomorphism, one you are hopefully already familiar with, the matrix determinant, which satisfies $\det(AB) = \det(A) \det(B)$, an obvious multiplicative homomorphism.
+Above we spoke of additive matrix groups, namely vector spaces, but our principle interest going forward will be of square matrix groups under multiplication. So in order to speak of subgroups, we will need to define the maximal group from which those matrix groups come, and this is called the \emph{general linear group}, denoted $\mathrm{GL_n(\reals)}$ for the group of $n\times n$ matrices with real entries. The sole requirement for a matrix to be a member of this group will be simply that the matrix has an inverse. This does more than just satisfy the inverse requirement of groups though, as we see from studying our first square matrix homomorphism. With any luck, you are already familiar with the matrix determinant, which satisfies $\det(AB) = \det(A) \det(B)$, an obvious multiplicative homomorphism.
 
-It must be observed that this homomorphism, as a homomorphism, is mapping into a group, yet we think of the determinant as producing a mere number. The trick here is that numbers also form a group under multiplication, since we have an identity, the number one, and inverses for all $x \in \reals$, the number $1/x$, with exception only to zero. Accordingly, the multiplicative group of real numbers $\reals_\times$ must be built on the set $\reals \setminus\{0\}$, i.e. $\reals$ without zero, in order to satisfy the group axioms. Similarly, this also identifies the matrices which must be excluded from the general linear group, those with determinant zero, since if nothing else, those matrices are not invertible. 
+It must be observed that this homomorphism, as a homomorphism, is mapping into a group, yet we think of the determinant as producing a mere number. The trick here is that numbers also form a group under multiplication, since we have an identity, the number one, and inverses for all $x \in \reals$, the number $1/x$, with exception only to zero. Accordingly, the multiplicative group of real numbers $\reals_\times$ must be built on the set $\reals \setminus\{0\}$, i.e. $\reals$ without zero, in order to satisfy the group axioms. Thus it becomes clear why non-invertable matrices must be excluded from a group; non-invertable matrices are \squote{zero-like}, and so permitting them for multiplication would get us \squote{stuck} in the set of matrices with determinant zero.
+
+In noticing such a structure in the output of the determinant, we are able to pull our notions of zero-ness and many other intuitions about real numbers back to the matrices. This pattern is an invaluable application of homomorphisms; the determinant map is able to ignore everything that is not \squote{number-like} about a matrix, turning matrix multiplication into number multiplication, a simpler group with which intuitions become much more obvious, and remain applicable on the original group. But in a very real sense, this $\reals_\times$ was hiding in the general linear group all along. For instance we could simply speak of matrices \begin{gather*}
+A_\lambda = \begin{bmatrix}
+\lambda & \vec{0}^T \\
+\vec{0} & I_{n-1}
+\end{bmatrix} \in
+\mathrm{GL}_n(\reals)
+\end{gather*}
+which have some number $\lambda \in \reals_\times$ in the top left followed by an identity matrix of size $(n-1) \times (n-1)$, and zeroes $\vec{0} \in \reals^{(n-1) \times 1}$ in the remaining spots. Such a matrix would satisfy $\det(A_\lambda) = \lambda$, and for a similar matrix with $\mu \in \reals_\times$ instead of $\lambda$, we would have $A_\lambda A_\mu = A_{\lambda \mu}$ and $\det(A_{\lambda \mu}) = \lambda \mu$. In this way, we can embed $\reals_\times$ in $\mathrm{GL}_n(\reals)$ and see that it forms a self contained subgroup with all the same dynamics of $\reals_\times$.
 
 \begin{definition}[Subgroup]
 Let $G$ be a group and let $H$ be a subset of $G$. We say that $H$ is a subgroup of $G$ if it satisfies the group properties (i.e. closure, identity, inverses) under the same group multiplication operation. The closure property is of particular importance here since one must not be able to escape the subgroup from within it.
 \end{definition}
 
-Subgroups are immediately interesting to us from the perspective of matrix groups for their ability to preserve a relevant property within themselves. For instance it is immediately apparent to us that any two matrices $A,B \in \reals^{n \times n}$ which satisfy $\det(A) = 1$ and $\det(B) = 1$ will satisfy $\det(AB) = 1$, so we may speak of the subgroup of 
+It is not always the case that the existence of a homomorphism implies that the output of the map is a subgroup within the input group. This is seen most obviously if one studies the following homomorphism: \begin{align*}
+f\colon & \reals_+ \to \mathrm{GL}_2(\reals) \\
+f\colon & x \mapsto \begin{bmatrix} \cos(2\pi x) & \sin(2\pi x) \\ -\sin(2\pi x) & \cos(2\pi x) \end{bmatrix}
+\end{align*}
+that is, the map that sends a vector space of dimension 1, the additive reals group, to $2\times 2$ rotation matrices. In brief, we prove the homomorphic property using the angle addition formulas \begin{gather*}
+\cos(a + b) = \cos(a) \cos(b) - \sin(a) \sin(b) \\
+\sin(a + b) = \sin(a) \cos(b) + \cos(a) \sin(b)
+\end{gather*}
+to show
+\begin{align*}
+&f(x)f(y) \\
+=&\begin{bmatrix} \cos(2\pi x) & \sin(2\pi x) \\ -\sin(2\pi x) & \cos(2\pi x) \end{bmatrix}
+\begin{bmatrix} \cos(2\pi y) & \sin(2\pi y) \\ -\sin(2\pi y) & \cos(2\pi y) \end{bmatrix} \\
+=& \begin{bmatrix} \cos(2\pi x) \cos(2\pi y) - \sin(2 \pi x) \sin(2\pi y) &
+\sin(2\pi y) \cos(2\pi x) + \cos(2 \pi y) \sin(2\pi x) \\
+- \sin(2\pi x) \cos(2\pi y) - \cos(2 \pi x) \sin(2\pi y) &
+\cos(2\pi x) \cos(2\pi y) - \sin(2 \pi x) \sin(2\pi y)
+\end{bmatrix} \\
+=& \begin{bmatrix} \cos(2\pi (x + y)) & \sin(2\pi (x + y)) \\ -\sin(2\pi (x + y)) & \cos(2\pi (x + y)) \end{bmatrix} \\
+=& f(x+y).
+\end{align*}
+In effect, we have turned our group of adding-numbers into rotations, with a full rotation equivalent to no rotation at all. The trouble here is that there is no such a subgroup in $\reals_+$ which has a similar looping property. No matter how clever you get, if I ask you to find a non-zero number which I can add to itself to get zero, you can't do that in $\reals$. But the homomorphism has still told us about a subgroup, if one described directly in the output, there is the one we factored out to get such an output. In this case, we have factored out the additive integer group $\integers_+$, the positive and negative whole numbers under addition. Although we cannot do scalar multiplication on integers in the same way we might with a one-dimensional vector space, it still satisfies the requirements for a group, and we can indeed imagine a \squote{vector of integers}, certainly if nothing else as a subset of vectors.
 
+The only guarentee we have with a subgroup is that whatever property is held by the subgroup elements is preserved within it, but this isn't necessarily a guarentee that the dynamics of the group associated with this property can be factored out. The property we have when a subgroup \emph{can} be factored out, in the way that a well chosen homomorphism might do, is called being \emph{normal}.
 
+\begin{definition}[Normal Subgroup]
+Let $G$ be a group and $N$ a subgroup. We say that $N$ is a \emph{normal subgroup} if for all $g \in G$ and $h \in N$, there exists a $k \in N$ such that \begin{gather*}
+gh = kg.
+\end{gather*}
+This is often written $gN = Ng$, to imply that while $g$ does not necessarily commute (swap ordering) with elements of $N$, a commutation can be forced by replacing the member of $N$ with some other member of $N$, thus keeping within the dynamics of the group described by $N$. 
+\end{definition}
 
+This notation, of writing $gN$ where $N$ stands in for any possible element of the subgroup $N$, is called a \emph{coset}. They are of interest in factoring out group dynamics since if $h\in N$ then $ghN = gN$; any possible element $k\in N$ also has $hk \in N$ by $N$'s closure. Additionally, if $g,h \in G$, then $(gN)(hN) = g(Nh)N$, which by the property $gN=Ng$, is $g(hN)N = (gh)N$. That is to say, these cosets can behave like a group on their own, and the group defined by factoring out $N$'s dynamics is readily defined merely by the group structure of this group of cosets. We call this the \emph{quotient group}.
+
+In the case of the determinant, the output group $\reals_\times$ implies the existence of a normal subgroup which we had factored out. Since it was factored out, we expect whatever structure this subgroup described to map to the identity in the output, i.e. we are interested in what matrices have determinant equal to one. This turns out to be a sufficient condition to characterize our normal subgroup, which we call the \emph{special linear group}: \begin{gather*}
+\mathrm{SL}_n(\reals) = \left\{ A \in \reals^{n \times n} \mid \det(A) = 1 \right\}.
+\end{gather*}
+
+If you are familiar with the property of determinants to give the volume of an $n$-dimensional parallelopiped with edges defined by the columns of a matrix, this property means that a matrix in $\mathrm{SL}_n(\reals)$ may rotate, flip, and skew a vector space, but never change its volume.
+
+\subsubsection{Matrix Groups of Interest}
+
+This article will primarily focus on Lie groups, i.e. continuous groups, but before we get there we should describe some other of groups of interest. Chiefly among the discrete groups is the groups of permutations, called the \emph{symmetric} groups, $\mathrm{S}_n$. In the description given earlier of groups existing to act on things, the permutations of the symmetric group act to turn one ordering of a set into another ordering. For instance, the set of numbers $\{1,2,3,4,5\}$ may be reordered by a permutation matrix in the following manner. \begin{gather*}
+\begin{bmatrix}
+0&1&0&0&0 \\ 1&0&0&0&0 \\ 0&0&0&0&1 \\ 0&0&0&1&0 \\ 0&0&1&0&0
+\end{bmatrix} \begin{bmatrix}
+1\\2\\3\\4\\5
+\end{bmatrix} = 
+\begin{bmatrix}
+2\\1\\5\\4\\3
+\end{bmatrix}
+\end{gather*}
+
+The symmetric group is of particular interest because we know that every group with a finite number of members may be written as a subgroup of a permutation group, via \hyperlink{https://en.wikipedia.org/wiki/Cayley\%27s\_theorem}{Cayley's theorem}. The reason for this powerful fact is deceptively simple: on a finite group, we can think of the group as merely a set in some order, and to each element of the set we associate a reordering for the rest of the set. In this way, one reads a group product $gh$ as $g(h)$ with $g$ a permuting function which takes $h$ to whatever we have decided we want $gh$ to be equal in the set.
+
+Things can get a bit more dicey if we want to describe infinite discrete groups, but doing such a thing may well leave the realm of groups which can be expressed as matrices entirely, so we'll avoid it here. Instead, we will begin our focus on infinite continuous groups, which we retain for the rest of the article. 
+
+In particular, we will be primarily interested in continuous multiplicative groups since additive matrix groups generally have trivial structure; no matter what shape a matrix has in an additive matrix group, the group may as well be described by a vector. Nonetheless, we should at least mention a few such as the group of symmetric matrices, the matrices $A = A^T$ which remain the same when transposed or flipped across their diagonal. Since two symmetric matrices $A,B$ only has $AB$ symmetric when $AB=BA$, we cannot form a multiplicative group of symmetric matrices, but since $A$ and $B$ are described by entries $A_{ij}$ and $B_{ij}$ for their $i$'th row and $j$'th column with $A_{ij}=A_{ji}$ and $B_{ij}=B_{ji}$ (i.e. the $A=A^T$ property), we also have \begin{align*}
+(A+B)_{ij} =& A_{ij} + B_{ij} \\
+=& A_{ji} + B_{ji} \\
+=& (A+B)_{ji}
+\end{align*}
+so sums preserve symmetry. This is also true of antisymmetric matrices, that is, matrices with the property $A = -A^T$, which become negative when flipped. For the group of antisymmetric $4\times 4$ matrices, we have matrices of the following form: \begin{gather*}
+\begin{bmatrix}
+0 & a & b & c \\ -a & 0 & d & e \\ -b & -d & 0 & f \\ -c & -e & -f & 0
+\end{bmatrix}, \hspace{2em} a,b,c,d,e,f \in \reals.
+\end{gather*} 
+Unlike the symmetric matrices, the antisymmetric matrices must be zero on the diagonal since the diagonal stays the same when flipped; since zero is the only number which is its own negative and the entire matrix must be negative when flipped, the part of the matrix that stays in the same place when flipped must be zero.
+
+We can also extend this to complex matrices, in particular the hermitian and anti-hermitian matrices. That is, we say that a matrix is hermitian when it satisfies not $A = A^T$ but $A = A^\dagger$, where $A^\dagger$ denotes the \emph{conjugate transpose}, i.e. we flip the matrix and we flip the sign on its imaginary component. Accordingly, if we say that $A = B + iC$ where $B$ and $C$ are both matrices with real number entries, then $A^\dagger = B^T - iC^T$. Moreover, this also tells us that when $A$ is hermitian, $B$ must be symmetric and $C$ must be antisymmetric, since requiring $A=A^\dagger$ is the same as requiring $A^\dagger = B^T - iC^T = B + iC = A$. Due to this structure, we can flip these by simply multiplying by $i$: if $A$ is hermitian, then $iA = iB + i^2C = -C + iB$. With $C$ antisymmetric and $B$ symmetric, we can show by a chain of equalities that $iA$ is anti-hermitian, i.e. $(iA)^\dagger = -iA$.
+\begin{align*}
+(iA)^\dagger =& \big(i(B + iC)\big)^\dagger\\
+=& (iB - C)^\dagger \\
+=& (-iB - C)^T \\
+=& -iB^T - C^T \\
+=& -iB + C \\
+=& i( -B - iC) \\
+=& -i (B + iC) \\
+=& -iA
+\end{align*}
+ In this way we know that hermitian and antihermitian matrices, although they are the complex analogs of symmetric and antisymmetric matrices, are only a factor of $i$ away from one another.
+ 
+It is now time, finally, to get to a matrix group of serious and persisting interest to us. Consider the transpose operation $A \mapsto A^T$. We know this is not a homomorphism, by the property that $(AB)^T = B^T A^T$, which appears almost like the homomorphic property but reversed for some reason. Interestingly, this property is also shared for the property of taking a matrix's inverse, i.e. $(AB)^\inv = B^\inv A^\inv$. So here's a thought, if we chain these two operations together, each which look like a homomorphism but with a reversing property, can their reversing properties cancel out? The answer is yes, however the resulting map is an isomorphism on the general linear group, so we don't get a normal subgroup out of it. \begin{gather*}
+(AB)^{-T} = (B^\inv A^\inv)^T = A^{-T} B^{-T}
+\end{gather*}
+We may still be interested in structure of the group which remains untouched by this isomorphism, which otherwise serves to rearrange the group within itself. Applying the determinant shows us that this homomorphism inverts the determinant, i.e. $\det(A^{-T}) = (\det(A))^\inv$, which means in some sense that the isomorphism is swapping matrices with determinant $\lambda$ for those with determinant $1/\lambda$. So surely, if a matrix has a determinant one, it may be left alone by the homomorphism, but this is on its own not true. If we merely take a matrix in the special linear group $\mathrm{SL}_n(\reals)$, you will recall such a matrix may rotate, flip, and skew a vector space; the step of taking an inverse will skew in the opposite way, but the step of taking a transpose will skew in an entirely different way. One way to see this is to write out the matrix product between a matrix $A$ and a column vector $v$. Denoting $A_{ij}$ as the $i$'th row and $j$'th column and $v_j$ as the $j$'th row, we define an output vector $u$ which has entries $u_i$ in its $i$'th row, writing the product as \begin{gather*}
+\sum_{j} A_{ij} v_j = u_i
+\end{gather*}
+This is the matrix multiplication you are hopefully familiar with in index notation; but notice in particular that while we sum across $j$, the way we track index $i$ remains intact across the equality. In fact, one can read this formula as saying that the output vector $u$ is merely a linear combination of the columns of $A$ with weights $v_j$. If $A \in \mathrm{SL}_n(\reals)$ then this linear combination can be thought of as sending $v$ to a different basis where its axes are squeezed, shrunk, stretched, etc. but we can guarentee any axis which is stretched will be accounted for in another which is shrunk so to keep a constant determinant. But when we take a transpose and calculate $A^T v$, the columns are simply completely different, and as such the matrix product is a linear combination of completely different vectors.
+
+So clearly not all determinant-one matrices are of interest with respect to this inverse-transpose homomorphism. Instead, consider we had found a set of matrices $\Omega$ such that all $A \in \Omega$ satisfy $A^{-T} = A$. Obviously this property is true of the identity matrix, since $I^T = I$ and $I^\inv = I$, so demanding such a thing does not lead to an empty set. What would be very interesting to us is if we can show that any two matrices having this property have a product matrix also with this property, and that other non-identity matrices exist with this property. The first is simple, i.e. asserting that two matrices $A,B \in \Omega$ have the property $A^{-T} = A$ and $B^{-T} = B$, we see $(AB)^{-T} = A^{-T} B^{-T} = AB$, by the homomorphic property.
+
+Next, let's study this property. To say $A^{-T}=A$, by the involutive property $A^{TT} = A$ and $(A^{-1})^\inv=A$, is the same as saying $A^\inv = A^T$. Using the property of an inverse matrix that $AA^\inv = I$ which is for our case $AA^T=I$, we may write the product as \begin{gather*}
+\sum_{k} A_{ik} (A^T)_{kj} = \sum_{k} A_{ik} A_{jk}  = I_{ij}.
+\end{gather*} 
+If we follow the same pattern we did earlier, of noticing that $i$ and $j$ are preserved across the equality and thus that we are really speaking about the columns of $A$ like vectors, then this equation reads like a dot-product between columns of $A$. In particular, with $I_{ij}$ on the other side, we are saying that these dot products must be 1 when $i=j$ and zero otherwise; we have demanded that the columns of the matrix are orthogonal to one another, and normalized so that their dot-products with themselves are exactly one. Of course, this is a property we can very easily satisfy, populating a group of matrices called the \emph{orthogonal group}, written $\mathrm{O}(n)$ to represent the matrices satisfying $A^T=A^\inv$.
+
+The orthogonal group refers to matrices which rotate and flip a vector space, but do not skew, stretch, or scale it. Orthogonal matrices have determinants of either one or negative one, on account of these flips; the reason for this is most obvious in $\reals^2$ however. Famously, one way to flip the sign on a determinant is to swap two rows or columns, however swapping rows is the same as swapping the $x$ and $y$ components of vectors in the output. If we think of the unit $x$ and $y$ vectors, in $\reals^2$ we think of the $x$ vector as being $90^\circ$ clockwise of the $y$ vector, and any rotation of the space will preserve this; swapping the places of $x$ and $y$ in a column vector however means that the $x$ vector is $90^\circ$ counter-clockwise of the $y$ vector. To turn such a flip into a rotation, the components need to be swapped and one of them multiplied by $-1$; drawing out $(x,y) \mapsto (y,-x)$ describes exactly a rotation, and so any flipped space is always one well placed negative sign away from its original orientation. Just as we factored $\reals_\times$ out of $\mathrm{GL}_n(\reals)$, the image of $\mathrm{O}(n)$ under the determinant homomorphism is the finite multiplicative group $\{1,-1\}$, and we can factor this out to form $\mathrm{SO}(n)$, the special orthogonal group, the matrices which only describe rotations in $n$-dimensions.
+
+Finally, it will serve us to speak about the complex analogy for these groups, the unitary and special unitary groups $\mathrm{U}(n)$ and $\mathrm{SU}(n)$ respectively. Justifying their rules would require a departure into complex numbers that's just a little too long for this section, but the basic pattern remains the same. The unitary matrices are those $A \in \mathrm{U}(n)$ which satisfy $A^\dagger = A^\inv$. The analogous notion of \emph{flips} here gets a bit stranger, since a unitary matrix is not confined to only determinants $1$ and $-1$ but all complex numbers of magnitude one, so $i$, $-i$, $\sqrt{1/2} + i\sqrt{1/2}$, anything of the form $\cos(\theta) + i\sin(\theta)$. We may nonetheless want to speak of those matrices satisfying $A^\dagger = A^\inv$ with determinant exactly the positive real number one, and for that we have the matrix group $\mathrm{SU}(n)$.
+
+\subsubsection{Lie Groups}
 
 
 \end{document}
