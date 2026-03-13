@@ -333,6 +333,152 @@ A more general proof can be given without even picking a $A$ matrix in which one
 
 Our example of the circle and the line is not to say that the Lie algebra is defined merely by its shape, although this is the case in one dimension. In dimensions higher than one, Lie algebras carry an extra piece of information that can distinguish them on the basis of what you might think of as curvature, but not on the basis of topology. Details of how topology comes into play will have to be delayed until part 2, however this forms the fundamental limitation of how much of the Lie group may be recovered from just the Lie algebra with the exponential map.
 
+\subsubsection{Lie Algebras}
+
+It is important to remember throughout all of this that groups are best thought of defining a set of invertible actions on some object. In fact one can even think of the group multiplication operator, in the sense that we had described it being differentiable on a Lie group, as itself being an action. One of the first group actions described in the theory of Lie groups is the \squote{left translation action}, the map $L_g \colon G \to G$ which for some $g \in G$ sends each $h\in G$ to $gh$, or the respective \squote{right translation action} $R_g$ which sends $h$ to $hg$. When we speak of the group multiplication as being differentiable, it is precisely these maps $L_g$ and $R_g$ we are requiring to be differentiable, and upon integrating these derivatives back into curves, we obtain the previously discussed exponential map. Moreover, these actions allow us to take a Lie algebra in the sense that it is a direction space, and apply that set of directions to every point in the space, defining the \emph{left invariant vector fields} and \emph{right invariant vector fields}. 
+
+But these left and right translation actions are set-actions; they treat $G$ like any other manifold and simply move points around. They are not homomorphisms. When a group acts on another group (including itself), if it does so homomorphically, then it must do so \emph{isomorphically}, since anything less than an isomorphism would mean an action is not reversible. In fact, the term for this, since they are isomorphisms of a group to itself, is \emph{automorphically}, which is important since unlike isomorphisms which may map different groups to one another, automorphisms of a group can apply repeatedly and chain together as many times as desired. In fact, the automorphisms of a group tend to define a group itself, and thus defining a group action on a group ends up amounting to a homomorphism between the group and the group of automorphisms of the target. This is to say, if $G$ acts on $H$, then there is a homomorphism $\Phi \colon G \to \mathrm{Aut}(H)$, where for some $g \in G$, $\big(\Phi(g)\big) \colon H \to H$ defines some isomorphism; if we wrote $f_1 = \Phi(g_1)$ and $f_2 = \Phi(g_2)$, we would expect both $f_1$ and $f_2$ to have the homomorphic property, and for some $h\in H$, it would make sense to speak about $f_1(f_1(f_2(h)))$.
+
+The reason we are discussing this is because multiplicative Lie groups are non-euclidean and vector spaces are euclidean. Even for a discrete group, we can speak of any group having a \emph{conjugate subgroup} of all elements $[g,h] := ghg^\inv h^\inv$ (for any pair $g,h \in G$) which will capture all the ways in which the group is not commutative (i.e. violates $gh = hg$). This subgroup is actually normal, so we can factor it out to define a commutative quotient group written $G/[G,G]$, a process which we call \emph{abelianization}. But factoring this subgroup out simply means we cease studying the group itself; we are often interested in precisely the ways in which the group fails to be commutative, and currently we lack the tools to do this in any way which takes advantage of the Lie group structure. What we find will be the missing piece that makes a Lie algebra more than just a vector space, and something that actually cares which Lie group it was derived from in the ways described above.
+
+The trick for us will be to define an action called the \emph{conjugation action} which will simultaneously capture similar properties to the conjugate subgroup while itself being a differentiable map. This action also exists on discrete groups as well, where it is a mainstay of many instructive group theory proofs due to its homomorphic property. We define it $\kappa_g\colon G \to G$ as $\kappa_g(h) = ghg^\inv$, and see that for $a,b,c \in G$, we have \begin{align*}
+\kappa_{ab}c &= abc(ab)^\inv\\
+&= abcb^\inv a^\inv \\
+&= a(\kappa_b (c)) a^\inv \\
+&= \kappa_a (\kappa_b (c))
+\end{align*}
+Even better, we can define $\kappa_g$ as the combination of $L_g$ and $R_{g^\inv}$. Our task now will be to find a way to differentiate this action so that it works for Lie algebras. The first step on that journey is the capital-A \emph{Adjoint map}.
+
+\begin{definition}[Adjoint Map]
+Let $G$ be a Lie group, $\mathfrak{g}$ its Lie algebra, and for any $g\in G$, $\kappa_g\colon G \to G$ its conjugation action. We call its derivative the \emph{Adjoint map}; for a matrix $g \in G$ and a matrix $\xi \in \mathfrak{g}$ in its Lie algebra, we define $\mathrm{Ad}_g \colon \mathfrak{g} \to \mathfrak{g}$ as a linear map on the vector space formed by the Lie algebra, \begin{gather*}
+\mathrm{Ad}_g \xi = \frac{d}{dt} \Big( g \cdot e^{t\xi } \cdot g^\inv \Big)_{t=0}
+\end{gather*}
+defined as the change in $g \cdot e^{t \xi} \cdot g^\inv$ for a tiny change in $t$ away from $t=0$. On matrices, this is simply $g\xi g^\inv$.
+\end{definition}
+
+The Adjoint map has many uses to many people other than us; we are not done until even that little $g$ on the bottom of $\mathrm{Ad}_g$ is replaced with a Lie algebra element. We should at least think about what this map is doing, and thus what it means: we have replaced the $h$ in our previous $\kappa_g(h)$ with the exponential of a Lie algebra element $\xi \in \mathfrak{g}$. Since $\exp \colon \mathfrak{g} \to G$, this makes perfect sense, but the scalar $t$ in there means we can differentiate the quantity in a single value. If our intuitions about exponentials from normal calculus are any indication, $\frac{d}{dt} e^{t\xi}$ at $t=0$ should just be $\xi$. In fact that is true even in the Lie group context, but with the $g$ and $g^\inv$ on either side, we have an important modification to this. What we have said is, before considering a direction we could go in, do not consider this direction from the identity as we might normally with the Lie algebra. Instead, start at $g^\inv$, take a tiny step in the direction $\xi$ \emph{should} be in, and then use $g$ to take $\xi$ at $g^\inv$ back to the identity.
+
+The final result is the answer to the question: what direction did our initial direction change in, when we considered it somewhere else then dragged it back? Consider the following example using the rotations of $\mathrm{SO(3)}$ on the Earth; Ecuador is roughly on the opposite side of the world as Indonesia, roughly on the equator, and is at a fairly close longitude to New York. If you were in New York, travelled directly in a straight line to Utah by somehow being left behind as the Earth spun around its north-south-pole axis, took a tiny step in the direction you would go if the Earth underneath you were to spin on its Ecuador-Indonesia-equatorial axis (this might be towards San Diego), and then went back to New York, how would the direction of that step have changed? This is now a thing we can calculate, although the result is relatively disappointing when the three dimensions of $\mathrm{SO}(3)$ are flattened to the two dimensional surface of a sphere. The more interesting result will come when our trip from New York to Utah is no longer a journey that would take a plane but merely a single step.
+
+\begin{example}{m}
+The calculation above can be done by hand if we remember that what $\mathrm{SO}(2)$ looks like. That is, the antisymmetric matrices of $\mathfrak{so}(3)$ are of the form \begin{gather*}
+\begin{bmatrix}
+0 & -x & -y \\
+x & 0 & -z \\
+y & z & 0
+\end{bmatrix}, \hspace{2em} x,y,z\in \reals
+\end{gather*}
+which gives us the following basis vectors for our Lie algebra. \begin{gather*}
+\begin{bmatrix}
+0 & -1 & 0 \\
+1 & 0 & 0 \\
+0 & 0 & 0
+\end{bmatrix}, \hspace{1em} \begin{bmatrix}
+0 & 0 & -1 \\
+0 & 0 & 0 \\
+1 & 0 & 0
+\end{bmatrix}, \hspace{1em} \begin{bmatrix}
+0 & 0 & 0 \\
+0 & 0 & -1 \\
+0 & 1 & 0
+\end{bmatrix}
+\end{gather*}
+The first and third matrices here look a lot like the matrices in $\mathfrak{so}(2)$, and so it turns out they look a lot like the rotations of $\mathrm{SO}(2)$. In fact their exponentials $\exp(tB)$ for $B$ equal to each of those are \begin{gather*}
+\begin{bmatrix}
+\cos(t) & -\sin(t) & 0 \\
+\sin(t) & \cos(t) & 0 \\
+0 & 0 & 1
+\end{bmatrix}, \hspace{0.5em} \begin{bmatrix}
+\cos(t) & 0 & -\sin(t) \\
+0 & 1 & 0 \\
+\sin(t) & 0 & \cos(t)
+\end{bmatrix}, \hspace{0.5em} \begin{bmatrix}
+1 & 0 & 0 \\
+0 & \cos(t) & -\sin(t) \\
+0 & \sin(t) & \cos(t)
+\end{bmatrix}
+\end{gather*}
+We can set $g$ equal to one of these and $e^{t\xi}$ equal to another, and our calculation will become something like \begin{gather*}
+\frac{d}{d\phi}\left(
+\begin{bmatrix}
+\cos(\theta) & -\sin(\theta) & 0 \\
+\sin(\theta) & \cos(\theta) & 0 \\
+0 & 0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+1 & 0 & 0 \\
+0 & \cos(\phi) & -\sin(\phi) \\
+0 & \sin(\phi) & \cos(\phi)
+\end{bmatrix}
+\begin{bmatrix}
+\cos(\theta) & \sin(\theta) & 0 \\
+-\sin(\theta) & \cos(\theta) & 0 \\
+0 & 0 & 1
+\end{bmatrix}
+\right)
+\end{gather*}
+with $\phi = 0$ at the end. Completing this calculation yields the following Lie algebra element. \begin{gather*}
+\begin{bmatrix}
+0 & 0 & \sin(\theta) \\
+0 & 0 & -\cos(\theta) \\
+-\sin(\theta) & \cos(\theta) & 0
+\end{bmatrix}
+\end{gather*}
+Placing this result in the context of our above description on the globe, this says that the direction you point in changes in the direction matching the spin of the Earth across its Algeria-Pacific-Ocean axis (the axis $90^\circ$ away on the equator from the Ecuador-Indonesia axis). When we describe this on the sphere instead of as a rotation of the space of rotations, these rotations look quite similar, making the example a bit less illustrative.
+\end{example}
+
+Much to the confusion of everyone involved, the derivative of the Adjoint map is often also called the adjoint map, distinguished by the capitalization of the word adjoint, but also written using the commutator bracket notation from before. The big Adjoint map can be thought of as $\mathrm{Ad}\colon G \times \mathfrak{g} \to \mathfrak{g}$ and the little adjoint map as $\mathrm{ad} \colon \mathfrak{g} \times \mathfrak{g} \to \mathfrak{g}$. This is the map we want to describe the failure of the group to be commutative.
+
+\begin{definition}[Lie Bracket/adjoint map]
+Let $G$ be a Lie group and $\mathfrak{g}$ its Lie algebra. In the same way we did before, for two Lie algebra elements $\xi,\nu \in \mathfrak{g}$, we define $\mathrm{ad}_{\xi} \nu$, also written $[\xi,\nu]$ to be \begin{align*}
+\mathrm{ad}_\xi \nu := [\xi,\nu] := \frac{d}{dt} \big(\mathrm{Ad}_{\exp(t\xi)} \nu \big)_{t=0}
+\end{align*}
+We then call the notation $[\xi,\nu]$ the \emph{Lie bracket}.
+\end{definition}
+
+Immediately one may realize we need a better way to calculate this Lie bracket without derivatives if we are to have any hope of using it. In this case, for $\xi,\nu \in \mathfrak{g}$ as matrices, our calculation can simplify using $\mathrm{Ad}_g \xi = g \xi g^\inv$ and the standard calculus product rule as \begin{align*}
+& \frac{d}{dt} \left(\frac{d}{d\tau} \left(e^{t\xi} e^{\tau \nu} e^{-t \xi} \right)_{\tau = 0}\right)_{t=0} \\
+&= \frac{d}{dt} \left( e^{t\xi} \nu e^{-t \xi} \right)_{t=0} \\
+&= \frac{d}{dt} \left( e^{t\xi} \right)_{t=0} \cdot \nu e^{-0 \cdot \xi} + e^{0 \cdot \xi} \nu \cdot \frac{d}{dt} \left( e^{-t \xi} \right)_{t=0} \\
+&= \xi \nu - \nu \xi
+\end{align*}
+
+And this is the matrix commutator. It should make perfect sense for what we want it to do, measuring the failure of $gh \neq hg$, since this expression literally says \dquote{take two directions and take the difference of going in those directions in different orders}. With this in hand, we know the ways that different Lie algebras are distinct beyond merely their dimension; the Lie algebra carries with it a Lie bracket which tells us how the group it came from fails to commute factors.
+
+What is to stop us now from simply defining a Lie bracket, and insisting on some space of directions just to see what space it generates? Almost nothing, but we need to learn the rules that Lie brackets follow. Much is obvious from the formula $[\xi,\nu] = \xi\nu - \nu\xi$, but we need to derive the \emph{Jacobi identity}. We can be derive it by first noticing that $\mathrm{Ad}_g [\xi,\nu] = [\mathrm{Ad}_g\xi, \mathrm{Ad}_g\nu]$. Observe: \begin{align*}
+\mathrm{Ad}_g[\xi,\nu] &= \mathrm{Ad}_g (\xi\nu - \nu \xi) \\
+&= g\xi\nu g^\inv - g \nu \xi g^\inv \\
+&= g \xi g^\inv g \nu g^\inv - g \nu g^\inv g \xi g^\inv \\
+&= (\mathrm{Ad}_g \xi) (\mathrm{Ad}_g \nu) - (\mathrm{Ad}_g \nu) (\mathrm{Ad}_g \xi) \\
+&= [ \mathrm{Ad}_g \xi , \mathrm{Ad}_g \nu]
+\end{align*}
+
+Now consider, what if we take the Lie bracket of a Lie bracket? What is $[\xi,[\nu,\mu]]$? We can find this by once again referring to the definition of the Lie bracket as a derivative of the Adjoint map: \begin{align*}
+[\xi,[\nu, \mu]] &= \frac{d}{dt} \left( \mathrm{Ad}_{\exp(t\xi)}[\nu,\mu]\right)_{t=0} \\
+&= \frac{d}{dt} \left( [\mathrm{Ad}_{\exp(t\xi)}\nu, \mathrm{Ad}_{\exp(t\xi)}\mu]\right)_{t=0} \\
+&= \frac{d}{dt} \left( (\mathrm{Ad}_{\exp(t\xi)}\nu) (\mathrm{Ad}_{\exp(t\xi)}\mu) - (\mathrm{Ad}_{\exp(t\xi)}\mu)(\mathrm{Ad}_{\exp(t\xi)}\nu) \right)_{t=0}
+\end{align*}
+Applying the product rule, we proceed with \begin{align*}
+&= \frac{d}{dt} \left( [\mathrm{Ad}_{\exp(t\xi)}\nu, \mu] \right)_{t=0} + \frac{d}{dt} \left( [\nu, \mathrm{Ad}_{\exp(t\xi)}\mu] \right)_{t=0} \\
+&= [[\xi,\nu],\mu] + [\nu,[\xi,\mu]] 
+\end{align*}
+
+Using $[\xi,\nu] = \xi\nu - \nu \xi$ to deduce that the Lie bracket is \emph{anti-commutative}, i.e. $[\xi,\nu]= -[\nu,\xi]$, we can swap these around a bit and derive the \emph{Jacobi identity}: \begin{gather*}
+[\xi,[\nu,\mu]] = - [\mu,[\xi,\nu]] - [\nu,[\mu,\xi]] \\
+\text{or} \hspace{2em} [\xi,[\nu,\mu]] + [\mu,[\xi,\nu]] + [\nu,[\mu,\xi]]= 0
+\end{gather*}
+
+It is worth noting that this identity, commonly touted as a defining property of the Lie bracket, is as we derived it, merely an expression of the product rule. This also means in a fashion, that the Lie bracket itself \emph{is} a derivation of its own.
+
+We are now, finally, ready to give the formal definition of a Lie algebra. \begin{definition}
+Let $\mathfrak{g}$ be a vector space together with a binary operation $[\square,\square]\colon \mathfrak{g} \times \mathfrak{g} \to \mathfrak{g}$. We say that this vector space and the binary operation together form a \emph{Lie algebra} if the binary operation satisfies $[\xi,\nu] = -[\nu,\xi]$ and the \emph{Jacobi identity}: \begin{gather*}
+[\xi,[\nu,\mu]] + [\mu,[\xi,\nu]] + [\nu,[\mu,\xi]]= 0.
+\end{gather*}
+\end{definition}
+
+Returning to our example from earlier, we can see by a very simple calculation that the Lie bracket of any two of the three basis vectors of $\mathfrak{so}(3)$ is simply the third.
+
+%If we wanted to throw a Lie algebra together and see what space it described, not only could we, we are not obligated to define a non-zero Lie bracket. This is to say, we can set $[\xi,\nu] = 0$ for all $\xi,\nu \in \mathfrak{g}$ and still satisfy the Jacobi identity. The only disappointing thing about doing that is that this exclusively results in a Lie group which is some form of euclidean plane, torus, cylinder, etc. and moreover the Lie algebra itself cannot tell you which of these you came from.
 
 
 \end{document}
