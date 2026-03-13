@@ -11,7 +11,7 @@
 \usepackage{amsmath}
 \begin{document}
 
-\emph{The following is the article version of a talk given on 03/14/26. The intended audience of the talk is a split demographic of programmers/machine learning engineers and various levels of academicians/hardware engineers. Consequently the first part of this article will be focused on a highly pedagogical description of basic group theory and Lie groups absent much discussion of differential geometry. This article is not intended to give a one-to-one correspondance with the content of the talk, but rather to formally detail the scaffold of the talk. Accordingly, it is written to supplement the talk and to be able to stand on its own, but not as a transcript or as an equivalent.}
+\emph{The following is the article version of a talk given on 03/14/26. The intended audience of the talk is a split demographic of programmers/machine learning engineers and various levels of academicians/hardware engineers. Consequently the first part of this article will be focused on a highly pedagogical description of basic group theory and Lie groups absent much discussion of differential geometry. This article is not intended to give a one-to-one correspondance with the content of the talk, but rather to formally detail the scaffold of the talk. Accordingly, it is written to supplement the talk and to be able to stand on its own as a resource, but not as a transcript or an intrinsically motivated text.}
 
 \subsection{Part 1: Matrix Groups}
 To the engineer with a mild interest in mathematics (who has done well to avoid any serious algebraic courses), one's primary exposure to anything group-like is matrices. This is not exactly an accident on the part of the mathematicians who have come up with these formalisms; in fact the entire field of representation theory studies which groups can have their structure encoded in matrices (or rather linear maps) and what one can glean when this is possible. Additionally, some of the language of linear algebra is now standardized in such a way to match with the theory of groups; terms like the 'kernel' of a matrix show up meaning roughly the same thing in group theory.
@@ -201,6 +201,138 @@ The orthogonal group refers to matrices which rotate and flip a vector space, bu
 Finally, it will serve us to speak about the complex analogy for these groups, the unitary and special unitary groups $\mathrm{U}(n)$ and $\mathrm{SU}(n)$ respectively. Justifying their rules would require a departure into complex numbers that's just a little too long for this section, but the basic pattern remains the same. The unitary matrices are those $A \in \mathrm{U}(n)$ which satisfy $A^\dagger = A^\inv$. The analogous notion of \emph{flips} here gets a bit stranger, since a unitary matrix is not confined to only determinants $1$ and $-1$ but all complex numbers of magnitude one, so $i$, $-i$, $\sqrt{1/2} + i\sqrt{1/2}$, anything of the form $\cos(\theta) + i\sin(\theta)$. We may nonetheless want to speak of those matrices satisfying $A^\dagger = A^\inv$ with determinant exactly the positive real number one, and for that we have the matrix group $\mathrm{SU}(n)$.
 
 \subsubsection{Lie Groups}
+
+A clear distinction must be drawn between discrete groups and continuous groups. That is, it is not too hard to enumerate the permutations in a symmetric group: one need only consider ways you could swap elements in a list. However if someone were to ask you to list all of the vectors in a vector space, you would rightly point out this is an equally absurd request as counting out all the numbers between zero and one. One can reason out that any permutation one may desire can usually be constructed by some sequence of the pairs of following permutations: \begin{gather*}
+(1,2,3,4,5) \mapsto (2,3,4,5,1), \\
+(1,2,3,4,5) \mapsto (2,1,3,4,5),
+\end{gather*}
+but it is not so clear that a direct analogy for these exists for a vector space. Even in a one dimensional space, if I pick a single vector, thought of as an action that moves me some distance along a line, and apply it and its inverses repeatedly, what I generate is not a vector space but something that looks more like the additive integers. And yet we have a clear notion of \emph{directions} in a vector space which make perfect sense if such a single vector, as above, is allowed to be applied fractionally, a la scalar multiplied, in order to construct the rest of the space.
+
+It is clear to us that the general linear group, special linear group, special and unspecial orthogonal and unitary groups, are all continuous groups, if for no other reason than what they describe. The set of invertible transformations may simply stretch an axis continuously, the set of volume preserving transformations may deform volumes continuously, and rotations, while bounded by their own cyclic nature, are still continuous within that cycle. In each of these cases, any effect we are picturing may be pictured happening ever so slightly more or ever so slightly less, and that \squote{slightly}-ness may be shrunk even further as desired.
+
+What this tells us is that in the same way that vector spaces are \emph{spaces}, in particular modelling arrows within euclidean space as familiar to us, we must also think of these matrix groups as spaces. In fact, in a more formal setting we would call these spaces \emph{manifolds}, placed on equal footing when discussing what the world looks like on the surface of a sphere, the surface of a torus, or existing in a curved space-time. But while manifolds are a far more general structure, describing all sorts of spaces which may lack uniformity, our continuous matrix groups are also groups, or rather actions that could be done on some other object invertibly. This imparts a few special properties, such as homogeneity of the space in the same way that a perfect sphere looks basically same no matter where you are in it; since no matter where you are in a group you may still multiply it by any other element in the group and move around in the same way you would at the identity.
+
+\begin{definition}[Lie Group]
+A group is said to be a \emph{Lie group} if it is continuous and its group multiplication operation is differentiable in both its left and right arguments.
+\end{definition}
+
+This construction introduces the principle trouble of any discussion of differential geometry, which is that the notion of differentiability doesn't hold in quite the same way in a space which is not euclidean. This is most obviously imagined on the surface of a sphere: when one thinks about the directions you can move in from some point and the speeds you could travel at in these motions, what you get is not a sphere but a tangent plane. All this is to say, taking the derivative of a function at a point, insofar as that derivative describes the rate of change of that function, must give you back some object which is not part of the original space you started with. Moreover, these tangent planes, these spaces of directions, are incomparable with one another: a sphere in space with a person on the equator may say \dquote{I will go north}, but the direction they are calling north is in fact \emph{up}, and when translated to the north pole, this direction points directly out of the sphere, an invalid direction.
+
+Fortunately, two properties of our object of study mitigate the unfamiliarity of this to us. First, we are not working with abstract intrinsic manifolds, we are working with matrix groups, which in our present description are subsets of $\reals^{n\times n}$, a euclidean $n^2$-dimensional space. The tangent planes we speak of are accordingly not just abstract vector spaces associated to a point, i.e. a space of directions, but also a tangible plane we can place against the surface of our manifold. Second, the group structure on the manifold means that all of our tangent spaces can be discussed similarly. That is, if we first specify a point on the Lie group, and this could be the identity $e \in G$ or some other element $g\in G$, any other element $h\in G$ species a way you could move around the space without caring whether you start at $e$ or $g$; you simply end up at either $h$ or $hg$ instead. For this reason, we can limit our discussion of these tangent planes to exclusively the plane that is tangent to the identity, and this forms a vector space of directions which we call the \emph{Lie algebra} of the Lie group. Moreover, this vector space will tell us about the dimensions of our Lie group as well as how to move through it without accidentally leaving it.
+
+Unfortunately the Lie algebra has a few other special properties so we'll need to wait to define it formally, but for now we can definitely calculate what one looks like.
+
+My favorite Lie group to calculate the Lie algebra for is the orthogonal group, since it demonstrates this method very clearly. First, recall that orthogonal matrices $A \in \mathrm{O}(n)$ satisfy $A^T = A^\inv$. If we multiply both sides of this by our $A$, we obtain $AA^T = I$, which is very valuable since the derivative of a constant such as $I$ will be zero. So if we consider $A$ not just as a member of the orthogonal group but as a matrix in the vector space $\reals^{n \times n}$, we can speak of a tiny perturbation and ask which perturbations will continue to satisfy this $AA^T = I$ property. So for some tiny perturbation $\varepsilon B \in \reals^{n \times n}$ and a function $\varphi\colon \reals^{n\times n} \to \reals^{n\times n}$ defined $A \mapsto AA^T$ (which by the way is \emph{not} a homomorphism), we calculate the derivative of $\varphi$ in the normal way: \begin{align*}
+\lim_{\varepsilon \to 0} \frac{\varphi(A + \varepsilon B) - \varphi(A)}{\varepsilon}
+&= \lim_{\varepsilon \to 0} \frac{(A+\varepsilon B)(A^T+\varepsilon B^T) - AA^T}{\varepsilon} \\
+&= \lim_{\varepsilon \to 0} \frac{AA^T + \varepsilon AB^T + \varepsilon BA^T + \varepsilon^2 BB^T - AA^T}{\varepsilon} \\
+&= \lim_{\varepsilon \to 0} \Big(AB^T + BA^T + \varepsilon BB^T \Big) \\
+&= AB^T + BA^T
+\end{align*}
+
+Now, remember we said that a matrix is only orthogonal if $AA^T = I$, so differentiating both sides of this equality by $A$, we have on the left hand side $AB^T + BA^T$ where $B$ was the direction of our tiny perturbation $\varepsilon B$, and on the other side we have $\frac{d}{dA} I$ which is simply the zero matrix. So we write \begin{gather*}
+AB^T + BA^T = 0 \\
+AB^T = - BA^T
+\end{gather*}
+
+And finally, remembering what we said earlier, since the Lie group looks the same everywhere, we focus our efforts to the tangent space set at the identity of the Lie group; this means we set $A = I$ now that we have this relation, and obtain \begin{gather*}
+B^T = -B.
+\end{gather*}
+
+This tells us something remarkable: the directions that orthogonal matrices can move in are exactly those matrices which are their own negatives when transposed, i.e. the space of directions in the orthogonal group is exactly the anti-symmetric matrices! We usually write the Lie algebra as a fraktur font version of the original Lie group name, so $\mathrm{O}(n)$ has lie algebra $\mathfrak{o}(n)$.
+
+We can repeat this calculation for a few other groups. The unitary matrices follow roughly the same calculation, concluding $B^\dagger = -B$, and thus that their Lie algebra is the anti-hermitian matrices.  We can think of additive groups as like vector spaces such as $\reals^{n \times 1}$, and for these the vector space itself, in the same way we think of standard calculus as not having any geometric complications. For instance, the anti-symmetric matrices under addition in dimension 4 only have six parameters (the upper triangle) and so its Lie algebra is $\reals^6$. The general linear group is a little stranger since it is not a restriction to a subspace of the set of matrices but rather just an exclusion of those with determinant zero; noticing that fact alone (together with some awareness of topology, i.e. that the set of invertible matrices is an open set in $\reals^{n \times n}$) is enough to tell us that the directions one can move in $\mathrm{GL}_n(\reals)$ is in fact all of them; the lie algebra of $\mathrm{GL}_n(\reals)$ which we call $\mathfrak{gl}_n(\reals)$ is simply $\reals^{n \times n}$ itself.
+
+Having a Lie algebra be a completely unrestricted set of matrices might be confusing; you might wonder how we are supposed to stay within the group if that is the case. And the answer to that is on its face that the Lie algebra alone does not stay inside the group for the same reason that tangent planes at a point do not stay within a surface. We need an additional tool that can take a direction and tell us what it means to trace along that direction while staying within the manifold. That tool will be the \emph{exponential map}.
+
+Before we continue, we should note that there are many other Lie groups which may be of interest in various circumstances. For instance, we can take the special orthogonal group in dimension two to be the group of rotations on a circle, itself a one dimensional space, and thus construct a torus by $\mathrm{SO}(2) \times \mathrm{SO}(2)$. The matrices of this group would look like so: \begin{gather*}
+\begin{bmatrix}
+\cos(\theta) & \sin(\theta) & 0 & 0 \\
+-\sin(\theta) & \cos(\theta) & 0 & 0 \\ 
+0 & 0 & \cos(\phi) & \sin(\phi)  \\
+0 & 0 & -\sin(\phi) & \cos(\phi)
+\end{bmatrix} \hspace{3em} \theta,\varphi \in [0,2\pi)
+\end{gather*}
+
+We can also take what we've described above and use it to figure out when a space can't be a Lie group. For instance, $\mathrm{SO}(3)$ describes the rotations you can do on a sphere, but we can reason out that the sphere itself can't be a Lie group. This is because at the equator, the directions one might think about moving in are north, south, east, and west, yet if one tries to map which direction east might be at every point of a globe, one finds that \squote{going east} means staying still if you are at the north pole. In a group setting, this would be like saying you found two matrices $A,B \in \mathrm{GL}_n(\reals)$ with the property that $AB = B$ where $A$ is distinctly \emph{not} the identity, and this simply does not occur without $A = I$. The rotations of $\mathrm{SO}(3)$ does not mean that the space itself is a sphere, because even though the space of rotations of a sphere includes rotations that take you from any one point to any other point (thus mapping the sphere), they act on \emph{the whole sphere}, and thus a point may be kept still (the poles) while the rest rotates.
+
+Finally, we should note that strictly speaking, many of the groups we described fail to have a perfectly differentiable group multiplication operation. This too is immediately apparent using the intuitions we have built up: consider the Lie group $\reals_\times$. If we think of it as a space that is a line, then it is clear that the line has a cut in the middle, since we cannot include zero in the Lie group. Since the determinant is differentiable group homomorphism, it is similarly apparent that the orthogonal group must be made of two disconnected components since an orthogonal matrix has determinant of either exactly one or exactly negative one. The \emph{flips} we mentioned earlier simply cannot be multiplied differentiably, \emph{except} in the case of complex matrix groups as we described in the previous subsection. In $\mathrm{GL}_n(\mathbb{C})$, there is a hole in the middle, but the space is connected. Similarly, taking the determinant of unitary matrices shows that the space clearly has a hole in the middle but it is still connected. Regardless, all of these matrix groups are generally considered Lie groups. The caveat made is that for each $\reals$ group with this cut, we define positive and negative components, $\mathrm{O}^+(n) = \mathrm{SO}(n)$ and $\mathrm{O}^-(n)$ isomorphic to $\mathrm{O}^+(n)$ for instance. We then think of $\mathrm{O}(n)$ as $\mathrm{O}^+(n) \times \{1,-1\}$.
+
+\subsubsection{The Exponential Map}
+In regular calculus, it is well known that the derivative of an exponential $e^x$ is itself. Moreover, the differential equation \begin{gather*}
+\frac{df}{dx} = a f(x)
+\end{gather*}
+for some constant $a$ is generally considered trivially simple to solve, since it is known that $e^{ax}$ has derivative $a e^{ax}$. The reason for this is owed to its Taylor expansion.
+
+When we perturb the input of a function by some small amount, it should make sense that the way the function changes is related to its derivatives, since those are supposed to describe rates of change. This is the justification for numerical methods such as forward euler, which calculate $f(x+h) = f(x) + h\frac{df}{dx}(x)$. But these methods are not perfect, and the reason for this is that the derivative also has its own rate of change, and the derivative of that also has its rate of change, and so on and so forth. The full expression for this generates an infinite series: \begin{gather*}
+f(x+h) = f(x) + h\frac{df}{dx}(x) + \frac{h^2}{2!} \frac{d^2 f}{dx^2}(x) + \frac{h^3}{3!}\frac{d^3f}{dx^3}(x) + ... 
+\end{gather*}
+
+Now, the exponential is special since when we set $f(x) = e^x$ and take the derivative in our perturbation $h$ (since that is how we're changing $x$), we get back what we started with. \begin{align*}
+\frac{d}{dh} f(x + h) &= \frac{d}{dh}e^x + \frac{d}{dh} \left( h \frac{de^x}{dx}\right) + \frac{d}{dh} \left( \frac{h^2}{1\cdot 2} \frac{d^2e^x}{dx^2}\right) + \frac{d}{dh}\left(\frac{h^3}{1\cdot 2\cdot 3} \frac{d^3 e^x}{dx^3}\right) ... \\
+&= \frac{d}{dh}e^x + \frac{d}{dh} \left( h e^x\right) + \frac{d}{dh} \left( \frac{h^2}{1\cdot 2} e^x\right) + \frac{d}{dh}\left(\frac{h^3}{1\cdot 2\cdot 3} e^x \right) + ... \\
+&= 0 + e^x + \frac{2h}{1\cdot 2} e^x + \frac{3h^2}{1\cdot 2\cdot 3} e^x + \frac{4h^3}{4 \cdot 3!} e^x + ... \\
+&= e^x + \frac{h}{1} e^x + \frac{h^2}{1\cdot 2} e^x + \frac{h^3}{3!} e^x + ... \\
+&= e^x + h \frac{de^x}{dx} + \frac{h^2}{1\cdot 2} \frac{d^2e^x}{dx^2} + \frac{h^3}{1\cdot 2\cdot 3} \frac{d^3 e^x}{dx^3} ... \\
+\end{align*}
+
+In a very real sense, this series is the definition of the exponential. For this reason, when we have a differential equation on vectors that appears as \begin{gather*}
+\frac{d\vec{x}}{dt} = A \vec{x},
+\end{gather*}
+the solution is written $e^{At}\cdot \vec{x}(0)$ in reference to the above series. That is, such differential equations are solved by \begin{gather*}
+e^{At} \cdot \vec{x}(0) = \vec{x}(0) + \frac{tA\vec{x}(0)}{1!} + \frac{t^2 AA \vec{x}(0)}{2!} + \frac{t^3 AAA \vec{x}(0)}{3!} + ...
+\end{gather*}
+with the same property as above that taking a derivative in $t$ causes the series to remain mostly the same but with an extra $A$ in front.
+
+The way that we use our Lie algebras to define a path through the Lie group is precisely by thinking of motion across the Lie group as solving a differential equation. Our differential equation looks like \begin{gather*}
+\frac{dA}{dt} = B\cdot A(t)
+\end{gather*}
+for $A(t) \in \mathrm{O}(n)$ and $B \in \mathfrak{o}(n)$ using the orthogonal group as an example. We think of this as saying that since movement across a multiplicative group is defined by multiplication, we want to multiply \emph{continuously}, and this might be thought of as some matrix $C\in \mathrm{O}(n)$ to the power of $t$, $C^t \cdot A(0)$ with $t$ any real number. Of course, it is not obvious how to compute $C^t$, but if we imagine $C$ to have a matrix logarithm where $\log(C) = B \in \mathfrak{o}(n)$ then our solution is $e^{tB}\cdot A(0)$. And $e^{tB}$ can be calculated, usually using any kind of diagonalization $B = P D P^\inv$ with $D$ a diagonal matrix, such as by eigenvalue decomposition. We would then compute \begin{gather*}
+\exp(t P^\inv D P) = P^\inv \begin{bmatrix}
+\exp(\lambda_1 t) & 0 & ... \\
+0 & \exp(\lambda_2 t) & ... \\
+\vdots & \vdots & \ddots
+\end{bmatrix} P,
+\end{gather*}
+expontiating along the diagonal. We can do since the matrix-polynomial called for in the exponential has factors such as $BBB$ expressed as $(P D P^\inv)(P D P^\inv)(P D P^\inv)$ which we can rewrite as $P DDD P^\inv$ by cancelling. In effect, the diagonalizing matrix $P$ (which may, for instance, be the eigenvector matrix) will cancel inside such $B^n$ terms, leaving $D^n$ where $P$ and $P^\inv$ can be extracted on the left and right, leaving $P e^{Dt} P^\inv$.
+
+In fact the matrix logarithm does exist, however for the same reason that you can't calculate the logarithm of a negative number, strict definitions for how to calculate the matrix logarithm comparable to the formula for the exponential as above only work for a fixed region rather than giving a general definition like we have for the exponential. Outside of this region, each formula for the matrix logarithm will begin to disobey $\exp(\log(C))=C$. Moreover, depending on the Lie group, it may simply become impossible to extend this region, as we will shortly discuss, since the existence of a perfect matrix logarithm would imply that the exponential map is an isomorphism, which it may not be.
+
+The note we made at the end of the previous section now has very clear implications. Since $\mathrm{O}(n)$ is disconnected, we cannot get from the identity of many of our Lie groups to all the other parts of it. For instance, there is no Lie algebra element $B$ for which a sufficiently large $t$ will cause $e^{tB}$ to yield a matrix with a negative determinant. For the orthogonal matrices, this means that the Lie algebra of the orthogonal group and the Lie algebra of the special orthogonal group are literally the same. However two Lie groups can also share a Lie algebra for other reasons.
+
+One example of this is the circle described by the rotations of $\mathrm{SO}(2)$ sharing a Lie group with $\reals^1$ since the tangent of a circle is a line, but the tangent of a line is also a line. This can be seen as the set of antisymmetric matrices in $\reals^{2\times 2}$ only has one free parameter on the off-diagonal (since the diagonal is zero), just as $\reals^1$ only has one free parameter; nonetheless, exponentiating the antisymmetric matrix will produce a member of $\mathrm{SO}(2)$, so we are not to think that two Lie groups sharing a Lie algebra means that the exponential map will suddenly fail.
+
+No, the exponential map can fail for other reasons. That is to say, all the exponential map can do is tell you how to walk away from a point in a direction, but there are places in a Lie group that you may be unable to reach if all you do is move in one direction the whole time. Take for instance the special linear group. Recall we defined the special linear group as the group of matrices with determinant equal to one; this also means that it does not suffer from any of the issues of disconnected components such as the orthogonal group or general linear group, so we can't blame that for the exponential map failing to take us somewhere. Since we require of $A \in \mathrm{SL}_n(\reals)$ that $\det(A) = 1$, we can differentiate in $A$ much in the same way we did earlier for the orthogonal group, however in this instance I will simply assert that the determinant's derivative is the trace operator, i.e. the sum of the values on the diagonal. So the derivative of the requirement $\det(A) = 1$ yields that the Lie algebra $\mathfrak{sl}_n(\reals)$ is the matrices satisfying $\mathrm{tr}(A) = 0$. Now, let's select the following matrix: \begin{gather*}
+A = \begin{bmatrix}
+-2 & 0 \\ 0 & -1/2
+\end{bmatrix} \in \mathrm{SL}_2(\reals).
+\end{gather*}
+
+The proof follows for those who want to see it.
+
+\begin{my proof}{m}
+For the sake of contradiction, let's assume there does exist a matrix $B \in \mathfrak{sl}_2(\reals)$, i.e. $\mathrm{tr}(B) = 0$, which has $e^B = A$. By the method we described above, of taking an eigenvalue decomposition and applying an exponential on the diagonal, we'll presume $B$ has some $B = P D P^\inv$ decomposition and say $e^B = P e^D P^\inv$. Note also that the formula for the trace $\sum_i B_{ii}$, in the case of a matrix multiplication, looks a lot like a loop $\sum_i B_{ii} = \sum_{i,j,k} P_{ij} D_{jk} P^\inv_{ki}$ which means writing $\mathrm{tr}(B) = 0$ is the same as writing $\mathrm{tr}(PDP^\inv) = \mathrm{tr}(P^\inv P D) = \mathrm{tr}(D)$, so we know the eigenvalues of $B$ sum to zero. Since we're discussing $2\times 2$ matrices, there are only two eigenvalues with $\lambda_1 + \lambda_2 = 0$, so we'll just say $D$ has $\lambda$ and $-\lambda$ on the diagonal. Now, sometimes matrices with real entries have complex eigenvalues, but that isn't a trouble for us, that just means that $\lambda$ is some complex number $a + ib$, and with $e^B = P e^D P^\inv$, our $e^B$ must look like \begin{gather*}
+P\begin{bmatrix}
+e^a \big(\cos(b) + i \sin(b) \big) & 0 \\
+0 & e^{-a} \big(\cos(b) - i \sin(b) \big)
+\end{bmatrix} P^\inv
+\end{gather*}
+For this to be a special linear matrix as we had wanted, we need it to have determinant one, but the only factor that affects this is $D$ since the determinants of $P$ and $P^\inv$ will cancel. However, the same property we noticed that the trace of a matrix is the sum of its eigenvalues can now be used on $e^B$ and $A$. We see that the trace of $A$ is $-5/2$, we should hope that if $e^B$ is truly $A$, that there is a way to chose $a,b \in \reals$ such that the diagonal above sums to $-5/2$. We'll set $c = e^a$ and try that: \begin{align*}
+\frac{-5}{2} &= e^a \big(\cos(b) + i \sin(b) \big) + e^{-a} \big(\cos(b) - i \sin(b) \big) \\
+&= c \big(\cos(b) + i \sin(b) \big) + c^\inv \big(\cos(b) - i \sin(b) \big) \\
+0 &= c^2 \cos(b) + i c^2 \sin(b) + \frac{5}{2}c + \cos(b) - i\sin(b)
+\end{align*}
+The complex numbers in this expression don't stop us from using the quadratic formula to calculate $c$ in terms of $b$ by treating the above expression as a quadratic equation in $c$, so let's do that too. \begin{gather*}
+c = \frac{-(5/2) \pm \sqrt{25/4 - 4(\cos(b) + i\sin(b))(\cos(b) - i\sin(b))}}{2(\cos(b) + i\sin(b))} \\
+= \frac{-(5/2) \pm 3/2 }{2(\cos(b) - i\sin(b))}
+\end{gather*}
+We've used a few tricks here to simplify this, such as Pythagoras' identity and $e^{ix} = \cos(x) + i\sin(x)$, $\sin(-x) = \sin(x)$, etc. but our conclusion shows that the assumption $c = e^a$ with $a \in \reals$ is immediately violated if $b$ is not $\pi$, since not only is that one of the two values $b$ could take resulting in $c$ being a real number, but $b=0$ would imply that $c= e^a$ is negative, which is impossible for a real exponential. In that case, we obtain solutions $c = 1/2$ and $c = 2$ and $e^{ib} = -1$. This is almost what we wanted, except that $c$ can only be one of these. The result is we have deduced $\mathrm{tr}(e^B)$ is either $-1$ or $-4$.
+
+A more general proof can be given without even picking a $A$ matrix in which one shows that all $B \in \mathfrak{sl}_2(\reals)$ has $\mathrm{tr}(e^B) \ge -2$, and so our choice of a matrix $A \in \mathrm{SL}_2(\reals)$ with trace $-5/2$ was the key trick.
+\end{my proof}
+
+Our example of the circle and the line is not to say that the Lie algebra is defined merely by its shape, although this is the case in one dimension. In dimensions higher than one, Lie algebras carry an extra piece of information that can distinguish them on the basis of what you might think of as curvature, but not on the basis of topology. Details of how topology comes into play will have to be delayed until part 2, however this forms the fundamental limitation of how much of the Lie group may be recovered from just the Lie algebra with the exponential map.
+
 
 
 \end{document}
