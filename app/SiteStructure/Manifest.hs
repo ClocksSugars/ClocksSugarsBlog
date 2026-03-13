@@ -179,5 +179,13 @@ blogArticles = AllMyArticles [
          "pet_webgpusolver_bg.wasm.d.ts",
          "package.json"
          ]
-      }
+      },
+      SubChapter {
+         name = "0326-matrixgroups",
+         title = "Matrix Groups as Discussed on 03/14/26",
+         flags = ["IndexTopOfPage","DoNotShowOnIndex"],
+         description = "The written notes for a talk on matrix groups, group theory, and Lie groups, all from an exclusively matrix point of view.",
+         depends = [
+            ]
+         }
    ]
