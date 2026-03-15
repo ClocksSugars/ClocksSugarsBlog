@@ -1,7 +1,11 @@
 \documentclass[11pt]{article}
     \title{\textbf{Default Doc}}
+    \author{ClocksSugars}
+    \date{03/13/26}
 
-    \date{\the\day/\the\month/\the\year}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\rfoot{ClocksSugars -- Matrix Groups}
 
 \input{../pdf.tex}
 \input{../webmacros.tex}
@@ -11,14 +15,13 @@
 \usepackage{amsmath}
 \begin{document}
 
-\emph{The following is the article version of a talk given on 03/14/26. The intended audience of the talk is a split demographic of programmers/machine learning engineers and various levels of academicians/hardware engineers. Consequently the first part of this article will be focused on a highly pedagogical description of basic group theory and Lie groups absent much discussion of differential geometry. This article is not intended to give a one-to-one correspondance with the content of the talk, but rather to formally detail the scaffold of the talk. Accordingly, it is written to supplement the talk and to be able to stand on its own as a resource, but not as a transcript or an intrinsically motivated text.}
+\emph{The following is the article version of a talk given on 03/13/26. The intended audience of the talk is a split demographic of programmers/machine learning engineers and various levels of academicians/hardware engineers. Consequently the first part of this article will be focused on a highly pedagogical description of basic group theory and Lie groups absent much discussion of differential geometry. This article is not intended to give a one-to-one correspondance with the content of the talk, but rather to formally detail the scaffold of the talk. Accordingly, it is written to supplement the talk and to be able to stand on its own as a resource, but not as a transcript or an intrinsically motivated text.}
 
-\subsection{Part 1: Matrix Groups}
 To the engineer with a mild interest in mathematics (who has done well to avoid any serious algebraic courses), one's primary exposure to anything group-like is matrices. This is not exactly an accident on the part of the mathematicians who have come up with these formalisms; in fact the entire field of representation theory studies which groups can have their structure encoded in matrices (or rather linear maps) and what one can glean when this is possible. Additionally, some of the language of linear algebra is now standardized in such a way to match with the theory of groups; terms like the 'kernel' of a matrix show up meaning roughly the same thing in group theory.
 
 This creates a problem for any pedagogical efforts around group theory to a \squote{mature audience}, that is, a significant amount of theory must be developed before it becomes concrete to the engineer what exactly was gained from the theory of groups. After all, if you understand matrices, and matrices describe groups, surely you understand groups. In truth, there is simply much much more to be known about matrices, neverminding the depths to be known of groups.
 
-\subsubsection{What is a group?}
+\subsection{What is a group?}
 We will focus here on an \emph{extrinsic} discussion of groups. That is, for better or for worse, most of this article will concede any argument one might want to have about representation or parametrization of groups and simply consider them to be sets of matrices. In this case, the necessary definition is as follows.
 
 \begin{label definition}[Matrix Group]{MatrixGroupsArticleGroup}
@@ -78,9 +81,9 @@ x \\ y
 
 In fact, homomorphisms, when they are not \emph{isomorphisms} (i.e. bijective or invertible homomorphisms), act precisely in this way to flatten out or project down something approximating a dimension of a group. These two instances are listed separately because they also make distinct something that will become important to us. In the first equation, our linear map $A$ is $A: \reals^3 \to \reals^3$ but can only materially map outputs within a two dimensional subspace of $\reals^3$. In the latter, we eliminate any pretense of being in $\reals^3$ and speak of a linear map $B$ as $B\colon \reals^3 \to \reals^2$. Since we can just as easily insert elements of $\reals^3$ into $\reals^2$, one might think of the inclusion map $\iota \colon (x,y) \mapsto (x,y,0)$ in composition with our linear maps to define $A = \iota \circ B$. This is fine, useful even, but very importantly \emph{distinct} as we will also shortly see.
 
-A final remark must be made before we describe subgroups and their kinds in detail. I would argue that the description of a group as a set of actions is the proper one (as motivated by the theory of group actions), and this intuition will serve as a basis in this article. That is to say, when we think of a group, we should think that the group has some underlying \emph{thing} it acts on, in the case of linear maps this is a vector space by stretching, skewing, and rotating. In this frame, the property that a group must have an identity and inverses becomes contextualized; it must of course be able to \emph{do nothing} to the underlying object (hence we need an identity action), and in particular we are only interested in things we can do to this object which are reversable, lest we find our exploration of properties leading us to a stuck-state. But this also contextualizes our repeated interest in separable structure, thinks approximating dimensions, subgroups, etcetera. The theory of groups is built with the capability that it tells us which actions on an underlying object will not interfere with one another, or in what ways they will interfere. 
+A final remark must be made before we describe subgroups and their kinds in detail. I would argue that the description of a group as a set of actions is the proper one (as motivated by the theory of group actions), and this intuition will serve as a basis in this article. That is to say, when we think of a group, we should think that the group has some underlying \emph{thing} it acts on; in the case of linear maps, this is a vector space which it stretchs, skews, and rotates. In this frame, the property that a group must have an identity and inverses becomes contextualized; it must of course be able to \emph{do nothing} to the underlying object (hence we need an identity action), and in particular we are only interested in things we can do to this object which are reversable, lest we find our exploration of properties leading us to a stuck-state. But this also contextualizes our repeated interest in separable structure, things approximating dimensions, subgroups, etcetera. The theory of groups is built with the capability that it tells us which actions on an underlying object will not interfere with one another, or in what ways they will interfere. 
 
-\subsubsection{Subgroups}
+\subsection{Subgroups}
 
 Above we spoke of additive matrix groups, namely vector spaces, but our principle interest going forward will be of square matrix groups under multiplication. So in order to speak of subgroups, we will need to define the maximal group from which those matrix groups come, and this is called the \emph{general linear group}, denoted $\mathrm{GL_n(\reals)}$ for the group of $n\times n$ matrices with real entries. The sole requirement for a matrix to be a member of this group will be simply that the matrix has an inverse. This does more than just satisfy the inverse requirement of groups though, as we see from studying our first square matrix homomorphism. With any luck, you are already familiar with the matrix determinant, which satisfies $\det(AB) = \det(A) \det(B)$, an obvious multiplicative homomorphism.
 
@@ -139,7 +142,7 @@ In the case of the determinant, the output group $\reals_\times$ implies the exi
 
 If you are familiar with the property of determinants to give the volume of an $n$-dimensional parallelopiped with edges defined by the columns of a matrix, this property means that a matrix in $\mathrm{SL}_n(\reals)$ may rotate, flip, and skew a vector space, but never change its volume.
 
-\subsubsection{Matrix Groups of Interest}
+\subsection{Matrix Groups of Interest}
 
 This article will primarily focus on Lie groups, i.e. continuous groups, but before we get there we should describe some other of groups of interest. Chiefly among the discrete groups is the groups of permutations, called the \emph{symmetric} groups, $\mathrm{S}_n$. In the description given earlier of groups existing to act on things, the permutations of the symmetric group act to turn one ordering of a set into another ordering. For instance, the set of numbers $\{1,2,3,4,5\}$ may be reordered by a permutation matrix in the following manner. \begin{gather*}
 \begin{bmatrix}
@@ -200,7 +203,7 @@ The orthogonal group refers to matrices which rotate and flip a vector space, bu
 
 Finally, it will serve us to speak about the complex analogy for these groups, the unitary and special unitary groups $\mathrm{U}(n)$ and $\mathrm{SU}(n)$ respectively. Justifying their rules would require a departure into complex numbers that's just a little too long for this section, but the basic pattern remains the same. The unitary matrices are those $A \in \mathrm{U}(n)$ which satisfy $A^\dagger = A^\inv$. The analogous notion of \emph{flips} here gets a bit stranger, since a unitary matrix is not confined to only determinants $1$ and $-1$ but all complex numbers of magnitude one, so $i$, $-i$, $\sqrt{1/2} + i\sqrt{1/2}$, anything of the form $\cos(\theta) + i\sin(\theta)$. We may nonetheless want to speak of those matrices satisfying $A^\dagger = A^\inv$ with determinant exactly the positive real number one, and for that we have the matrix group $\mathrm{SU}(n)$.
 
-\subsubsection{Lie Groups}
+\subsection{Lie Groups}
 
 A clear distinction must be drawn between discrete groups and continuous groups. That is, it is not too hard to enumerate the permutations in a symmetric group: one need only consider ways you could swap elements in a list. However if someone were to ask you to list all of the vectors in a vector space, you would rightly point out this is an equally absurd request as counting out all the numbers between zero and one. One can reason out that any permutation one may desire can usually be constructed by some sequence of the pairs of following permutations: \begin{gather*}
 (1,2,3,4,5) \mapsto (2,3,4,5,1), \\
@@ -258,7 +261,7 @@ We can also take what we've described above and use it to figure out when a spac
 
 Finally, we should note that strictly speaking, many of the groups we described fail to have a perfectly differentiable group multiplication operation. This too is immediately apparent using the intuitions we have built up: consider the Lie group $\reals_\times$. If we think of it as a space that is a line, then it is clear that the line has a cut in the middle, since we cannot include zero in the Lie group. Since the determinant is differentiable group homomorphism, it is similarly apparent that the orthogonal group must be made of two disconnected components since an orthogonal matrix has determinant of either exactly one or exactly negative one. The \emph{flips} we mentioned earlier simply cannot be multiplied differentiably, \emph{except} in the case of complex matrix groups as we described in the previous subsection. In $\mathrm{GL}_n(\mathbb{C})$, there is a hole in the middle, but the space is connected. Similarly, taking the determinant of unitary matrices shows that the space clearly has a hole in the middle but it is still connected. Regardless, all of these matrix groups are generally considered Lie groups. The caveat made is that for each $\reals$ group with this cut, we define positive and negative components, $\mathrm{O}^+(n) = \mathrm{SO}(n)$ and $\mathrm{O}^-(n)$ isomorphic to $\mathrm{O}^+(n)$ for instance. We then think of $\mathrm{O}(n)$ as $\mathrm{O}^+(n) \times \{1,-1\}$.
 
-\subsubsection{The Exponential Map}
+\subsection{The Exponential Map}
 In regular calculus, it is well known that the derivative of an exponential $e^x$ is itself. Moreover, the differential equation \begin{gather*}
 \frac{df}{dx} = a f(x)
 \end{gather*}
@@ -333,7 +336,7 @@ A more general proof can be given without even picking a $A$ matrix in which one
 
 Our example of the circle and the line is not to say that the Lie algebra is defined merely by its shape, although this is the case in one dimension. In dimensions higher than one, Lie algebras carry an extra piece of information that can distinguish them on the basis of what you might think of as curvature, but not on the basis of topology. Details of how topology comes into play will have to be delayed until part 2, however this forms the fundamental limitation of how much of the Lie group may be recovered from just the Lie algebra with the exponential map.
 
-\subsubsection{Lie Algebras}
+\subsection{Lie Algebras}
 
 It is important to remember throughout all of this that groups are best thought of defining a set of invertible actions on some object. In fact one can even think of the group multiplication operator, in the sense that we had described it being differentiable on a Lie group, as itself being an action. One of the first group actions described in the theory of Lie groups is the \squote{left translation action}, the map $L_g \colon G \to G$ which for some $g \in G$ sends each $h\in G$ to $gh$, or the respective \squote{right translation action} $R_g$ which sends $h$ to $hg$. When we speak of the group multiplication as being differentiable, it is precisely these maps $L_g$ and $R_g$ we are requiring to be differentiable, and upon integrating these derivatives back into curves, we obtain the previously discussed exponential map. Moreover, these actions allow us to take a Lie algebra in the sense that it is a direction space, and apply that set of directions to every point in the space, defining the \emph{left invariant vector fields} and \emph{right invariant vector fields}. 
 
@@ -358,7 +361,7 @@ defined as the change in $g \cdot e^{t \xi} \cdot g^\inv$ for a tiny change in $
 
 The Adjoint map has many uses to many people other than us; we are not done until even that little $g$ on the bottom of $\mathrm{Ad}_g$ is replaced with a Lie algebra element. We should at least think about what this map is doing, and thus what it means: we have replaced the $h$ in our previous $\kappa_g(h)$ with the exponential of a Lie algebra element $\xi \in \mathfrak{g}$. Since $\exp \colon \mathfrak{g} \to G$, this makes perfect sense, but the scalar $t$ in there means we can differentiate the quantity in a single value. If our intuitions about exponentials from normal calculus are any indication, $\frac{d}{dt} e^{t\xi}$ at $t=0$ should just be $\xi$. In fact that is true even in the Lie group context, but with the $g$ and $g^\inv$ on either side, we have an important modification to this. What we have said is, before considering a direction we could go in, do not consider this direction from the identity as we might normally with the Lie algebra. Instead, start at $g^\inv$, take a tiny step in the direction $\xi$ \emph{should} be in, and then use $g$ to take $\xi$ at $g^\inv$ back to the identity.
 
-The final result is the answer to the question: what direction did our initial direction change in, when we considered it somewhere else then dragged it back? Consider the following example using the rotations of $\mathrm{SO(3)}$ on the Earth; Ecuador is roughly on the opposite side of the world as Indonesia, roughly on the equator, and is at a fairly close longitude to New York. If you were in New York, travelled directly in a straight line to Utah by somehow being left behind as the Earth spun around its north-south-pole axis, took a tiny step in the direction you would go if the Earth underneath you were to spin on its Ecuador-Indonesia-equatorial axis (this might be towards San Diego), and then went back to New York, how would the direction of that step have changed? This is now a thing we can calculate, although the result is relatively disappointing when the three dimensions of $\mathrm{SO}(3)$ are flattened to the two dimensional surface of a sphere. The more interesting result will come when our trip from New York to Utah is no longer a journey that would take a plane but merely a single step.
+The final result is the answer to the question: what direction did our initial direction change in, when we considered it somewhere else then dragged it back? Consider the following example using the rotations of $\mathrm{SO(3)}$ on the Earth; Ecuador is roughly on the opposite side of the world as Indonesia, roughly on the equator, and is at a fairly close longitude to New York. If you were in New York, travelled to Utah across a line of longitude (perhaps by somehow being left behind as the Earth spun around its north-south-pole axis), took a tiny step in the direction you would go if the Earth underneath you were to spin on its Ecuador-Indonesia-equatorial axis (this might be towards San Diego), and then went back to New York, how would the direction of that step have changed? This is now a thing we can calculate, although the result is relatively disappointing when the three dimensions of $\mathrm{SO}(3)$ are flattened to the two dimensional surface of a sphere. The more interesting result will come when our trip from New York to Utah is no longer a journey that would take a plane but merely a single step.
 
 \begin{example}{m}
 The calculation above can be done by hand if we remember that what $\mathrm{SO}(2)$ looks like. That is, the antisymmetric matrices of $\mathfrak{so}(3)$ are of the form \begin{gather*}
@@ -425,6 +428,8 @@ with $\phi = 0$ at the end. Completing this calculation yields the following Lie
 \end{bmatrix}
 \end{gather*}
 Placing this result in the context of our above description on the globe, this says that the direction you point in changes in the direction matching the spin of the Earth across its Algeria-Pacific-Ocean axis (the axis $90^\circ$ away on the equator from the Ecuador-Indonesia axis). When we describe this on the sphere instead of as a rotation of the space of rotations, these rotations look quite similar, making the example a bit less illustrative.
+
+In the specific case of $\theta = 2\pi/9$, or $40^{\circ}$ of longitude as is the case of New York to Utah, we could think of this change as going from pointing south-south-west to south-west-west as rotated by a different axis $40^\circ$ west of Ecuador. This may seem confusing until you remember that lines of longitude are not straight lines on the earth, and to travel one (except on the equator) requires airplanes to turn constantly.
 \end{example}
 
 Much to the confusion of everyone involved, the derivative of the Adjoint map is often also called the adjoint map, distinguished by the capitalization of the word adjoint, but also written using the commutator bracket notation from before. The big Adjoint map can be thought of as $\mathrm{Ad}\colon G \times \mathfrak{g} \to \mathfrak{g}$ and the little adjoint map as $\mathrm{ad} \colon \mathfrak{g} \times \mathfrak{g} \to \mathfrak{g}$. This is the map we want to describe the failure of the group to be commutative.
@@ -448,7 +453,7 @@ And this is the matrix commutator. It should make perfect sense for what we want
 What is to stop us now from simply defining a Lie bracket, and insisting on some space of directions just to see what space it generates? Almost nothing, but we need to learn the rules that Lie brackets follow. Much is obvious from the formula $[\xi,\nu] = \xi\nu - \nu\xi$, but we need to derive the \emph{Jacobi identity}. We can be derive it by first noticing that $\mathrm{Ad}_g [\xi,\nu] = [\mathrm{Ad}_g\xi, \mathrm{Ad}_g\nu]$. Observe: \begin{align*}
 \mathrm{Ad}_g[\xi,\nu] &= \mathrm{Ad}_g (\xi\nu - \nu \xi) \\
 &= g\xi\nu g^\inv - g \nu \xi g^\inv \\
-&= g \xi g^\inv g \nu g^\inv - g \nu g^\inv g \xi g^\inv \\
+&= (g \xi g^\inv) (g \nu g^\inv) - (g \nu g^\inv) (g \xi g^\inv) \\
 &= (\mathrm{Ad}_g \xi) (\mathrm{Ad}_g \nu) - (\mathrm{Ad}_g \nu) (\mathrm{Ad}_g \xi) \\
 &= [ \mathrm{Ad}_g \xi , \mathrm{Ad}_g \nu]
 \end{align*}
@@ -458,7 +463,7 @@ Now consider, what if we take the Lie bracket of a Lie bracket? What is $[\xi,[\
 &= \frac{d}{dt} \left( [\mathrm{Ad}_{\exp(t\xi)}\nu, \mathrm{Ad}_{\exp(t\xi)}\mu]\right)_{t=0} \\
 &= \frac{d}{dt} \left( (\mathrm{Ad}_{\exp(t\xi)}\nu) (\mathrm{Ad}_{\exp(t\xi)}\mu) - (\mathrm{Ad}_{\exp(t\xi)}\mu)(\mathrm{Ad}_{\exp(t\xi)}\nu) \right)_{t=0}
 \end{align*}
-Applying the product rule, we proceed with \begin{align*}
+Applying the product rule (and then packaging the difference back up into Lie brackets, this line would be a bit too long otherwise), we proceed with \begin{align*}
 &= \frac{d}{dt} \left( [\mathrm{Ad}_{\exp(t\xi)}\nu, \mu] \right)_{t=0} + \frac{d}{dt} \left( [\nu, \mathrm{Ad}_{\exp(t\xi)}\mu] \right)_{t=0} \\
 &= [[\xi,\nu],\mu] + [\nu,[\xi,\mu]] 
 \end{align*}
@@ -476,7 +481,63 @@ Let $\mathfrak{g}$ be a vector space together with a binary operation $[\square,
 \end{gather*}
 \end{definition}
 
-Returning to our example from earlier, we can see by a very simple calculation that the Lie bracket of any two of the three basis vectors of $\mathfrak{so}(3)$ is simply the third.
+We should build some intuitions here. The Lie bracket tells us how a tiny step in a direction changes if before we take it, we take a step in some other direction, then afterwards we take the reverse step in that other direction. Obviously such a change would be miniscule, but the tools of calculus can renormalize this tiny change to something large enough to speak about. The first thing we should expect is that if we apply a Lie bracket to the same element twice, this is the same as asking how a step changes if we take two steps in the same direction and one step backwards; the step in the middle does not change at all, and so we have $[\xi,\xi] = \xi\xi - \xi \xi = 0$ as we should expect.
+
+
+
+Returning to our example from earlier, we can see by a very simple calculation that the Lie bracket of any two of the three basis vectors of $\mathfrak{so}(3)$ is simply the third. We can do this calculation explicitly.
+
+\begin{example}{m}
+We'll recall and now name our Lie algebra matrices for $\mathfrak{so}(3)$:
+\begin{gather*}
+L_x =\begin{bmatrix}
+0 & -1 & 0 \\
+1 & 0 & 0 \\
+0 & 0 & 0
+\end{bmatrix}, \hspace{1em} L_y = \begin{bmatrix}
+0 & 0 & -1 \\
+0 & 0 & 0 \\
+1 & 0 & 0
+\end{bmatrix}, \hspace{1em} L_z = \begin{bmatrix}
+0 & 0 & 0 \\
+0 & 0 & -1 \\
+0 & 1 & 0
+\end{bmatrix} 
+\end{gather*}
+Knowing now that $[\xi,\nu] = \xi\nu - \nu\xi$, we can calculate a pair explicitly and we see \begin{align*}
+&\begin{bmatrix}
+0 & -1 & 0 \\
+1 & 0 & 0 \\
+0 & 0 & 0
+\end{bmatrix}\begin{bmatrix}
+0 & 0 & -1 \\
+0 & 0 & 0 \\
+1 & 0 & 0
+\end{bmatrix} - \begin{bmatrix}
+0 & 0 & -1 \\
+0 & 0 & 0 \\
+1 & 0 & 0
+\end{bmatrix} \begin{bmatrix}
+0 & -1 & 0 \\
+1 & 0 & 0 \\
+0 & 0 & 0
+\end{bmatrix} \\
+&= \begin{bmatrix}
+0 & 0 & 0 \\
+0 & 0 & -1 \\
+0 & 0 & 0
+\end{bmatrix} - \begin{bmatrix}
+0 & 0 & 0 \\
+0 & 0 & 0 \\
+0 & -1 & 0
+\end{bmatrix} = \begin{bmatrix}
+0 & 0 & 0 \\
+0 & 0 & -1 \\
+0 & 1 & 0
+\end{bmatrix} = L_z.
+\end{align*}
+The other calculations proceed similarly.
+\end{example}
 
 %If we wanted to throw a Lie algebra together and see what space it described, not only could we, we are not obligated to define a non-zero Lie bracket. This is to say, we can set $[\xi,\nu] = 0$ for all $\xi,\nu \in \mathfrak{g}$ and still satisfy the Jacobi identity. The only disappointing thing about doing that is that this exclusively results in a Lie group which is some form of euclidean plane, torus, cylinder, etc. and moreover the Lie algebra itself cannot tell you which of these you came from.
 

@@ -182,8 +182,8 @@ blogArticles = AllMyArticles [
       },
       SubChapter {
          name = "0326-matrixgroups",
-         title = "Matrix Groups as Discussed on 03/14/26",
-         flags = ["IndexTopOfPage","DoNotShowOnIndex"],
+         title = "Matrix Groups as Discussed on 03/13/26",
+         flags = ["IndexTopOfPage"],
          description = "The written notes for a talk on matrix groups, group theory, and Lie groups, all from an exclusively matrix point of view.",
          depends = [
             ]
