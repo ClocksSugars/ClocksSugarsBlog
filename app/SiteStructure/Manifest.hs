@@ -187,5 +187,13 @@ blogArticles = AllMyArticles [
          description = "The written notes for a talk on matrix groups, group theory, and Lie groups, all from an exclusively matrix point of view.",
          depends = [
             ]
+         },
+      SubChapter {
+         name = "0326-homotopy-type-theory",
+         title = "Homotopy Type Theory as Introduced on 03/13/26",
+         flags = ["IndexTopOfPage","DoNotShowOnIndex"],
+         description = "The written notes for a talk on type theory, topology, and homotopy type theory, as designed for a programmer audience.",
+         depends = [
+            ]
          }
    ]

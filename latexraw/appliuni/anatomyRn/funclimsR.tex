@@ -71,7 +71,7 @@ If this is the case we write $\lim_{x\to p} f(x) = L$ and say that $f$ converges
 
 This version of the limit will actually be useful to us, but as you can see, the mess of symbols is only particularly illustrative of what the limit is doing when we aren't hedging against the risk of asking what $f(p)$ is. In fact you can see that this definition of the limit is almost exactly the same as above, except that instead of asking that $p$ is in the domain, we merely ask that it is a limit point of the domain, and then we say both that we're only interested in the part of $U$ actually in our domain $A$, and we don't want $p$ included. To exclude $p$, we use the \hyperlink{https://clockssugars.blog/appliuni/prelims/maththink.html\#maththink_4}{set-minus} notation introduced in the previous chapter to, in a sense, subtract all elements of some other set, which is in this case just the singleton set containing only $p$.
 
-\figuresvgwithcaption{./funcconvvsseqconv}{A depiction of four kinds of limits. The above two limits are the epsilon-N limit for sequences and the topological/region-of-convergence limit; in the epsilon-N limit we are concerned with a fixed radius $\varepsilon$ around the limit and we see with $N=4$, all future sequence points are within this radius; in the topological limit, an oval depicts that the shape of the open set $U$ does not matter, only that $U$ exists and is an open set. Function limits are similar. In the bottom left we see a topological limit, mapping $U$ (oval to depict any open set) around $p$ into $f(U) \subset V$ around $L$. Likewise, the epsilon-delta limit (defined below) can do this with fixed radii $\delta$ and $\varepsilon$}
+\figuresvgwithcaption{./funcconvvsseqconv}{A depiction of four kinds of limits. The above two limits are the epsilon-N limit for sequences and the topological/region-of-convergence limit; in the epsilon-N limit we are concerned with a fixed radius $\varepsilon$ around the limit and we see with $N=4$, all future sequence points are within this radius; in the topological limit, an oval depicts that the shape of the open set $U$ does not matter, only that $U$ exists and is an open set. Function limits are similar. In the bottom left we see a topological limit, mapping $U$ (oval to depict any open set) around $p$ into $f(U) \subset V$ around $L$. Likewise, the epsilon-delta limit (defined below) can do this with fixed radii $\delta$ and $\varepsilon$.}
 
 We'll show convergence of our $f(x) = \big(x(x-1)\big)/(x-1)$ example shortly, but before we do, we should describe a version of this limit that's a little easier to use. As seen in the diagram above, just like we showed that epsilon-N limits for sequences are merely a special case of choosing intervals (displayed as circles) centered on our limits as our open sets in a topological limit, we can do the same for function limits. This will allow us to prove our limits using orderings instead of set membership.
 
@@ -115,20 +115,87 @@ The converse proof is similar; assume the relaxed epsilon-delta limit as in d, s
 Below we'll conclude our previously mentioned example, however you'll notice it's ultimately fairly trivial. In fact this will remain the case with most specific examples of function limits until we develop some more sophisticated tools; right now, we only have the ability to manipulate algebraic functions to create such holes in the domain.
 
 \begin{example}[Showing convergence of $\big(x(x-1)\big)/(x-1)$]{m}
-Let's continue our prior example first, although it will quickly become apparent that this is one of the easiest kinds of limits to show. Setting $f(x) = \big(x(x-1)\big)/(x-1)$ and $L = 1$ at $p=1$, showing the limit is to show that for all $\varepsilon > 0$, there exists some $\delta > 0$ such that when $|x - p| = |x - 1| \le \delta$, we have $|f(x) - L| = |f(x) - 1| \le \varepsilon$.
+Let's continue our prior example, although it will quickly become apparent that this is one of the easiest kinds of limits to show. Setting $f(x) = \big(x(x-1)\big)/(x-1)$ and $L = 1$ at $p=1$, showing the limit is to show that for all $\varepsilon > 0$, there exists some $\delta > 0$ such that when $|x - p| = |x - 1| \le \delta$, we have $|f(x) - L| = |f(x) - 1| \le \varepsilon$.
 
 As before, since this function is not defined at $x = 1$, its domain is $(-\infty, 1) \cup (1, \infty)$, so it is not meaningful to speak of $f(1)$. But if this is true, then it is also reasonable to simply cancel the $(x-1)/(x-1)$ component to $1$, since this is possible on all $x \neq 1$. In this case, we are trying to show there exists $\delta > 0$ such that $|x - 1| \le \delta$ implies $|f(x) - L| = |x - 1| \le \varepsilon$.
 
 For any $\varepsilon > 0$ we are given, this is satisfied by simply setting $\delta = \varepsilon$.
 \end{example}
 
-What this example
+\subsection{Continuity, Sequential Characterizations, and Algebraic Theorems}
 
+For now, most of what our limits can show us is that functions seem to \squote{do what we expect}. Most functions we can take limits of right now either have a hole in their domain because we put it there (i.e. insisting a function which is well defined at a point cannot be taken there) or do not converge at all. In the former case, the hole is not even necessary; we may simply take the limit of a function for a point it is defined for, and to great anti-climax, find that it usually converges.
 
+But this is not always the case. Consider the following piecewise function. \begin{gather*}
+H(x) = \left\{ \begin{matrix} -1 & x < 0 \\ 1 & x > 0\end{matrix}\right.
+\end{gather*}
+That is, we speak of a function which is negative one when $x < 0$ and one when $x > 0$. This function also has a hole at $x = 0$, which is clearly a limit point of the domain $\reals \setminus\{ 0 \}$ since we obviously may define a sequence $a_n = 1/n$ converging to $0$, so we may take a limit there in theory. In practice, there is no such $L$ that $H$ will converge to at $x=0$. One need only choose $0 < \varepsilon < 1$ and see that suddenly, \emph{all} open sets $U \subset \reals$ (formed by $|x| < \delta$ or otherwise) containing $0 \in U$ fail to have $H(U \setminus \{0\}) \subset (-\varepsilon, \varepsilon)$, due simply to the fact that $\varepsilon < 1$ will mean that $(-\varepsilon, \varepsilon)$ shrinks into a range which $H$ never goes. You could try fixing this by setting $L = -1$ or $L=1$ but in the former case, any $x=\delta/2$ would violate $|H(x) - L| < \varepsilon$ by $H(x) = 1$ and in the latter, $x=-\delta/2$ violates it since $H(x) = -1$.
 
+What we have encountered is a \emph{discontinuity}, often described as a place where our pen must disappear off the page before reapparing somewhere else when we want to draw the graph. In fact we could simply choose to define $H(0) = 1$ or $H(0) = -1$, and this problem would remain for exactly the reasons discussed above. We could choose another function $D\colon \reals \to \reals$ which is $D(0) = 1$ and $D(x) = 0$ for $x \neq 0$ instead, since in this case the limit does exist, however it has a similar problem in that its limit at $x=0$ is $L=0$, not the value $D(0)=1$. It turns out that accounting for these sorts of cases is all we need to establish a criterion of continuity, and indeed this will be our first serious application of function limits.
 
+\begin{label definition}[Continuous Functions]{RContinuousFunctions}
+Let $f\colon A \to \reals$ be a function with $A \subseteq \reals$ and $B \subseteq A$. \begin{itemize}
+\item If for $p \in A$, we have $\lim_{x \to p}f(x) = f(p)$, then we say that $f$ is \emph{continuous at} $p$.
+\item If for all $p\in B$, $\lim_{x \to p}f(x) = f(p)$, we say that $f$ is \emph{continuous on} $B$.
+\item If for all $p\in A$, we have $\lim_{x \to p}f(x) = f(p)$, we say that $f$ is a \emph{continuous function}.
+\end{itemize}
+When $f$ is a continuous function, we say that it is a member of the set $f \in C^0(A,\reals)$, often abbreviated $C^0(A)$, the set of continuous functions from $A$ to $\reals$.
+\end{label definition}
 
+We should make the connection we are drawing between paths and sequences explicit. A sequence and a path are clearly not the same thing, and arguments we have used thusfar for sequences do not apply for paths, such as in \ref{pro:BoundednessOfConvergentSequences} where we bounded the \squote{beginning} of a sequence based on it being finite.
 
+Nonetheless, it is clear that intrinsic to many of the statements we have made about sequence limits is a certain intuition that is appropriate to paths. Now with continuity as a motivation, it is natural to ask whether, for a sequence $(a_n)_{n \in \nats}$ with limit $a \in \reals$ and a function $f\colon \reals \to \reals$, we have $\lim_{n\to\infty}f(a_n) = f(a)$. That is, can we test continuity (and perhaps other function limits) with mere sequences, bypassing the need to use function limits at all?
+
+The answer in general is no, but there is indeed a strong link to be made here which will prove invaluable to us. We must strengthen the statement we are aiming for, that is, we cannot merely say that a statement about convergence of sequences implies something about convergence of functions, but we can say that if it is true on \emph{all} convergent sequences, and we can say the converse.
+
+\begin{label theorem}[Sequential Characterization of Function Limits]{SequentialCharacterizationRLimits}
+Let $f\colon A \to \reals$ be a function and $p,L \in \reals$ with $p$ a limit point of $A$. Then the following statements are equivalent: \begin{itemize}
+\item $\displaystyle{\lim_{x\to p} f(x) = L}$
+\item for all sequences $(a_n)_{n \in \nats}$ with $a_n \in A$ and $a_n \neq p$ for all $n \in \nats$, and with $a_n \to p$ as $n \to \infty$, we have $\lim_{n \to \infty} f(a_n) = L$.
+\end{itemize}
+\end{label theorem}
+
+The following proof will make heavy use of propositional manipulations, so it makes a good example for inspection if that is something you are interested in.
+
+\begin{my proof}{m}
+Suppose first that $\lim_{x \to p} f(x) = L$, that is, by the relaxed epsilon-delta characterization, that for all $\varepsilon_1 > 0$, there exists $\delta> 0$ such that when $|x - p| \le \delta$, we have $|f(x) - L| \le \varepsilon_1$. If we are given some $\varepsilon_2 > 0$ for a relaxed epsilon-N characterization of the sequence limit, along with an appropriate $(a_n)_{n\in \nats}$ with the above guarentees, we must find some $N$ such that for all $n \ge N$, we have $|f(a_n) - L| \le \varepsilon_2$. So set $\varepsilon_1 = \varepsilon_2$ so that our $\delta$ exists with the properties mentioned above. We already know that $a_n \to p$ as $n \to \infty$, so if we treat this as its own relaxed epsilon-N limit and set $\varepsilon_3 = \delta$, we obtain $N$ such that for all $n \ge N$, we have $|a_n - p| \le \delta$. This is the $N$ we want: for all $n \ge N$, we know $|a_n - p| \le \delta$, but by the relaxed epsilon-delta limit for $f$ we knew that any $x$ (including $x=a_n$) satisfying $|x - p| \le \delta$ satisfies $|f(x) - L| \le \varepsilon_1$. So we conclude $|f(a_n) - L| \le \varepsilon_1 = \varepsilon_2$.
+
+For the converse, we will need some more advanced propositional tools. This proof will be done via proof by contrapositive, so we will show not that \dquote{for all sequences $(a_n)_{n\in \nats}$ which satisfy etc. we have $\lim_{n \to \infty} f(a_n) = L$} implies $\lim_{x \to p} f(x) = L$, but rather, with those two statements as our $P$ and $Q$ respectively, we will prove $\neg Q \implies \neg P$. Under \hyperref[thm:NegationRules]{our various rules of propositional negation}, $\neg Q \Rightarrow \neg P$ is the same as $P \Rightarrow Q$. This will also necessitate a careful negation of the full statements, exercising our other rules of propositional negation.
+
+Beginning with the statement that $\lim_{x \to p}f(x) = L$, we will negate the epsilon-delta limit, taking $p$ being a limit point as a given. \begin{gather*}
+\neg \Big( \forall \varepsilon_1 > 0, \exists \delta > 0, \forall x \in A, |x - p| \le \delta \Rightarrow |f(x) - L| \le \varepsilon_1\Big) \\
+\Leftrightarrow \exists \varepsilon_1 > 0, \forall \delta > 0, \exists x \in A, \neg \Big(|x - p| \le \delta \Rightarrow |f(x) - L| \le \varepsilon_1\Big) \\
+\Leftrightarrow \exists \varepsilon_1 > 0, \forall \delta > 0, \exists x \in A, \big( |x - p| \le \delta \big) \wedge \big( |f(x) - L| > \varepsilon_1 \big)
+\end{gather*}
+The final form of this is \dquote{there exists $\varepsilon_1 > 0$ such that for all $\delta_1 > 0$, there exists $x \in A$ such that both $|x-p|< \delta$ can be true while $|f(x) - L| \ge \varepsilon_1$ (i.e. violating the bound that is appropriate for a limit) is also true}. This should make sense to us as the negation, since the first three quantifiers negate as \squote{for all} turning into a search for an exception, and \squote{there exists} turning into a proof that there are no counter examples. The negation of the final implication should also make sense to us, as explained in \ref{thm:NegationRules}, since an implication $P \Rightarrow Q$ can be shown false if we find an instance where both $P$ was true and $Q$ was not true.
+
+The second statement we need to negate ought to be negated in two parts. We have the statement of the sequential limit itself, an the statement around the limit. The former will follow similarly as above. \begin{gather*}
+\neg \Big( \forall \varepsilon_2 > 0, \exists N \in \nats, \forall n \in \nats, (n \ge N) \implies \big( |f(a_n) - L| \le \varepsilon_2  \big)\Big) \\
+\Leftrightarrow \exists \varepsilon_2 > 0, \forall N \in \nats, \exists n \in \nats, \neg \Big( (n \ge N) \implies \big(|f(a_n) - L| \le \varepsilon_2  \big) \Big) \\
+\Leftrightarrow \exists \varepsilon_2 > 0, \forall N \in \nats, \exists n \in \nats, (n \ge N) \wedge \big( |f(a_n) - L| > \varepsilon_2 \big)
+\end{gather*}
+This will form the statement $\neg \left( \lim_{n \to \infty} f(a_n) = L \right)$. The statement it exists within is the following: \begin{gather*}
+\forall \left( (a_n)_{n\in \nats}, \left( \lim_{n \to \infty} a_n = p\right) \wedge \big( \forall n \in \nats, (a_n \in A) \wedge (a_n \neq p) \big)\right), \lim_{n \to \infty} f(a_n) = L.
+\end{gather*}
+The reason for the unusual format is that it is not enough to say here that \squote{for all sequences etc.} we must enforce that our statement only holds when we say \squote{for all} for sequences that follow specific conditions, namely that they must converge to $p$, and that for all $n \in \nats$, they satisfy $a_n \in A$ and $a_n \neq p$. Consequently, the formal statement calls for not a sequence of nested \squote{for all}s and \squote{there exists} statements as in the case of a limit, but rather one big for-all in which what must be provided is a pair containing first a sequence and next, all of the relevant propositional evidence that this sequence is satisfactory. Ultimately, we may combine the earlier negation of the limit with negation on this one singular quantifier to obtain the total negative: \begin{gather*}
+\exists \left( (a_n)_{n\in \nats}, \left( \lim_{n \to \infty} a_n = p\right) \wedge \big( \forall n \in \nats, (a_n \in A) \wedge (a_n \neq p) \big)\right), \neg \left( \lim_{n \to \infty} f(a_n) = L \right)
+\end{gather*}
+This statement can now be read \dquote{for some sequence $(a_n)_{n\in \nats}$ which converges to $p$ and satisfies that for all $n \in \nats$, both $a_n \in A$ and $a_n \neq p$, $\big(f(a_n)\big)_{n\in \nats}$ will fail to converge to $L$ as $n \to \infty$}.
+
+We are finally ready to proceed to the actual proof, which will be to the effect that: if all sequences obeying the conditions described imply $f(a_n) \to L$ as $n \to \infty$ then $\lim_{x \to p}f(x) = L$ since we can show that if $\lim_{x \to p} f(x) = L$  is not true, then it was because there existed a counter example sequence obeying the necessary conditions in which $f(a_n)$ failed to converge to $L$.
+
+We begin with the assumption that $\neg(\lim_{x \to p} f(x) = L)$, i.e. that there exists some $\varepsilon_1 > 0$ such that for all choices of $\delta_1 > 0$, there will exist a $x \in A$ which is both $|x- p| < \delta$ and $|f(x) - L| \ge \varepsilon_1$. Take $\varepsilon_1$ to exist as presumed. Since our statement now provides a \squote{for all} in $\delta$, let us choose a sequence of deltas assigned $(\delta_n)_{n\in \nats}$ where $\delta_n = 1/n$. Since our hypothesis holds for all $\delta_n$, we also say that each $\delta_n$ has some $x_n$ such that both $|x_n - p| < \delta_n$ and $|f(x) - L | \ge \varepsilon_1$, so we'll define a sequence of these too called $(x_n)_{n\in \nats}$.
+
+Our goal now, as previous discussed, is to find a sequence $(a_n)_{n\in \nats}$ which converges to $p$, is never $p$, and is always in $A$, for which $\lim_{n \to \infty} f(a_n) = L$ fails to hold, and we claim that $(x_n)_{n\in \nats}$ is this sequence. In order for $(x_n)_{n\in \nats}$ to be applicable however, we must first show that it converges to $p$; we already know by construction that each $x_n\in A$, and we can guarentee that $x_n \neq p$ since it is defined $|f(x) - L| > \varepsilon_1$, which may not be possible if $x_n = p$ (if $p$ is in the domain however, a version of this argument is readily constructed which drops the $a_n \neq p$ for all $n\in \nats$ condition, so without loss of generality, assume $x_n \neq p$ because $p \notin A$). 
+
+To show $(x_n)_{n\in \nats}$ converges to $p$, say we are given $\varepsilon_3 > 0$ in accordance with a relaxed epsilon-N limit. It suffices to choose $N = \lceil 1/\varepsilon_3 \rceil$ since we already know that $|x_n - p| \le \delta_n = 1/n$, so by similar reasoning as in example \ref{exa:IntroInverseNSquaredLimit}, we know for all $n \ge N = \lceil 1/\varepsilon_3 \rceil$, we satisfy $|x_n - p| \le \delta_n \le \varepsilon_3$.
+
+Now, we finally show the negated limit, i.e. prove $\neg(\lim_{n \to \infty} f(x_n) = L)$. We must show there exists a $\varepsilon_2 > 0$ such that for all $N \in \nats$, there exists a $n \in \nats$ such that both $n \ge N$ and $|f(x_n) - L| > \varepsilon_2$ may be true. Take $\varepsilon_2 = \varepsilon_1$, the epsilon we already know exists by hypothesis. Now presume we are given some $N \in \nats$ in accordance with the following \squote{for all} quantifier. Remembering that each $x_n$ was defined to have the property that $|x-p| \le \delta_n$ and $|f(x) - L| > \varepsilon_1$, and we now have $\varepsilon_2 = \varepsilon_1$, we have that all $x_n$ satisfy $|f(x_n) - L| > \varepsilon_2$ as desired. We need only show that this is true for some $n \ge N$, but since it is true on all $n$, it suffices to pick any valid one.
+
+We are done.
+\end{my proof}
+
+From the perspective of the development of a theory, this connection is remarkable. We are now in a position to extend many of our theorems about sequence limits to function limits.
 
 
 
