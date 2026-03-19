@@ -10,6 +10,7 @@ module LatexToHtml.ReferenceHandling (
 
 import Data.Map.Strict (Map, empty, insert, fromList, (!?))
 import Text.Blaze.Html5 (Html)
+import Text.Blaze.Html.Renderer.String (renderHtml)
 
 data RefIndexState = RefIndexState
    {  theorems    :: Int
@@ -18,7 +19,10 @@ data RefIndexState = RefIndexState
    ,  subsection  :: (Int, Map String (Html, String, Int), String) -- CurrentSection, Map between ID/label (this can be pagename_num by default) and title, pagename, number it occurs at, then current section label
    ,  subsubsection  :: (Int, Map String (Html, String, String, Int)) -- CurrentSubsection, map between ID/label, title, page name, section-id it's under, subsection number
    ,  references  :: Map String (String, String, String) -- pageaddress pagename theorem-number
-   }
+   } deriving Show
+
+instance Show Html where
+   show = renderHtml
 
 blankIndex :: RefIndexState
 blankIndex = RefIndexState {

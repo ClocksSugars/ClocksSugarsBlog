@@ -190,7 +190,7 @@ blogArticles = AllMyArticles [
          },
       SubChapter {
          name = "0326-homotopy-type-theory",
-         title = "Homotopy Type Theory as Introduced on 03/13/26",
+         title = "Homotopy Type Theory as Introduced on 03/20/26",
          flags = ["IndexTopOfPage","DoNotShowOnIndex"],
          description = "The written notes for a talk on type theory, topology, and homotopy type theory, as designed for a programmer audience.",
          depends = [

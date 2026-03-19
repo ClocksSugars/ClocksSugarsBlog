@@ -183,7 +183,10 @@ parseArticles (AllMyArticles thearticles) = let
          case mayberefs of
             Nothing -> do {putStrLn "Exiting chapter"; return Nothing}
             Just refout -> do {programtail refout}
-      in (theprogram , indexedarthead:indexedarttail)
+      in (
+         theprogram ,
+         if "DoNotShowOnIndex" `elem` x.flags then indexedarttail else indexedarthead:indexedarttail
+      )
    (endprogram, listofindexchapters) = sectionWorker thearticles
    in (endprogram, AllMyArticlesIndex listofindexchapters)
 

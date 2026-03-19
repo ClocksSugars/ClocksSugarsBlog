@@ -15,7 +15,7 @@ zeroArgMathCommands = let
    in fromList [
       ("nats", TeXComm "mathbb" [FixArg (TeXRaw "N")]),
       ("powerset",TeXComm "mathcal" [FixArg (TeXRaw "P")]),
-      ("inv",TeXRaw "-1"),
+      ("inv",TeXBraces $ TeXRaw "-1"),
       ("integers", TeXComm "mathbb" [FixArg (TeXRaw "Z")]),
       ("rationals", TeXComm "mathbb" [FixArg (TeXRaw "Q")])
       ]

@@ -1,11 +1,11 @@
 \documentclass[11pt]{article}
     \title{\textbf{Default Doc}}
     \author{ClocksSugars}
-    \date{03/13/26}
+    \date{03/20/26}
 
 \usepackage{fancyhdr}
 \pagestyle{fancy}
-\rfoot{ClocksSugars -- Introduction to Homotopy Type Theory}
+\lhead{ClocksSugars -- Introduction to Homotopy Type Theory}
 
 \input{../pdf.tex}
 \input{../webmacros.tex}
@@ -21,8 +21,154 @@ Homotopy type theory is an exciting modern exploration of type theory using reas
 
 Our narration will proceed through four theaters of varying significance, one of which is already written about on this website and so readers are advised to review \hyperlink{https://clockssugars.blog/appliuni/prelims/proptypes.html}{Propositional Logic: A Programming Inspired Approach}. The other three are set theory, topology, and category theory, which will follow an appropriate through-line. With those developed, we will finally introduce the core idea of homotopy type theory.
 
-\subsection{Sets}
+\subsection{Sets and Equivalence}
 
+One of the more frustrating things for a young mathematician to realize as they enter mathematics-the-discipline as distinct from mathematics-the-tool-for-engineering is that mathematics is an exploration of logic more than a collection of algorithms. While there exist techniques to express groups as collections of sequences of symbols and vectors and matrices as collections of numbers, in the proper narration of mathematics, these methods of representation are sidenotes. Far more important to mathematicians are the structural insights about their objects of study; for instance, one does not need a way to write vectors in order to realize that from the axioms of a vector space that these spaces have dimensionality.
+
+On the other side of this, we have a problem. Mathematics is constructed to be general. This means that when we provide the axioms for a group, we are trying to describe all things which satisfy these axioms, not just matrices, not just any particular construction we choose to represent them. The cost of this generality is that we define a group merely as a set together with an operation on that set which is required to satisfy the axioms of the group, and nothing more. Likewise, when we define the real numbers, we provide the real number axioms and require these to restrict any candidate set, without ever saying what the base objects in the set were.
+
+That is to say, the cost of this generality is that we make no claim, and thus have no information, about exactly what objects we are manipulating or what other data they may hold. We may manipulate a group without realizing that the group is in fact a vector space, and in turn may manipulate a vector space without realizing it is defined over column matrices or indeed square matrices. Far more perniciously, we may manipulate a two dimensional vector space of column vectors in $\reals^3$, not realizing that our vector addition is defined to ignore the third element in the matrix. In other words, the objects we manipulate are pulled from the void, and while they are pulled from this void to satisfy some properties, we cannot say what other information they may hold which we ignore for the purposes of our construction, groups, vector spaces, or otherwise.
+
+This presents an obvious problem, which is that extraneous information attached to elements of some set may disrupt our notion of equivalence of two objects. For instance, if we construct a group of $3 \times 1$ column vectors under addition in the first two elements, where addition is defined to simply copy the third element of $u \in \reals^3$ into the output of $(u + v) \in \reals^3$, we actually still satisfy all of the group axioms (associativity, closure, etc.) with the only point of concern being the identity axiom, since it is not clear that $(0,0,1)$ and $(0,0,2)$ can both be the identity. If, in such a space, we can \emph{insist} that the first two elements are the only ones that matter, then we would say in this space that $(0,0,1) = (0,0,2)$ and satisfy the identity axiom by claiming that the extraneous data attached to our elements simply do not matter in this context.
+
+(Note that an alternative version of this problem can be constructed of two dimensional vector spaces in $\reals^3$ where vectors are of the form $(x,y,1)$ or $(x,y,2)$ where addition ignores the third element completely. In this case, these two vector spaces each have only one identity $(0,0,1)$, $(0,0,2)$ respectively, and need no forcing of $(0,0,1) = (0,0,2)$, yet we are faced with two identical spaces which incomparable, i.e. $(x,y,1) \neq (x,y,2)$ for entirely arbitrary reasons of excess incompatible information.)
+
+This resolution, of forcing equality which ignores extraneous data, is called \emph{quotienting a set}, and is a powerful concept which we will need for our narrative. To execute it successfully, we need to define an equivalence relation properly, but this will require some quick meditations about what we expect of a statement of equivalence. If we are to insist that two things are \emph{the same}, each object ought be the same as itself, so $a = a$, and we expect that there is no notion of \emph{same first}, so we expect $a = b$ to imply $b = a$. We also expect that many things can be the same, and if they are, that we can know any two objects are the same if we know that there are other objects they are both the same as, i.e. $a = b$ and $b = c$ implies $a = c$ through $b$. These requirements define our notion of equivalence.
+
+\begin{definition}[Equivalence Relation]
+(This definition also appears \hyperref[def:EquivalenceRelation]{here}.) \\
+An equivalence relation can be considered to be a set of pairs $A$. When a pair $(a,b) \in A$ then we write $a \sim b$ and either say that $a$ is \emph{similar} to $b$ or that $a$ is \emph{equivalent} to $b$ \emph{under} $\sim$. Let $B$ be the set of all items that $\sim$ relates to one another. Then in order to be an equivalence relation, $\sim$ must satisfy the following: \begin{itemize}
+\item (Reflexivity) For all $a \in B$, we have $a \sim a$ since a thing must be equal to itself
+\item (Symmetry) For all $a,b \in B$, if we have $a \sim b$ then we have $b \sim a$ since equality (or similarity) is not an ordered property; i.e. $(a,b) \in A \iff (b,a) \in A$
+\item (Transitivity) For all $a,b,c \in B$, if we have $a \sim b$ and we have $b \sim c$ then we have $a \sim c$, since if $b$ is the same as both $a$ and $c$ then they must be the same as one another as well.
+\end{itemize}
+These three properties, capturing what we expect of the notion of \squote{sameness}, formalize our notion of what it means for something to describe a kind of equivalence.
+\end{definition}
+
+With this in hand, we may now develop a formal set quotient.
+
+\begin{definition}[Set Quotient]
+
+Let $B$ be a set, and $\sim$ an equivalence on its elements, with the relations of the equivalence defined by the set of pairs $A$. We define the set quotient $B/_\sim$ to be the set of \emph{equivalence classes}, i.e. sets of elements which are equivalent under the equivalence relation. That is, we would write formally \begin{gather*}
+B/_\sim = \{ [a] \mid a \in B\}
+\end{gather*}
+where our equivalence classes $[a]$ are defined \begin{gather*}
+[a] = \{ b\in B \mid (a,b) \in A\} = \{b \in B \mid a \sim b\}.
+\end{gather*}
+That is to say, the equivalence class $[a]$ is literally the set of all elements in $B$ which are equivalent under $\sim$.
+\end{definition}
+
+\subsection{Topology}
+
+When speaking about a space $X$, it is natural to desire a notion of closeness. In most spaces you may be familiar with, this is achieved with a \emph{metric}, a function $d\colon X \times X \to \reals$ which can provide a notion of distance between any two points, with points of shorter distance between each other being closer. The trouble with this is that in many spaces, it may either not make sense to define a notion of distance, or we may want to avoid defining a notion of distance due to undesired implications. For example, on a torus you may not want to define a notion of distance since any \squote{straight line} to a point has another line to that point going around the torus (in any way you want) which may draw a shorter or longer line between two points, neverminding the choice one would have to make about how to convert such a line into a number distance (i.e. how do you privilege kilometers or miles? How do you choose how lines turn into numbers?). This could be extended to discussions about graphs (collections of points and lines between them), where the idea that using edges of the graph to define distances may be undesireable, either because the edges may be directed (i.e. you may need to insist that distances are only defined in one direction) or the sums of edges don't agree, and there are multiple paths between points of varying lengths.
+
+In many of the cases discussed above, the notion of \emph{closeness} is not the fundamental problem, but merely the attempt to assign this closeness a number corresponding to a pair of points. We resolve this with the notion of a \emph{topology}, avoiding a choice of number but instead defining closeness in terms of a set of sets. That is, for some set of points $X$, we define a topology $\mathcal{T}_X$ which contains sets, where each set stands as a claim that its members are some degree of close to one another.
+
+\figuresvgwithcaption{./Art0326HTTTopologyDiagram}{Above we see a set of points together with a collection of sets that might be used to define a topology. This collection of sets is not exhaustive of a topology, as they are required to include all of the intersections and unions of sets, but it is clear from this that we say 1 is closer to 2 and 3 than to 18 since we can find a set containing 1, 2, and 3, but not 18, while we cannot find a set containing 1 and 18 but not 2 and 3. Likewise with 13, any set containing 13 and 12 must also contain 14,15,16, but the reverse is not true.}
+
+This is best seen when we recall the definition (or rather, one of the definitions, perhaps the most important one) of continuity of a function. For the definition of continuity in $\reals$ in \emph{Application Unification}, see definition \ref{def:RContinuousFunctions}. I'll warn in advance to read past this definition if you do not immediately understand it, as we are about to explain.
+
+\begin{definition}[Continuity]
+Let $f\colon A \to \reals$ be a function with domain $A \subseteq \reals$, and let $B \subseteq A$ be a subset of the domain with $p \in B$. If for any open set $V \subseteq \reals$ with $f(p) \in V$, there exists an open set $U \subseteq \reals$ with $p\in U$ such that \begin{gather*}
+f(U) = \{f(x) \mid x \in U\} \subseteq V
+\end{gather*}
+then we say that $f$ converges to $f(p)$ at $p$, or rather\begin{gather*}
+\lim_{x \to p} f(x) = f(p)
+\end{gather*}
+and thus we say that $f$ is \emph{continuous at} $p$ since the limit it approaches at $p$ matches what it actually is at $p$.
+
+If this is true for all $p \in B$, we say that $f$ is \emph{continuous on} $B$. If this is true for all $p\in A$, we say that $f$ is a \emph{continuous function}.
+\end{definition}
+
+Continuity is usually described in the context of graphing a line; we tend to think that a function is continuous if we can draw its graph without taking our pen off the paper, that is, in one continuous stroke. If you have any familiarity with formal limits yet do not recognize this definition, it is because we have stated it in a way which is topologically agnostic (if you are not familiar with limits, hang tight. They are merely a construction to ask what a function looks like it is going to be at a point). The usual topology applied to $\reals$ is the \emph{metric topology}, in which we define a metric, a function which gives distance between two points $d(x,y) = |x - y|$, and declare that an open set in $\reals$ is either a ball centered at $x$ of radius $r$, the set \begin{gather*}
+B_r(x) = \{y \in \reals \mid d(x,y) < r \},
+\end{gather*}
+or some union or intersection of balls. In this way, the definition above becomes \squote{for any $\varepsilon > 0$ (i.e. a radius $r_1$), there exists $\delta > 0$ (i.e. a radius $r_2$) such that for all $|x - p| < \delta$ (i.e. $x \in B_{r_2}(p)$) we have $|f(x) - f(p)| < \varepsilon$ (i.e. $f(x) \in B_{r_1}(f(p))$)}. This epsilon-delta definition is normally read as \squote{for any distance $\varepsilon$, there must exist a distance $\delta$ so that whenever our input is within $\delta$ of $p$, our output is within $\varepsilon$ of $f(p)$}, and we use this to say that any input sufficiently close to $p$ must result in an output sufficiently close to $f(p)$, so we should approach the \emph{expected output} as we approach the input we expect it to correspond to.
+
+In effect, the standard epsilon-delta definition of the limit of a function in the definition of continuity, when combined with this notion of open sets, is actually \begin{gather*}
+f\big( B_{r_1}(p) \big) \subseteq B_{r_2} \big( f(p) \big)
+\end{gather*}
+exactly like $f(U) \subset V$ in the topologically agnostic definition of continuity.
+
+A lot of intuition is gained by thinking of continuity in this way, and by understanding that \emph{the sets present in the topology set $\mathcal{T}_X$ define which sets are called open sets on $X$}. That is, a topology is exactly a choice of which sets count as open, and thus which functions from one space to another are continuous.
+
+\begin{definition}[Topological Space]
+Let $X$ be some set and $\mathcal{T}_X$ a set of subsets of $X$. We say that $(X,\mathcal{T}_X)$ (or just $X$ or $\mathcal{T}_X$ alone) form a \emph{topological space} if $\mathcal{T}_X$ satisfies the following properties. \begin{enumerate}
+\item $\mathcal{T}_X$ contains the empty set $\emptyset$ and $X$ itself.
+\item Any sequence of sets $(U_n)_{n \in \nats}$ (finite or infinite) in $\mathcal{T}_X$ satisfy \begin{gather*}
+\bigcup_{n \in \nats} U_n \in \mathcal{T}_X.
+\end{gather*}
+\item Any finite set of sets $U_1, ..., U_N$ in $\mathcal{T}_X$ satisfy \begin{gather*}
+\bigcap_{n =1}^{N} U_n \in \mathcal{T}_X.
+\end{gather*}
+\end{enumerate}
+\end{definition}
+
+Our ability to choose which points are thought of as close to one another finds immediate application in defining strangely shaped spaces, as you may be familiar with as the primary utility of topology. We may choose a set, such as $[0,1] \times [0,1]$, and define an equivalence relation (as we did in the previous section) that says that points on the edge are the same as one another (i.e. $(x,0) \sim (x,1)$ and $(0,y) \sim (1,y)$). If we bring along with this an appropriate topology (perhaps one that looks like the metric topology we are familiar with, but says that open balls near one edge loop over to the opposite edge), then we can simply say that opposite sides of the square are simply close to one another, and a line $f \colon \reals \to [0,1] \times [0,1]$ that disappears off one side of the square and reappears on the other is considered continuous. What we have constructed is in fact a torus.
+
+(We are also at liberty to choose some strange and unusual topologies with weird properties. For instance the trivial topology in $\reals$ which has only the empty set and $\reals$ itself as open sets implies that all functions converge to everything, since for all points $x \in \reals$, the only open set which contains it is $\reals$ itself, which also contains all other points, so all points are equally close to one another. We may also choose the powerset topology, which includes every possible subset of $\reals$. In the powerset topology, nothing converges to anything except constant functions, since even singleton sets $\{x\}$ are present; any proposed limit would only converge if it could fit the image of the function entirely within the singleton set of the limit, and so only constant functions would be continuous.)
+
+The application of deciding which lines are continuous is an important one. We are equally at liberty as above to construct a set which is two unit squares, say $[0,1] \times [0,1]$ and $[0,1] \times [2,3]$, and create a topology in which the points $(x,1)$ are identified to the points $(x,2)$, in effect combining the two squares into a rectangle equivalent to $[0,1] \times [0,2]$. In this case we can draw a path between the two squares, but importantly, if we do not make such an identification, we will be able to tell that our space is constructed of two disconnected spaces, for which no continuous function $f \colon \reals \to X$ exists.
+
+In fact, more specifically, the statement of which continuous functions $f\colon [0,1] \to X$ exist is especially instructive about a space. We would call such functions \emph{point homotopies}, since they define a way which we may continuously slide form one point to another. These point homotopies allow us to define a define a new equivalence relation, where we say that two points $x,y \in X$ are $x \sim y$ if there exists a point homotopy between them, i.e. a continuous function $f\colon [0,1] \to X$ which is $f(0) = x$ and $f(1) = y$. In this case, the equivalence classes we are left with each uniquely correspond to a disconnected component of the topological space, since no continuous map exists to move between them.
+
+\begin{proposition}
+Let $X$ be a space with topology $\mathcal{T}_X$. Then point homotopy on $X$ forms an equivalence relation.
+\end{proposition}
+
+\begin{my proof}{m}
+To satisfy the conditions of an equivalence relation, we require a homotopy which is $f(0) = x$ and $f(1) = x$ to satisfy reflexivity, we must be able to take a homotopy which is $f(0) = x$ and $f(1) = y$ and construct a homotopy $g\colon [0,1] \to X$ which is $g(0) = y$ and $g(1) = x$ to satisfy symmetry, and finally for two homotopies $f(0) = x$,$f(1) = y$ and $g(0) = y$,$g(1) = z$, we must be able to construct a homotopy $h(0) = x$ and $h(1) = z$ to satisfy transitivity.
+
+To satisfy reflexivity, for any point $x \in X$, define the map $f(t) = x$, i.e. the constant function. For all open sets $V$ in $X$ around $x$, any open set $U \subseteq [0,1]$ will map $f(U) = \{x\}$ which is contained in $V$ by definition, so it must be continuous and thus a homotopy.
+
+To satisfy symmetry, for any two points $x,y \in X$, assume $f\colon [0,1] \to X$ is continuous with $f(0)= x$ and $f(1) = y$. We construct the function $g(t) = f(1-t)$. It must be continuous since the composition of continuous functions is continuous, and $1-t$ is continuous.
+
+To satisfy transitivity, for any three points $x,y \in X$, assume $f,g\colon [0,1] \to X$ are continuous with $f(0)= x$, $f(1) = y$, $g(0) = y$, and $g(1) = z$. We construct $h\colon [0,1] \to X$ with $h(0) = x$ and $h(1) = z$ by defining it \begin{gather*}
+h(t) = \left\{ \begin{matrix} f(2t) & t \le 1/2 \\ g(2t - 1) & t > 1/2\end{matrix}\right.
+\end{gather*}
+This function is continuous on $[0,1/2)$ and continuous on $(1/2,1]$ by construction (and by composotion of functions), and is also continuous at $t=1/2$ since $\lim_{t \to 1/2}f(2t) = \lim_{t \to 1/2} g(2t - 1) = y$.
+\end{my proof}
+
+But we are not only confined to point homotopies. In the sense that point homotopies are paths, we may also construct homotopies between paths. That is, we define a function $F \colon [0,1] \times [0,1] \to X$ which may be $F(0,t) = f$ and $F(1,t) = g$ where $f$ and $g$ are point homotopies, so $F$ will continuously deform $f$ into $g$. Just as the number of equivalence classes up to point homotopy in $X$ told us how many disconnected components there are, the equivalence classes up to path homotopies will tell us something else about the space. But here we must restrict our attention to a specific kind of path homotopy. In particular, if we allow path homotopies between two points $x,y \in X$ where $x \neq y$, then it is trivial to consider a path homotopy $F$ which deforms a point homotopy that starts at $x$ and ends at $y$ to one which is constantly at $x$, then moves $x$ to any other desired point via point homotopy, and extends it back into a desired path. In effect, all paths between points will have path homotopies if their endpoints have point homotopies, and no new information is found. 
+
+We resolve this by focusing specifically on path homotopies between loops. That is, we want point homotopies with $f(0) = f(1) = x$. These are far more interesting; while they may also include the constant function $f(t) = x$, they may include a loop around a point that is missing from our space, i.e. $[0,1] \times [0,1] \setminus \{(1/2,1/2)\}$. Such a loop has no continuous path homotopy deforming it into the constant function, but does have path homotopies deforming it into other loops which may take more meandering paths; we are not interested in these meanderings, and so up to path-homotopy, they altogether form a distinct equivalence class.
+
+\figurepngwithcaption{./wikipediaspherehomotopytopoint}{(Credit to Wikipedia: this image can be found on the page for the fundamental group.) The sphere has only one equivalence class up to path homotopy, since it only has one connected component (i.e. has one equivalence class up to point homotopy) and any path may be deformed over the top or the bottom of the sphere to turn the loop into a point. This can be blocked by poking holes in the sphere at the poles, resulting in a space similar to a cylinder. Such a loop would not only fail to be path-homotopic to a constant path, but also fails to be path-homotopic to loops that go around the poked-sphere twice, or three times, or backwards. In effect, we would have as many loops as there are integers. }
+
+Interestingly, the same fact that stops us from continuously deforming a loop that goes around some abstract hole or gap into a point stops us from deforming a loop that goes around this hole twice to a loop that goes around once or not at all. In fact, if we only think about loops that all start at one point in a space, we may take two loops and construct a third one which goes around the first loop then the second. When we do this, in some systems we will find that certain sequences of loops \emph{can} be homotopic to a point; the classic example of this is a torus, where if we call going around the arch of the donut the equivalence class of loops $[a]$ and going throught the hole of the donut the equivalence class of loops $[b]$, then $[a][b][a^\inv][b^\inv]$ turns out to be homotopic to a constant map (although the more remarkable fact in this situation is usually that this can be restated $[a][b] = [b] [a]$, meaning the ordering which loops are taken in may be swapped).
+
+The consequence of this is that the loops on a topological space actually form a group as discussed in the \hyperlink{https://clockssugars.blog/articles/0326-matrixgroups/}{previous article}, called the \emph{fundamental group} of the topological space $X$ and denoted $\pi_1(X)$. Even more remarkable than that, a continuous map $\varphi$ between two topological spaces $X$ and $Y$ induces a group homomorphism $\varphi_* \colon \pi_1(X) \to \pi_1(Y)$ defined by sending a loop $a(t) \colon [0,1] \to X$ to a loop $ \varphi(a(t)) \colon [0,1] \to Y$ and taking its equivalence class $[\varphi\circ a]$.
+
+This property is remarkable, in that it implies that the process of generating this fundamental group of a space is not merely a way to produce \emph{some group}, but that whatever structure this process reveals is also preserved between transformations between topological spaces. What we have discovered is a \emph{functor}.
+
+\subsection{Categories}
+
+In many ways, the algebraic topology tree we've just been barking up was one of the driving motivations of the development of category theory, or so the legend goes. It became apparent that there were these operations, such as the operation of taking the fundamental group, which could turn a space of one kind, a topological space, into a space of another kind, a group, while preserving structure in the morphisms between them (continuous maps for topological spaces, homomorphisms for groups) but not the individual components of the spaces (e.g. it does not make sense to ask which group element the fundamental group operator sends a single point in a topological space).
+
+A similar thing was noticed for dual objects in linear algebra; it made perfect sense for a vector space $V$ to construct a dual space $V'$ containing functionals $f\colon V \to \reals$ which measured a vector (for column vectors, these are row vectors), and a linear map $A$ could be sent to a linear map $A^T$ which was defined to have the property that $(A^T(f))(v) = f(Av)$ (if you insist on reading this as matrices then you must understand that dual vectors/maps act backwards, so $A^T(f)$ is $fA$ in the matrix sense; the idea that things should be read backwards is common wherever duals show up).
+
+The lesson taken was, one presumes, that constructions in mathematics tend to privelege certain kinds of maps within themselves, and that there often exist transformations from one field's construction to another that preserve these priveleged maps, allowing us to make insights about a field using the tools of another. Such was the driving tool of algebraic topology, which went on to use the tools of group theory to further explore topology, for instance finding that the subgroups of a fundamental group corresponded to the existence (or lack thereof) of covering spaces (spaces where traversing a loop doesn't take you back to where you started but to alternate copies of the space until certain special loops are followed).
+
+\begin{definition}[Category]
+Let $\mathcal{C}$ be such an object that we say $\mathrm{ob}(\mathcal{C})$ is a set of \emph{objects} in $\mathcal{C}$ and $\mathrm{hom}(\mathcal{C})$ is a set of \emph{morphisms} in $\mathcal{C}$, such that each morphism has a source and a target $f \colon x \to y$ with $x,y \in \mathrm{ob}(\mathcal{C})$, and the ability to chain these morphisms together $f\circ g \colon x \to z$ if $g \colon x \to y$ and $f \colon y \to z$. If each object $x \in \mathrm{ob}(\mathcal{C})$ has a morphism $\mathrm{id}_x \colon x \to x$ such that $\mathrm{id}_x \circ f = f$ or $f \circ \mathrm{id}_x = f$ for appropriate $f$, and any appropriate $f,g,h \in \mathrm{hom}(\mathcal{C})$ satisfy $(f \circ g) \circ h = f \circ (g \circ h)$, then we say $\mathcal{C}$ is a category.
+\end{definition}
+
+The key take away is that in most of the settings you are familiar with, an object of a category is some kind of set with perhaps additional structure, and the morphisms of a category are functions which may have some additional condition placed on them such as a homomorphic property or continuity. Taken in this light, the additional requirements are trivial: of course there is always an identity map that says a function can send elements of a set to themselves, and of course function composition is associative.
+
+Categories you may already be familiar with are \begin{itemize}
+\item $\mathbf{Set}$, the category with objects which are sets and morphisms which are functions,
+\item $\mathbf{Grp}$, the category with objects which are groups and morphisms which are group homomoprhisms,
+\item $\mathbf{Top}$, the category with objects which are topological spaces and morphisms which are continuous maps
+\item $\mathbf{Vect}_{\reals}$, the category with objects which are vector spaces with $\reals$ scalar multiplication and morphisms which are linear maps.
+\end{itemize}
+
+\begin{definition}[Functor]
+Let $\mathcal{C}$ and $\mathcal{D}$ be categories. A construction $F$ is written $F \colon \mathcal{C} \to \mathcal{D}$ if it defines a function $F \colon \mathrm{ob}(\mathcal{C}) \to \mathrm{ob}(\mathcal{D})$ and a function $F \colon \mathrm{hom}(\mathcal{C}) \to \mathrm{hom}(\mathcal{D})$ and has the properties that $F(\mathrm{id}_x) = \mathrm{id}_{F(x)}$ and $F(f \circ g) = F(f) \circ F(g)$, sending identity on objects in $\mathcal{C}$ to identity on their image objects in $\mathcal{D}$, and composition of functions on $\mathcal{C}$ to composition on functions in $\mathcal{D}$, then we call it a \emph{covariant functor}.
+
+If instead of that final condition $F(f \circ g) = F(f) \circ F(g)$ it satisfies $F(f \circ g) = F(g) \circ F(f)$ then we call it a \emph{contravariant functor}.
+\end{definition}
+
+It is of 
 
 
 

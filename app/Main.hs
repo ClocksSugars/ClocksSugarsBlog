@@ -27,9 +27,12 @@ import Data.String (fromString)
 main :: IO ()
 main = do
    commandlineargs <- getArgs
+
+   let printrefs = if "-s" `elem` commandlineargs then True else False
+
    --putStrLn $ "Command line args were: " ++ show commandlineargs
    if "-h" `elem` commandlineargs || commandlineargs == [] then
-      putStrLn "-h for help\n -eb to write default json for book\n -ea to write default json for articles\n -e to write both json files\n -m to make site from json file\n -mb to make just book part of site from json file\n -l to make latex for pdf\n\n -e and -m or -l together always does -e first."
+      putStrLn "-h for help\n -eb to write default json for book\n -ea to write default json for articles\n -e to write both json files\n -m to make site from json file\n -mb to make just book part of site from json file\n -l to make latex for pdf\n\n -e and -m or -l together always does -e first.\n -s to show references once compiled"
       else return ()
 
    if "-e" `elem` commandlineargs || ("-ea" `elem` commandlineargs && "-eb" `elem` commandlineargs) then
@@ -49,11 +52,12 @@ main = do
       makeSite
       writeHomePage
    else if "-mb" `elem` commandlineargs then do
-      _ <- getWithManifest $ \manifest -> do
+      refs <- getWithManifest $ \manifest -> do
          refsIfSuccess <- webBookFromManifest manifest blankIndex
          copyAssetDepends assetDepends
          writeHomePage
          return refsIfSuccess
+      if printrefs then print refs else return ()
       return ()
    else return ()
 

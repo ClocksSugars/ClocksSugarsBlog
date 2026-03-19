@@ -4,17 +4,18 @@
 %
 
 \usepackage{hyperref}
+\usepackage{float}
 
 \hypersetup{
     colorlinks=true,
     linkcolor=blue,
-    filecolor=magenta,      
+    filecolor=magenta,
     urlcolor=blue,
 	citecolor=blue
     }
 
 \newcommand{\figuresvgwithcaption}[2]{%
-	\begin{figure}[tbh]%
+	\begin{figure}[H]%
 		\centering%
 		\includesvg{#1}%
 		\caption{\centering #2}%
