@@ -178,6 +178,8 @@ It is of great significance that these definitions were general enough to cover 
 
 More broadly, in the same way we had just made individual integers into objects of a category, we can do away with the set-substructure of categories in general and construct categories which are the objects of another category. For instance, let $V$ be a vector space and construct a category $\mathcal{V}$ which has objects $\mathrm{ob}(\mathcal{V}) = V$ and morphisms $\mathrm{hom}(\mathcal{V}) = V$ such that any two vectors $v_1,v_2 \in V$ act in the category by $v_2 \colon v_1 \to (v_1 + v_2)$, i.e. we make vectors both the objects and morphisms of a category and make their addition into the act of applying a morphism to an object. In this case, one should not think of $v_2$ as a \emph{function} and neither is $v_1$ a set or any other kind of object with internal structure; $v_1$ is simply itself, a point, a position, an arrow, and $v_2$ is simply another arrow which in its incarnation as a morphism, says \dquote{I know how to place the tail of my arrow at the head of another and see where our arrows go together}, arriving at destination $v_1 + v_2$ as the target of the morphism. In this setting, linear maps between vector spaces are elevated to functors between vector categories.
 
+(Although strictly speaking to set up an example such as that one, you would have $\mathrm{hom}(\mathcal{V}) = V \times V$ since each morphism has its own distinct source, so the $v_2$ mentioned above must be specifically the $v_2$ morphism with source $v_1$ so that its target can be $v_1 + v_2$, and it would be distinct from a morphism such as $v_2^* \colon v_3 \to (v_3 + v_2)$.)
+
 We can just as easily do the opposite, instead of constructing categories which were the objects of some other category, we can construct categories which have objects who are categories, for instance by constructing the \emph{category of categories}, with objects which are categories and morphisms which are functors. In this case we find that the fundamental group becomes a mere morphism.
 
 Finally, one of the other great contributions of categories was the establishment that certain structures should be drawn as graphs, and manipulations on these graphs could identify new structures. One such a structure you may be familiar with is a cartesian product, which we know to send two sets $X$ and $Y$ to a set $X \times Y$, the set of pairs $(x,y)$ where $x \in X$ and $y \in Y$. Category theory formalizes this construction with the following graph. \begin{detect tikz}\begin{tikzcd}
@@ -556,7 +558,7 @@ There is no way to prove these, since having these as theorems constitutes a dis
 
 The second axiom of homotopy type theory, although we will not spend much time thinking about it today, is the \textbf{univalence axiom}, which says that we have a type-level equivalence if we can show that the two types are isomorphic. For completeness, a version of that is included here. 
 
-\begin{lstlisting}
+\begin{lstlisting}[language=Haskell]
 id : {A : Type} → A → A
 id a = a
 -- map that sends everything to itself
@@ -579,7 +581,7 @@ In at least one way this should make sense to us. Back in topology, we could quo
 
 This, on its own, is not too interesting though. The only way we have to generate equivalences besides complex proof programs, is reflexivity, which is to say that the only times when two elements of a type were equal was when they were literally the same object, up to every piece of data provided. This also isn't interesting from a topological perspective either, since the only data we are left with after equivalence under homotopy is the disconnected components; all of our paths are homotopic too since the only proof of equivalence is reflexivity, and equivalences there are just reflexivity of reflexivity.
 
-Homotopy type theory spices this up by introducing \emph{higher inductive types}, which are inductive types where we specify not only the ways to make new elements of a type but also ways we make non-reflexivity equivalences in the type. If we use the topological analogy we were using before, then the standard inductive \emph{unit type} would be thought of as a disk in 2D. Every point can reach every other point, so we have one point up to point-homotopy, which is represented by the unit element $* \colon \top$. But we can make a new type which is more topologically complex. \begin{lstlisting}
+Homotopy type theory spices this up by introducing \emph{higher inductive types}, which are inductive types where we specify not only the ways to make new elements of a type but also ways we make non-reflexivity equivalences in the type. If we use the topological analogy we were using before, then the standard inductive \emph{unit type} would be thought of as a disk in 2D. Every point can reach every other point, so we have one point up to point-homotopy, which is represented by the unit element $* \colon \top$. But we can make a new type which is more topologically complex. \begin{lstlisting}[language=Haskell]
 postulate
   -- topological circle
   S1 : Type
