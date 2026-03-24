@@ -33,7 +33,7 @@ synopsis:
 homepage:           clockssugars.blog
 
 -- The file containing the license text.
-license-file:       LICENSE
+-- license-file:       LICENSE
 
 -- The package author(s).
 author:             ClocksSugars
@@ -81,7 +81,8 @@ executable ClocksSugarsBlog
                      SiteStructure.WorkHorse,
                      SiteStructure.MainTools,
                      LatexToPdf.WorkHorse,
-                     LatexToPdf.MainTools
+                     LatexToPdf.MainTools,
+                     LatexToHtml.TikzToSvg
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -101,7 +102,9 @@ executable ClocksSugarsBlog
                      aeson,
                      directory,
                      filepath,
-                     bytestring
+                     bytestring,
+                     pantry,
+                     process
 
 
     -- Directories containing source files.

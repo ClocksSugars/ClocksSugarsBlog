@@ -1,7 +1,20 @@
 \usepackage{listings}
 \usepackage{.././listings-rust}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{newunicodechar}
+
+\newunicodechar{λ}{\ensuremath{\mathnormal\lambda}}
+\newunicodechar{←}{\ensuremath{\mathnormal\from}}
+\newunicodechar{→}{\ensuremath{\mathnormal\to}}
+\newunicodechar{∀}{\ensuremath{\mathnormal\forall}}
+%\newunicodechar{≡}{\ensuremath{\mathnormal\equiv}}
+\newunicodechar{∔}{\ensuremath{\mathnormal\dotplus}}
+%\newunicodechar{😂}{\ensuremath{\mathnormal\dotplus}}
+
 \lstdefinestyle{mystyle}{
-    backgroundcolor=\color{LightGrey},   
+    backgroundcolor=\color{White},   
     commentstyle=\color{Green},
     keywordstyle=\color{MediumPurple},
     numberstyle=\tiny\color{Grey},

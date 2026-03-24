@@ -27,5 +27,6 @@ data HtmlVers =
    |  JsEmbed String
    |  BreakLine
    |  CenteredParagraph [HtmlVers]
+   |  Tikz Text
    deriving ( Show )
 --   |  Env Text [HtmlVers]

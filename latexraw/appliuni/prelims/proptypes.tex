@@ -265,7 +265,7 @@ Part of the power of using type theory is that, as discussed before but more obv
 
 Before moving on, note that we have introduced a split in the notation of constructive mathematics and classical mathematics: in type theory, propositions and their operations exist at the same level as objects, and use the same tools. As our intention here is to proceed, after this section, to classical mathematics, it would be better practice to give our operations appropriate aliases so that we are not confused in future.
 
-\begin{notation}
+\begin{label notation}{BasicCurryHowardCorr}
 When they act on propositions, define the following symbols as aliases for their non-propositional counterparts:
 \begin{itemize}
 \item $\wedge := \times \hspace{0.5em}$ read as \squote{and},
@@ -273,7 +273,7 @@ When they act on propositions, define the following symbols as aliases for their
 \item $\Rightarrow \hspace{4pt} := \hspace{4pt} \to \hspace{0.5em}$ read as \squote{implies}, e.g. $P \Rightarrow Q$ is the type of functions taking witnesses $p \colon P$ and producing some witness $q \colon Q$ , along with $(P \Leftarrow Q) = (Q \rightarrow P)$,
 \item $(P \Leftrightarrow Q) := (P \to Q) \times (Q \to P)$, that is, we say $P$ \squote{if and only if} $Q$ when we can find as witness a function $P \to Q$ as well as a function $Q \to P$ so that both propositions imply one another.
 \end{itemize}
-\end{notation}
+\end{label notation}
 
 \subsection{Dependent Types and Example Proposition Types}
 

@@ -36,6 +36,7 @@ import LatexToHtml.Utils (
 import LatexToHtml.PageTemplate
 import LatexToHtml.ReferenceHandling
 import LatexToHtml.InfoBoxType
+import LatexToHtml.TikzToSvg
 
 import Text.Blaze.Internal (MarkupM(Empty))
 import Text.Blaze.Html5 as H
@@ -54,14 +55,14 @@ import Text.LaTeX.Base (LaTeX)
 linknewtab :: Html -> Html
 linknewtab = H.a ! target "_blank" ! rel "noopener noreferrer"
 
-writePage :: String -> String -> [String] -> LaTeX -> RefIndexState -> (Html, RefIndexState, [String])
+writePage :: String -> String -> [String] -> LaTeX -> RefIndexState -> (Html, RefIndexState, [String], IO ())
 writePage pagename addressliteral pageFlags pagecontents indstate = let
    inspect0 = myShow pagecontents
    part1 = processOne pagecontents
    inspect1 = show part1
    part2 = processTwo part1
    inspect2 = show part2
-   (part3, newindstate) = processThree pagename addressliteral part2 indstate
+   (part3, newindstate, joblist) = processThree pagename addressliteral part2 indstate
    final :: Html
    final = do
       if "IndexTopOfPage" `elem` pageFlags
@@ -69,21 +70,21 @@ writePage pagename addressliteral pageFlags pagecontents indstate = let
          else Empty ()
       part3
    logs = [inspect0,inspect1,inspect2]
-   in (final, newindstate, logs)
+   in (final, newindstate, logs, joblist)
 
 
-processPage :: String -> String -> LaTeX -> RefIndexState -> (Html, RefIndexState, [String])
+processPage :: String -> String -> LaTeX -> RefIndexState -> (Html, RefIndexState, [String], IO ())
 processPage pagename addressliteral pagecontents indstate = let
    inspect0 = myShow pagecontents
    part1 = processOne pagecontents
    inspect1 = show part1
    part2 = processTwo part1
    inspect2 = show part2
-   (part3, newindstate) = processThree pagename addressliteral part2 indstate
+   (part3, newindstate, joblist) = processThree pagename addressliteral part2 indstate
    logs = [inspect0,inspect1,inspect2]
-   in (part3, newindstate, logs)
+   in (part3, newindstate, logs, joblist)
 
-processLatexToHtml :: String -> String -> LaTeX -> RefIndexState -> (Html, RefIndexState)
+processLatexToHtml :: String -> String -> LaTeX -> RefIndexState -> (Html, RefIndexState, IO ())
 processLatexToHtml pagename pageaddress x = processThree pagename pageaddress $ processOneTwo x
 
 pageIndex :: RefIndexState -> String -> String -> Html
@@ -149,58 +150,60 @@ inlineProcessThree (x:xs) propind = (\y -> y >> (inlineProcessThree xs propind))
          _ -> "REFERENCE-ERROR"
    _ -> "WAS TOLD TO INLINE SOMETHING THAT I CANNOT INLINE"
 
-processThree :: String -> String -> [HtmlVers] -> RefIndexState -> (Html, RefIndexState)
+processThree :: String -> String -> [HtmlVers] -> RefIndexState -> (Html, RefIndexState, IO ())
 processThree pagename theaddress content indexstate = let
-   repeatCase :: [HtmlVers] -> RefIndexState -> (Html, RefIndexState)
-   repeatCase [] ind = (Empty (), ind)
-   repeatCase (x:xs) ind = let
-      (resultx, newind) = worker x ind
-      (resultxs, finind) = repeatCase xs newind
-      in (resultx >> resultxs, finind)
-   passFirst :: (Html -> Html) -> (Html, RefIndexState) -> (Html, RefIndexState)
-   passFirst func (x,y) = (func x, y)
-   worker :: HtmlVers -> RefIndexState -> (Html, RefIndexState)
-   worker stuff propind = case stuff of
-      RawText x -> (toHtml x, propind)
-      Emphasize x -> (i $ toHtml x, propind)
-      Bold x -> (b $ toHtml x, propind)
-      TTtext x -> (code $ toHtml x, propind)
-      BreakLine -> (br, propind)
-      HLink turl tx -> (H.a ! href (fromString $ fromText turl) $ inlineProcessThree tx propind, propind)
-      ListItem xs -> passFirst li $ repeatCase xs propind
-      Itemize xs -> passFirst ul $ repeatCase xs propind
-      Enumerate listkind xs -> passFirst (ol ! A.type_ (fromString $ fromText listkind)) $ repeatCase xs propind
+   repeatCase :: [HtmlVers] -> RefIndexState -> IO () -> (Html, RefIndexState, IO ())
+   repeatCase [] ind joblist = (Empty (), ind, joblist)
+   repeatCase (x:xs) ind joblist1 = let
+      (resultx, newind, joblist2) = worker x ind joblist1
+      (resultxs, finind, joblist3) = repeatCase xs newind joblist2
+      in (resultx >> resultxs, finind, joblist3)
+   passFirst :: (Html -> Html) -> (Html, RefIndexState, IO ()) -> (Html, RefIndexState, IO ())
+   passFirst func (x,y,z) = (func x, y, z)
+   worker :: HtmlVers -> RefIndexState -> IO () -> (Html, RefIndexState, IO ())
+   worker stuff propind joblist = case stuff of
+      RawText x -> (toHtml x, propind, joblist)
+      Emphasize x -> (i $ toHtml x, propind, joblist)
+      Bold x -> (b $ toHtml x, propind, joblist)
+      TTtext x -> (code $ toHtml x, propind, joblist)
+      BreakLine -> (br, propind, joblist)
+      HLink turl tx -> (H.a ! href (fromString $ fromText turl) $ inlineProcessThree tx propind, propind, joblist)
+      ListItem xs -> passFirst li $ repeatCase xs propind joblist
+      Itemize xs -> passFirst ul $ repeatCase xs propind joblist
+      Enumerate listkind xs -> passFirst (ol ! A.type_ (fromString $ fromText listkind)) $ repeatCase xs propind joblist
       -- TODO MAKE THE OL TYPE MORE ROBUST
-      Paragraph xs -> passFirst p $ repeatCase xs propind
-      CenteredParagraph xs -> passFirst (H.div ! A.class_ "centerthis") $ repeatCase xs propind
+      Paragraph xs -> passFirst p $ repeatCase xs propind joblist
+      CenteredParagraph xs -> passFirst (H.div ! A.class_ "centerthis") $ repeatCase xs propind joblist
       CodeBlock language thecode -> (
          pre $ code ! class_ (fromString language) $ toHtml thecode,
-         propind
+         propind,
+         joblist
          )
       JsEmbed thefile -> (do
          H.div ! A.id (fromString thefile <> "_give_content") $ Empty ()
          script ! A.type_ "module" ! src (fromString $ "./" ++ thefile ++ ".js") ! defer "" $ Empty()
          ,
-         propind
+         propind,
+         joblist
          )
 
       HRefLink reflabel tx -> let
          droppedBoxTypeV  = drop 4 reflabel
          theref = references propind Data.Map.Strict.!? droppedBoxTypeV
          in case theref of
-            Just (pageaddress, _, _) -> (, propind) $ linknewtab !
+            Just (pageaddress, _, _) -> (, propind, joblist) $ linknewtab !
                href (fromString $ "/" ++ pageaddress ++ ".html#" ++ droppedBoxTypeV) $
                   inlineProcessThree tx propind
-            Nothing -> ("REFERENCE-ERROR", propind)
+            Nothing -> ("REFERENCE-ERROR", propind, joblist)
 
       ReferenceNum reflabel -> let
          droppedBoxTypeV  = drop 4 reflabel
          theref = references propind Data.Map.Strict.!? droppedBoxTypeV
          in case theref of
-            Just (pageaddress, refpagename, thmnum) -> (, propind) $ linknewtab !
+            Just (pageaddress, refpagename, thmnum) -> (, propind, joblist) $ linknewtab !
                href (fromString $ "/" ++ pageaddress ++ ".html#" ++ droppedBoxTypeV) $
                   toHtml $ refpagename ++ "." ++ thmnum
-            Nothing -> ("REFERENCE-ERROR", propind)
+            Nothing -> ("REFERENCE-ERROR", propind, joblist)
 
       Subheading mlabel x -> let
          secnumber = (1 +) $ (\ (y, _, _) -> y) $ subsection propind
@@ -215,7 +218,7 @@ processThree pagename theaddress content indexstate = let
          ),
             subsubsection = (0, snd propind.subsubsection)
          }
-         in (h3 ! A.id (fromString newlabel) $ ((>>) (toHtml $ show secnumber <> ". ") processedtitle) , newind)
+         in (h3 ! A.id (fromString newlabel) $ ((>>) (toHtml $ show secnumber <> ". ") processedtitle) , newind, joblist)
 
       Subsubheading mlabel x -> let
          oversecnumber = (\(y,_,_)->y) $ subsection propind
@@ -231,8 +234,13 @@ processThree pagename theaddress content indexstate = let
             insert newlabel (processedtitle, pagename, secitsunder, secnumber) (snd $ propind.subsubsection)
          )
          }
-         in (h4 ! A.id (fromString newlabel) $ ((>>) (toHtml $ show itsundernumber <> "." <> show secnumber <> " ") processedtitle) , newind)
+         in (h4 ! A.id (fromString newlabel) $ ((>>) (toHtml $ show itsundernumber <> "." <> show secnumber <> " ") processedtitle) , newind, joblist)
 
+
+      Tikz stuff -> let
+         (outputname, outputjob) = makeTikzStandalone stuff theaddress
+         in (, propind, outputjob >> joblist) $ do
+            (H.div ! A.class_ "centerthis") $ img ! (src . fromString $ "./" <> outputname <> ".svg")
       -- Subsubheading x -> let
       --    processedtitle = inlineProcessThree x propind
       --    in (h4 processedtitle , propind)
@@ -247,19 +255,19 @@ processThree pagename theaddress content indexstate = let
                figcaption $ (>>)
                   (fromString $ "Figure " <> show fignumber <> ": ")
                   $ inlineProcessThree thing propind
-         in (htmlelement, newind)
+         in (htmlelement, newind, joblist)
 
       BoxedSec infobox mtitle content -> let
          mlabel = getMaybeLabelInfoBox infobox
          updateTheoremCounter = shouldUpdateThmCounter infobox
          (newind1, thmnum) = doAnInfoBox updateTheoremCounter mlabel theaddress pagename propind
-         (processedContent, newind2) = processThree pagename theaddress content newind1
+         (processedContent, newind2, joblist1) = processThree pagename theaddress content newind1
          pmtitle = case mtitle of
             Just ttitle -> Just $ inlineProcessThree ttitle propind
             Nothing -> Nothing
          (htmlelement, _) = boxToHtml infobox pmtitle pagename thmnum processedContent
-         in (htmlelement, newind2)
+         in (htmlelement, newind2, joblist1 >> joblist)
 
    in case (content,indexstate) of
-      ([], ind) -> (Empty (), ind)
-      (xs, ind) -> repeatCase xs ind
+      ([], ind) -> (Empty (), ind, (return ()))
+      (xs, ind) -> repeatCase xs ind (return ())

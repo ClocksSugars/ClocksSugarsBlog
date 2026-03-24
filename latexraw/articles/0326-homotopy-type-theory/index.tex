@@ -13,13 +13,19 @@
 \input{../amsthmstuff.tex}
 
 \usepackage{amsmath}
+
+\usepackage{sourcecodepro}
+\setmonofont{JuliaMono}
+
 \begin{document}
 
-\emph{The following is the article version of a talk given on 03/13/26. The intended audience of the talk is a split demographic of programmers/machine learning engineers and various levels of academicians/hardware engineers. Consequently, the content herein is intended to be exploratory for a reader rather than comprehensive; for that, there is the content currently published in Application Unification. This article is not intended to give a one-to-one correspondance with the content of the talk, but rather to formally detail the scaffold of the talk. Accordingly, it is written to supplement the talk and to be able to stand on its own as a resource, but not as a transcript or an intrinsically motivated text.}
+\emph{The following is the article version of a talk given on 03/20/26. The intended audience of the talk is a split demographic of programmers/machine learning engineers and various levels of academicians/hardware engineers. Consequently, the content herein is intended to be exploratory for a reader rather than comprehensive; for that, there is the content currently published in Application Unification. This article is not intended to give a one-to-one correspondance with the content of the talk, but rather to formally detail the scaffold of the talk. Accordingly, it is written to supplement the talk and to be able to stand on its own as a resource, but not as a transcript or an intrinsically motivated text.}
 
 Homotopy type theory is an exciting modern exploration of type theory using reasoning developed in the theory of homotopy. Consequently, to a naive audience, it is not exactly clear what any of the constituent names are in reference to. In order to have any hope of discussing this, we will need to step through the basics of a few parts of mathematics. Only then, after what \emph{type theory} is has been established, will we be able to discuss homotopy type theory.
 
 Our narration will proceed through four theaters of varying significance, one of which is already written about on this website and so readers are advised to review \hyperlink{https://clockssugars.blog/appliuni/prelims/proptypes.html}{Propositional Logic: A Programming Inspired Approach}. The other three are set theory, topology, and category theory, which will follow an appropriate through-line. With those developed, we will finally introduce the core idea of homotopy type theory.
+
+A disclaimer: while I have studied homotopy type theory a bit on my own, I am extraordinarily far from an expert on the matter, and my expertise stops at the content of the Homotopy Type Theory textbook, as well as the 2022 HoTT summer school course. The finer details of either of those will not even appear here, as this is an introduction intended to explore the topic and its prerequisites for an audience who has little to no formal mathematical experience. Many snippets of code in this article were inspired by or taken from the 2022 HoTT summer school course.
 
 \subsection{Sets and Equivalence}
 
@@ -37,7 +43,7 @@ This resolution, of forcing equality which ignores extraneous data, is called \e
 
 \begin{definition}[Equivalence Relation]
 (This definition also appears \hyperref[def:EquivalenceRelation]{here}.) \\
-An equivalence relation can be considered to be a set of pairs $A$. When a pair $(a,b) \in A$ then we write $a \sim b$ and either say that $a$ is \emph{similar} to $b$ or that $a$ is \emph{equivalent} to $b$ \emph{under} $\sim$. Let $B$ be the set of all items that $\sim$ relates to one another. Then in order to be an equivalence relation, $\sim$ must satisfy the following: \begin{itemize}
+An equivalence relation can be considered to be a set of pairs $A$. When a pair $(a,b) \in A$ then we write $a \sim b$ and either say that $a$ is \textbf{similar} to $b$ or that $a$ is \textbf{equivalent to} $b$ \textbf{under} $\sim$. Let $B$ be the set of all items that $\sim$ relates to one another. Then in order to be an equivalence relation, $\sim$ must satisfy the following: \begin{itemize}
 \item (Reflexivity) For all $a \in B$, we have $a \sim a$ since a thing must be equal to itself
 \item (Symmetry) For all $a,b \in B$, if we have $a \sim b$ then we have $b \sim a$ since equality (or similarity) is not an ordered property; i.e. $(a,b) \in A \iff (b,a) \in A$
 \item (Transitivity) For all $a,b,c \in B$, if we have $a \sim b$ and we have $b \sim c$ then we have $a \sim c$, since if $b$ is the same as both $a$ and $c$ then they must be the same as one another as well.
@@ -49,7 +55,7 @@ With this in hand, we may now develop a formal set quotient.
 
 \begin{definition}[Set Quotient]
 
-Let $B$ be a set, and $\sim$ an equivalence on its elements, with the relations of the equivalence defined by the set of pairs $A$. We define the set quotient $B/_\sim$ to be the set of \emph{equivalence classes}, i.e. sets of elements which are equivalent under the equivalence relation. That is, we would write formally \begin{gather*}
+Let $B$ be a set, and $\sim$ an equivalence on its elements, with the relations of the equivalence defined by the set of pairs $A$. We define the set quotient $B/_\sim$ to be the set of \textbf{equivalence classes}, i.e. sets of elements which are equivalent under the equivalence relation. That is, we would write formally \begin{gather*}
 B/_\sim = \{ [a] \mid a \in B\}
 \end{gather*}
 where our equivalence classes $[a]$ are defined \begin{gather*}
@@ -60,9 +66,9 @@ That is to say, the equivalence class $[a]$ is literally the set of all elements
 
 \subsection{Topology}
 
-When speaking about a space $X$, it is natural to desire a notion of closeness. In most spaces you may be familiar with, this is achieved with a \emph{metric}, a function $d\colon X \times X \to \reals$ which can provide a notion of distance between any two points, with points of shorter distance between each other being closer. The trouble with this is that in many spaces, it may either not make sense to define a notion of distance, or we may want to avoid defining a notion of distance due to undesired implications. For example, on a torus you may not want to define a notion of distance since any \squote{straight line} to a point has another line to that point going around the torus (in any way you want) which may draw a shorter or longer line between two points, neverminding the choice one would have to make about how to convert such a line into a number distance (i.e. how do you privilege kilometers or miles? How do you choose how lines turn into numbers?). This could be extended to discussions about graphs (collections of points and lines between them), where the idea that using edges of the graph to define distances may be undesireable, either because the edges may be directed (i.e. you may need to insist that distances are only defined in one direction) or the sums of edges don't agree, and there are multiple paths between points of varying lengths.
+When speaking about a space $X$, it is natural to desire a notion of closeness. In most spaces you may be familiar with, this is achieved with a \textbf{metric}, a function $d\colon X \times X \to \reals$ which can provide a notion of distance between any two points, with points of shorter distance between each other being closer. The trouble with this is that in many spaces, it may either not make sense to define a notion of distance, or we may want to avoid defining a notion of distance due to undesired implications. For example, on a torus you may not want to define a notion of distance since any \squote{straight line} to a point has another line to that point going around the torus (in any way you want) which may draw a shorter or longer line between two points, neverminding the choice one would have to make about how to convert such a line into a number distance (i.e. how do you privilege kilometers or miles? How do you choose how lines turn into numbers?). This could be extended to discussions about graphs (collections of points and lines between them), where the idea that using edges of the graph to define distances may be undesireable, either because the edges may be directed (i.e. you may need to insist that distances are only defined in one direction) or the sums of edges don't agree, and there are multiple paths between points of varying lengths.
 
-In many of the cases discussed above, the notion of \emph{closeness} is not the fundamental problem, but merely the attempt to assign this closeness a number corresponding to a pair of points. We resolve this with the notion of a \emph{topology}, avoiding a choice of number but instead defining closeness in terms of a set of sets. That is, for some set of points $X$, we define a topology $\mathcal{T}_X$ which contains sets, where each set stands as a claim that its members are some degree of close to one another.
+In many of the cases discussed above, the notion of \emph{closeness} is not the fundamental problem, but merely the attempt to assign this closeness a number corresponding to a pair of points. We resolve this with the notion of a \textbf{topology}, avoiding a choice of number but instead defining closeness in terms of a set of sets. That is, for some set of points $X$, we define a topology $\mathcal{T}_X$ which contains sets, where each set stands as a claim that its members are some degree of close to one another. One way to think of this is that for three points $x,y,z \in X$, $x$ and $y$ are closer than $x$ and $z$ if for any given set $A \in \mathcal{T}_X$ in the topology containing $x,y,z \in A$, we can find a more restrictive set $B \in \mathcal{T}_X$ which has $x,y \in B$ but $z \notin B$; that is, a more restrictive set in the topology still places $x$ and $y$ together but without $z$, so we think of $x$ and $y$ as closer. This intuition is by no means canonical, but it certainly beats the abstract definition we will get to shortly.
 
 \figuresvgwithcaption{./Art0326HTTTopologyDiagram}{Above we see a set of points together with a collection of sets that might be used to define a topology. This collection of sets is not exhaustive of a topology, as they are required to include all of the intersections and unions of sets, but it is clear from this that we say 1 is closer to 2 and 3 than to 18 since we can find a set containing 1, 2, and 3, but not 18, while we cannot find a set containing 1 and 18 but not 2 and 3. Likewise with 13, any set containing 13 and 12 must also contain 14,15,16, but the reverse is not true.}
 
@@ -75,12 +81,12 @@ f(U) = \{f(x) \mid x \in U\} \subseteq V
 then we say that $f$ converges to $f(p)$ at $p$, or rather\begin{gather*}
 \lim_{x \to p} f(x) = f(p)
 \end{gather*}
-and thus we say that $f$ is \emph{continuous at} $p$ since the limit it approaches at $p$ matches what it actually is at $p$.
+and thus we say that $f$ is \textbf{continuous at} $p$ since the limit it approaches at $p$ matches what it actually is at $p$.
 
-If this is true for all $p \in B$, we say that $f$ is \emph{continuous on} $B$. If this is true for all $p\in A$, we say that $f$ is a \emph{continuous function}.
+If this is true for all $p \in B$, we say that $f$ is \textbf{continuous on} $B$. If this is true for all $p\in A$, we say that $f$ is a \textbf{continuous function}.
 \end{definition}
 
-Continuity is usually described in the context of graphing a line; we tend to think that a function is continuous if we can draw its graph without taking our pen off the paper, that is, in one continuous stroke. If you have any familiarity with formal limits yet do not recognize this definition, it is because we have stated it in a way which is topologically agnostic (if you are not familiar with limits, hang tight. They are merely a construction to ask what a function looks like it is going to be at a point). The usual topology applied to $\reals$ is the \emph{metric topology}, in which we define a metric, a function which gives distance between two points $d(x,y) = |x - y|$, and declare that an open set in $\reals$ is either a ball centered at $x$ of radius $r$, the set \begin{gather*}
+Continuity is usually described in the context of graphing a line; we tend to think that a function is continuous if we can draw its graph without taking our pen off the paper, that is, in one continuous stroke. If you have any familiarity with formal limits yet do not recognize this definition, it is because we have stated it in a way which is topologically agnostic (if you are not familiar with limits, hang tight. They are merely a construction to ask what a function looks like it is going to be at a point). The usual topology applied to $\reals$ is the \textbf{metric topology}, in which we define a metric, a function which gives distance between two points $d(x,y) = |x - y|$, and declare that an open set in $\reals$ is either a ball centered at $x$ of radius $r$, the set \begin{gather*}
 B_r(x) = \{y \in \reals \mid d(x,y) < r \},
 \end{gather*}
 or some union or intersection of balls. In this way, the definition above becomes \squote{for any $\varepsilon > 0$ (i.e. a radius $r_1$), there exists $\delta > 0$ (i.e. a radius $r_2$) such that for all $|x - p| < \delta$ (i.e. $x \in B_{r_2}(p)$) we have $|f(x) - f(p)| < \varepsilon$ (i.e. $f(x) \in B_{r_1}(f(p))$)}. This epsilon-delta definition is normally read as \squote{for any distance $\varepsilon$, there must exist a distance $\delta$ so that whenever our input is within $\delta$ of $p$, our output is within $\varepsilon$ of $f(p)$}, and we use this to say that any input sufficiently close to $p$ must result in an output sufficiently close to $f(p)$, so we should approach the \emph{expected output} as we approach the input we expect it to correspond to.
@@ -93,7 +99,7 @@ exactly like $f(U) \subset V$ in the topologically agnostic definition of contin
 A lot of intuition is gained by thinking of continuity in this way, and by understanding that \emph{the sets present in the topology set $\mathcal{T}_X$ define which sets are called open sets on $X$}. That is, a topology is exactly a choice of which sets count as open, and thus which functions from one space to another are continuous.
 
 \begin{definition}[Topological Space]
-Let $X$ be some set and $\mathcal{T}_X$ a set of subsets of $X$. We say that $(X,\mathcal{T}_X)$ (or just $X$ or $\mathcal{T}_X$ alone) form a \emph{topological space} if $\mathcal{T}_X$ satisfies the following properties. \begin{enumerate}
+Let $X$ be some set and $\mathcal{T}_X$ a set of subsets of $X$. We say that $(X,\mathcal{T}_X)$ (or just $X$ or $\mathcal{T}_X$ alone) form a \textbf{topological space} if $\mathcal{T}_X$ satisfies the following properties. \begin{enumerate}
 \item $\mathcal{T}_X$ contains the empty set $\emptyset$ and $X$ itself.
 \item Any sequence of sets $(U_n)_{n \in \nats}$ (finite or infinite) in $\mathcal{T}_X$ satisfy \begin{gather*}
 \bigcup_{n \in \nats} U_n \in \mathcal{T}_X.
@@ -150,7 +156,7 @@ A similar thing was noticed for dual objects in linear algebra; it made perfect 
 The lesson taken was, one presumes, that constructions in mathematics tend to privelege certain kinds of maps within themselves, and that there often exist transformations from one field's construction to another that preserve these priveleged maps, allowing us to make insights about a field using the tools of another. Such was the driving tool of algebraic topology, which went on to use the tools of group theory to further explore topology, for instance finding that the subgroups of a fundamental group corresponded to the existence (or lack thereof) of covering spaces (spaces where traversing a loop doesn't take you back to where you started but to alternate copies of the space until certain special loops are followed).
 
 \begin{definition}[Category]
-Let $\mathcal{C}$ be such an object that we say $\mathrm{ob}(\mathcal{C})$ is a set of \emph{objects} in $\mathcal{C}$ and $\mathrm{hom}(\mathcal{C})$ is a set of \emph{morphisms} in $\mathcal{C}$, such that each morphism has a source and a target $f \colon x \to y$ with $x,y \in \mathrm{ob}(\mathcal{C})$, and the ability to chain these morphisms together $f\circ g \colon x \to z$ if $g \colon x \to y$ and $f \colon y \to z$. If each object $x \in \mathrm{ob}(\mathcal{C})$ has a morphism $\mathrm{id}_x \colon x \to x$ such that $\mathrm{id}_x \circ f = f$ or $f \circ \mathrm{id}_x = f$ for appropriate $f$, and any appropriate $f,g,h \in \mathrm{hom}(\mathcal{C})$ satisfy $(f \circ g) \circ h = f \circ (g \circ h)$, then we say $\mathcal{C}$ is a category.
+Let $\mathcal{C}$ be such an object that we say $\mathrm{ob}(\mathcal{C})$ is a set of \textbf{objects} in $\mathcal{C}$ and $\mathrm{hom}(\mathcal{C})$ is a set of \textbf{morphisms} in $\mathcal{C}$, such that each morphism has a source and a target $f \colon x \to y$ with $x,y \in \mathrm{ob}(\mathcal{C})$, and the ability to chain these morphisms together $f\circ g \colon x \to z$ if $g \colon x \to y$ and $f \colon y \to z$. If each object $x \in \mathrm{ob}(\mathcal{C})$ has a morphism $\mathrm{id}_x \colon x \to x$ such that $\mathrm{id}_x \circ f = f$ or $f \circ \mathrm{id}_x = f$ for appropriate $f$, and any appropriate $f,g,h \in \mathrm{hom}(\mathcal{C})$ satisfy $(f \circ g) \circ h = f \circ (g \circ h)$, then we say $\mathcal{C}$ is a category.
 \end{definition}
 
 The key take away is that in most of the settings you are familiar with, an object of a category is some kind of set with perhaps additional structure, and the morphisms of a category are functions which may have some additional condition placed on them such as a homomorphic property or continuity. Taken in this light, the additional requirements are trivial: of course there is always an identity map that says a function can send elements of a set to themselves, and of course function composition is associative.
@@ -163,13 +169,426 @@ Categories you may already be familiar with are \begin{itemize}
 \end{itemize}
 
 \begin{definition}[Functor]
-Let $\mathcal{C}$ and $\mathcal{D}$ be categories. A construction $F$ is written $F \colon \mathcal{C} \to \mathcal{D}$ if it defines a function $F \colon \mathrm{ob}(\mathcal{C}) \to \mathrm{ob}(\mathcal{D})$ and a function $F \colon \mathrm{hom}(\mathcal{C}) \to \mathrm{hom}(\mathcal{D})$ and has the properties that $F(\mathrm{id}_x) = \mathrm{id}_{F(x)}$ and $F(f \circ g) = F(f) \circ F(g)$, sending identity on objects in $\mathcal{C}$ to identity on their image objects in $\mathcal{D}$, and composition of functions on $\mathcal{C}$ to composition on functions in $\mathcal{D}$, then we call it a \emph{covariant functor}.
+Let $\mathcal{C}$ and $\mathcal{D}$ be categories. A construction $F$ is written $F \colon \mathcal{C} \to \mathcal{D}$ if it defines a function $F \colon \mathrm{ob}(\mathcal{C}) \to \mathrm{ob}(\mathcal{D})$ and a function $F \colon \mathrm{hom}(\mathcal{C}) \to \mathrm{hom}(\mathcal{D})$ and has the properties that $F(\mathrm{id}_x) = \mathrm{id}_{F(x)}$ and $F(f \circ g) = F(f) \circ F(g)$, sending identity on objects in $\mathcal{C}$ to identity on their image objects in $\mathcal{D}$, and composition of functions on $\mathcal{C}$ to composition on functions in $\mathcal{D}$, then we call it a \textbf{covariant functor}.
 
-If instead of that final condition $F(f \circ g) = F(f) \circ F(g)$ it satisfies $F(f \circ g) = F(g) \circ F(f)$ then we call it a \emph{contravariant functor}.
+If instead of that final condition $F(f \circ g) = F(f) \circ F(g)$ it satisfies $F(f \circ g) = F(g) \circ F(f)$ then we call it a \textbf{contravariant functor}.
 \end{definition}
 
-It is of 
+It is of great significance that these definitions were general enough to cover not merely organizations of sets with structure, but many things we would normally think of as objects in some other category. For instance, picture a set $A$ together with a relation $\le$ such that for any two $a,b \in A$, either $a \le b$ or $b \le a$, we assume $a \le a$ is also true, and we have $a \le b \le c$ implies $a \le c$. This would be entirely appropriate of say, a set of integers, and yet what we have satisfied are the axioms of a category, with objects $A$ and morphisms, the orderings between objects in $A$. We could use such a category to study the structure of another category, for instance we could construct a functor from the category with objects which are finite sets and morphisms which are \hyperref[def:functionproperties]{injective} maps, to the category of integers with these $\le$ orderings for morphisms, and we would find that sets together with injective maps obey an ordering rule depending on which injective maps exist or do not. 
 
+More broadly, in the same way we had just made individual integers into objects of a category, we can do away with the set-substructure of categories in general and construct categories which are the objects of another category. For instance, let $V$ be a vector space and construct a category $\mathcal{V}$ which has objects $\mathrm{ob}(\mathcal{V}) = V$ and morphisms $\mathrm{hom}(\mathcal{V}) = V$ such that any two vectors $v_1,v_2 \in V$ act in the category by $v_2 \colon v_1 \to (v_1 + v_2)$, i.e. we make vectors both the objects and morphisms of a category and make their addition into the act of applying a morphism to an object. In this case, one should not think of $v_2$ as a \emph{function} and neither is $v_1$ a set or any other kind of object with internal structure; $v_1$ is simply itself, a point, a position, an arrow, and $v_2$ is simply another arrow which in its incarnation as a morphism, says \dquote{I know how to place the tail of my arrow at the head of another and see where our arrows go together}, arriving at destination $v_1 + v_2$ as the target of the morphism. In this setting, linear maps between vector spaces are elevated to functors between vector categories.
 
+We can just as easily do the opposite, instead of constructing categories which were the objects of some other category, we can construct categories which have objects who are categories, for instance by constructing the \emph{category of categories}, with objects which are categories and morphisms which are functors. In this case we find that the fundamental group becomes a mere morphism.
+
+Finally, one of the other great contributions of categories was the establishment that certain structures should be drawn as graphs, and manipulations on these graphs could identify new structures. One such a structure you may be familiar with is a cartesian product, which we know to send two sets $X$ and $Y$ to a set $X \times Y$, the set of pairs $(x,y)$ where $x \in X$ and $y \in Y$. Category theory formalizes this construction with the following graph. \begin{detect tikz}\begin{tikzcd}
+& Z \arrow[ddl,"f_1"'] \arrow[dd,"f", dashed] \arrow[ddr,"f_2"] & \\\\ X & X \times Y \arrow[l, "p_X"] \arrow[r, "p_Y"'] & Y
+\end{tikzcd}\end{detect tikz}
+The idea here is that we define $X \times Y$ not by being constructed of pairs $(x,y)$, but by having the property that first, any object in it can be \textbf{projected} onto either $X$ or $Y$, and any set $Z$ which has functions $f_1 \colon Z \to X$ and $f_2 \colon Z \to Y$ constructs a function $f \colon Z \to X \times Y$ which satisfies $p_X(f(z)) = f_1(z)$ and $p_Y(f(z)) = f_2(z)$. With these rules in mind, it is only natural that we are indeed speaking about $X \times Y$ as pairs $(x,y)$, since we construct $f$ as pairs $(f_1(z), f_2(z))$, and our projection maps are simply $(x,y) \mapsto x$ and $(x,y) \mapsto y$ ignoring the other data. We call such a diagram a \textbf{commutative diagram} because we require that all sequences of paths in the diagram are equivalent to each other. In other words, we require that for any starting object, for instance $Z$, and any ending object, for instance $X$, any two paths between them, i.e. $f_1$ or $p_X\circ f$ are the same. 
+
+One of the great insights of category theory is that these diagrams describe the concept of a product space in abstract. We can now not only define cartesian products, products of sets, but group products, topological space products, vector space products, and even ordering products in the way we described a category of integers with morphisms which are orderings $\le$ (although in this case, our products may not match our intuitions about multiplication). More than this, category theory also establishes an idea that these diagrams may remain meaningful in reverse. That is, in the same way that we speak of product objects as obeying the property of this diagram, we may speak of coproduct objects which obey a reversed diagram. 
+\begin{detect tikz}\begin{tikzcd}
+& Z & \\\\ X \arrow[uur,"f_1"'] \arrow[r, "i_X"] & X + Y \arrow[uu,"f", dashed] & Y \arrow[l, "i_Y"'] \arrow[uul,"f_2"]
+\end{tikzcd}\end{detect tikz}
+We call this object $X + Y$ the coproduct of $X$ and $Y$, with \squote{co-} meaning the flipped diagram and \squote{product} owing from the diagram that we flip to obtain this construction. Now, we say that $X + Y$ is the object which keeps the above diagram commutative, i.e. if we have functions $f_1 \colon X \to Z$ and $f_2 \colon Y \to Z$ then there exists \textbf{injection maps} $i_X \colon X \to X + Y$, $i_Y \colon Y \to X + Y$, and a function $f \colon X + Y \to Z$ which keeps $f \circ i_X = f_1$ and $f \circ i_Y = f_2$. In the same way that for products, the resolution in the category of sets was to construct a set of pairs, the resolution here is to construct a set which contains both the elements of $X$ and the elements of $Y$. This is distinct from the union $X \cup Y$, since whenever there exists an element $e \in X$ which is also $e \in Y$, we require that these elements from $X$ and $Y$ remain distinct in $X + Y$, so we may construct $e_X, e_Y \in X + Y$ which are $e$ but with a little note attached saying \dquote{this came from $X$} or \dquote{this came from $Y$} so we know $e_X \neq e_Y$. In this way, our injection maps are simply defined $i_X \colon x \mapsto x_X$ and $i_Y \colon y \mapsto y_Y$, merely attaching a note to the object that says where it came from and then dumping it in the mutual collection of items $X + Y$. Now the existence of $f$ should make sense to us, since for any $e \in X + Y$, we define $f(e)$ to say \dquote{let me check the attached note, did this come from $X$ or from $Y$? If it came from $X$ then I'll say $f(e_X) = f_1(e)$ and if it came from $Y$ then I'll say $f(e_Y) = f_2(e)$.} In fact, this notion is so similar to a union, in particular we call this a \textbf{disjoint union} since we insist that the two sets have no overlap (even labelling their elements when they do so that they ultimately do not overlap) that the more common notation for the coproduct is $X \sqcup Y$, with the squared union symbol denoting the disjoint union.
+
+\subsection{Type Theory, Proposition Types, and Martin-Lof Type Theory}
+
+Okay. So we have meandered around three of our four necessary theaters at this point. We have discussed sets, and the complications attached to constructing or enforcing a notion of equivalence. We have discussed topology, how it defines continuity, homotopy, and how the existence of homotopies or lack thereof tell us about a space. And we have covered some very basic category theory, discussing the notion of a product and coproduct object in a category.
+
+Now, in our fourth and final theater before homotopy type theory, we will begin to pay off some, but not all, of the links we have discussed. Here I must insist that a more thorough exposition of what follows is written in \emph{Application Unification} in \hyperlink{https://clockssugars.blog/appliuni/prelims/proptypes.html}{Propositional Logic: A Programming Inspired Approach}. The narration here will speed through many of the constructions and other formal proofs, emphasizing other features and making recourse to the above discussion of categories.
+
+We begin with the notion of a type.
+
+When we define a function, or a homomorphism, or a continuous map, or any morphism in the sense of a category, we required that it be defined with a source and a target. To our intuitions in other contexts, this should make perfect sense. A function which takes vectors does not know what to do if it is given an element of an abstract topological space. In a programming context this is even more apparent, as the abstraction of addition of two numbers is entirely inappropriate for say, two strings of characters. We resolve this by saying that functions are defined with an input type and an output type, and insist that functions \emph{never} act on elements outside their input type.
+
+This is in many ways a clean break from the thinking of set theory. In the context of sets, objects simply exist, and sets contain them, so a set $A$ and a set $B$ may share elements in a set $A \cap B$ (their intersection), and a function $f \colon A \to C$ still knows what to do with an element $b \in A$ which is present in the intersection $b \in A \cap B$. This does not match with our intuition of types: in programming, one thinks of a computer as considering the number twenty 20 distinct from the string \dquote{20} or the string \dquote{twenty}, with a function defined to take an integer throwing a type error if it is given the input string \dquote{20}. For types, an object is not only a member of one and only one type, but membership to that type tells you something about what it fundamentally is, and what it would even make sense to do with things from that type. For that reason, we cease speaking about $a \in A$ and instead say that a member of a type $A$ has members such as $a \colon A$ in the same way we would think of $f \colon A \to B$; we say that $a$ is \emph{of type} $A$ just as all things have a type and exactly one type.
+
+The simplest way to define a type is usually given by expressing some enumeration of members of the type, for instance we can define the type of alphabetic characters in C code: \begin{lstlisting}[language=C]
+enum Alphabetic {
+	A,
+	B,
+	C,
+	...
+	Z
+}
+\end{lstlisting}
+
+The way we will be thinking about this is not with C enums but rather with rust enums, which is to say that each of those letters above is to be thought of as a \textbf{constructor} for the type. The constructor $\mathtt{A}$ constructs the element $\mathtt{A}$, $\mathtt{B}$ constructs the element $\mathtt{B}$, etc. and this may seem superfluous as a construction, however in rust, our constructors may also take some additional data. So for instance we may have a type \begin{lstlisting}[language=Rust]
+enum Option<T> {
+	None,
+	Some(T)
+}
+\end{lstlisting}
+which for any type $\mathtt{T}$, has two constructors, $\mathtt{Some(T)}$ which holds one member of type $\mathtt{T}$, and $\mathtt{None}$ which holds no additional data. In rust, a type like this is used for error handling, since any function with desired output of type $\mathtt{T}$, which we are not certain will complete correctly, can instead output type $\mathtt{Option<T>}$, returning $\mathtt{None}$ if the function fails and $\mathtt{Some(result)}$ if the function succeeds. For a type $\mathtt{T}$ with $N$ members, the type $\mathtt{Option<T>}$ then has $N+1$ members.
+
+We can get a lot more aggressive with these constructions, although in rust, we will have to take account for the fact that rust expects to know how much data a type has at any given time. For instance, we can make a type which has a constructor storing some data and requiring an instance of itself, as well as a constructor for the base empty list, to construct a linked list: \begin{lstlisting}[language=Rust]
+enum LinkedList<T> {
+	EmptyList,
+	Cons(T, Box<LinkedList>)
+}
+\end{lstlisting}
+and so we can construct a list $\mathtt{[A,B,C]}$ of type $\mathtt{LinkedList<Alphabetic>}$ which is in full \begin{gather*}
+\mathtt{Cons(A,Box::new(Cons(B,Box::new(Cons(C,Box::new(EmptyList)))))) }
+\end{gather*}
+although this is unwieldy. Part of the trouble here is that in rust, a type must always know the maximum amount of memory it could take up, which is unbounded if a type's constructors can simply hold more of the type within themselves; we have gotten around that problem here by \emph{boxing} the values, i.e. saying that the constructor $\mathtt{Cons}$ only holds a pointer, and that pointer points to data of type $\mathtt{LinkedList}$.
+
+What we are describing is called a \textbf{inductive type}, and they exist in other languages with less restrictions, such as in haskell. In haskell, we do not need to turn data into a pointer in order for a constructor of a type to hold another instance of itself, although our syntax is slightly different, with the primary difference being that things that look like functions do not necessarily have the same function-name parentheses function-argument pattern as in other contexts. In haskell, the argument is simply written after the function.
+
+\begin{lstlisting}[language=Haskell]
+data LinkedList t =
+		emptylist
+	|	cons t LinkedList
+\end{lstlisting}
+
+The whitespace we have used here is unnecessary, but we have written the same thing as in rust. For some type $\mathtt{t}$, we can construct a list of type \texttt{LinkedList Alphabetic}, for instance the list $[A,B,C]$, with \begin{gather*}
+\texttt{cons A (cons B (cons C emptylist))}
+\end{gather*}
+and in fact an identical structure is used as the standard form of lists in haskell, usually written as the type $\mathtt{[t]}$ with $\mathtt{cons}$ written with a colon, so $\mathtt{[A,B,C]}$ would be $\mathtt{A:B:C:[]}$ with $\mathtt{[]}$ written for the empty list.
+
+All this is to say that our inductive types may also be used to give formal grounding to concepts we tend to think of as familiar. For instance, we can now express counting numbers as an inductive type, and we do this by formalizing the notion of counting so that each number is either zero or its successor, a number counted up by one. \begin{lstlisting}[language=Haskell]
+data NaturalNumber =
+		Zero
+	|	Succ(NaturalNumber)
+\end{lstlisting}
+This has a very similar structure to the linked lists, where we have simply ommitted the extra data stored in each link of the list, and instead treated the number of links as the number represented. The power of an inductive type is now made manifest, since we may think of \emph{every} counting number as merely zero, or some other number counted up by one, and define functions by what they should do with these cases accordingly. For instance, we may define addition as a recursive function which takes two numbers, thought of as tallies, and recursively moves tally marks from one number to the other, exiting only when the first number is zero. The example is presented in both rust and haskell. \begin{lstlisting}[language=Rust]
+enum NaturalNumber {
+	Zero,
+	Succ(Box<NaturalNumber>)
+}
+
+fn Add(x: NaturalNumber, y: NaturalNumber) -> NaturalNumber {
+	match (x,y) {
+		(Zero, y) => y,
+		(Succ(z), y) => Add(z, Succ(y)) 
+	}
+} 
+\end{lstlisting}
+
+\begin{lstlisting}[language=Haskell]
+data NaturalNumber =
+		Zero
+	|	Succ(NaturalNumber)
+	
+Add :: NaturalNumber -> NaturalNumber -> NaturalNumber
+Add x y = case (x,y) of
+	(Zero,y) -> y,
+	(Succ(z), y) -> Add z (Succ(y))
+	
+--- Or equivalently
+
+Add Zero y = y
+Add (Succ(z)) y = Add z (Succ(y))
+\end{lstlisting}
+
+Haskell, as a product of the academic community around programming language theory, introduces a syntax concept which will be important to us later. That is, just as $\mathtt{LinkedList}$ was not itself a type until it had been instructed what data it was going to hold, we can think of $\mathtt{LinkedList}$ as a constructor in the type of types, taking a type as an argument and constructing a type of linked lists in it; in rust, these are referred to as generic types. In haskell, there is a similar notion in which the arrow $\mathtt{->}$ is a constructor which takes two types on either side of it and constructs the type of functions from the source type to the target type. We have spoken before about associativity, in groups where $(gh)k = g(hk)$, and in morphisms of a category where $f\circ (g \circ h) = (f \circ g) \circ h$, and this arrow is one such a binary operator (constructor) that is not associative but instead \textbf{right-associative}. That is, we think of $\mathtt{Add}$ as taking a $\mathtt{NaturalNumber}$ such as $\mathtt{3}$ and returning a function of type \texttt{NaturalNumber -> NaturalNumber}, a function which would take a second number and add $\mathtt{3}$ to it. In this way, as we would think of a function composition $f \circ g \circ h$ as having any set of implicit brackets within it that would not change its meaning, function type signatures have only one correct set of implicit brackets. We read the type signature of $\mathtt{Add}$ as \begin{gather*}
+\texttt{NaturalNumber -> (NaturalNumber -> NaturalNumber)}
+\end{gather*}
+with the rightmost pair being the innermost nested set of brackets.
+
+We're now ready to discuss basic proposition types, but in order to do this, we'll need to model it on familiar logic. That is, we understand in a basic classical logic, there is boolean \texttt{true}, a boolean \texttt{false}, a logical negation (\texttt{NOT}) in which $! \mathtt{true} = \mathtt{false}$ and $!\mathtt{false} = \mathtt{true}$, a logical \texttt{OR} which takes two logical statements and returns true if either is true and false otherwise, and a logical \texttt{AND} which takes two logical statements and returns false if either is false and true otherwise. \begin{gather*}
+\begin{matrix}
+P & | & Q & | & P \texttt{ OR } Q \\ &&\text{---}&& \\ 
+\texttt{false} & | & \texttt{false} & | & \texttt{false} \\
+\texttt{true} & | & \texttt{false} & | & \texttt{true} \\
+\texttt{false} & | & \texttt{true} & | & \texttt{true} \\
+\texttt{true} & | & \texttt{true} & | & \texttt{true}
+\end{matrix} \hspace{5em} \begin{matrix}
+P & | & Q & | & P \texttt{ AND } Q \\ &&\text{---}&& \\
+\texttt{false} & | & \texttt{false} & | & \texttt{false} \\
+\texttt{true} & | & \texttt{false} & | & \texttt{false} \\
+\texttt{false} & | & \texttt{true} & | & \texttt{false} \\
+\texttt{true} & | & \texttt{true} & | & \texttt{true}
+\end{matrix}
+\end{gather*}
+
+We now possess the tools now to encode each of these logical constructions as types. The way this will work is that a we think of a logical statement as a type, and the members of that type as evidence that it is true. Accordingly, we think of a proposition type as true if we can find an element in it, and false if we can show that the type is empty. Our prototypical types will then be: the \emph{true} object, or \textbf{unit type} written $\top$ which has a single element $* \colon \top$; and the \emph{false} object, or \textbf{empty type} written $\bot$ which has a no elements.
+
+With these two prototypical logic types, we now have the challenge of constructing logical operators \texttt{AND}, \texttt{OR} and \texttt{NOT} as above. In fact, we developed the tools to do this in category theory.
+
+If we treat our (proposition) types like objects in a category of types, a category $\mathbf{Type}$ if you will, we immediately construct the product and coproduct types in exactly the way we did in the previous section. Our \texttt{AND} operation will be the product type $P \times Q$, the type of pairs $(p,q)$ with $p \colon P$ and $q \colon Q$. If we examine $\top \times \bot$, it immediately becomes obvious that this is the empty type since there exists $* \colon \top$ but no element in $\bot$, so we cannot construct a pair, i.e. any attempt to form a pair $(*, - )$ fails to find anything to occupy the second spot. Our coproduct will form the logical \texttt{OR}, since if either is true then we will throw that evidence into the pile $P + Q$ which contains all (labelled) elements of $P$ and $Q$ and thus find $P+Q$ has evidence for it. For example, $\top + \bot$ will have the element $*_L \colon \top + \bot$ with the $L$ indicating that this unit element came from the left argument.
+
+These types can be written in rust or haskell as follows. \begin{lstlisting}[language=Rust]
+enum Unit {
+	Star
+}
+// This is also the familiar () unit type
+
+enum Empty {}
+// this doesn't necessarily compile, but the same functionality is covered
+//		by the never-type, which can be exposed with a feature flag in rust
+
+enum Product<S,T> {
+	Pair(S,T)
+}
+// This is also the familiar (S,T) tuple type
+
+enum Sum<S,T> {
+	InLeft(S),
+	InRight(T)
+}
+// this is also called the Result type in rust,
+//		where it is used for error handling
+\end{lstlisting}
+\begin{lstlisting}[language=Haskell]
+data Unit = Star
+-- this is also the familiar () unit type
+
+data Empty
+-- unlike in rust, this is perfectly valid by default
+
+data Product s t = pair s t
+-- this is also the familiar (s,t) tuple type
+
+data Sum s t = inl s | inr t
+-- this is also called the Either type in haskell,
+--		where it is used for error handling
+\end{lstlisting}
+
+The only real trick we need to inroduce is at the point that we discuss logical negation. This is a little more difficult than our previous constructions since we now need a way to turn a type with elements into a type with no elements. The trick we will use to do this is exploiting the $\to$ constructor which makes function types, together with the empty type. In particular, we will define the logical negation of a type $\neg P$ to be a type $P \to \bot$. You might wonder what it would mean for a function to map into an empty type; if it had at least one element as in $\top$, we could say that $f(p) = *$ for all $p \colon P$, but with no elements, we cannot assign any outputs to any inputs. The only way we can resolve this is by either saying that this type exists, but no such functions exist in it, or by saying that $P$ itself is an empty type. If there are no inputs, then the failure to assign any outputs is no issue since there were no inputs which required outputs; in this case, we say that there exists a function in the type $P \to \bot$ which proves $P$ is empty.
+
+This construction does not necessarily compile at all in rust, but we can still write it as though it does for intuition. \begin{lstlisting}[language=Rust]
+#![feature(never_type)]
+
+fn proof_of_false<P>(p: P) -> !
+	where P: // Require P has no constructors
+{
+	match p {}
+}
+// this function only exists if P is an enum with no constructors.
+//		in this case, our match statement finishes without any cases
+\end{lstlisting}
+
+For the same reason that we can only construct functions into the empty type if the input type is also empty, we can actually always construct functions from the empty type to anything else. On one hand, we can think this is because when searching for an adequate output to associate to each input for such a function $\bot \to P$, we look at the empty input type and say immediately \dquote{we are finished finding outputs}. On the other hand, we can think of this as the logical principle of explosion, i.e. \dquote{if false is true then anything is true}. This serves a vital role, since when enumerating the cases of possible constructor arguments we could get in a function, some of them will correspond to intrinsic self contradictions; in this case, we need merely prove that the elements we've been given result in the false type, and then we can produce proof of anything we want, including any terminating cases of a theorem.
+
+At this point, we actually have all we need to do some basic logic proofs. Nothing too fancy, but say, we can write a function that proves that \dquote{If \texttt{P} or \texttt{Q} is true and it's not \texttt{P} that's true, then it's \texttt{Q} that's true} and make it almost look like it would compile in rust. 
+
+\begin{theorem}
+Let $P,Q \colon \mathtt{Type}$ be proposition types. Then \dquote{if $P$ or $Q$, then if not $P$, then $Q$}, or \begin{gather*}
+P + Q \to \neg P \to Q
+\end{gather*}
+i.e. \dquote{if the ground was wet or we played basketball, then if the ground was \emph{not} wet, then we played basketball}.
+\end{theorem}
+
+\begin{my proof}
+The corresponding rust code goes as so: \begin{lstlisting}[language=Rust]
+fn trivial_func(x: !) -> Q { match x {} }
+
+fn theorem<P,Q>(
+	s: Sum<P,Q>,
+	g: impl Fn(p: P) -> !
+) -> Q
+{
+	match s {
+		InLeft(p) => trivial_function(g(p)),
+		InRight(q) => q
+	}
+}
+\end{lstlisting}
+
+This proof can be read as so. Assume proof of $P$ or $Q$ is provided, and called $s$, and that proof of $\neg P$ is provided and called $g$, which is itself a proof that \texttt{false} is true if $P$ is true. Ask which constructor formed $s$: if we knew $P$ or $Q$ was true because $P$ is true as evidenced by $p\in P$ and $s = \mathtt{InLeft}(p)$, then use $g \colon P \to \bot$ on $p$ to deduce $\bot$ is true, and with false shown true, deduce anything we want, namely $Q$. If we knew $P$ or $Q$ was true because $Q$ is true, then this is exactly what we wanted to hear, and we finish. 
+\end{my proof}
+
+What we are lacking at this stage is a way to construct types that say something useful to us. This will require us to construct something beyond the notion of a generic type, called a \textbf{dependent type}. Where a generic type takes a type and constructs a new one, in the way we might think of $\mathtt{LinkedList}$ from earlier as a function in $\mathtt{Type} \to \mathtt{Type}$, a dependent type is something like $T \to \mathtt{Type}$ where $T$ is an existing type; i.e. we are discussing a type that is dependent not on data from another type, but from data about a \emph{specific} member of the type.
+
+The closest example we have to this in rust is \squote{const generics} in which we can specify an integer which might be necessary to define, say, a type of arrays of some fixed length. \begin{lstlisting}[language=Rust]
+enum FixedLengthArray<const N: usize> {
+	Floats([f32 ; N]),
+	Ints([i32 ; N]),
+	...
+}
+\end{lstlisting}
+
+But no true analogy for dependent types exist in rust nor haskell, so we'll need to move to a language which will support our antics. This language will be Agda. Agda shares a lot of its syntax with haskell (and is based in the GHC ecosystem) so I'll have borrow haskell syntax highlighting here. We'll update all of our previous constructions first. \begin{lstlisting}[language=Haskell]
+-- Empty type
+data 𝟘 : Type where
+
+-- Unit type
+data 𝟙 : Type where
+   * : 𝟙 
+
+data BinProd (A : Type) (B : Type) : Type where
+    _,_ : BinProd A B
+
+-- Corresponding Syntax alias
+_×_ : Type → Type → Type
+A × B = BinProd A B
+
+data BinSum (A : Type) (B : Type) : Type where
+  inl : A → BinSum A B
+  inr : B → BinSum A B
+    
+-- Corresponding Syntax alias
+_ ∔ _ : Type → Type → Type
+A ∔ B = BinSum A B
+
+¬_ : Type → Type
+¬ P = P → 𝟘
+
+data ℕ : Type where
+  zero : ℕ
+  succ : ℕ → ℕ
+
+_+_ : ℕ → ℕ → ℕ
+zero + y = y
+(succ x) + y = x + (succ y)
+\end{lstlisting}
+
+Let's walk through some of the syntax adjustments. First, we explicitly declare our new enum types (these were data types in haskell) to be declarations of a new element in \texttt{Type}. Secondly, we have some syntax conveniences for defining infix operators such as $+$ involving underscores to indicate where arguments should appear (although I've had to put spaces next to these underscores for unicode-misbehaviour reasons). There is also a slight difference here between the symbols $+$ for addition and the symbol $\dotplus$ for sum types, where the latter has a dot above it. Lastly, when defining generic types such as \texttt{BinProd}, we don't just provide types which it takes as arguments to construct the type, we explicitly say that these \emph{are} specifically \emph{types} that we are providing. This opens the door to the idea that we might define a generic type not as depending on a provided type, but perhaps a provided member of a type, and these will be the so called \textbf{dependent types} for which dependent type theory is named.
+
+We'll construct the first of these dependent types we'll need right now, starting with the type defining the proposition of equivalence, called the \textbf{identity type}. \begin{lstlisting}[language=Haskell]
+data _ ≡ _ {A : Type} : A → A → Type where
+	refl : (x : A) → (x ≡ x)
+\end{lstlisting}
+
+Alright, so there are a few things going on here. First, Agda supports a language facility we're using here, in which we define a type to use something, a type $A$, but not explicitly say so later on; this is useful because if we have $a,b \colon A$ and $a \equiv b$, we don't want to have to specify that $\equiv$ requires the $A$ type since this is implied by using $a$ and $b$.
+
+Now we can get on to some conceptual things. Since Agda uses the equals sign for definitions, we can't use the literal equal sign and instead use the congruence symbole $\equiv$. Next, we need a way to construct proofs of this propositional equality, and the way we do so is with the constructor \texttt{refl}, short for reflexivity. Way back in the beginning of this, we said that an equivalence relation obeys reflexivity ($x = x$), symmetry ($x=y$ implies $y=x$) and transitivity ($x=y$ and $y=z$ implies $x=z$ through $y$). Here, we take reflexivity not only as an axiom, but the fundamental place from which proofs of equality come from. In other words, we say that equality is fundamentally true if the things on both sides of an equality are the same thing, which is of course tautologically what equality means.
+
+The other properties, symmetry and transitivity, will need to be proven. However as above, we have all the tools we need to construct these proofs as functions, that is, as programs. \begin{lstlisting}[language=Haskell]
+sym : {A : Type} {x y : A} → (x ≡ y) → (y ≡ x)
+sym (refl x) = refl x
+
+trans : {A : Type} {x y z : A} → (x ≡ y) → (y ≡ z) → (x ≡ z)
+trans p (refl y) = p
+\end{lstlisting}
+
+The functioning of these proofs are sort of tricky. For symmetry, we only take one argument, the argument that proves $x = y$ is true. In this case, we case-match on the constructors of $x = y$ just as we did in rust or in haskell, however since the type is the identity type, we say \squote{This type only has one constructor, which exists only in the case where $x = y$ is literally $x = x$. If you are giving me proof of $x = y$ then it must be because $y$ is literally just $x$.} This means that what the proof of symmetry sees, at the point that it receives the argument \texttt{refl x}, is that it is a function of type \texttt{sym : x ≡ x → x ≡ x}, and so it suffices to say the output is the same as the input.
+
+This reasoning extends to the proof of transitivity. We say \squote{I need proof of $x = y$ and proof of $y=z$, and I don't care what the proof of $x = y$ is exactly so I'll just call it $p$, but I need to know how $y = z$ was proved}. The only answer to that is $y = z$ was proved with reflexivity, and so $z$ must literally be $y$, and the function believes its type signature to be \begin{gather*}
+\texttt{trans : x ≡ y → y ≡ y → x ≡ y},
+\end{gather*}
+so it is obviously okay to simply return the argument $p$.
+
+Understanding proof-functions involving the identity type is one of the trickiest parts of this, and so if you find yourself confused and without instruction, please, again, refer to \hyperlink{https://clockssugars.blog/appliuni/prelims/proptypes.html}{Propositional Logic: A Programming Inspired Approach} for a more detailed explanation.
+
+Now, we approach the end game of our discussion of type theory, and we have only two stops left to complete a basic introduction to Martin-Lof dependent type theory, which are the dependent function and the dependent pair.
+
+In the definition of our equivalence-symmetry and equivalence-transitivity proofs, you saw that we specified implicit arguments such as \texttt{\{A : Type\}} and \texttt{\{x y : A\}}, then later explicit arguments that depended on these implicit ones, such as \texttt{x ≡ y} which only defined a type for us to expect an argument from \emph{after} $x$ and $y$ were already specified. There is a pattern here which the syntax has enabled, in which we have defined functions for which the output type depends not just on the input type, but on the \emph{specific input} used. In fact, we saw an example of this as early as the definition of the \texttt{refl} constructor, since $\texttt{refl : (x : A) → (x ≡ x) }$ produces outputs of a type $\texttt{x ≡ x}$ which only exists after $x$ is chosen.
+
+On the other side of this logic-programming divide, we have need of a way to make statements in generality. For instance, if I claim about our previously defined addition operator that $x + y = y + x$, I am uninterested in proving this in a case by case basis. Such a proof only has use to me if I can construct a proof that shows $x + y = y + x$ is true no matter which $x \colon \nats$ or $y \colon \nats$ I encounter in the wild, so that I can extend the power of this theorem to some other context and make useful deductions. This means that the statement I actually want to prove is something like \dquote{for all counting numbers $x$ and for all counting numbers $y$, we have $x + y$ the same as $y + x$}, perhaps with a type signature that looks like this: \begin{gather*}
+\texttt{AddComm : (x y : ℕ) → ( x + y ≡ y + x ) }
+\end{gather*}
+
+In mathematics, we would formalize such a statement by saying $\forall (x,y \in \nats), x + y = y + x$, with $\forall$ being the symbol read literally as \squote{for all} or \squote{for any}. Now, we do not want to involve the $\in$ symbol, since set membership is itself a proposition, and we will not be constructing any set-types today. But we do want an explicit way to talk about this pattern of a function which has an output type depending on the input element.
+
+The construction we are reaching for is known formally as the $\Pi$\textbf{-type} (capital greek Pi-type), and it is the type corresponding to the non-propositional version of for-all statements. We can now put mathematical symbolic statements in correspondance with our agda code. \begin{lstlisting}[language=Haskell]
+Pi : (A : Type) (B : A → Type) → Type
+Pi A B = (x : A) → B x
+\end{lstlisting}
+
+So now, we can express our \texttt{AddComm} proof form as \begin{gather*}
+\texttt{AddComm} \colon \prod_{x,y \colon \nats} \Big( x + y \equiv y + x \Big).
+\end{gather*}
+
+Now, any time we have a proposition which is dependent on some object it speaks about, or in other words, any time we have a propositional \emph{condition} of form $P \colon A \to \mathtt{Type}$, we can construct the type of a function which would prove that every element in the type $A$ satisfies this condition, $\prod_{a : A} P(a)$. This should make sense to us, since we think of a proposition type as only being true if it has an element. This dependent function type $\prod_{a : A} P(a)$ only has an element, a function in the type, if we can assign a proof of $P(a)$ to every input $a \colon A$, which is to say that such a function only exists at all if every $P(a)$ is true. In this way, we construct a proposition type which is only true if a condition is true for every element in a type $A$, and thus say \dquote{for all $a\colon A$, the statement $P(a)$ holds}.
+
+\begin{proposition}[Proof by Induction in $\nats$]
+A condition $P \colon \nats \to \mathtt{Type}$ is true for all $\nats$ if $P(0)$ is true and we can show for all $x \colon \nats$ that $P(x) \to P(\texttt{succ } x )$.
+\end{proposition}
+\begin{my proof}{mo}
+Once again, this proof will be a brief program in agda. \begin{lstlisting}[language=Haskell]
+NaturalInduction : {P : ℕ → Type}
+       → P 0
+       → ((x : ℕ) → P x → P (succ x))
+       →  ( (n : ℕ) → P n )
+NaturalInduction {P} p0 pnext = helper
+	where
+ 		helper : (n : ℕ) → P n
+		helper 0 = p0
+ 		helper (succ n) = pnext n (helper n)
+\end{lstlisting}
+Our proof is a function \texttt{NaturalInduction} which takes an implicit type in the form of a condition $P$, evidence that $P(0)$ is true, and a function-proof that $\forall (x \colon \nats), (P(x) \to P(\texttt{succ }x))$ is true (where $P(x) \to P(\texttt{succ }x)$ is itself a condition applied to a $\Pi$-type, dependent on $x$). Strictly speaking, since the $\to$ symbol is right-associative, the fact that the output type is of $(n \colon \nats) \to P(x)$ could simply be ignored, and we could just provide another natural number $x$ immediately to obtain proof of $P(x)$; in this instance we do not do this.
+
+To construct the function, we make a helper function which checks what kind of natural number we're trying to show $P$ is true for. If we're trying to show $P(0)$, we already have a proof of that provided in \texttt{p0}. If we're trying to show some other number satisfies $P$, we need only say that it must satisfy $P$ because the number before it satisfies $P$, and the number before that satisfies $P$, recursively until we are trying to show $P(0)$.
+\end{my proof}
+
+This dependent function type, the type theoretic instantiation of \squote{for all} propositions has a lot in common with our product type, in that the product type, representing logical-\texttt{AND} was similarly only true if you could find a proof in each proposition $P$ and $Q$ and combine them into a proof $(p,q)$. Hell, we even use indicative notation, the $\Pi$ which in standard mathematics denotes a large product between a set of values. It may be natural to ask then, is there a co-Pi-type? Or rather, is there a type which generalizes the sum type in the same way that $\Pi$-types generalize the product type?
+
+The answer is an emphatic yes, and we do this with the \textbf{dependent pair}. Superficially, these are pairs in the same way we think of $A \times B$ containing pairs $(A,B)$, but if we have a condition $P\colon A \to \texttt{Type}$, we can construct a pair of type which we might think of as \texttt{(a : A) × P(a)}. That is, the second element of the pair is of a type depending on the specific member of the type $A$ in the first entry. If we think about what kind of proposition type this is, based on how it is true or false (i.e. a populated type or empty) in relation to a condition $P$, we realize that such a pair in such a type exists as long as even a single $a \colon A$ has a proof of $P(a)$. What we are touching on is the propositional statement of \emph{existence}, the ability to say \dquote{there exists a natural number $n \colon \nats$ such that $P(n)$ is true}. We could use this to say things like \dquote{for all natural numbers $n$, there exists a prime number which is greater than $n$} for instance, in conjunction with our $\Pi$-type for-all statements. We call these dependent pairs $\Sigma$\textbf{-types}, by a similar analogy to large sums, as we named $\Pi$-types by analogy to large products.
+
+\begin{lstlisting}[language=Haskell]
+data Σ {A : Type } (B : A → Type) : Type  where
+   _,_ : (x : A) (y : B x) → Σ {A} B
+   
+-- Since the syntax here also looks like a pair but this is more general,
+--		we state our previous pair definitiona in terms of this one.
+
+_×_ : Type → Type → Type
+A × B = Σ {x : A} B
+\end{lstlisting}
+
+These constructions together, the identity type $\equiv$, the product type and $\Pi$-type, the sum type and $\Sigma$-type, the unit type, empty type, function types standing for logical implication, and functions-to-false standing for logical negation, form the Martin-Lof dependent type theory. This is, in a minimal form, a basic expression of the Curry-Howard correspondance, that proofs may be written as programs. Now, there are multiple asterisks to this, such as our type system allowing logical outcomes other than true or false, proof by contradiction not working without additional axioms, etc. but these are expounded upon in \hyperlink{https://clockssugars.blog/appliuni/prelims/proptypes.html}{Propositional Logic: A Programming Inspired Approach}.
+
+We close this section with a summary of our logical correspondances, taken from the first chapter of \emph{Application Unification}.
+
+\begin{notation}
+When they act on propositions, define the following symbols as aliases for their non-propositional counterparts:
+\begin{itemize}
+\item $\top := \mathbf{1}$ read as \squote{true} or \squote{top} or \squote{tautology}
+\item $\bot := \mathbf{0}$ read as \squote{false} or \squote{bottom} or \squote{contradiction}
+\item $\wedge := \times \hspace{0.5em}$ read as \squote{and},
+\item $\vee := + \hspace{0.5em}$ read as \squote{or},
+\item $\forall := \Pi\hspace{0.5em}$ read as \squote{for all...} 
+\item $\exists := \Sigma\hspace{0.5em}$ read as \squote{there exists...} 
+\item $\Rightarrow \hspace{4pt} := \hspace{4pt} \to \hspace{0.5em}$ read as \squote{implies}, e.g. $P \Rightarrow Q$ is the type of functions taking witnesses $p \colon P$ and producing some witness $q \colon Q$ , along with $(P \Leftarrow Q) = (Q \rightarrow P)$,
+\item $\neg P := (P \to \bot)$ read as \squote{negation} or \squote{not...}
+\item $(P \Leftrightarrow Q) := (P \to Q) \times (Q \to P)$, that is, we say $P$ \squote{if and only if} $Q$ when we can find as witness a function $P \to Q$ as well as a function $Q \to P$ so that both propositions imply one another.
+\end{itemize}
+\end{notation}
+
+\subsection{Homotopy Type Theory}
+
+I mentioned that we were missing some axioms, and now our previous theaters are coming home to roost.
+
+In the first section, we spoke about equivalence, and how we quotient away information which we do not believe is significant to the object we are trying to refer to. We have function types $A \to B$, and we have equivalence types $a \equiv a$, but we have at this stage no rule for how one insists that two functions are equal. Thus far, we have thought of functions as being defined by the outputs they assign to each input, and to believe otherwise is to believe that functions have some distinct additional information besides what they do. This is true in the category of sets, as we could have two functions $f \colon A \to B$ and $g \colon A \to C$ in which $C$ is a subset of $B$, but both functions agree on what outputs they assign to inputs, then they are difference because of where they place those outputs, in $B$ or $C$. Such a concern is important for deciding if a function is \emph{surjective}, but we are not working in the space of sets; in type theory, there are no sub-types, and every object is a member of exactly one type which instructs on how its members are formed, and so it is meaningless to think of an object as being from two types.
+
+Accordingly, the first axiom of homotopy type theory is \textbf{function extensionality}, the axiom that two functions are equal if their outputs are equal for equal inputs. \begin{lstlisting}[language=Haskell]
+FunExt : {A B : Type} {f g : A → B}
+	→ ((x y : A) → (x ≡ y) → (f x ≡ g y))
+	→ f ≡ g 
+PiFunExt : {A : Type} {B : A → Type}
+	{f g : (x : A) → B x}
+	→ ((x y : A) → (x ≡ y) → (f x ≡ g y))
+	→ f ≡ g
+\end{lstlisting}
+
+There is no way to prove these, since having these as theorems constitutes a distinct choice about what kind of logic we are working with. That is why they are \emph{axioms}.
+
+The second axiom of homotopy type theory, although we will not spend much time thinking about it today, is the \textbf{univalence axiom}, which says that we have a type-level equivalence if we can show that the two types are isomorphic. For completeness, a version of that is included here. 
+
+\begin{lstlisting}
+id : {A : Type} → A → A
+id a = a
+-- map that sends everything to itself
+
+isomorphism_condition : {A B : Type} → (A → B) → Type
+isomorphism_condition {A B} f = Σ g ꞉ (B → A) , ((g ∘ f ≡ id) × (f ∘ g ≡ id))
+
+isomorphic_condition : (A B : Type) → Type
+isomorphic_condition A B = Σ f : (A → B) , (isomorphic_condition f)
+
+univalence : (A B : Type)
+	→ (isomorphic_condition A B → A ≡ B ) × (A ≡ B → isomorphic_condition A B)
+\end{lstlisting}
+
+The real interesting part of homotopy type theory is how it develops a conceptual framework in which \emph{types are topological spaces and equivalences are homotopies}. This begs a question that has gone unaddressed by now, that is, if we could have path homotopies between point homotopies back in topology, then can we make equivalences between proofs of equivalence in type theory? The answer is also yes! It makes perfect sense to speak about equivalences such as \begin{gather*}
+\texttt{refl (refl x) : (refl x) ≡ (refl x)}.
+\end{gather*}
+
+In at least one way this should make sense to us. Back in topology, we could quotient the topology up to point homotopies, and discover how many distinct disconnected components of the space there were. If we think of equivalences $\texttt{\_≡\_ : {A : Type} ...}$ as homotopies now, they tell us how many elements of a type there are if we don't double count elements which are equal to each other.
+
+This, on its own, is not too interesting though. The only way we have to generate equivalences besides complex proof programs, is reflexivity, which is to say that the only times when two elements of a type were equal was when they were literally the same object, up to every piece of data provided. This also isn't interesting from a topological perspective either, since the only data we are left with after equivalence under homotopy is the disconnected components; all of our paths are homotopic too since the only proof of equivalence is reflexivity, and equivalences there are just reflexivity of reflexivity.
+
+Homotopy type theory spices this up by introducing \emph{higher inductive types}, which are inductive types where we specify not only the ways to make new elements of a type but also ways we make non-reflexivity equivalences in the type. If we use the topological analogy we were using before, then the standard inductive \emph{unit type} would be thought of as a disk in 2D. Every point can reach every other point, so we have one point up to point-homotopy, which is represented by the unit element $* \colon \top$. But we can make a new type which is more topologically complex. \begin{lstlisting}
+postulate
+  -- topological circle
+  S1 : Type
+  base : S1
+  loop : base ≡ base
+\end{lstlisting}
+
+Since any point of a circle can be reached from any other, there is only one point in \texttt{S1} up to point-homotopy, and so only one element \texttt{base} just like the unit type. Where we differ is that we can come up with at least two path homotopies now, the trivial one \texttt{refl base}, as well as the \texttt{loop}, and we in particular, $\texttt{base} \neq \texttt{loop}$. Moreover, we can apply transitivity \texttt{trans loop loop} to obtain a new loop which is not necessarily equal to \texttt{loop} either. We have in effect constructed a version of the fundamental group in the equivalence relations of this higher inductive type.
+
+This allows us to begin an exploration of topology in a somewhat synthetic fashion, i.e. where the homotopies of the topology become primitive objects which we can study programmatically.
 
 \end{document}

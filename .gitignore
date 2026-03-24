@@ -7,3 +7,4 @@ assets/tribackraw.kra
 *.log
 public/*
 logs/*
+latexvomit/*

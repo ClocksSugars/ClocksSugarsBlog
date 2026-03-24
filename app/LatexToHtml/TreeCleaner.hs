@@ -10,6 +10,7 @@ module LatexToHtml.TreeCleaner (
 
 import Data.ListLike (fromText)
 import Data.Text (splitOn)
+import qualified Data.Text (tail)
 import Data.List (intersperse)
 -- import Data.String
 import Data.Maybe
@@ -74,6 +75,7 @@ data Htmllatexinter =
    |  IRefLink String [Htmllatexinter]
    |  ICodeBlock String Text
    |  IJsEmbed String
+   |  ITikz Text
    deriving (Eq, Show)
 
 inlineCommands :: [String]
@@ -130,6 +132,8 @@ processOne arg = let
    subprocess (TeXComm "subsubsection" [FixArg stuff]) = Right . SubSection Nothing $ processOne stuff
    subprocess (TeXComm "figuresvgwithcaption" [FixArg (TeXRaw location), FixArg content]) =
       Right $ IFigure (location <> ".svg") $ processOne content
+   subprocess (TeXComm "figurepngwithcaption" [FixArg (TeXRaw location), FixArg content]) =
+      Right $ IFigure (location <> ".png") $ processOne content
    subprocess (TeXComm "ref" [FixArg (TeXRaw referenceName)]) = Right $ IReference $ fromText referenceName
    subprocess (TeXComm "href" [FixArg (urlarg), FixArg tx]) = case (unescapeChars urlarg) of
       TeXRaw turl -> Right $ ILink turl $ processOne tx
@@ -152,11 +156,13 @@ processOne arg = let
             -- there is 2 since this should have compiled in latex thus having at least one \item
          ("enumerate", _) -> Right $ List "enumerate" Nothing $
             map processOne (drop 1 $ splitByDelimiterLaTeX (TeXCommS "item") content)
-         ("lstlisting", [OptArg (TeXRaw "language=Rust")]) -> Right $ ICodeBlock "language-rust" $ render content
-         ("lstlisting", [OptArg (TeXRaw "language=Haskell")]) -> Right $ ICodeBlock "language-haskell" $ render content
-         ("lstlisting", [OptArg (TeXRaw "language=toml")]) -> Right $ ICodeBlock "language-toml" $ render content
+         ("lstlisting", [OptArg (TeXRaw "language=Rust")]) -> Right $ ICodeBlock "language-rust" $ (Data.Text.tail $ render content)
+         ("lstlisting", [OptArg (TeXRaw "language=Haskell")]) -> Right $ ICodeBlock "language-haskell" $ (Data.Text.tail $ render content)
+         ("lstlisting", [OptArg (TeXRaw "language=toml")]) -> Right $ ICodeBlock "language-toml" $ (Data.Text.tail $ render content)
+         ("lstlisting", [OptArg (TeXRaw "language=C")]) -> Right $ ICodeBlock "language-C" $ (Data.Text.tail $ render content)
 
          ("center", _) -> Right $ CenterEnv $ processOne content
+         ("detect tikz", _) -> Right $ ITikz (render content)
 
          ("gather*", _) -> Right . RawPrint . render $
             TeXMath DoubleDollar $ TeXEnv kind texargs $ applyMathCommands content
@@ -241,6 +247,7 @@ processTwo ((SubSection mlabel content):xs) = Subsubheading mlabel (map inLineTr
 processTwo ((IFigure location content):xs) = Figure location (processTwo content) : processTwo xs
 processTwo ((ICodeBlock lang content):xs) = CodeBlock lang content : processTwo xs
 processTwo ((IJsEmbed thefile):xs) = JsEmbed thefile : processTwo xs
+processTwo ((ITikz stuff):xs) = (Tikz stuff) : processTwo xs
 -- processTwo ((IReference reference):xs) = ReferenceNum reference : processTwo xs
 processTwo ((List kind margs items):xs) = case kind of
    "itemize" -> Itemize (map (ListItem . processTwo) items) : processTwo xs

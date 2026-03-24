@@ -191,9 +191,11 @@ blogArticles = AllMyArticles [
       SubChapter {
          name = "0326-homotopy-type-theory",
          title = "Homotopy Type Theory as Introduced on 03/20/26",
-         flags = ["IndexTopOfPage","DoNotShowOnIndex"],
+         flags = ["IndexTopOfPage","LoadHighlightJs"], -- "DoNotShowOnIndex"
          description = "The written notes for a talk on type theory, topology, and homotopy type theory, as designed for a programmer audience.",
          depends = [
+            "Art0326HTTTopologyDiagram.svg",
+            "wikipediaspherehomotopytopoint.png"
             ]
          }
    ]

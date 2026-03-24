@@ -73,12 +73,13 @@ parseSubChapter address subchapter isIndexStyle pagetitle pageh1 tagline = let
             ) $ copyassets xs
       parseSuccessCase :: LaTeX -> IO RefIndexState
       parseSuccessCase doc = do
-         let (thepagehtml,newrefs,logs) = writePage
+         let (thepagehtml,newrefs,logs,joblist) = writePage
                subchapter.name
                (folderPathRender $ if isIndexStyle then addressWeUse else docaddress)
                subchapter.flags
                (extractDocument doc)
                resetAllButReferences
+         joblist
          let thepage = renderHtml $ defaultPageHTML $ PageConstructInfo
                ((++ "../../styles.css") $ if isIndexStyle then "../" else "")
                pagetitle
@@ -195,12 +196,13 @@ parsePreface refinds = let
    resetAllButReferences = resetNoneMapInd refinds
    parseSuccessCase :: LaTeX -> IO RefIndexState
    parseSuccessCase doc = do
-      let (thepagehtml,newrefs,logs) = writePage
+      let (thepagehtml,newrefs,logs, joblist) = writePage
             "preface"
             (folderPathRender ["preface","appliuni"])
             []
             (extractDocument doc)
             resetAllButReferences
+      joblist
       let thepage = renderHtml $ defaultPageHTML $ PageConstructInfo
             "../styles.css"
             "Application Unification"
@@ -229,12 +231,13 @@ parseTail :: IO (Maybe Html)
 parseTail = let
    parseSuccessCase :: LaTeX -> IO Html
    parseSuccessCase doc = do
-      let (thepagehtml,newrefs,logs) = processPage
+      let (thepagehtml,newrefs,logs, joblist) = processPage
             "preface"
             ""
             (extractDocument doc)
             blankIndex
       -- writeFileMakePath ["preface","appliuni","public"] ".html" thepage
+      joblist
       writeFileMakePath ["tail","appliuni","logs"] "0.txt" (logs !! 0)
       writeFile "logs/appliuni/tail1.txt" (logs !! 1)
       writeFile "logs/appliuni/tail2.txt" (logs !! 2)
