@@ -197,5 +197,14 @@ blogArticles = AllMyArticles [
             "Art0326HTTTopologyDiagram.svg",
             "wikipediaspherehomotopytopoint.png"
             ]
+         },
+      SubChapter {
+         name = "0326-hamiltonian-symplectic",
+         title = "Homotopy Type Theory as Introduced on 03/27/26",
+         flags = ["IndexTopOfPage","DoNotShowOnIndex"], -- "DoNotShowOnIndex"
+         description = "",
+         depends = [
+            "wikipedia_Fermat_Snellius_hamsymp.svg"
+            ]
          }
    ]

@@ -1,0 +1,535 @@
+\documentclass[11pt]{article}
+    \title{\textbf{Default Doc}}
+
+    \date{\the\day/\the\month/\the\year}
+
+\input{../pdf.tex}
+\input{../webmacros.tex}
+\input{../programmingmacros.tex}
+\input{../amsthmstuff.tex}
+
+\usepackage{amsmath}
+\begin{document}
+
+% Review and Introduction to Iterative Techniques for $Ax=b$ Solvers
+
+I mentioned in a \hyperlink{https://clockssugars.blog/articles/0126-heateq/}{previous post} that I was considering making my own finite element solver. I had already done much of the necessary reading for how one does this (a topic I should discuss in a separate post), which I then had to buttress with some additional double checking of methods on basis functions and boundary conditions, etc. etc. Anyway, the thing that got me stuck was that finite element techniques owe much of their stability and solvability to statements that can be made about the resulting discretized system as a linear relation, something of the form $Ax = b$. The fast version of this is that information from the boundary conditions (or perhaps state iteration in the case of a time-dependent differential equation) in addition to conditions on derivatives, inform a notion of error or deviation from satisfaction of the diff eq. which, when linear, can solve for a minimum-error state. (When not linear, other techniques may be used.)
+
+The trouble is that these linear systems end up huge. For a first-order linear system (i.e. we describe our solution function in terms of linear functions, or first order polynomials) we have something like one basis function per vertex of our space discretization graph. Since we usually do this with triangles in 2D, a 20 by 20 grid ends up with a linear system of dimension in the hundreds. Some systems require higher order basis functions in order to derive stable solutions, e.g. for second order, each vertex and each edge are associated to a second order basis function (in fact this is similar to subdividing each triangle into four, then once again using vertices for basis functions), meaning a roughly fourfold increase in the number of basis functions. The most obvious system that suffers from instability without second order basis functions is Navier-Stokes systems which involve not just a scalar field solution, but a vector field (the field describing fluid flow), meaning another factor of three increase to the number of basis functions. In total, you could end up with a $Ax=b$ system of dimension in the thousands or tens of thousands that must be solved on every timestep of the simulation before any interesting phenomena are observed, and this is before methods to improve stability such as Runge-Kutta which may require doing the calculation two or more times (usually four) per time step.
+
+Put this way, such a simulation seems like a ridiculous computational task, even though mathematically it is not all too complicated (in my opinion). There is a trick here however, that the matrix $A$ we come up with for our $Ax=b$ problem is quite sparse. Despite potentially tens of thousands of dimensions of the overall problem, each dimension, associated to a basis function which is itself associated to a vertex or edge, is generally only coupled to its neighboring vertices and edges, meaning almost all of the $A$ matrix is just zeros. This information on its own is useless if we are naive about how to resolve a $Ax=b$ system; methods such as Gaussian elimination or $LU$ decomposition will rapidly couple every dimension to every other in the course of narrowing down a single solution. Moreover, since we are working with floating point arithmetic, the error due to rounding may ultimately be significant, in which case methods which spend significant time to find an exact solution to $Ax=b$ may be inferior to methods which can rapidly approximate a solution to within a tolerable amount of error.
+
+Following my previous post, discussing a method to solve the heat equation on mobile devices via webgpu, I had assumed there would be some way to parallelize the solving of an $Ax=b$ problem via mere GPU distribution of the calculation. Of course, this was a bit of a handwave on my part, and it quickly became apparent that most other finite element systems simply used an existing library for numerical solutions of large linear systems, such as \hyperlink{https://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms}{BLAS} or \hyperlink{https://en.wikipedia.org/wiki/Portable,_Extensible_Toolkit_for_Scientific_Computation}{PETSc}. These would not be available to me if I wanted my finite element solver to run on a mobile device, where my methods would need to be implemented in WASM and WebGPU, and so I would need to learn some details of the implementation myself.
+
+The following documents my exploration of this topic, of iterative methods for solving large $Ax=b$ systems in the interest of finite element methods (esp. for Navier-Stokes), and in particular, documents my reading of Yousef Saad's \emph{Iterative Methods for Sparse Linear Systems} (2003) and Gerard Meurant's \emph{Computer Solution of Large Linear Systems} (1999). As I write this I can hardly say that I have read either book thoroughly or that I have a deep grasp of the topics within; indeed, I had quite some trouble placing the intuitions these authors appear to have intended within any context I am familiar with. I write this in part to straighten out my own thoughts as I attempt to understand the volumes, as well as to make explicit a narrative I am forming about how one understands the topic.
+
+Thus, this article endeavors to serve as a reference for readers with some linear algebra knowledge who wish to quickly develop some understanding of the field, and as a reference for myself in future, should I forget some of what I presently know.
+
+\subsection{Nothing Ventured, Nothing Gained: What Naive Investigation Will Get You}
+
+In my first exploration of the techniques available to beat methods for exact solution of $Ax=b$ problems, I repeatedly found that either an algorithm either appeared to be a method for exact solution in a trench coat, or the reason why it was better than that could only be expressed through some handwaving. As I expect readers curious about these topics are likely to come to similar conclusions initially, we'll first outline these pitfalls.
+
+The shape I will paint these pitfalls is that which they appeared to me, which is to say that they will appear as $QR$-decomposition. That is, if we take $A$ and perform the Gram-Schmidt algorithm on its columns, we will obtain an orthonormal basis, the columns of which form $Q$, as well as the coefficients required to put the columns in $Q$ back together into $A$, forming the matrix $R$. Since the columns or $Q$ are orthonormal, it is an orthogonal matrix, and since the coefficients in the Gram-Schmidt algorithm are obtained by successively subtracting the components of previously found orthonormal vectors, the $n$-th column of $R$ can only contain $n$ coefficients, so we are speaking of an upper-triangular matrix. This decomposition is then written $A = QR$ since the matrix product reconstructs the original matrix $A$.
+
+Completing such an operation on $A$ is half the job of solving $Ax=b$ directly; orthogonal matrices such as $Q$ have the property that $Q^T = Q^\inv$, meaning that we need only flip $Q$ to find its inverse, and triangular matrices are sought after precisely because once $c = Q^T b$ is computed, the equivalent system $Rx = c$ is especially easy to solve by back substitution: since $R$ is upper triangular, solve $R_{nn}x_n = c_n$ (i.e. $Rx = c$ in it's $n$-th dimension) since the $n$-th row of $R$ is all zero except for the final element. With $x_n$ solved, use that to solve for $x_{n-1}$ since \begin{gather*} R_{(n-1) n} x_{n} + R_{(n-1) (n-1)} x_{n-1} = c_{n-1} \end{gather*}
+by the triangular shape of $R$. So on and so forth, at any given time there will only be one unknown.
+
+But both in the $QR$-decomposition step and in the $Rx = c$ back-substitution step, we are dealing with an algorithm that is roughly $O(n^2)$. Moreover, we take no advantage of the sparsity of $A$ that is previously mentioned, since the Gram-Schmidt algorithm must necessarily couple all dimensions together; our $Q$ and $R$ matrices will be anything but sparse, and so we surrender whatever advantages we had.
+
+This is the technique we are trying to beat, and without deeper thought, it will at first seem like nothing we do escapes this.
+
+\subsubsection{Conjugate Gradient: A First approach}
+
+We cannot begin this exploration (and indeed we will be unable to end it) without discussing the conjugate gradient method. When I first began investigation of iterative methods for solving linear systems, conjugate gradient was the name that everyone brought up, which lead me to the wikipedia page and the corresponding context-agnostic understanding. We will find in later sections that conjugate gradient is more of a family of techniques (and an extremely effective family at that) but you certainly wouldn't guess that from a quick reading of given on wikipedia, so we'll start with what is described there.
+
+The wikipedia page describes the algorithm as requiring $A$ to be symmetric ($A = A^T$) and positive definite ($x^TAx > 0$ for all $x \in \reals^n$) thus also an invertible matrix. These conditions together are actually also the conditions for an inner product, so we have in effect defined an inner product $\langle u, v \rangle_A = u^T A v$. With this inner product in hand, we now require a $A$-orthogonal basis $\vec{p}_i$ such that $\vec{p}_i \neq \vec{0}$ for all $i = 1,...,n$ and $\langle \vec{p}_i, \vec{p}_j\rangle_A = 0$ if $i \neq j$.
+
+Since we are describing an iterative method, what we will do is start with some $\vec x_0$ and use it to define each successive improvement $\vec x_{j+1}$ until hopefully our $\vec{x}_j$ is either an exact solution $\vec x_*$ satisfying $A\vec x_* = b$ or is close enough. In the conjugate gradient method, these successive improvements at each step $j$ are defined by subtracting the $\vec{p}_j$ component of the error. The idea is as follows:
+
+We desire $A\vec{x}_* = b$, and so $A\vec{x}_j - b = \vec{r}_j$ will be a non-zero residual vector whenever $\vec{x}_j \neq \vec{x}_*$ (or indeed if they are equal, terminate and deliver solution $\vec{x}_*$). Our update step, in removing the $\vec{p}_j$ component of the error, will be \begin{gather*}
+\vec{x}_{j+1} = \vec{x}_j + \alpha_j \vec p_j
+\end{gather*}
+where $\alpha_j$ is the amount of error in the $\vec{p}_j$ direction. If we knew $\alpha_j$, we would propogate to the next step and find \begin{align*}
+\vec r_{j+1} &= A(\vec x_j + \alpha_j \vec p_j) - b \\
+&= A\vec x_j + \alpha_j A\vec p_j - b \\
+&= \vec r_j + \alpha_j A\vec p_j
+\end{align*}
+where, by $A$-orthogonality of $\vec{p}_j$ vectors, the correction term $\alpha_j A \vec p_j$ would be orthogonal to all other $\vec{p}_k$ where $k \neq j$.
+
+Now at this stage, we have not promised that our set of $\vec{p}_j$ vectors are \emph{normal} vectors, so they may have arbitrary magnitude; this means that our calculation of $\alpha_j$ is downstream from our choice of $\vec{p}_j$. Since ultimately we want our $\vec{r}_j$ vector to become the zero vector, we should choose our $\vec{p}_j$ so that each $\alpha_j A \vec{p}_j$ can subtract as much of itself as is present from the $\vec{r}_j$ it acts on. This implies the following \begin{gather*}
+\alpha_j = \frac{\langle \vec p_j, \vec r_j \rangle}{\langle \vec p_j, \vec p_j \rangle _A } = \frac{\vec p_j \cdot \vec r_j }{\vec p_j \cdot A \vec p_j } \\
+\vec p_j = \vec r_j - \sum_{i < j} \frac{\vec r_j \cdot A \vec p_i}{\vec p_i \cdot A \vec p_i} \vec{p_j}
+\end{gather*}
+which is to say, we choose each $\vec p_j$ basically by running Gram-Schmidt on each residual as we get it, and we calibrate the $\alpha_j$ to subtract from $\vec x_{j}$ what will become the error in $\vec r_j$.
+
+If you don't understand this at this point, that's okay. Neither did I. At this point the wikipedia page provides an algorithm in which there appears some way to compute each $\vec p_j$ in the basis in $O(n)$ time besides the residuals as they are calculated, but the page does not particularly explain how other than by reference vague to Krylov subspaces and orthogonality of $\vec r_j$ vectors. Absent that explanation, it is also easy to see the Gram-Schmidt calculation of the $\vec p_j$ vectors and conclude that we are still probably not making use of the sparsity of $A$.
+
+\figuresvgwithcaption{./Conjugate_gradient_illustration}{(Credit to Wikipedia, from the page on the Conjugate Gradient method) This illustration from the wikipedia page seems to give the intuition that the Conjugate Gradient algorithm merely picks a series of directions and iteratively subtracts their components from the error as though it were a circumstance specific improvement on Gradient Descent. Moreover, this image may lead you to the intuition that Conjugate Gradient must proceed through all $n$ iterations to avoid risk of a radically incorrect answer, which we will see later is not true.}
+
+With the Gram-Schmidt in the picture, it appears for now as though all Conjugate Gradient has offered us is a faster way to do $QR$-decomposition. My frustration with this lead me to read deeper.
+
+\subsubsection{Preconditioners: A First Approach}
+
+Similarly, the concept of preconditioners had been mentioned to me, both by friends and appearing in documentation related to existing implementations of finite element solvers. Morally, the idea as I initially understood it, was that a preconditioner matrix $M$ may exist such that $M^\inv$ is easy to calculate, and where $M^\inv A x = M^\inv b$ would be easier to solve than $Ax = b$ directly, even though it would still solve $Ax=b$.
+
+More generally, a preconditioner aims to reduce the \textbf{condition number} of the problem, whcih we can think of as how sensitive the residual is to an error in $x$. Recall from earlier that for the application of finite element problems, $Ax=b$ implies minimum possible violation of some differential condition and $Ax - b \neq \vec 0$ implies greater violation of that condition. We would then say that if $A$ is such that a very small error in $x$ away from the $\vec x_*$ that solves $A\vec x_* - b = \vec 0 $ can lead to a very very significant violation in the differentiability condition we want, we say that $A$ is \textbf{ill-conditioned}. Now, we can't do anything about the differentiability condition itself (although we could perhaps pick a $Bz = b$ problem to solve where $Bz = Ax$ via $Cz = x$ and $BC^\inv = A$, changing the basis we solve in) but if we can choose a good preconditioner $M$, then we may well solve $M^\inv A x = M^\inv b$ faster, or eliminate significant sources of error in a candidate $x$ sooner.
+
+The formal way to compute a condition number is actually to assume we find an exact solution $x$ but there is some error in the $b$ for which we use $Ax = b$ to calculate $x$. Posed that way, we define it as \begin{align*}
+\kappa(A) :&= \max_{e,b \neq \vec 0} \left\{ \frac{\lVert A^\inv e \rVert}{\lVert A^\inv b \rVert} / \frac{\lVert e \rVert }{\lVert b \rVert} \right\} \\
+&= \max_{e \neq \vec 0} \left\{ \frac{\lVert A^\inv e \rVert}{\lVert e \rVert} \right\} \max_{b \neq \vec 0} \left\{ \frac{\lVert b \rVert }{\lVert A^\inv b \rVert } \right\} \\
+&= \max_{e \neq \vec 0} \left\{ \frac{\lVert A^\inv e \rVert}{\lVert e \rVert} \right\} \max_{b \neq \vec 0} \left\{ \frac{\lVert A x \rVert }{\lVert x \rVert } \right\}
+\end{align*}
+for $e$ error in $b$. The normal way to express this would be to use an operator norm, writing $\kappa(A) = \lVert A^\inv \rVert \lVert A \rVert$ but it is just as well to leave it in this form, since a larger population of people can read this expression and correctly conclude that it roughly means $\kappa(A)$ is usually the product of $A$'s largest eigenvalue squared with the inverse of its smallest eigenvalue squared. That is, each maximum factor is $\sqrt{Ax \cdot  A x}$ divided by $\sqrt{x \cdot x}$, so normalized but with $x$ chosen to extract the maximum increase from $A$ which is only done if $x$ is the eigenvector with greatest eigenvalue. There are exceptions to this intuition (in general it's more like the square root of the greatest eigenvalue of $A^T A$), but presuming $A$ is diagonalizable, what we are saying is $A$ is worse conditioned when there is greater disparity between the magnitude of its eigenvalues.
+
+If you're anything like me, upon hearing this you may immediately feel that we have discussed a method that might help us reducing the disparity between the magnitude of eigenvalues. In fact, an orthogonal matrix as earlier mentioned has only eigenvalues of magnitude one, so a perfect preconditioner $M$ that achieves preconditioning to minimum condition number would be such that $M^\inv A = Q$ is an orthogonal matrix, and that's just $QR$-decomposition again isn't it. Yeah. Yeah we were just about to deduce the perfect $M$ is $M=L$ where $L$ is a lower triangular matrix deduced by applying $QR$-decomposition to $A^T = QL^T$ (with $L^T=R$ upper triangular) so that $A = L Q^T$, in which case the preconditioner $M = L$ results in $M^\inv A = L^\inv (LQ^T) = Q^T$ which is orthogonal and thus perfectly preconditioned.
+
+So once again, nothing is gained from considering preconditioning naively like that. We find ourselves falling back on previously known naive methods.
+
+\subsection{Viable Frameworks and Some Signposting}
+
+What I learned quickly when reading the two books as well as investigating other sources was that most writers on iterative techniques have a lens from which they view techniques, and generally handwave details that don't fit neatly into their lens. Moreover, the books repeatedly closed in on generalized frameworks of methods for which each technique seemed merely like a choice of certain parameters.
+
+What I'll try to do here is focus on intuitive explanations but not single any of them out as canonical. Different systems of thinking about these techniques reveal different things, and some of them are better suited to make obvious why a thing is true or why an algorithm is efficient. Worse, the implications of each way of thinking is generally necessary to understand the nuances of the others.
+
+We will proceed by first discussing splitting techniques, then use the framing of projection techniques, showing in our exposition that they are ultimately different ways of thinking about the same thing. With those two frameworks apparent, we will proceed to Krylov subspaces, where the core insight of the conjugate gradient technique will become apparent, as well as how we can manipulate this insight to form alternative algorithms purpose-fit to other situations.
+
+\subsection{Splitting Methods}
+
+Consider the component-wise statement of what we want. $Ax_*=b$ with $A$ containing elements $A_{ij}$ at row $i$ and column $j$ and $x_*$ and $b$ containing elements $x^j_*$ and $b^i$ (we use superscripts to mean index on vectors since we will use subscripts to indicate different vectors; matrices still use subscripts for indices) respectively, we want \begin{gather*}
+b^i - A_{ij} x^j_* = 0 
+\end{gather*}
+for all $1 \le i \le n$. If we have some decomposition $A = M - N$ where we describe $A$ as the difference of two matrices (the choice of to reuse $M$ is not an accident here) then this requirement can be written as follows: \begin{gather*}
+b^i + N_{ij} x^{j}_* = M_{ij} x^{j}_*.
+\end{gather*}
+Now, with $x_*$ as a solution to $Ax=b$, this holds true on its own. But if $x_0$ is merely an initial guess vector, then we can define a recurrence relation \begin{gather*}
+b^i + N_{ij} x^j_k = M_{ij} x^j_{k+1}
+\end{gather*}
+which is given explicitly by \begin{gather*}
+x_{k+1} = M^\inv b + M^\inv N x_k
+\end{gather*}
+assuming we chose our splitting $A = M - N$ in such a way that $M$ is easily inverted, such as by choosing $M$ as a diagonal matrix. Now, you may be asking as I did, this is a nice recurrence relation but there is no reason to think yet that it necessarily brings us closer to solving for $x_*$. For that, we must choose $M$ and $N$ very judiciously, and our choice will have consequences in all sorts of ways, for the computing complexity of our algorithm and for the reusability of products of the algorithm.
+
+In general, any iterative method of the form \begin{gather*}
+x_{k+1} = G x_k + f
+\end{gather*}
+will converge so long as the \textbf{spectral radius} of $G$ is less than one. \begin{definition}[Spectral Radius]
+Let $A$ be a $n \times n$ matrix with eigenvalues $\lambda_1, \dots, \lambda_n$. Then we define $\rho(A)$ the \textbf{spectral radius} to be $\rho(A) = \max \{ |\lambda_1|, \dots, |\lambda_n| \}$ the largest magnitude eigenvalue.  
+\end{definition}
+The spectral radius coincides with the operator norm described above as $\max_{x \neq 0} \lVert Ax \rVert / \lVert x \rVert$ for \emph{normal matrices} i.e. matrices which satisfy $A^\dagger A = A A^\dagger$, which for real matrices is just $A^T A = A A^T$ (and it's easy to see why such a condition would lead to the square root of eigenvalues of $AA^T$ coinciding with eigenvalues of $A$). The operator norm has its uses when $A$ is not square since an $n\times m$ has $A A^T$ a $n \times n$ shape, or $A^T A$ with a $m \times m$ shape.
+
+\begin{proposition}[Convergence of Iterative Methods]
+An iterative method $x_{k+1} = Gx_k + f$ with $x_{k},f \in \reals^n$ and $G \in \reals^{n \times n}$ converges if $\rho(G) < 1$.
+\end{proposition}
+
+\begin{my proof}{m}
+If $G$ has $\rho(G) < 1$ then we know not only that the largest magnitude eigenvalue is less than one but that, since it is the largest magnitude, all eigenvalues of $G$ have magnitude less than one. Recall that eigenvalues are those $\lambda \in \reals$ such that \begin{gather*}
+\det(G - \lambda I) = 0
+\end{gather*}
+since eigenvectors must satisfy $Gv = \lambda v = \lambda I v$ and thus $Gv - \lambda I v = \vec 0$, placing eigenvectors in the null-space of $(G - \lambda I)$, and making the determinant zero since it has non-trivial null-space.
+
+Since we have guarenteed all eigenvalues of $G$ are $|\lambda| < 1$, we have also guarenteed that $\lambda \neq \pm 1$ for all eigenvalues $\lambda$, and so we know \begin{gather*}
+\det(G - I) \neq 0 \\
+\det(G - (-1)I) \neq 0 
+\end{gather*}
+merely because $1$ and $-1$ are known not to be eigenvalues due to $\rho(G) < 1$.
+
+We conclude from this in particular that $G - I$ is an invertible matrix, and thus $I - G$ is an invertible matrix.
+
+Using this information, return to our recurrence relation. To ask if \begin{gather*}
+x_{k+1} = G x_k + f
+\end{gather*}
+converges is to ask if there exists $x_* \in \reals^n$ such that $x_* = G x_* + f$. Such a condition can also be written \begin{align*}
+x_* - G x_* & = f\\
+(I - G) x_* &= f.
+\end{align*}
+Since we have deduced $I - G$ is invertible however, we know there exists $x_* = (I - G)^\inv f$ as a fixed point of this iteration.
+
+Now we just need to know if we will actually converge towards this fixed point. For that, assume we have an initial candidate vector $x_0 \in \reals^n$ and express it in terms of the fixed point and some error away from the fixed point $x_0 = x_* + \varepsilon$ with $\varepsilon \in \reals^n$. With this decomposition, our recurrence relation appears as \begin{align*}
+x_{1} &= Gx_0 + f \\
+&= G(x_* + \varepsilon) + f\\
+&= Gx_* + f + G \varepsilon \\
+&= x_* + G \varepsilon
+\end{align*}
+If we decompose our sequence of vectors $x_{k}$ defined by the recurrence relation starting from some $x_0$ as $x_k = x_* + \varepsilon_k$ then we can see clearly by the above reasoning that \begin{gather*}
+x_{k+1} = x_* + G \varepsilon_k
+\end{gather*}
+and so the difference between any two steps $x_{k+1}$ and $x_k$ must be \begin{align*}
+x_{k+1} - x_k &= (x_* + G \varepsilon_k) - (x_* + \varepsilon_k) \\
+&= G \varepsilon_k - \varepsilon_k.
+\end{align*}
+But by $x_{k+1} = x_* + \varepsilon_{k+1}$ we can also see \begin{align*}
+x_{k+1} - x_k &= (x_* + \varepsilon_{k+1}) - (x_* + \varepsilon_k) \\
+&= \varepsilon_{k+1} - \varepsilon_k
+\end{align*}
+so together, we conclude a recurrence relation on the error components of $x_k$, \begin{gather*}
+G \varepsilon_k - \varepsilon_k = \varepsilon_{k+1} - \varepsilon_k \\
+G \varepsilon_k = \varepsilon_{k+1}
+\end{gather*}
+meaning $x_k = x_* + G^k \varepsilon_0$. We must now show this error term converges to zero, i.e. that $G^k$ in the limit goes to the zero matrix.
+
+Take the Jordan normal form of $G$ (that is, we require a decomposition $G = PDP^\inv $ but do not wish to require $G$ is diagonalizable, so $G = P J P^\inv$ with $J = D + N$ with $D$ diagonal and $N$ nilpotent will sufffice). The matrix $D$ will contain the eigenvalues of $G$ along its diagonal (possibly with repeats) which we know from earlier to all be $|\lambda| < 1$. By cancelling inverses of $P$ we have the standard technique \begin{gather*}
+G^k = (PJP^\inv) ... (PJP^\inv) = PJ^k P^\inv
+\end{gather*}
+Recall nilpotent matrices are defined to have the property that some $p \in \nats$ satisfies $N^p = \mathbf{0}$ the zero matrix, and jordan normal form results in $PJP^\inv$ with $J = D + N$ with $N$ nilpotent. If we look at the polynomial expansion (expressed combinatorically) of $J^k$, \begin{gather*}
+J^k = (D + N)^k = \sum_{i=0}^k \left( \begin{matrix} k \\ i\end{matrix} \right) D^{k - i} N^i
+\end{gather*}
+then we know by the property that $N^p = \mathbf{0}$ that only the first $p-1$ terms will be non-zero. So assuming $k \ge p$, we have 
+\begin{align*}
+J^k &= \sum_{i=0}^{p-1} \left( \begin{matrix} k \\ i\end{matrix} \right) D^{k - i} N^i \\
+&= D^k \left( \sum_{i=0}^{p-1} \left( \begin{matrix} k \\ i\end{matrix} \right) D^{- i} N^i \right)
+\end{align*}
+Now, $D^k$ should tend towards zero exponentially since it contains the eigenvalues of $G$ along its diagonal, and these are all known to be $|\lambda| < 1$, but we need to make sure that it will tend towards zero faster than the up-to $p-1$ combinations of $k$ factor will grow as we increase $k$. For this, recall that \begin{gather*}
+\left( \begin{matrix} k \\ i\end{matrix} \right) = \frac{k!}{i! (k-i)!}
+\end{gather*}
+meaning that if we fix $i$, say at $i=2$ for example, we find \begin{gather*}
+\left( \begin{matrix} k \\ 2 \end{matrix} \right) = \frac{(k-2)!(k-1)k}{2! (k-2)!} = \frac{1}{2!} (k-1)k
+\end{gather*}
+so it is clear that fixing the number of combinations $i$ produces a polynomial of order $i$. Knowing this, the fastest growing term in the summation above should be the term for which $i=p-1$. For large $k$ this term will dominate, so let us write \begin{align*}
+J^k &\approx D^{k} \left( \prod_{i=0}^{p-1} (k-i) \right) D^{-p+1} N^{p-1} \\
+&\approx D^{k} \left( \sum_{i=0}^{p-1} \left( \begin{matrix} p-1 \\ i \end{matrix} \right) k^i \right) D^{-p+1} N^{p-1}
+\end{align*}
+where in this form it is clear that the exponential decay of $D^k$ will go to zero faster than any polynomial in $k$. We could also have made this argument prior to the approximation we made, but it is clear in any case that finite order polynomials will grow slower than an exponential can go to zero in the limit.
+
+We conclude that $G^k$ must go to zero as $k \to \infty$ and thus $\varepsilon_k \to \vec 0$ as $k \to \infty$, so any sequence $x_k$ with the described recurrence relation has $x_k \to x_*$.
+\end{my proof}
+
+This proof also can be read to imply that the smaller $\rho(G)$ is, the faster the method should converge.
+
+So the pattern with a splitting method will be thus: pick a splitting $A = M - N$, make sure it results in $\rho(M^\inv N) < 1$, and make sure we can iterate our recurrence relation cheaply.
+
+\subsubsection{Jacobi Iteration}
+
+One very simple choice, as alluded to, is simply to consider a decomposition $A = D + L + U$ where $D$ is simply the elements of $A$ on the diagonal, $L$ is those below the diagonal, and $U$ is above the diagonal, and choose $M = D$ and $N = - L - U$. \begin{gather*}
+L_{ij} = \left\{ \begin{matrix} A_{ij}, & i < j \\ 0 & \text{else} \end{matrix}\right. \hspace{3em}
+U_{ij} = \left\{ \begin{matrix} A_{ij}, & i > j \\ 0 & \text{else} \end{matrix}\right. \\
+D_{ij} = \left\{ \begin{matrix} A_{ij}, & i = j \\ 0 & \text{else} \end{matrix}\right.
+\end{gather*}
+
+Jacobi iteration can be known to converge if $A$ is \emph{strictly diagonally dominant} i.e. \begin{gather*}
+|A_{ii}| > \sum_{j \neq i} |A_{ij}|
+\end{gather*}
+that is, the element on the diagonal is larger than the sum of all other elements on its row. We can suffice with weakening $>$ to $\ge$ if we also know that the matrix is also \emph{irreducible}. This condition is a little more complicated but can be thought of roughly as whether the matrix can be described as two mostly-separate systems. For instance, one definition of \emph{reducible} matrices $A$ is that there exists a permutation matrix $P$ such that $P^\inv A P$ has block structure \begin{gather*}
+P^\inv A P = \begin{bmatrix} B & \mathbf{0} \\ F & C \end{bmatrix}
+\end{gather*}
+where $B,C,F \in \reals^{n \times n}$ and $\mathbf 0$ the zero matrix. Another equivalent condition of matrix reducibility is that the index set $I = \{ 1, \dots , n \}$ has a partition into $I_1, I_2$ (partition meaning $I_1 \cap I_2 = \emptyset$ and $I_1 \cup I_2 = I$, they are disjoint and union to the full set) has some pair $i \in I_1$ and $j \in I_2$ with $A_{ij} = 0$. When $A$ is \emph{irreducible} (for all such partitions, every $i\in I_1,j \in _I2$ has $A_{ij} \neq 0$) and it is diagonally dominant (not necessarily strictly) then besides knowing convergence due to $\rho(M^\inv N) = \rho(- D^\inv (L + U)) < 1$, we also know the technique converges with $A$ strictly diagonally dominant or irreducibly diagonally dominant without finding $M^\inv N$'s largest eigenvalue.
+
+Proofs of these convergence conditions are present in chapter 5.2 of Gerard Meurant's book.
+
+\subsubsection{The Gauss-Seidel Method}
+
+The Gauss-Seidel method consists of a splitting method $A = M - N$ where with the decomposition $A = D + L + U$ into a diagonal component $D$, a component beneath the diagonal $L$, and a component above the diagonal $U$, we set $M = D + L$ and $N = -U$.
+
+You may immediately look at this and think \dquote{hold on, we know that $D$ is easy to calculate the inverse of, its just a diagonal matrix, but we have no guarentee of this for $L$} and that is true. This is an interesting situation where we need to declare that matrices and linear algebra actually form a poor abstraction.
+
+Consider the elementwise statement of Jacobi iteration: \begin{gather*}
+x_{k+1}^i = \frac{1}{A_{ii}} \left( b^i - \sum_{j \neq i} A_{ij} x_k^j \right).
+\end{gather*}
+This is because $D$ is just $A$'s diagonal elements so multiplying by $D^\inv$ is multiplying each $i$'th element by $1/A_{ii}$, and the remaining multiplication of $x_k$ by $N = L + U$ is just $A$ without its diagonal elements; we do a standard matrix multiplication but skip when $j=i$.
+
+Notice that with this iteration, we commit to calculating every element of $x_{k+1}$ before moving on to $x_{k+2}$. But it may well be the case that part way through calculating $x_{k+1}$, we will have removed enough error from the earlier elements of the vector that we could get some efficiency gains by using the new elements early. If we were to do this, our iteration step would instead look like \begin{gather*}
+x_{k+1}^i = \frac{1}{A_{ii}} \left( b^i - \sum_{j > i} A_{ij} x_k^j - \sum_{j < i} A_{ij} x_{k+1}^j \right).
+\end{gather*}
+Stated as matrices, this is \begin{gather*}
+D x_{k+1} = b - Ux_k - Lx_{k+1}
+\end{gather*}
+and thus \begin{gather*}
+(D +  L)x_{k+1} = b - Ux_k
+\end{gather*}
+making clear that this method does indeed describe $M = D + L$. Naively proceeding from the matrix abstraction, we would appear to have a method which requires the costly calculation of $(D + L)^\inv$, but as above, this is not the case!
+
+What appears as a costly calculation is merely the side effect of expressing a technique which weakens the assumptions of linear algebra (namely the simultaneity of vector operations) in the terms of linear algebra. As long as we calculate each element of $x_{k+1}^i$ in order (ascending $i$), the only parts of $x_{k+1}$ we ever use are those we have already calculated, so no matrix inversion is necessary!
+
+This forms a lesson that will be important to remember moving forward: a non-diagonal choice of matrix $M$ does not necessarily mean an inversion is necessary \emph{if} we are clever about its non-diagonal components and our iteration algorithm. In fact, the insistence at \emph{every} turn that what we are doing here is linear algebra will lead us astray; what we are doing is coming up with algorithms, and linear algebra does not have the final say.
+
+Gauss-Seidel is similarly known to converge if $A$ is strictly diagonally dominant.
+
+\subsubsection{Successive Over Relaxation}
+
+This sequence of techniques would not be complete if I did not mention Successive Over Relaxation (SOR) although I must say it is the technique I spent the least time thinking about. Superficially, one interprets the SOR method as the choice of some $\omega > 0$ and a splitting \begin{gather*}
+A = D + L + U \\
+A = M - N \\
+M = \frac{1}{\omega}D + L \\
+N = \frac{1-\omega}{\omega} D - U 
+\end{gather*}
+Written as an matrix iteration, it typically appears as \begin{gather*}
+(D + \omega L) x_{k+1} = \omega b  - \omega U x_k + (1 - \omega) D x_k
+\end{gather*}
+but as a component-wise iteration it appears more obviously as a Gauss-Seidel style mid-iteration update method \begin{gather*}
+x_{k+1}^ i = \frac{\omega}{A_{ii}} \left(b_i - \sum_{j < i} A_{ij} x^j_{k+1} - \sum_{j > i} A_{ij} x^j_{k} \right) + (1 - \omega) x_k^i.
+\end{gather*}
+That is to say, what we do is roughly to take linear combinations of what Gauss-Seidel tells us to do and our previous timestep, perhaps to provide a measure of stability. I say roughly because we by no means confine $\omega$ to the interval $(0,1]$. In fact, the result referred to here is that \dquote{If SOR converges then $0 < \omega < 2$} so we may also accelerate the alterations Gauss-Seidel suggests. The idea of extending $\omega$ to the range $(0,2)$ provides the prospect that we may have some parametric control over the \emph{convergence rate} of the technique, i.e. there may be an ideal $\omega$ for which the technique converges \emph{fastest}.
+
+Now, the statement that SOR converges implies $\omega \in (0,2)$ does not mean in general that $\omega \in (0,2)$ guarentees convergence of SOR; in chapter 5.4 Meurant shows that SOR converges if under the condition that $A$ is a \squote{H-matrix} and its associated $A = D + L + U$ has \begin{gather*}
+0 < \omega < \frac{2}{1 + \rho(|D^\inv (L + U)|)}.
+\end{gather*}
+Now, what an \squote{H-matrix} is is an irritating conversation that I prefer to largely skip over here. A definition is provided for completeness. \begin{definition}
+Let $A \in \reals^{n \times n}$ be a matrix. We say that $A$ is a \textbf{M-matrix} if there exists $\sigma \in \reals$ and $B \in \reals^{n\times n}$ such that \begin{gather*}
+A = \sigma I - B,\\
+\sigma > 0, \\
+\forall i,j \ \ B_{ij} \ge 0, \\
+\rho(B) \le \sigma.
+\end{gather*}
+Now associate to $A$ a matrix $M^A \in \reals^{n \times n}$ which is defined \begin{gather*}
+M^A_{ij} = \left\{ \begin{matrix} |A_{ij}| & i = j \\ -|A_{ij}| & i \neq j \end{matrix} \right.
+\end{gather*}
+We say that $A$ is an \textbf{H-matrix} if $M^A$ is an M-matrix.
+\end{definition}
+
+All over Meurant's book there is frequent reference to the H-matrix condition being a requirement for convergence of techniques. As we will see later, we will have even better techniques that do not require such an unwieldy property.
+
+As for the optimum $\omega$, Meurant cites a 1950 Ph.D. thesis by a David M. Young Jr who appears also to have (simultaneously) invented the SOR method. Assuming certain hypotheses, the optimum $\omega$ for a $A x = b$ problem with $A = D + L + R$ is defined \begin{gather*}
+\omega_b = \frac{2}{1+\sqrt{1-\rho(-D^\inv(L+U) )^2 }}
+\end{gather*}
+although Meurant mentions that having to calculate $\rho(D^\inv(L + R))$ makes this formula impractical most of the time, and so there exist a variety of techniques to approximate it.
+
+\subsection{Projection Methods}
+
+Much in the way that one might look at the initial statement of splitting methods, a priori, and say \dquote{on its own, there's no reason that should do anything useful} and then add certain assumptions to ensure that a method converges, projection methods lay out only \squote{an operation} with no guarentees attached. In fact even less than \squote{an operation}, projection methods call for defining two subspaces of $\reals^n$ called $\mathcal{K}$ and $\mathcal{L}$ and saying, given a vector $x_0 \in \reals^{n}$, we want to calculate a \emph{some} vector $x_1 \in \reals^{n}$ which is $x_1 \in \mathcal{K}$ and $ b - Ax_1 \perp \mathcal{L}$ i.e. the residual $r_1 = b - Ax_1$ is entirely perpendicular to the space $\mathcal{L}$. Now, two asterisks must follow. First, it is often the case that what we calculate is not as the \squote{next in the sequence} $x_1$ but the difference between approximations, i.e. we do not calculate $x_1$ with these properties, we calculate $\delta_0 \in \mathcal{K}$ and $r_0 - A\delta_0 \perp \mathcal L$ and set $x_1 = x_0 + \delta_0$. \begin{align*}
+\text{(Note:)} \hspace{1.5em} \mathcal{L} \perp &\hspace{0.6em} b - Ax_1 \\
+&= b - A(x_0 - \delta_0) \\
+&= (b - Ax_0) - A\delta_0 \\
+&= r_0 - A \delta_0.
+\end{align*}
+Second, this method also forms an iteration technique so while the notation does not appear to be common, it is perhaps more appropriate to think of these choices of subspaces as $\mathcal{K}_k$ and $\mathcal{L}_k$ with the property $\delta_k \in \mathcal{K}_k$ and $r_k - A \delta_k \perp \mathcal{L}_k$.
+
+This is but a framework, in the same way that choosing some $M$ and $N$ to split $A$ into was a framework which described many methods as well as a general class of things you could do which might not be valuable at all. Consequently, our existing splitting methods can be described as projection methods. For instance, say for each step $k$ we set $\mathcal{K}_k = \mathcal{L}_k = \mathrm{span}(e_k)$ where $e_k \in \reals^n$ is the unit vector which is $e_k^i = 1$ for $i = k$ and $e_k^{i} = 0$ otherwise. In this case, our method appears as so \begin{align*}
+\delta_k \in \mathrm{span}(e_k) &\implies \delta_k = c e_k \\
+r_k - A \delta_k \perp \mathrm{span}(e_k) &\implies (r_k - c A e_k ) \cdot e_k = 0 \\
+& \implies c = \frac{r_k \cdot e_k}{e_k \cdot A e_k}
+\end{align*}
+where we state the orthogonality condition as a dot product equality and rearrange to obtain $c$. Recalling $r_k = b - A x_k$, we can state each step as a standard recurrence relation \begin{align*}
+x_{k+1} = x_k + \delta_k &= x_k + e_k \frac{(b - A x_k) \cdot e_k}{e_k \cdot A e_k}.
+\end{align*}
+Index notation is especially ideal for expressing this since each dot product by $e_k$ is equal to the $k$'th element of the other argument, so $e_k \cdot A e_k$ is $A_{kk}$ and $(b - Ax_k) \cdot e_k = b^k - \sum_j A_{kj} x_k^j$. However these only contribute to the coefficient $c$ seen here as the fraction; the vector $e_k$ which is scaled by this fraction is zero if the index we are inspecting is not itself $i = k$. So \begin{align*}
+x_{k+1}^k &= x_k^k + \frac{b^k - \sum_j A_{kj} x_k^j}{A_{kk}} \\
+x_{k+1}^k &= \frac{1}{A_{kk}} \left( A_{kk} x_k^k + b^k - \sum_{j=1}^n A_{kj} x^j_k \right).
+\end{align*}
+Consider now that since each step updates one element of $x_k$ at a time, all $x_k^j$ with $j > k$ will refer to the unaltered vector $x_0$. Additionally, each $x_k^j$ with $j < k$ will only have been altered once by this iteration scheme; in general on  any iteration step $x_{k+1}$, we are in the process of altering element $k$ and thus $x_k^k = x_0^k$. If we denote $y = x_n$ i.e. each element $y^k$ refers to the post-alteration $x^k_{k+1}$ with the full vector $y$ being the result after $n$ projection steps, then in fact this is \begin{align*}
+x_{k+1}^k &= \frac{1}{A_{kk}} \left( A_{kk} x_0^k + b^k - \sum_{j<k}^n A_{kj} x^j_k - \sum_{j>k}^n A_{kj} x^j_0 \right) \\
+y^k &= \frac{1}{A_{kk}} \left( A_{kk} x_0^k + b^k - \sum_{j<k}^n A_{kj} y^j - \sum_{j>k}^n A_{kj} x^j_0 \right)
+\end{align*}
+at which point it becomes apparent that the $n$ projection steps of this projection method which move us from $x_0$ to $y = x_n$ is in fact the same form as Gauss-Seidel iteration. For $\mathcal{K}_k = \mathcal{L}_k = \mathrm{span}(e_k)$, they produce the same algorithm.
+
+But the value of the projection method is lost on us if all we do is choose subspaces which are of single dimension. In such a case, projection methods are no more valuable than splitting methods, perhaps even less so because of the difficulties in converting to a clean iteration.
+
+To illustrate where projection methods offer us something novel, assume we have a $Ax = b$ problem with $A \in \reals^{n \times n}$ and $n = 2m$ i.e. is divisible by two, and set $\mathcal{K}_k = \mathcal{L}_k = \mathrm{span}(e_{2m-1}, e_{2m})$ so that each subspace $\mathcal{K}_k = \mathcal{L}_k$ has two dimensions spanned by consecutive orthonormal unit vectors. In this case, we are in some sense trying to approximate Gauss-Seidel but seeing if we can do it two steps at a time, and the projection method indicates an iteration that satisfies the following:
+\begin{align*}
+&\delta_k \in \mathrm{span}(e_{2k-1}, e_{2k}) \implies \delta_k = c_1 e_{2k-1} + c_2 e_{2k} \\
+& r_k - A \delta_k \perp \mathrm{span}(e_{2k-1},e_{2k}) \implies \begin{bmatrix} (r_k - A \delta_k) \cdot e_{2k-1} \\ (r_k - A \delta_k) \cdot e_{2k} \end{bmatrix} = \begin{bmatrix} 0 \\ 0\end{bmatrix}\\
+& \implies \begin{bmatrix} e_{2k-1} \cdot r_k \\ e_{2k} \cdot r_k \end{bmatrix} -
+\begin{bmatrix}
+	e_{2k - 1} \cdot A e_{2k-1} & e_{2k-1} \cdot A e_{2k} \\
+	e_{2k} \cdot A e_{2k-1} & e_{2k} \cdot A e_{2k}
+\end{bmatrix}
+\begin{bmatrix} c_1 \\ c_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix} \\
+& \implies \begin{bmatrix} c_1 \\ c_2 \end{bmatrix} = \begin{bmatrix}
+	e_{2k - 1} \cdot A e_{2k-1} & e_{2k-1} \cdot A e_{2k} \\
+	e_{2k} \cdot A e_{2k-1} & e_{2k} \cdot A e_{2k}
+\end{bmatrix}^\inv
+\begin{bmatrix} e_{2k-1} \cdot r_k \\ e_{2k} \cdot r_k \end{bmatrix}
+\end{align*}
+This is exactly the same as before, where we converted the orthogonality condition into a dot product, but this time there are two dot product conditions which must be simultaneously obeyed, $(r_k - A \delta_k) \cdot e_{2k-1} = 0$ and $(r_k - A \delta_k) \cdot e_{2k} = 0$ and in addition to that, $\delta_k$ is now a linear combination of both $e_{2k-1}$ and $e_{2k}$. Here, we have expanded $\delta_k = c_1 e_{2k-1} + c_2 e_{2k}$ and then expressed the simultaneous dot products we require as a linear equation in $\reals^2$
+
+Calculating the proper $c_1$ and $c_2$ such that $\delta_k$ satisfies $\delta_k \in \mathcal{K}_k$ and $r_k - A\delta_k \perp \mathcal{L}_k$ is now more difficult, but not so much more difficult since we have a linear relation. Yes, we require a matrix inversion, but the matrix inversion is only $2 \times 2$, where the typical formula \begin{gather*}
+\begin{bmatrix} a & b \\ c & d\end{bmatrix} ^ \inv = \frac{1}{ad - bc} \begin{bmatrix} d & -b \\ -c & a\end{bmatrix} ^ \inv
+\end{gather*}
+will suffice. In this case, we can decide how large a matrix we are comfortable inverting by other means, whether that be $2\times 2$, $3 \times 3$, $p \times p$ with $p \ll n$, etc., and if for some reason we think we can do these calculations quicker, we can remove vast swathes of error from our residual all at once. Moreover, if we know something about where our error is coming from, we may be able to select our $\mathcal{K}$ and $\mathcal{L}$ to target and subtract large sources of error directly, something we couldn't do when we were bound to repeat only the same splitting method iteration.
+
+So far, we have only examined cases where $\mathcal{K} = \mathcal{L}$ and an orthonormal basis of these subspaces are immediately available, principly as unit vectors $e_i$. If we get more creative with our choices of subspaces we will need to break the latter assumpion, but we will soon see that assuming some basis exists and aiming to make its calculation part of our iteration process later will be valuable. Assuming a basis $\{v_1, ..., v_p \}$ for $\mathcal{K}$ and $\{w_1, \dots, w_p\}$ for $\mathcal{L}$, then forming the matrices $V$ and $W$ whose columns are these bases (with shape $n \times p$), our technique appears as follows: \begin{enumerate}
+\item Calculate $r_k = b - Ax_k$.
+\item If we are to express our earlier condition in terms of these basis vectors, it would appear we need to solve \begin{gather*}
+w_i \cdot (r_k - A\delta_k) = 0 \hspace{2em} 1 \le i \le p
+\end{gather*}
+however with $\delta_k = c_1 v_1 + ... + c_p v_p$ it is prudent to construct a coefficient vector $\vec c$ for which $\delta_k = V \vec c$ and to combine all $p$ equations using the matrix $W$ (transposed so that we get a dot-product on each column), and so our condition becomes
+\begin{gather*}
+W^T (r_k - AV \vec c) = \vec 0 \\
+\implies \vec c = (W^T A V)^\inv W^T r_k
+\end{gather*}
+with $(W^T A V)^\inv$ a $p \times p$ matrix inversion.
+\item Finally, recall that $\vec c$ was the coefficients for how much of each basis vector $v_i$ we wanted to put in $\delta_k$, so our update step is \begin{gather*}
+x_{k+1} = x_k + V \vec c.
+\end{gather*}
+\end{enumerate}
+
+This notion of considering our update vector as an assembly of other vectors in another basis will become very important later.
+
+For now, we direct our attention towards two important classes of projection techniques. So far we have considered the case where $\mathcal{L} = \mathcal{K}$, and here we can show that if our $A$ is symmetric, pretty much any choice of subspace $\mathcal{K} = \mathcal{L}$ will improve our guess. These techniques are called \textbf{orthogonal} projection methods. (When $\mathcal{K} \neq \mathcal{L}$ the method is called \textbf{oblique}.)
+
+\begin{proposition}
+Let $A \in \reals^{n \times n}$ satisfy $A = A^T$ and $v^T A v > 0$ for all $v \neq 0$, and say for some $b \in \reals^n$ we are trying to solve $A x_* = b$ for $x_* \in \reals^n$. If we have an initial guess $x$ and select some subspace $\mathcal{K} = \mathcal{L}$ of $\reals^n$, any $y = x + \delta$ with \begin{gather*}
+\delta \in \mathcal{K} = \mathcal{L} \\
+b - Ay \perp \mathcal{L} = \mathcal{K}
+\end{gather*}
+and define an error function \begin{gather*}
+E(z) = \sqrt{(z - x_*) \cdot A(z - x_*)}.
+\end{gather*}
+Then $E(y) = \min_{\delta \in \mathcal K} E(x + \delta)$.
+\end{proposition}
+
+\begin{my proof}{m}
+Since $A$ is symmetric positive definite, it defines an inner product $\langle u,v\rangle_A = u \cdot A v$ and thus $E(z)$ defines a norm $\lVert z \rVert_A = \sqrt{\langle z, z \rangle_A}$. Note also that \begin{align*}
+E(z) &= \sqrt{(z - x_*) \cdot (Az - x_*)} \\
+ &= \sqrt{(z - x_*) \cdot (Az - b)} \\
+ &= \sqrt{(z - x_*) \cdot r_z}
+\end{align*}
+where $r_z$ is the associated residual $Az - b$.
+
+With this norm and inner product in hand, now recall the Galerkin method. Unfortunately it has not been discussed on this website before, but it is a common method for selecting an error minimizing vector from a subspace. The outline of the method, in the language of our present problem, is that if you can control $\delta \in \mathcal K$ and aim to minimize $r \in \reals^n$ (a residual) then this is achieved at the point in $\mathcal{K}$ for which the error vector points orthogonally out of the plane of possible choices; the reasoning here is that if at any point the error vector is not orthogonal, there is a direction you can move in which would reduce your error.
+
+Tangibly, the statement of the Galerkin method is that to find $\delta$ such that $r \cdot r$ is minimized (i.e. $\min_{\delta \in \mathcal{K}} (r \cdot r)$) we must select $\delta$ that satisfies \begin{gather*}
+r_\delta \cdot v = 0 \hspace{2em} \forall v \in \mathcal{K}.
+\end{gather*}
+with $r_\delta = b - A(x + \delta)$. It is clear however that this condition is the same as $b - A(x + \delta) \perp \mathcal{K}$ as called for by the projection method, so by applying the projection method, we are also applying the Galerkin method.
+
+Since we have a valid inner product $\langle \square , \square \rangle_A$, this too defines a Galerkin method such that if what we are trying to minimize is not $r_\delta = b - A(x + \delta)$ but instead $x + \delta - x_*$, which we know to be the same minimization problem, the method is\begin{gather*}
+\delta \in \mathcal{K} \text{ minimizes } \langle x + \delta - x_* , x + \delta - x_* \rangle_A \\
+\text{when } \langle x + \delta - x_* , v \rangle_A = 0 \hspace{1em} \text{for all } v \in \mathcal{K}
+\end{gather*}
+Since we know minimizing $x + \delta - x_*$ to be the same objective as minimizing $b - A(x + \delta)$, we can ignore the requirement, but notice that the objective can be written as \begin{align*}
+\langle x + \delta - x_* , x + \delta - x_* \rangle_A &= (x + \delta - x_*) \cdot A (x + \delta - x_*) \\
+&= \big( E(x + \delta) \big)^2 
+\end{align*}
+And since the square and the square root are monotonic functions, we know that in fact what we find is \begin{gather*}
+E(y) = \min_{\delta \in \mathcal K} E(x + \delta)
+\end{gather*}
+where $\delta$ is the iteration vector satisfying the projection method requirements.
+\end{my proof}
+
+The other case that will be of interest, breaking from our tradition so far, is when $\mathcal L = A \mathcal{K}$ i.e. $\mathcal L$ is the vector subspace defined by the image of $A$ on the subspace $\mathcal K$. In fact it is the ability to satisfy this class condition that will make Krylov subspaces of such use to us, rather than any particular \squote{interesting shape} that one might imagine Krylov subspaces having.
+
+\begin{proposition}
+Let $A \in \reals^{n \times n}$ and say for some $b \in \reals^n$ we are trying to solve $A x_* = b$ with $x_* \in \reals^n$. If we have an initial guess $x$ and select some subspaces $ \mathcal{L} = A \mathcal{K}$ of $\reals^n$, any $y = x + \delta$ with\begin{gather*}
+\delta \in \mathcal{K} \\
+b - Ay \perp \mathcal{L} = A \mathcal{K}
+\end{gather*}
+satisfies \begin{gather*}
+\lVert b - Ay \rVert = \min_{\delta \in \mathcal{K}} \lVert b - A(x + \delta) \rVert.
+\end{gather*}
+\end{proposition}
+
+\begin{my proof}{m}
+To show this, it will be helpful to have a lemma. Call $P$ an orthogonal projector when it has the property that \begin{gather*}
+x = Px + (I - P)x
+\end{gather*}
+for all $x \in \reals^n$ and say it is an orthogonal projector \emph{onto} $\mathcal{K}$ when $Px \in \mathcal{K}$ for all $x \in \reals^n$. Orthogonal projectors allow us to separate $x$ into its $\mathcal{K}$ and non-$\mathcal K$ components, meaning \begin{align*}
+x \cdot x &= (P x + (I - P)x) \cdot (Px + (I - P) x) \\
+&= Px \cdot Px + (I - P) x \cdot (I - P) x + 2 Px \cdot (I - P) x \\ 
+&= Px \cdot Px + (I - P) x \cdot (I - P) x + 2 Px \cdot x - 2 Px \cdot Px \\
+&= Px \cdot Px + (I - P) x \cdot (I - P) x + (2 P - 2P )x \cdot Px \\
+&= Px \cdot Px + (I - P) x \cdot (I - P) x 
+\end{align*} by bilinearity. Written as norms, this is \begin{gather*}
+\lVert x \rVert^2 = \lVert Px \rVert^2 + \lVert (I - P)x \rVert^2
+\end{gather*} i.e. the squared magnitudes separate cleanly with no cross terms. First, it is valuable for us to know that \begin{gather*}
+\min_{y \in \mathcal K}\lVert x - y \rVert = \lVert x - Px \rVert
+\end{gather*}
+for all $x \in \reals^n$. The reason for this is that a candidate $y \in \mathcal K$ has $Px - y \in \mathcal K$ and $x - Px \perp \mathcal K$, meaning for a similar property as above, \begin{gather*}
+\lVert x - y \rVert^2 = \lVert x - Px + Px -  y \rVert^2 = \lVert x - Px\rVert^2 + \lVert Px - y \rVert^2
+\end{gather*}
+Since $\lVert Px - y \rVert^2 \ge 0$ as a norm, we conclude $\lVert x - Px\rVert^2$ is the lowest we can get $\lVert x - y \rVert^2$ by setting $y = Px$ so that $\lVert Px - y \rVert^2 = 0$.
+
+With this lemma in hand, we immediately deduce a corollary that \begin{gather*}
+\min_{y_* \in \mathcal K} \lVert x - y_* \rVert = \lVert x - y \rVert
+\end{gather*}
+if and only if both $y \in \mathcal K$ and $x - y \perp \mathcal K$, since this implies $y = Px$.
+
+Now return to our problem. Restating our conditions in a different form, we say a satisfactory $\delta_*$ for the projection method is one which is \begin{gather*}
+\delta_* \in \mathcal{K} \\
+(b - Ax) - A\delta_* \perp \mathcal L = A \mathcal K
+\end{gather*}
+and we want to show that this is equivalent to \begin{gather*}
+\min_{\delta \in \mathcal K} \lVert (b - Ax) - A \delta \rVert = \lVert (b - Ax) - A\delta_* \rVert.
+\end{gather*}
+But we may just as well say that we require $(A\delta) \in \mathcal L = A \mathcal K$ instead of $\delta \in \mathcal K$, in which case what we are trying to prove is \begin{gather*}
+\min_{(A\delta) \in \mathcal L} \lVert (b - Ax) - (A \delta) \rVert = \lVert (b - Ax) - A\delta_* \rVert.
+\end{gather*}
+In this form, it is also clear that we can restate the requirements on $\delta_*$ as \begin{gather*}
+A \delta_* \in \mathcal{L} \\
+(b - Ax) - A\delta_* \perp \mathcal L
+\end{gather*}
+and thus our goal statement is proved exactly by the earlier mentioned corollary, with its $y$ as $A \delta$ and its $x$ as our $(b-Ax)$.
+\end{my proof}
+
+\subsection{Krylov Subspace Methods}
+
+As alluded to in the final part of the previous section, there is something special about a projection method in which we select $\mathcal L = A \mathcal K$ which we aim to exploit. Moreover, at this stage we have not discussed how a projection method might calculate a basis for its relevant subspaces so that we could describe an update step in terms of a coefficient calculation $\vec c = (W^T A V)^\inv W^T r$. 
+
+We aim to solve these together. The first relatively minor insight to make is that with $\mathcal L = A \mathcal K$, strictly speaking we only need one basis, since each vector $v_i \in \mathcal K$ which forms a basis in $\mathcal K$ will form a basis $A v_i \in \mathcal L$. We can exploit this even more so if we choose $\mathcal K$ to be \begin{gather*}
+\mathcal{K}_m (A,r_0) = \mathrm{span}(r_0, Ar_0, \dots, A^{m-1} r_0)
+\end{gather*}
+using the residual of our initial guess $r_0 = b - Ax_0$ to start the sequence of basis vectors. Now, these vectors are not at all guarenteed to be orthogonal, and actually they are not even guarenteed to be linearly independent; we imagine that they are linearly independent since if we were to find some $c A^p r_0 = r_0$, this would mean we have actually just solved our $Ax = b$ problem early, and we would take \begin{align*}
+c A^p (b - Ax_0) - (b - A x_0) &= 0 \\
+b - A (- c A^{p-1}b + cA^p x_0 - x_0) &= 0 \\
+x_* = - c A^{p-1}b + cA^p x_0 - x_0
+\end{align*}
+and so this failure of linear independence is in fact an ideal outcome so long as we include early terminations in our algorithms. If our linear dependence is more complicated $A^p r_0 = c_1 A^k r_0 + c_2 r_0$ for instance, the solution follows as an appropriate linear combination \begin{gather*}
+x_* = -A^{p-1}b + A^p x_0 - A^{k-1}b - A^{k}x_0 - c_2 x_0
+\end{gather*}
+but it will always be some linear combination $A^0 r_0$ since if we have $A^p r_0 = c_1 A^k r_0 + c_2 A^{l}r_0$ then this implies we would have found $A^{p-l} r_0 = c_1 A^{k-l} r_0 + c_2 r_0$ earlier. If no such linear dependence is found, we are provided with the tools to proceed with the standard iterative approach we have been interested in so far.
+
+I must pause at this stage and say that we've found some interesting leads, but nothing concretely useful at this point; that will come later. With Krylov subspaces I had a certain persistent impatience that I can only imagine is common when encountering them. Everyone seems to describe them as very important and there is perhaps an expectation that their importance can be made evident from a simple definition; unfortunately, the value of Krylov subspaces will come largely from the techniques that are to follow.
+
+\subsubsection{Arnoldi's Method}
+
+The first order of business for us will be to explore what it would mean to find an orthogonal basis in $\mathcal{K}$. We already have a basis in a Krylov subspace by default, the standard $\mathcal{K}_m (A,r_0)$ assuming any existing linear dependence is exploited to terminate the problem by providing a solution early, but we have yet to make this basis orthogonal.
+
+This can be achieved with the Gram-Schmidt algorithm; yes, it is clear that using this places us in another $O(n^2)$ problem, but as we will see, we either have no intention of actually running the algorithm we are about to describe until certain properties are shown that will reveal it to be $O(n)$.
+
+The Arnoldi algorithm then proceed relatively similarly to Gram-Schmidt but with a seemingly minor, yet very important, asterisk: \begin{itemize}
+\item In establishing our orthonormal basis $v_1, \dots, v_m \in \mathcal K_m (A, r_0)$, choose $v_1 = r_0 / \lVert r_0 \rVert$. Initialize the rest of the vectors $v_2, \dots, v_m$ as zeros such that the column vectors $v_1,\dots, v_m$ form the matrix $V$ which starts with only one non-zero column. Additionally, initialize a $v_{m+1} \in \reals^{n}$ as zeros.
+\item Initialize a matrix $\tilde H$ which is $(m+1) \times m$ as zeros; we will soon refer to the top $m \times m$ part of the matrix as $H$ without the tilde. 
+\item Initialize a sequence of buffer vectors $w_1, \dots, w_m \in \reals^n$ as zeroes.
+\item For each $j = 1, \dots, m$, do the following: \begin{enumerate}
+\item For each $i = 1, \dots, j$, set $\tilde H_{ij} = v_i \cdot A v_j$, thus filling out the first $j$ elements of the $j$'th column.
+\item Set $w_j = A v_j - \sum_{i=1}^j \tilde H_{ij} v_i$ (this can be interpretted as $w_j = Av_j - V H e_j $ using the partially completed $V$ and $\tilde H$ and unit vector $e_j \in \reals^m$ which is $e_j^k = 1$ if $k=j$ and $0$ otherwise).
+\item Set $\tilde H_{j+1,j} = \lVert w_j \rVert$, setting the element in $\tilde H$ just below the diagonal. If this $\lVert w_j \rVert = 0$, terminate the algorithm, as this is the linear dependence case mentioned earlier.
+\item Set $v_{j+1} = w_j / H_{j+1, j} = w_j / \lVert w_j \rVert$.
+\end{enumerate}
+\end{itemize}
+It is important to notice something about these $\tilde H$ and $H$ matrices we build. $H$, the top $m$ rows of $\tilde H$, is what is called a Hessenberg matrix, which is almost triangular except with non-zero elements just above or below the diagonal (below in our case). The reason for this in this instance is that what we have done here is actually slightly different from just Gram-Schmidt; if what we were doing matched Gram-Schmidt exactly, we would result in a triangular matrix of coefficients, but instead we have dropped the column which would have held the associated coefficient for $v_1$ (i.e. $\lVert r_0 \rVert$) and asserted our starting vector must be magnitude one. In place of this missing first column, we have constructed a basis vector $v_{j+1}$ which at the conclusion of our algorithm is $v_{m+1}$ and orthonormal to all our $v_1, \dots, v_m \in \mathcal{K}_m (A, r_0)$; in fact this is an orthonormal basis vector of $v_{m+1} \in \mathcal K_{m+1}(A,r_0)$, and if we included a column $[1,0,\dots,0]^T$ on the left of $\tilde H$, it would be the $(m+ 1) \times (m+1)$ diagonal matrix associated with the Gram-Schmidt algorithm.
+
+By the conclusion of the algorithm, this means we have \begin{gather*}
+A V = V H + w_{m} e_m^T
+\end{gather*}
+where $e_m$ is the $[0,\dots, 0, 1]^T \in \reals^m$ unit vector resulting in the outer product $w_m e_m^T$ an $n \times m$ matrix which is $w_m$ in the first column and zero otherwise. And this is owing exactly to the step \begin{gather*}
+w_j = Av_j + V H e_j
+\end{gather*}
+since, at the final step, we can read this as \begin{gather*}
+(w_m e_m^T) e_m = AV e_m  - V H e_m.
+\end{gather*}
+
+Now, again, we have no intention of running this algorithm in its present form. The takeaway from this for us, is that since $V$ is orthonormal and orthongal to $w_m$, the above property results in \begin{align*}
+V^T A V &= V^T V H + V^T w_m e_m^T \\
+&=H + \mathbf{0}
+\end{align*} 
+where in particular this $\mathbf{0}$ is the zero matrix in $m \times n$. We conclude that $H = V^T A V$.
+
+Arnoldi's method, like all naive Gram-Schmidt implementations, is not generally robust to floating point rounding errors. There exists a modified Gram-Schmidt method consistent with the technique Arnoldi applies, but if for some reason you wish to implement this yourself, see algorithm 6.2 of Saad's aforementioned book.
+
+\subsubsection{The Symmetric Lanczos Algorithm}
+
+Now, if we were to find ourselves in a case where we had $A = A^T$ symmetric, this property we have just discovered where there exists a basis of $m$ orthonormal vectors in $\reals^n$ forming the matrix $V$ such that $H = V^T A V$ with $H$ a Hessenberg matrix means that \begin{gather*}
+(V^T A V)^T = V^T A^T (V^T)^T = V^T A V
+\end{gather*}
+and thus $H = H^T$. This is a \textbf{huge} discovery, since we know by construction that each $j$'th column of $H$ is zero after the $j+1$'th element of the column; adding symmetry to this means that $H$ has shape \begin{gather*}
+H = \begin{bmatrix} \alpha_1 & \beta_2 & & & \\ \beta_2 & \alpha_2 & \beta_3 & & \\ & \beta_3 & \ddots & \ddots & \\ & & \ddots & \alpha_{m-1} & \beta_m \\ & & & \beta_m & \alpha_m \end{bmatrix}
+\end{gather*}
+with $\alpha_1, \dots, \alpha_m \in \reals$ and $\beta_2, \dots, \beta_m \in \reals$ and empty spaces in the described matrix shape above filled with zeros.
+
+In fact, this tells us that when we are running Arnoldi's algorithm, each $j$ iteration has to deal with at most three non-zero $v_i \cdot A v_j$, simplifying the runtime down to $O(n)$. We call this the \textbf{Symmetric Lanczos's Algorithm}, and it runs as so: \begin{itemize}
+\item In establishing our orthonormal basis $v_1, \dots, v_m \in \mathcal K_m (A, r_0)$, choose $v_1 = r_0 / \lVert r_0 \rVert$. Initialize the rest of the vectors $v_2, \dots, v_m$ as zeros, as well as a $v_0 = \vec 0 \in \reals^n$.
+\item Initialize scalar values $\alpha_1, \dots, \alpha_m \in \reals$ and $\beta_1, \dots, \beta_m \in \reals$ as zeros, as well as buffer vectors $w_1, \dots, w_m \in \reals^n$. In particular, $\beta_1 = 0$ must be defined.
+\item For each $j = 1, \dots, m$, do the following: \begin{enumerate}
+\item Set $w_j = Av_j - \beta_j v_{j - 1}$. This can be considered the first part of the step that was $w_j = Av_j - \sum_{i=1}^j \tilde H_{ij} v_i$ in the Arnoldi algorithm, however we are still missing $\alpha_j$  in column $j$ so our $-\sum_{i=1}^j \tilde H_{ij} v_i$ cannot fully do its job yet. We will have to account for this missing term next.
+\item Set $\alpha_j = w_j \cdot v_j$.
+\item Update $w_j$ to  $w_j - \alpha_j v_j$. This completes the analogous $w_j = Av_j - \sum_{i=1}^j \tilde H_{ij} v_i$ step in the Arnoldi algorithm.
+\item Set $\beta_{j+1} = \lVert w_j \rVert$. If $\lVert w_j \rVert = 0$ then we are in a linear dependence situation and must terminate the algorithm.
+\item Set $v_{j+1} = w_{j}/ \beta_{j+1}$
+\end{enumerate}
+\end{itemize}
+
+This performs the same process as the Arnoldi algorithm, which as we discussed earlier is no more than Gram-Schmidt, but by careful choice of which subspace we wanted to find and what kind of basis we wanted, we found that the Gram-Schmidt algorithm runs in this context in $O(n)$ time.
+
+Once again, this algorithm works under the assumption of exact arithmetic, and in particular is known to fail rapidly under floating point rounding."
+
+
+\end{document}

@@ -2,6 +2,7 @@ module LatexToHtml.Utils where
 
 import Data.Text (Text)
 import Text.LaTeX.Base.Syntax
+import Text.LaTeX.Base.Render
 
 
 flattenTeXTree :: LaTeX -> [LaTeX]
@@ -12,6 +13,7 @@ flattenTeXTree tex = case tex of
 flattenTeXText :: LaTeX -> Maybe Text
 flattenTeXText tex = case tex of
    TeXRaw x -> Just x
+   TeXMath x y -> Just . render $ TeXMath x y
    TeXSeq x y -> flattenTeXText x <> flattenTeXText y
    _ -> Nothing
 
