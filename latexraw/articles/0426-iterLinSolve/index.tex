@@ -353,7 +353,7 @@ x_{k+1} = x_k + V \vec c.
 
 This notion of considering our update vector as an assembly of other vectors in another basis will become very important later.
 
-For now, we direct our attention towards two important classes of projection techniques. So far we have considered the case where $\mathcal{L} = \mathcal{K}$, and here we can show that if our $A$ is symmetric, pretty much any choice of subspace $\mathcal{K} = \mathcal{L}$ will improve our guess. These techniques are called \textbf{orthogonal} projection methods. (When $\mathcal{K} \neq \mathcal{L}$ the method is called \textbf{oblique}.)
+For now, we direct our attention towards two important classes of projection techniques. So far we have considered the case where $\mathcal{L} = \mathcal{K}$, and here we can show that if our $A$ is symmetric, pretty much any choice of subspace $\mathcal{K} = \mathcal{L}$ will improve our guess.
 
 \begin{proposition}
 Let $A \in \reals^{n \times n}$ satisfy $A = A^T$ and $v^T A v > 0$ for all $v \neq 0$, and say for some $b \in \reals^n$ we are trying to solve $A x_* = b$ for $x_* \in \reals^n$. If we have an initial guess $x$ and select some subspace $\mathcal{K} = \mathcal{L}$ of $\reals^n$, any $y = x + \delta$ with \begin{gather*}
@@ -529,7 +529,20 @@ In fact, this tells us that when we are running Arnoldi's algorithm, each $j$ it
 
 This performs the same process as the Arnoldi algorithm, which as we discussed earlier is no more than Gram-Schmidt, but by careful choice of which subspace we wanted to find and what kind of basis we wanted, we found that the Gram-Schmidt algorithm runs in this context in $O(n)$ time.
 
-Once again, this algorithm works under the assumption of exact arithmetic, and in particular is known to fail rapidly under floating point rounding."
+Once again, this algorithm works under the assumption of exact arithmetic, and in particular is known to fail rapidly under floating point rounding. Saad notes in his book:
+
+\dquote{\emph{It is rather surprising that the above simple algorithm guarantees, at least in exact arithmetic, that the vectors $v_i$, $i = 1, 2, \dots ,$ are orthogonal. In reality, exact orthogonality of these vectors is only observed at the beginning of the process. At some point the $v_i$’s start losing their global orthogonality rapidly. There has been much research devoted to finding ways to either recover the orthogonality, or to at least diminish its effects by partial or selective orthogonalization}}
+
+\subsubsection{The Conjugate Gradient Algorithm}
+
+Alright, so we have what is in theory an efficient way to calculate a basis on a Krylov subspace, the symmetric Lanczos method when $A$ is symmetric, but we haven't substantiated what that means for solving a $Ax = b$ problem other than providing an orthonormal basis $v_1, \dots, v_m$. We can say at this stage that with $\mathcal L = A \mathcal K$ and the matrix $V$ with columns which are the vectors $v_1, \dots, v_m$, we also have $A V$ with columns whose vectors form an orthonormal basis of $m-1$  for $\mathcal L$, and thus by our earlier discussion of projection methods, an update step \begin{align*}
+x_{k+1} &= x_k + V \vec c \\
+\vec c &= (W^T A V)^\inv W^T r_k \\
+&= ((AV)^T A V)^\inv (AV)^T r_k \\
+&= (V^T A^T A V)^\inv V^T A^T r_k
+\end{align*}
+In particular, this update step with $W = AV$ does not use the assumption that $A = A^T$, which is only required if we want to use the Lanczos algorithm to derive $V$ rather than the Arnoldi algorithm, a choice made purely for computation speed. 
+
 
 
 \end{document}
