@@ -209,9 +209,9 @@ Jacobi iteration can be known to converge if $A$ is \emph{strictly diagonally do
 |A_{ii}| > \sum_{j \neq i} |A_{ij}|
 \end{gather*}
 that is, the element on the diagonal is larger than the sum of all other elements on its row. We can suffice with weakening $>$ to $\ge$ if we also know that the matrix is also \emph{irreducible}. This condition is a little more complicated but can be thought of roughly as whether the matrix can be described as two mostly-separate systems. For instance, one definition of \emph{reducible} matrices $A$ is that there exists a permutation matrix $P$ such that $P^\inv A P$ has block structure \begin{gather*}
-P^\inv A P = \begin{bmatrix} B & \mathbf{0} \\ F & C \end{bmatrix}
+P^\inv A P = \begin{bmatrix} D_1 & \mathbf{0} \\ F & D_2 \end{bmatrix}
 \end{gather*}
-where $B,C,F \in \reals^{n \times n}$ and $\mathbf 0$ the zero matrix. Another equivalent condition of matrix reducibility is that the index set $I = \{ 1, \dots , n \}$ has a partition into $I_1, I_2$ (partition meaning $I_1 \cap I_2 = \emptyset$ and $I_1 \cup I_2 = I$, they are disjoint and union to the full set) has some pair $i \in I_1$ and $j \in I_2$ with $A_{ij} = 0$. When $A$ is \emph{irreducible} (for all such partitions, every $i\in I_1,j \in _I2$ has $A_{ij} \neq 0$) and it is diagonally dominant (not necessarily strictly) then besides knowing convergence due to $\rho(M^\inv N) = \rho(- D^\inv (L + U)) < 1$, we also know the technique converges with $A$ strictly diagonally dominant or irreducibly diagonally dominant without finding $M^\inv N$'s largest eigenvalue.
+where $F$ is a square matrix, $\mathbf 0$ the zero matrix, and $D_1,D_2$ diagonal matrices. Another equivalent condition of matrix reducibility is that the index set $I = \{ 1, \dots , n \}$ has a partition into $I_1, I_2$ (partition meaning $I_1 \cap I_2 = \emptyset$ and $I_1 \cup I_2 = I$, they are disjoint and union to the full set) has some pair $i \in I_1$ and $j \in I_2$ with $A_{ij} = 0$. When $A$ is \emph{irreducible} (for all such partitions, every $i\in I_1,j \in _I2$ has $A_{ij} \neq 0$) and it is diagonally dominant (not necessarily strictly) then besides knowing convergence due to $\rho(M^\inv N) = \rho(- D^\inv (L + U)) < 1$, we also know the technique converges with $A$ strictly diagonally dominant or irreducibly diagonally dominant without finding $M^\inv N$'s largest eigenvalue.
 
 Proofs of these convergence conditions are present in chapter 5.2 of Gerard Meurant's book.
 
@@ -302,7 +302,7 @@ x_{k+1} = x_k + \delta_k &= x_k + e_k \frac{(b - A x_k) \cdot e_k}{e_k \cdot A e
 \end{align*}
 Index notation is especially ideal for expressing this since each dot product by $e_k$ is equal to the $k$'th element of the other argument, so $e_k \cdot A e_k$ is $A_{kk}$ and $(b - Ax_k) \cdot e_k = b^k - \sum_j A_{kj} x_k^j$. However these only contribute to the coefficient $c$ seen here as the fraction; the vector $e_k$ which is scaled by this fraction is zero if the index we are inspecting is not itself $i = k$. So \begin{align*}
 x_{k+1}^k &= x_k^k + \frac{b^k - \sum_j A_{kj} x_k^j}{A_{kk}} \\
-x_{k+1}^k &= \frac{1}{A_{kk}} \left( A_{kk} x_k^k + b^k - \sum_{j=1}^n A_{kj} x^j_k \right).
+ &= \frac{1}{A_{kk}} \left( A_{kk} x_k^k + b^k - \sum_{j=1}^n A_{kj} x^j_k \right).
 \end{align*}
 Consider now that since each step updates one element of $x_k$ at a time, all $x_k^j$ with $j > k$ will refer to the unaltered vector $x_0$. Additionally, each $x_k^j$ with $j < k$ will only have been altered once by this iteration scheme; in general on  any iteration step $x_{k+1}$, we are in the process of altering element $k$ and thus $x_k^k = x_0^k$. If we denote $y = x_n$ i.e. each element $y^k$ refers to the post-alteration $x^k_{k+1}$ with the full vector $y$ being the result after $n$ projection steps, then in fact this is \begin{align*}
 x_{k+1}^k &= \frac{1}{A_{kk}} \left( A_{kk} x_0^k + b^k - \sum_{j<k}^n A_{kj} x^j_k - \sum_{j>k}^n A_{kj} x^j_0 \right) \\
@@ -353,9 +353,9 @@ x_{k+1} = x_k + V \vec c.
 
 This notion of considering our update vector as an assembly of other vectors in another basis will become very important later.
 
-For now, we direct our attention towards two important classes of projection techniques. So far we have considered the case where $\mathcal{L} = \mathcal{K}$, and here we can show that if our $A$ is symmetric, pretty much any choice of subspace $\mathcal{K} = \mathcal{L}$ will improve our guess.
+For now, we direct our attention towards two important classes of projection techniques. So far we have considered the case where $\mathcal{L} = \mathcal{K}$, and here we can show that if our $A$ is symmetric, pretty much any choice of subspace $\mathcal{K} = \mathcal{L}$ will improve our guess. These kinds of methods with $\mathcal L = \mathcal K$ are called \textbf{orthogonal projection methods} (otherwise, the projection method is called \textbf{oblique}).
 
-\begin{proposition}
+\begin{label proposition}{iterpageOrthogonalProjectionBasicOptimality}
 Let $A \in \reals^{n \times n}$ satisfy $A = A^T$ and $v^T A v > 0$ for all $v \neq 0$, and say for some $b \in \reals^n$ we are trying to solve $A x_* = b$ for $x_* \in \reals^n$. If we have an initial guess $x$ and select some subspace $\mathcal{K} = \mathcal{L}$ of $\reals^n$, any $y = x + \delta$ with \begin{gather*}
 \delta \in \mathcal{K} = \mathcal{L} \\
 b - Ay \perp \mathcal{L} = \mathcal{K}
@@ -364,7 +364,7 @@ and define an error function \begin{gather*}
 E(z) = \sqrt{(z - x_*) \cdot A(z - x_*)}.
 \end{gather*}
 Then $E(y) = \min_{\delta \in \mathcal K} E(x + \delta)$.
-\end{proposition}
+\end{label proposition}
 
 \begin{my proof}{m}
 Since $A$ is symmetric positive definite, it defines an inner product $\langle u,v\rangle_A = u \cdot A v$ and thus $E(z)$ defines a norm $\lVert z \rVert_A = \sqrt{\langle z, z \rangle_A}$. Note also that \begin{align*}
@@ -451,6 +451,8 @@ and thus our goal statement is proved exactly by the earlier mentioned corollary
 
 \subsection{Krylov Subspace Methods}
 
+(This section will largely follow the narration of Saad. While he I found him often hard to follow, ultimately it became clear that his treatment of Krylov methods had the most apparent through-line.)
+
 As alluded to in the final part of the previous section, there is something special about a projection method in which we select $\mathcal L = A \mathcal K$ which we aim to exploit. Moreover, at this stage we have not discussed how a projection method might calculate a basis for its relevant subspaces so that we could describe an update step in terms of a coefficient calculation $\vec c = (W^T A V)^\inv W^T r$. 
 
 We aim to solve these together. The first relatively minor insight to make is that with $\mathcal L = A \mathcal K$, strictly speaking we only need one basis, since each vector $v_i \in \mathcal K$ which forms a basis in $\mathcal K$ will form a basis $A v_i \in \mathcal L$. We can exploit this even more so if we choose $\mathcal K$ to be \begin{gather*}
@@ -468,11 +470,11 @@ but it will always be some linear combination $A^0 r_0$ since if we have $A^p r_
 
 I must pause at this stage and say that we've found some interesting leads, but nothing concretely useful at this point; that will come later. With Krylov subspaces I had a certain persistent impatience that I can only imagine is common when encountering them. Everyone seems to describe them as very important and there is perhaps an expectation that their importance can be made evident from a simple definition; unfortunately, the value of Krylov subspaces will come largely from the techniques that are to follow.
 
-\subsubsection{Arnoldi's Method}
+\subsubsection{Arnoldi's Method and Full Orthogonalization Method (FOM)}
 
 The first order of business for us will be to explore what it would mean to find an orthogonal basis in $\mathcal{K}$. We already have a basis in a Krylov subspace by default, the standard $\mathcal{K}_m (A,r_0)$ assuming any existing linear dependence is exploited to terminate the problem by providing a solution early, but we have yet to make this basis orthogonal.
 
-This can be achieved with the Gram-Schmidt algorithm; yes, it is clear that using this places us in another $O(n^2)$ problem, but as we will see, we either have no intention of actually running the algorithm we are about to describe until certain properties are shown that will reveal it to be $O(n)$.
+This can be achieved with the Gram-Schmidt algorithm; yes, it is clear that using this places us in another $O(n^3)$ problem, but as we will see, we either have no intention of actually running the algorithm we are about to describe until certain properties are shown that will reveal it to be $O(n)$.
 
 The Arnoldi algorithm then proceed relatively similarly to Gram-Schmidt but with a seemingly minor, yet very important, asterisk: \begin{itemize}
 \item In establishing our orthonormal basis $v_1, \dots, v_m \in \mathcal K_m (A, r_0)$, choose $v_1 = r_0 / \lVert r_0 \rVert$. Initialize the rest of the vectors $v_2, \dots, v_m$ as zeros such that the column vectors $v_1,\dots, v_m$ form the matrix $V$ which starts with only one non-zero column. Additionally, initialize a $v_{m+1} \in \reals^{n}$ as zeros.
@@ -496,12 +498,29 @@ w_j = Av_j + V H e_j
 since, at the final step, we can read this as \begin{gather*}
 (w_m e_m^T) e_m = AV e_m  - V H e_m.
 \end{gather*}
+Using $\tilde H$ and with $v_{m+1} \in \mathcal{K}_{m+1} (A,r_0)$ as $w_m / \lVert w_m \rVert$ above used to write $\tilde V$, a $n \times (m+1) $ matrix whose columns are $v_1, \dots, v_m, v_{m+1}$, we can also write $AV = \tilde V \tilde H$, compressing the $w_m e_m^T$ into the $\tilde V \tilde H$ notation.
 
-Now, again, we have no intention of running this algorithm in its present form. The takeaway from this for us, is that since $V$ is orthonormal and orthongal to $w_m$, the above property results in \begin{align*}
+We have no intention of running this algorithm in its present form, since it involves a Gram-Schmidt orthogonalization of complexity $O(n^2)$. The takeaway from this for us is that, since $V$ is orthonormal and orthongal to $w_m$, the above property results in \begin{align*}
 V^T A V &= V^T V H + V^T w_m e_m^T \\
-&=H + \mathbf{0}
+&= I H + \mathbf{0} \\
+&= H
 \end{align*} 
-where in particular this $\mathbf{0}$ is the zero matrix in $m \times n$. We conclude that $H = V^T A V$.
+where in particular this $\mathbf{0}$ is the zero matrix in $m \times m$. We conclude that $H = V^T A V$.
+
+This is in fact sufficient to lead to \emph{a} method for solving $Ax=b$ problems, although it offers no efficiency until further modifications can be made. Observe that for an orthogonal projection method, that is, one where we use $\mathcal K = \mathcal L$, $V$ becomes a matrix forming a basis for both $\mathcal K$ and $\mathcal L$. Consequently our previous expression for the coefficient vector \begin{gather*}
+\vec c = (W^T A V)^\inv W^T 
+\end{gather*}
+which solves the projection method problem with $x_{k+1} = x_k + V \vec c$ has $W = V$ and so \begin{align*}
+\vec c &= (V^T A V)^\inv V^T r_k \\
+&= H^\inv V^T r_k.
+\end{align*}
+Moreover, recalling that $V$ has columns which are the orthonormal vectors computed from Arnoldi's method, and in particular $v_1$ is the normalized $r_k$, $r_k$ is up-to-normalization the same as the first column of $V$. We read $V^T r_k$ as the dot product of the different columns of $V$ with $r_k$, where all columns are orthogonal except the first, so we get $V^T r_k = \lVert r_k \rVert e_1$ with $e_1 = [1,0,\dots,0]^T \in \reals^m$.
+
+What we call the \textbf{Full Orthogonalization Method} is nothing but the Arnoldi method followed by the steps \begin{gather*}
+\vec c = H^\inv (\lVert r_k \rVert e_1) \\
+x_{k+1} = x_k + V \vec c
+\end{gather*}
+Where $H^\inv$ calls for an $m \times m$ matrix inverse. Curiously, we may write this as $\lVert r_k \rVert (H^\inv e_1) $ in which case it is clear that we are not meaning to calculate the entire matrix $H^\inv$, but only its first column; this could present a significant efficiency gain on a naive inversion algorithm, say, by using some kind of matrix adjugate algorithm perhaps, although this is not an avenue we will chase here.
 
 Arnoldi's method, like all naive Gram-Schmidt implementations, is not generally robust to floating point rounding errors. There exists a modified Gram-Schmidt method consistent with the technique Arnoldi applies, but if for some reason you wish to implement this yourself, see algorithm 6.2 of Saad's aforementioned book.
 
@@ -510,12 +529,12 @@ Arnoldi's method, like all naive Gram-Schmidt implementations, is not generally 
 Now, if we were to find ourselves in a case where we had $A = A^T$ symmetric, this property we have just discovered where there exists a basis of $m$ orthonormal vectors in $\reals^n$ forming the matrix $V$ such that $H = V^T A V$ with $H$ a Hessenberg matrix means that \begin{gather*}
 (V^T A V)^T = V^T A^T (V^T)^T = V^T A V
 \end{gather*}
-and thus $H = H^T$. This is a \textbf{huge} discovery, since we know by construction that each $j$'th column of $H$ is zero after the $j+1$'th element of the column; adding symmetry to this means that $H$ has shape \begin{gather*}
+and thus $H = H^T$. This is a \textbf{huge} discovery, since we know by construction that each $j$'th column of $H$ is zero after the $(j+1)$'th element of the column; adding symmetry to this means that $H$ has shape \begin{gather*}
 H = \begin{bmatrix} \alpha_1 & \beta_2 & & & \\ \beta_2 & \alpha_2 & \beta_3 & & \\ & \beta_3 & \ddots & \ddots & \\ & & \ddots & \alpha_{m-1} & \beta_m \\ & & & \beta_m & \alpha_m \end{bmatrix}
 \end{gather*}
 with $\alpha_1, \dots, \alpha_m \in \reals$ and $\beta_2, \dots, \beta_m \in \reals$ and empty spaces in the described matrix shape above filled with zeros.
 
-In fact, this tells us that when we are running Arnoldi's algorithm, each $j$ iteration has to deal with at most three non-zero $v_i \cdot A v_j$, simplifying the runtime down to $O(n)$. We call this the \textbf{Symmetric Lanczos's Algorithm}, and it runs as so: \begin{itemize}
+In fact, this tells us that when we are running Arnoldi's algorithm, each $j$ iteration has to deal with at most three non-zero $v_i \cdot A v_j$, simplifying the runtime down to $O(n)$ vector operations. We call this the \textbf{Symmetric Lanczos's Algorithm}, and it runs as so: \begin{itemize}
 \item In establishing our orthonormal basis $v_1, \dots, v_m \in \mathcal K_m (A, r_0)$, choose $v_1 = r_0 / \lVert r_0 \rVert$. Initialize the rest of the vectors $v_2, \dots, v_m$ as zeros, as well as a $v_0 = \vec 0 \in \reals^n$.
 \item Initialize scalar values $\alpha_1, \dots, \alpha_m \in \reals$ and $\beta_1, \dots, \beta_m \in \reals$ as zeros, as well as buffer vectors $w_1, \dots, w_m \in \reals^n$. In particular, $\beta_1 = 0$ must be defined.
 \item For each $j = 1, \dots, m$, do the following: \begin{enumerate}
@@ -533,16 +552,779 @@ Once again, this algorithm works under the assumption of exact arithmetic, and i
 
 \dquote{\emph{It is rather surprising that the above simple algorithm guarantees, at least in exact arithmetic, that the vectors $v_i$, $i = 1, 2, \dots ,$ are orthogonal. In reality, exact orthogonality of these vectors is only observed at the beginning of the process. At some point the $v_i$’s start losing their global orthogonality rapidly. There has been much research devoted to finding ways to either recover the orthogonality, or to at least diminish its effects by partial or selective orthogonalization}}
 
+We will soon find remedies for this problem, but for now, we can notice that in exact arithmetic, we have yet another algorithm via applying FOM as in the previous subsection. Moreover, any technique that can give us efficiency gains on calculating the inverse of a tridiagonal matrix such as our symmetric $H$ will dramatically speed up such an FOM method.
+
+\subsubsection{Direct Lanczos Algorithm}
+
+A number of insights follow exactly the previous thread to enable the symmetric Lanczos FOM to turn into an efficient method. In the subsection after this one we will see about making it into an effective one.
+
+First, we consider an $LU$-decomposition of our tridiagonal $H$. The techniques related to the inversion of banded matrices are discussed at length \hyperlink{https://doi.org/10.1016/j.cam.2012.07.018}{in Kılıç and Stanica 2013} (including an elegant proof that this decomposition works as described) and much more briefly in Saad, however for our purposes, all we need to know is that a tridiagonal matrix such as symmetric $H$ has an $LU$-decomposition in which $H$ is written\begin{gather*}
+ \begin{bmatrix} \alpha_1 & \beta_2 & & & \\ \beta_2 & \alpha_2 & \beta_3 & & \\ & \beta_3 & \ddots & \ddots & \\ & & \ddots & \alpha_{m-1} & \beta_m \\ & & & \beta_m & \alpha_m \end{bmatrix} = 
+\begin{bmatrix} 1 &  & & & \\ \lambda_2 & 1 &  & & \\ & \lambda_3 & \ddots & & \\ & & \ddots & 1 &  \\ & & & \lambda_m & 1 \end{bmatrix}
+\begin{bmatrix} \eta_1 & \beta_2 & & & \\  & \eta_2 & \beta_3 & & \\ &  & \ddots & \ddots & \\ & & & \eta_{m-1} & \beta_m \\ & & &  & \eta_m \end{bmatrix}
+\end{gather*}
+Moreover, we have recurrence relations for these new quantities $\lambda_2,\dots, \lambda_m \in \reals$ and $\eta_1,\dots, \eta_m \in \reals$ \begin{gather*}
+\lambda_j = \frac{\beta_j}{\eta_{j-1}} \\
+\eta_j = \alpha_j - \lambda_j \beta_j
+\end{gather*}
+allowing for straight forward analytic calculation; this follows simply from gaussian elimination. Labelling these two matrices above $L$ and $U$ respectively, we take our earlier deduction that \begin{align*}
+\vec c &= \lVert r_0 \rVert H^\inv e_1 \\
+x_{k+1} &= x_k + V \vec c \\
+&= x_k + \lVert r_0 \rVert V H^\inv e_1
+\end{align*}
+and rewrite it as \begin{gather*}
+x_{k+1} = x_k + \lVert r_0 \rVert V U^\inv L^\inv e_1.
+\end{gather*}
+We now require a radical shift in our framing. So far we have privelaged $V$ as an orthonormal basis in $\mathcal K$ from which we build update vectors $\delta \in \mathcal K$ from a linear combination $\delta = V \vec c$. We now consider instead that the appropriate thing to calculate isn't the basis $v_1, \dots, v_m \in \reals^n$ exactly, but instead columns of a matrix we will call $P = V U^\inv$, together with a transformed coefficient vector $z = \lVert r_0 \rVert L^\inv \vec c$. At first it may seem that this only makes things more complicated, but here \hyperlink{https://doi.org/10.1016/j.cam.2012.07.018}{Kılıç and Stanica} can help us once again with the recurrence relation that defines the inverse of a bidiagonal matrix such as our $U$ or $L$. For $U$, this is \begin{gather*}
+(U^\inv)_{ij} = \left\{ \begin{matrix} 0 & i > j \\ \frac1{\eta_j} \prod_{k=i}^{j-1} \frac{- \beta_{k+1}}{\eta_{k} } & i \le j \end{matrix} \right.
+\end{gather*}
+(Here I correct what I believe to be typos in the formula given in Kılıç and Stanica's paper. In particular what I write here is in place of their $v_j$ which should probably have been $u_j$ ((and indeed $v_j$ is not a meaningful symbol in their notation, hence why I am so sure)), and their product starts from $k=1$ whereas I believe it should start from $k=i$.)
+
+A similar formula applies for $L^\inv$ since $L^T$ is an upper bidiagonal matrix and so $((L^T)^\inv)^T = L^\inv$ would mean this algorithm works there as well.
+\begin{gather*}
+(L^\inv)_{ij} = \left\{ \begin{matrix} 0 & i < j \\ 1 & i = j \\ \prod_{k=j}^{i-1} (- \lambda_{k+1}) & i > j \end{matrix} \right.
+\end{gather*}
+
+Alternatively, these can be expressed as a recurrence relation, which will allow us cut down on computations so long as we cache values as our hypothetical algorithm runs. \begin{gather*}
+(U^\inv)_{ij} =  \left\{ \begin{matrix} 0 & i > j \\ \frac1{\eta_{j} } & i = j \\ \frac{- \beta_{i+1} }{\eta_{i} } (U^\inv)_{i+1,j} & i < j \end{matrix} \right. \\
+(L^\inv)_{ij} =  \left\{ \begin{matrix} 0 & i < j \\ 1 & i = j \\ (- \lambda_{j+1}) (L^\inv)_{i,j+1} & i > j \end{matrix} \right.
+\end{gather*}
+
+If indeed we are to recontextualize $P$ and $z$ as the canonical objects of our algorithm rather than $V$ and $\vec c$, we are in a situation now where we need to develop intuitions about these objects. With our above recurrence relation, we can do just that.
+
+Giving an example of our recurrence relation for $L^\inv$, in $m = 5$ it should look something like \begin{gather*}
+L_5^{-1} = \begin{bmatrix} 1 & 0 & 0 & 0 & 0 \\ - \lambda_2 & 1 & 0 & 0 & 0 \\ \lambda_2 \lambda_3 & -\lambda_3 & 1 & 0 & 0 \\ -\lambda_2 \lambda_3 \lambda_4 & \lambda_3 \lambda_4 & -\lambda_4 & 1 & 0 \\ \lambda_2 \lambda_3 \lambda_4 \lambda_5 & - \lambda_3 \lambda_4 \lambda_5 & \lambda_4 \lambda_5 & - \lambda_5 & 1 \end{bmatrix}
+\end{gather*}
+This lets us do something really cool. Recalling that $z$ is defined $z = \lVert r_0 \rVert L^\inv e_1$, we know that this $z$ is simply this left hand column which is \begin{gather*}
+z^j = \lVert r_0 \rVert \prod_{k=1}^{j-1} \lambda_{k+1}
+\end{gather*}
+or rather, we can think of a sequence of numbers $\zeta_j \in \reals$ with $\zeta_1 = \lVert r_0 \rVert$ and \begin{gather*}
+\zeta_{j+1} = - \lambda_{j+1} \zeta_j
+\end{gather*}
+along with a sequence of vectors $z_j \in \reals^j$ which are similarly defined recursively as $z_1 = [\zeta_1]$ and \begin{gather*}
+z_{j+1} = \begin{bmatrix} z_j \\ \zeta_{j+1} \end{bmatrix} \in \reals^{j+1}
+\end{gather*}
+via block matrix.
+
+Where previously we had $\vec c$, a vector of coefficients we needed such that $V \vec c = \delta$ gave us the update vector we needed assuming we could calculate a single quite possibly expensive matrix inverse $H^\inv$, now, this transformed coefficient vector $z$ can actually be calculated \emph{iteratively}. That is to say, if we applied an orthogonal projection method with $\mathcal K = \mathcal L = \mathcal K_m (A, r_0)$ with a big $m$, previously this would have implied a big matrix inverse of $O(m^3)$; if we can make finding the $P$ matrix similarly easy, we have arrived at a $O(m)$ method for calculating the coefficient vector.
+
+This discovery is of incredible significance to our framework of procedure. Where previously, the problem of a matrix inversion step meant that we might want to have a small $m$ and do many projection method steps, finding $x_{k+1} = x_k + \delta_k$ with $\delta_k \in \mathcal K$ and $b - A(x_k + \delta_k) \perp \mathcal L$, it no longer makes sense to separate these projection method steps. We are freed to pick a large $p$ and calculate in one algorithm \begin{gather*}
+\tilde x = x_0 + \delta\\
+\delta \in \mathcal K_p (A, r_0) \\
+b - A \tilde x \perp \mathcal K_p (A,r_0)
+\end{gather*}
+now ditching subscripts of our iterative $x$ steps. It will of course still make sense to think of there being a sequence $x_m$, however these steps are no longer steps that occur due to repeated projection methods; from now on we operate within one projection algorithm until it terminates, and our $x_m$ will refer to how far along the projection method has progressed, equivalent to solving a projection method with $\mathcal K_{m}(A,r_0) = \mathcal K = \mathcal L$ for each $m \le p$.
+
+In order to make this new system work as we are implying, we will need a way to iteratively come up with the columns of $P$. Since $P = V U^\inv$, we can look at an example $U^\inv$ in, say, $m=4$, with our above recurrence relation for the inverse: \begin{gather*}
+U^\inv_4 = \begin{bmatrix} \eta_1^\inv & - \beta_2 (\eta_1 \eta_2)^\inv & \beta_2 \beta_3 (\eta_1 \eta_2 \eta_3)^\inv & - \beta_2 \beta_3 \beta_4 (\eta_1 \eta_2 \eta_3 \eta_4)^\inv \\
+0 & \eta_2^\inv & -\beta_3 (\eta_2 \eta_3)^\inv & \beta_3 \beta_4 (\eta_2 \eta_3 \eta_4)^\inv \\
+0 & 0 & \eta_3^\inv  & \beta_4 (\eta_3 \eta_4)^\inv \\
+0 & 0 & 0 & \eta_4^\inv \end{bmatrix}
+\end{gather*}
+Paying attention to this, we notice that each $j+1$ column is merely the $j$'th column multiplied by $\beta_{j+1}\eta_{j+1}^\inv$ plus $\eta_{j+1}^\inv$ in the $(j+1)$'th row. Since we need to construct $P = V U^\inv$, and the first column of $U^\inv$ is zero in all but the first element, the first column of $P$ which we'll call $p_1$ is merely $\eta_1^\inv v_1$. Furthermore, chasing this recurrence relation, we'll see that each future column of $P$, $p_{j+1}$ is merely \begin{gather*}
+p_{j+1} = \eta_{j+1}^\inv v_{j+1} - \beta_{j+1} p_j.
+\end{gather*}
+
+This is exactly what we wanted. Now, assuming exact arithmetic, we can run an iterative projection method at the same time that we run a basis finding algorithm such as Lanczos, in such a way that we can choose large $m$ and terminate at any time if our error becomes acceptable. Since the matrix $P$ adds a new column on each step, we'll denote $P_k \in \reals^{n \times k}$ to be the matrix on the $k$'th step with $k$ filled out columns; in this way, we have an update rule that looks like \begin{gather*}
+x_k = x_0 + P_k z_k
+\end{gather*}
+remembering that $z_k \in \reals^k$. As an iterative rule, we only need to apply one of these columns at a time since each previous column will have been applied in $x_k$; we get \begin{gather*}
+x_{k+1} = x_k + p_{k+1} \zeta_{k+1}.
+\end{gather*}
+
+The \textbf{Direct Lanczos} algorithm applies this as follows assuming $A$ is symmetric: \begin{itemize}
+\item Choose an initial $x_0$ and compute an associated $r_0 = b - Ax_0$. Choose some maximum number of iterations $m \in \nats$ and initialize vectors $v_0,v_1, \dots, \in \mathcal K_m (A,r_0)$ with $v_0 = \vec 0$ and $v_1 = r_0 / \lVert r_0 \rVert $ as well as vectors $p_0,p_1, \dots, \in \reals^n$ with $p_0 = \vec 0$. We'll also need coefficient values $\alpha_1, \dots, \in \reals$, $\beta_1,\dots, \in \reals$ with $\beta_1 = 0$, $\eta_1,\dots, \in \reals$, $\lambda_1, \dots, \in \reals$ with $\lambda_1= 0$, and $\zeta_1,\dots, \in \reals$ with $\zeta_1 = \lVert r_0 \rVert$. Finally, we'll also use one buffer vector $w \in \reals^n$.
+\item For each $k = 1, \dots, m$ do the following: \begin{enumerate}
+	\item The first part of our loop will involve no more than following the Lanczos algorithm. Set $w = A v_k - \beta_k v_{k-1}$ just as before where it was the first part of an incomplete $w_k = A v_k - \sum_{i=1}^j \tilde H_{ij} v_i $ step as in the Arnoldi algorithm and described in the Lanczos algorithm.
+	\item Set $\alpha_k = w \cdot v_k $. We will postpone the $w \to w - \alpha_k v_k$ update since it won't be necessary if we choose to terminate early.
+	\item If $k > 1$ then set $\lambda_k = \beta_k \eta_{k-1}^\inv $ and $\zeta_k = -\lambda_k \zeta_{k-1}$. If $k=1$ then simply use $\lambda_1 = 0$ and $\zeta_1 = \lVert r_0 \rVert$ as described above.
+	\item Set $\eta_k = \alpha_k - \lambda_k \beta_k$. Steps c. and d. together form the recurrence rule required to split $H = LU$ with $L$ and $U$ the bidiagonal matrices we defined earlier, as one derives from Gaussian elimination.
+	\item Set $p_k = \eta_k^\inv (v_k - \beta_k p_{k-1})$. This is no more than the observation we made earlier that each $(j+1)$'th column of $U^\inv$ is but a product of its $j$'th column multiplied by $\beta_{j+1} \eta_{j+1}^\inv$ together with $\eta_{j+1}^\inv$ in its $(j+1)$'th row. This recurrence in $U^\inv$ means that $P = VU^\inv$ turns the $j$'th column into $p_j$ and an addition in a single row in $U^\inv$ into the $j$'th column of $V$ as seen above.
+	\item Finally, set $x_k = x_{k-1} + \zeta_k p_k$. If $\lVert b - Ax_k \rVert$ is satisfactory, terminate.
+	\item If $\lVert b - Ax_k \rVert$ is unsatisfactory, complete now the full update step mentioned earlier, updating $w$ to $w - \alpha_k v_k$.
+	\item To prepare for the next step if indeed we have decided to continue, set $\beta_{k+1} = \lVert w \rVert$ and $v_{k+1} = w / \beta_{k+1}$. 
+\end{enumerate}
+\end{itemize}
+
+Of course, a number of these steps may be skipped or moved around; for instance here we do not cache previous versions of $w$ since we no longer need to, and additionally it is up to the implementation circumstance as to how often one wants to check that $\lVert b - Ax_k \rVert$ is satisfactory. Similarly, it may also be unnecessary to keep previous $x_k$.
+
 \subsubsection{The Conjugate Gradient Algorithm}
 
-Alright, so we have what is in theory an efficient way to calculate a basis on a Krylov subspace, the symmetric Lanczos method when $A$ is symmetric, but we haven't substantiated what that means for solving a $Ax = b$ problem other than providing an orthonormal basis $v_1, \dots, v_m$. We can say at this stage that with $\mathcal L = A \mathcal K$ and the matrix $V$ with columns which are the vectors $v_1, \dots, v_m$, we also have $A V$ with columns whose vectors form an orthonormal basis of $m-1$  for $\mathcal L$, and thus by our earlier discussion of projection methods, an update step \begin{align*}
-x_{k+1} &= x_k + V \vec c \\
-\vec c &= (W^T A V)^\inv W^T r_k \\
-&= ((AV)^T A V)^\inv (AV)^T r_k \\
-&= (V^T A^T A V)^\inv V^T A^T r_k
+We now have an algorithm that, for symmetric $A \in \reals^{n \times n}$ and assuming exact arithmetic, will solve an $Ax=b$ problem in $O(n)$ vector operations. Although we have not emphasized it so far (since in practice this does not occur), under exact arithmetic and assuming $\mathcal K_n (A,r_0) = \reals^n$, this should solve for $x_*$ exactly on the $n$'th step. The trouble is that this algorithm depends on the Lanczos algorithm which is not stable in floating point precision; principly this is because we are running a straight forward naive Gram-Schmidt, obscured by a number of optimizations we have discovered.
+
+Our task now will be to realize that features of this new algorithm are more robust than the particular methods we are using to calculate them.
+
+\begin{proposition}
+Let $r_k = b - A_k$ be the residual vectors produced by the Direct Lanczos algorithm above and thus inheriting its assumptions, along with the vectors $p_k$ and $v_k$ as produced by the algorithm. Then we have the following: \begin{enumerate}
+\item Our residuals point exactly in the direction of our orthonormal vectors $v_k$, that is to say for some $\sigma_k \in \reals$, \begin{gather*}
+r_k = \sigma_k v_{k+1}.
+\end{gather*}
+Consequently, $r_i \cdot r_j = 0$ when $i \neq j$.
+\item The vectors $p_k$ are $A$-orthogonal as we described much earlier, i.e. they satisfy $p_i \cdot Ap_j = 0$ when $i \neq j$.
+\end{enumerate}
+\end{proposition}
+
+\begin{my proof}{m}
+The first claim follows from a much earlier fact about the Arnoldi method. Recall the equation $AV = VH + w_{m} e_m^T$, and that this was just $AV = VH + \beta_{m+1} v_{m+1} e_m^T$. Proceeding with terminology appropriate to the Arnoldi FOM algorithm (since indeed direct Lanczos is just that with some optimizations), observe that with $x_k = x_0 + V \vec c$ we have \begin{align*}
+r_k = b - Ax_k &= b - A(x_0 + V \vec c) \\&= (b - Ax_0) - AV\vec c \\&= r_0 - VH\vec c - \beta_{m+1} v_{m+1}e_m^T \vec c
 \end{align*}
-In particular, this update step with $W = AV$ does not use the assumption that $A = A^T$, which is only required if we want to use the Lanczos algorithm to derive $V$ rather than the Arnoldi algorithm, a choice made purely for computation speed. 
+We can take $e_m^T \vec c$ as a dot product, together with the factor $\beta_{m+1}$ to obtain $\sigma_m = - \beta_{m+1} e_m^T \vec c$. As for $r_0$ and $VH \vec c$, recall that $v_1 = r_0 / \lVert r_0 \rVert $ so $r_0 = \lVert r_0 \rVert v_1$; we also derived earlier when discussing the full orthogonalization method that $\vec c= H^\inv (\lVert r_0 \rVert e_1)$, which means that $H \vec c= \lVert r_0 \rVert e_1$. Substituting these in we get \begin{align*}
+r_k &= \lVert r_0 \rVert v_1 - V(\lVert r_0 \rVert e_1) + \sigma_m v_{m+1} \\
+&= \lVert r_0 \rVert v_1 - \lVert r_0 \rVert v_1 + \sigma_m v_{m+1} \\
+&= \sigma_m v_{m+1}
+\end{align*}
+where we use $V e_1 = v_1$ since the $e_1 = [1,0,\dots,0]^T $ unit vector can extract the first column of the matrix. We are done with part a.
+
+The second part is fundamentally a proof that $P^T A P$ is a diagonal matrix, since each element $(P^T A P)_{ij}$ correspond to the elementwise formula \begin{align*}
+(P^T A P)_{ij} &= \sum_{k,l} (P^T)_{ik} A_{kl} P_{lj} \\
+&= \sum_{k,l} P_{ki} A_{kl} P_{lj}
+\end{align*}
+and so since we sum across each row in $k$ and $l$, in effect what we are looking at in the $(i,j)$ position of $P^T A P$ is a dot product $p_i \cdot A p_j$.
+
+Let us begin by using $P = VU^\inv$. Recalling $V^T A V = H$ and $H = LU$, we have \begin{align*}
+P^T A P &= U^{-T} V^T A V U^\inv \\
+&= U^{-T} H U^\inv \\
+&= U^{-T} LU U^\inv \\
+&= U^{-T} L.
+\end{align*}
+Now since $U$ is upper triangular, we must have $U^{-T}$ lower triangular. Moreover, triangular matrices form closed groups, so $U^{-T} L$ must also be lower triangular; however we also know that $P^T A P$ is symmetric via the symmetry of $A$, so $(P^T A P)^T = P^T A^T P = P^T A P$. If $U^{-T}L$ is lower triangular yet it is also symmetric, then it can only be non-zero on its diagonal. As above, this is the same as $p_i \cdot A p_j = 0$ for $i \neq j$. We are done with part b.
+\end{my proof}
+
+Knowing these properties, it now becomes appropriate to disassemble the direct Lanczos method in an effort to reproduce its artifacts without following the method itself. In particular, we know this must be possible in some manner since as long as we start with $p_0 = r_0$, each successive Krylov subspace $\mathcal K_2 (A , r_0) = \mathrm{span}(r_0,A r_0)$, then $ \mathrm{span}(r_0,Ar_0,A^2 r_0)$, will each specify a unique $A$-orthogonal direction at step $k+1$ not previously spanned by the $P$ basis in $k$; consequently, up to a scalar factor, we have no commitments to any way of calculating $p_{k+1}$ since it is well defined at each step. We know we cannot follow a naive Gram-Schmidt method or else we will produce an unstable method, but since in theory it is possible to derive some set of steps such as \begin{gather*}
+x_{k+1} = x_k + \alpha_k p_k \\
+p_{k+1} = \eta_k^\inv \sigma_{k}^{-1} r_k + \beta_k p_k 
+\end{gather*}
+we can proceed as follows as follows.
+
+Since we are trying to dispense with Gram-Schmidt, we dismiss the $\alpha_k, \beta_k, \lambda_k$ symbols we had earlier which were artifacts of deriving a Gram-Schmidt $H$ matrix or its $LU$-decomposition; instead we use these symbols now to mean unknown coefficients which we need to find new ways to calculate, since e.g. what we now call $\alpha_k$ was previously $\zeta_k$.
+
+By the above proposition, we have also learned that we can dismiss any explicit calculation of $v_k$ since they are a biproduct of the residuals of this method, i.e. via $\sigma_{k} v_{k+1} = r_k$ we derive $v_{k+1} = \sigma^\inv_{k} r_k$; moreover, the step we had previously in the direct Lanczos algorithm which was $p_k = \eta_k^\inv (v_k - \beta_k p_{k+1})$ takes $\eta_k^\inv$ and $v_{k+1} = \sigma^\inv_{k+1} r_k$ to give the first term of the formula above.
+
+But since we are dismissing any attachment to $H$ or $V$, and we had only defined the vectors $p_k$ as the columns of $P = VU^\inv$, introducing a scalar multiple into each $p_k$ does not disrupt any of the properties we wanted our $p_k$ vectors to have. Consequently, we can dispense entirely with the $\eta_k^\inv \sigma_{k+1}^\inv$ factor, assuming $p_{k+1}$ now holds in it some appropriate scaling and expecting $\beta_k$ and $\alpha_k$ to be scaled appropriately as well.
+
+This leaves us with only two steps and two quantities we must calculate: \begin{gather*}
+x_{k+1} = x_k + \alpha_k p_k \\
+p_{k+1} = r_k + \beta_k p_k 
+\end{gather*}
+In fact, we can deduce $\alpha_k$ and $\beta_k$ purely from the consequences of the above proposition, namely that $r_i \cdot r_j = 0$ and $p_i \cdot A p_j = 0$ when $i \neq j$. Substituting our recurrence relation for $x_k$ into the formula for residual, we have \begin{align*}
+r_{k+1} = b - A(x_k + \alpha_k p_k) &= (b - Ax_k) - \alpha_k A p_k \\
+&= r_k - \alpha_k A p_k
+\end{align*}
+Merely enforcing our condition that residuals are orthogonal, we can use $r_{k+1} \cdot r_k = 0$ to obtain \begin{align*}
+0 &= r_k \cdot (r_k - \alpha_k A p_k) \\
+&= r_k \cdot r_k - \alpha_k (r_k \cdot A p_k) 
+\end{align*}
+which can be rearranged to obtain \begin{gather*}
+\alpha_k = \frac{r_k \cdot r_k}{r_k \cdot A p_k}.
+\end{gather*}
+
+A similar trick now applies to computing $p_k$ vectors since $p_{k+1}$ should be $A$-orthogonal to $p_k$. Writing $A p_k \cdot p_{k+1} = 0$ yields by the recurrence relation \begin{align*}
+0 &= A p_k \cdot (r_{k+1} + \beta_k p_k) \\
+&= A p_k \cdot r_{k+1} + \beta_k (A p_k \cdot p_k)
+\end{align*}
+which may be similarly rearranged to obtain \begin{gather*}
+\beta_k = - \frac{r_{k+1} \cdot A p_k }{p_k \cdot A p_k}.
+\end{gather*}
+In this case, we'll use a reformulation of this since $r_{k+1} = r_k - \alpha_k A p_k $ so using $A p_k = \alpha_k^\inv (r_{k+1} - r_k)$ and $p_k = r_k + \beta_{k-1} p_{k-1} $ to express $\beta_k$ as \begin{align*}
+\beta_k &= - \frac{\alpha_k^\inv r_{k+1} \cdot (r_{k+1} - r_k) }{ (r_k + \beta_{k-1} p_{k-1}) \cdot Ap_k} \\
+&= - \frac{\alpha_k^\inv r_{k+1} \cdot (r_{k+1} - r_k) }{ r_k \cdot Ap_k} \hspace{2em} \text{(by $p_{k-1} \cdot A p_k = 0$)}\\
+&= - \frac{\alpha_k^\inv r_{k+1} \cdot (r_{k+1} - r_k) }{ \alpha_k^\inv r_k \cdot (r_{k+1} - r_k)} \\
+&= \frac{ r_{k+1} \cdot r_{k+1} }{ r_k \cdot  r_k} \hspace{2em} \text{(by $r_{k+1} \cdot r_k = 0$)}
+\end{align*}
+
+What we derive is a much simpler algorithm that unfortunately obscures the precise reason it works; as we have seen above, this is but a clever relabelling that avoids the pitfalls but ultimately does a similar job to a highly modified Gram-Schmidt, which due to previously discussed circumstances would be $O(n)$ complexity if not for compounding rounding error.
+
+The final \textbf{Conjugate Gradient} algorithm is as follows: \begin{itemize}
+\item Choose an initial $x_0$ and compute an associated $r_0 = b - Ax_0$. Initialize vectors $x_1,\dots, \in \reals^n$, $r_1,\dots, \in \reals^n$ and vectors $p_0,p_1,\dots, \in \reals^n$ with $p_0 = r_0$.
+\item For $k = 1, \dots$ do the following: \begin{enumerate}
+	\item Set $\alpha_k = \frac{r_k \cdot r_k}{p_k \cdot A p_k}$. (Since $r_k = p_k - \beta_{k-1} p_{k-1}$ and $p_k$ are $A$-orthogonal, this denominator is equivalent to the $r_k \cdot A p_k$ we called for above.)
+	\item Set $x_{k+1} = x_k + \alpha_k p_k$
+	\item Set $r_{k+1} = r_k - \alpha_k A p_k$
+	\item Decide whether $\lVert r_{k+1} \rVert$ is tolerable and if so, terminate the algorithm.
+	\item Set $\beta_k = \frac{r_{k+1} \cdot r_{k+1} }{r_k \cdot r_k}$
+	\item Set $p_{k+1} = r_{k+1} + \beta_k p_k$
+\end{enumerate}
+\end{itemize}
+
+It is important to keep in mind as we continue that this algorithm does something mathematically equivalent to the direct Lanczos algorithm, but computationally very different. The update vectors $p_k$ we deduce are exactly as in the direct Lanczos algorithm up to a scaling factor, but are simply calculated a different way that is less vulnerable to compounding rounding errors.
+
+\subsection{Conjugate Gradient: Propeties and Modifications}
+
+We cannot discuss the broader properties and situational improvements on conjugate gradient without first acknowledging that what we have described above is not universally agreed upon to be \emph{the} algorithm. The previous section follows from Saad's narrative, but Meurant provides one as well which I felt was, in his text, poorly motivated. It does however set the stage for how we can analyze the algorithm, so we'll need to pivot frameworks.
+
+\subsubsection{Polynomial Splitting Techniques and Acceleration Methods}
+
+While Saad derives the conjugate gradient method as a projection method, Meurant has a greater focus on splitting methods, which ultimately has its advantages.
+
+Given a splitting method with $A = M - N$ and $M x_{k+1} = N x^k + b$, shortened with $B = M^\inv N$ and $c = M^\inv b$ to $x_{k+1} = Bx_k + c$, Meurant says that there may exist an alternative sequence $y_k$ with its own recurrence relation which can converge faster, built out of a linear combination of different $x_k$s at different stages of recurrence. Neverminding whether this works quite yet, such a sequence would be defined \begin{gather*}
+y_k = \sum_{l=0}^k \alpha_{lk} x_l
+\end{gather*}
+where we require $\sum_{l=0}^k \alpha_{lk} = 1$ so that $y_k$ is always a weighted average of the previous $x_k$ and thus a sequence of $x_k = x_*$ will result in $y_k = x_*$.
+
+If we examine the error of this $y_k$ over time, $\eta_k = x_* - y_k$, we find that \begin{align*}
+\eta_k &= x_* - \sum_{l=0}^k \alpha_{lk} x_l \\
+&= \sum_{l=0}^k \alpha_{lk} x_* - \sum_{l=0}^k \alpha_{lk} x_l \\
+&= \sum_{l=0}^k \alpha_{lk} (x_* - x_l)
+\end{align*}
+Since $x_*$ satisfies $x_* = B x_* - c$, if we have $\varepsilon_k = x_* - x_k$ as our normal error, we see that the residual is \begin{gather*}
+\varepsilon_k = x_* - x_k = Bx_* - c - (Bx_{k-1} - c) = B(x_* - x_{k-1}) = B \varepsilon_{k-1}
+\end{gather*}
+similar to back when we were doing proofs in the splitting section. Taking this as a recurrence relation, we obtain $\varepsilon_k = B^k \varepsilon_0$ and apply this to our weighted average to get \begin{gather*}
+\eta_k = \sum_{l=0}^k \alpha_{lk} \varepsilon_l = \sum_{l=0}^k \alpha_{lk} B^l  \varepsilon_0.
+\end{gather*}
+What we see now appears to be a polynomial of order $k$ in $B$ with coefficients $\alpha_{lk}$ for the $l$'th order terms. We'll call this polynomial $P_k(t)$, i.e. \begin{gather*}
+P_k(t) = \sum_{l=0}^k \alpha_{lk} t^l
+\end{gather*}
+and now write $\eta_k = P_k(B)\varepsilon_0$ as a matrix polynomial.
+
+Now that we have deduced our $y_k$ error is a matrix polynomial with a set of coefficients, we may apply other methods that exist for polynomial minimization; in this case Meurant calls for the use of Chebyshev polynomials.
+
+\begin{definition}[Chebyshev Polynomials]
+We will denote $T_n(x)$ as \textbf{Chebyshev Polynomials}, that is, for integer $n\in \nats$ and $x \in [-1,1]$ they are polynomials that satisfy \begin{gather*}
+T_n(x) = \cos (n \arccos x)
+\end{gather*}
+or alternatively for $t \in [a,b]$ they are\begin{gather*}
+T_n(t) = \cos \left(n \arccos \left( \frac{a+b}{2} + \frac{b- a}{2} x\right) \right)
+\end{gather*}
+interpolating the original $|x| \le 1$ polynomial.
+\end{definition}
+
+Chebyshev polynomials are interesting because they are ostensibly polynomials which emulate in some sense a cosine bound to an interval, but with $n$ periods within the interval. Additionally, they can be defined with a recurrence relation as well as having very straight forward minimization properties.
+
+We'll quote the following from Meurant's book verbatim:
+\begin{theorem}
+Let $T_n$ by a Chebyshev polynomial. Then, \begin{enumerate}
+\item $T_0(x) = 1$, $T_1(x) = x$, \begin{gather*}
+T_{n+1} (x) = 2x T_n(x) - T_{n-1}(x);
+\end{gather*}
+\item For $n \ge 1$, $T_n$ is an $n$-degree polynomial whose leading coefficient is $2^{n-1}$;
+\item $T_n(-x) = (-1)^n T_n(x)$;
+\item $T_n(x)$ has $n$ zeros in $[-1,1]$, namely \begin{gather*}
+x_k = \cos \left( \frac\pi2 \frac{2k+1}{n} \right), \hspace{2em} k=0,1,\dots,n-1,
+\end{gather*}
+and $n+1$ extremas \begin{gather*}
+x_k' = \cos \left( \frac{k\pi}{n} \right) \hspace{1em} \text{with} \hspace{1em} T_n(x_k') = (-1)^k, \hspace{1.7em} k=0,1,\dots,n
+\end{gather*}
+\item The Chebyshev polynomials are orthogonal with respect to the scalar product \begin{gather*}
+\langle f, g \rangle = \int_{-1}^{+1}\frac{f(x)g(x)}{\sqrt{1-x^2}}dx
+\end{gather*}
+Moreover, \begin{gather*}
+\langle T_i, T_j \rangle = \left\{ \begin{matrix} 0 & i \neq j \\ \frac{\pi}{2} & i = j \neq 0 \\ \pi & i = j = 0 \end{matrix} \right.
+\end{gather*}
+\item For all $n$-degree polynomials with leading coefficient $1$, $T_n/2^{n-1}$ has the smallest maximum norm, namely $1/2^{n-1}$
+\end{enumerate}
+\end{theorem}
+
+For proof, Meurant cites \hyperlink{https://dl.acm.org/doi/abs/10.5555/574892}{Bjorck and Dahlquist's Numerical Methods (1990)}. While normally I would provide a summarization of the proof, I try not to get too involved with polynomial algebra at the moment; to proceed, we only need results a., d. and f. from the above.
+
+That is, we are presently faced with a similar polynomial minimization problem, almost but not quite like that of part f. of the above theorem. We need to pick a polynomial $P_k$ such that $\lVert P_k(B) \rVert$ is minimized, in that we want parameters $\alpha_{lk}$ such that $\eta_k = P_k(B) \varepsilon_0$ will be minimized. Recall that $\lVert P_k(B) \rVert$ is the matrix norm, and so what we are trying to minimize is \begin{gather*}
+\min_{P_k} \max_{v \neq \vec 0} \frac{\lVert P_k(B) v \rVert }{\lVert v \rVert}.
+\end{gather*}
+
+Supposing $B$ has eigenvalues within some range $[-\rho,\rho]$ with $\rho > 0$, then imagining we take $v$ to be the eigenvector associated with the largest eigenvalue $\lambda$, what we are looking at above is more like \begin{gather*}
+\min_{P_k} \max_{\lambda \in [-\rho,\rho]} \lvert P_k(\lambda) \rvert
+\end{gather*}
+
+This is no longer a matrix polynomial minimization problem but a normal polynomial minimization problem, and so we can approach it with methods associated to the Chebyshev polynomials, owing to their ability to be minimal polynomials. Now our averaging property of the polynomial coefficients $\alpha_{lk}$ from earlier becomes important; we aren't just trying to find any minimal polynomial, we are trying to keep the property that $\sum_{l=0}^k \alpha_{lk} x_* = x_*$ so in effect we require $P_k(1) = 1$.
+
+Using $P_k(1)=1$ and property f. above, our minimal polynomial should look something like $T_k(\lambda/\rho)/2^{n-1}$, sending inputs $\lambda \in [-\rho, \rho]$ to $T_k$'s natural domain $[-1,1]$, and normalize it by the $\lambda = 1$ case. This gives us \begin{gather*}
+P_k(\lambda) = \frac{T_k(t/\rho)}{T_k(1/\rho)}.
+\end{gather*}
+Rewriting this as $T_k(\lambda/\rho) = T_k(1/\rho) P_k(\rho)$, we can use a. from the above theorem on $T_k(\lambda/\rho)$ to get \begin{gather*}
+T_{k+1}(\lambda/\rho) = \frac{2\lambda}{\rho} T_k(\lambda/\rho) - T_{k-1}(\lambda/\rho) \\
+\implies \\
+T_{k+1}(1/\rho) P_{k+1}(\lambda) = \frac{2\lambda}{\rho} T_k(1/\rho) P_k(\lambda) - T_{k-1}(1/\rho) P_{k-1} (\lambda)
+\end{gather*}
+
+If indeed the above is a property that will follow from $P_k$ being a polynomial such that $\lVert P_k(B) \rVert$ is minimized, then without knowing the polynomial explicitly at this stage, we can replace $\lambda$ with $B$ (careful not to forget our $2\lambda/\rho$) and use $\eta_k = P_k(B) \varepsilon_0$ once again to obtain \begin{gather*}
+T_{k+1}\left(\frac1\rho\right) P_{k+1}(B) \varepsilon_0 = \frac{2B}{\rho} T_k\left(\frac1\rho\right) P_k(B) \varepsilon_0 - T_{k-1}\left(\frac1\rho \right) P_{k-1} (B) \varepsilon_0 \\
+\implies \\
+T_{k+1}\left(\frac1\rho\right) \eta_{k+1} = \frac{2}{\rho} T_k\left(\frac1\rho\right) B \eta_k - T_{k-1}\left(\frac1\rho \right) \eta_{k-1}
+\end{gather*}
+
+From the properties of the necessary minimal polynomial, we have obtained a recurrence relation on $\eta_k$ and thus $y_k$ through $\eta_k = x_* - y_k$. \begin{gather*}
+T_{k+1}\left(\frac1\rho\right) P_{k+1}(B) \varepsilon_0 = \frac{2B}{\rho} T_k\left(\frac1\rho\right) P_k(B) \varepsilon_0 - T_{k-1}\left(\frac1\rho \right) P_{k-1} (B) \varepsilon_0 \\
+\implies \\
+T_{k+1}\left(\frac1\rho\right) \eta_{k+1} = \frac{2}{\rho} T_k\left(\frac1\rho\right) B \eta_k - T_{k-1}\left(\frac1\rho \right) \eta_{k-1} \\
+\implies \\
+y_{k+1} - x_* = \left( \frac{2 T_k\left(\frac1\rho\right) }{\rho T_{k+1}\left(\frac1\rho\right) } \right)  B (y_k - x_*) - \left( \frac{T_{k-1} \left(\frac1\rho \right)}{T_{k+1}\left(\frac1\rho\right)} \right) (y_{k-1} - x_*)
+\end{gather*}
+We now need to do some term surgery on the above recurrence relation. The factor in the first term $-B x_*$ via $x_* = B x_* + c$ will become $-x_* + c$, and that $x_*$ along with its coefficient will participate in the following identity: with the original Chebyshev recurrence on $T_k(1/\rho)$ we can eliminate some of the coefficients on $x_*$ \begin{gather*}
+T_{k+1} (1/\rho) = \frac{2}{\rho} T_k(1/\rho) - T_{k-1}(1/\rho) \\ \implies \\ - x_* = \frac{2 T_k (1/\rho)}{\rho T_{k+1} (1/\rho)} (-x_*) - \frac{T_{k-1}(1/\rho)}{T_{k+1}(1/\rho)} (-x_*)
+\end{gather*}
+
+These two modifications together allow us to eliminate $x_*$ and get something we might actually be able to calculate \begin{gather*}
+y_{k+1} = \left( \frac{2 T_k\left(\frac1\rho\right) }{\rho T_{k+1}\left(\frac1\rho\right) } \right) (B y_k + c) - \left( \frac{T_{k-1} \left(\frac1\rho \right)}{T_{k+1}\left(\frac1\rho\right)} \right) y_{k-1}
+\end{gather*}
+given that Chebyshev polynomials are known and $\rho$ can be taken to be the magnitude of the largest eigenvalue of $B$, without knowing anything about the $x_k$ sequence. A further simplification is made on the right hand side by repeating the trick we used on for eliminating $x_*$ via the Chebyshev recurrence rule on $T_k(1/\rho)$ but in $y_{k-1}$. \begin{align*}
+y_{k+1} &= \left( \frac{2 T_k\left(\frac1\rho\right) }{\rho T_{k+1}\left(\frac1\rho\right) } \right) (B y_k + c - y_{k-1} + y_{k-1}) - \left( \frac{T_{k-1} \left(\frac1\rho \right)}{T_{k+1}\left(\frac1\rho\right)} \right) y_{k-1} \\
+&= \left( \frac{2 T_k\left(\frac1\rho\right) }{\rho T_{k+1}\left(\frac1\rho\right) } \right) (B y_k  + c - y_{k-1}) + \left( \frac{2 T_k\left(\frac1\rho\right) }{\rho T_{k+1}\left(\frac1\rho\right) } - \frac{T_{k-1} \left(\frac1\rho \right)}{T_{k+1}\left(\frac1\rho\right)} \right) y_{k-1} \\
+&= \left( \frac{2 T_k\left(\frac1\rho\right) }{\rho T_{k+1}\left(\frac1\rho\right) } \right) (B y_k + c - y_{k-1}) + y_{k-1}
+\end{align*}
+
+If now, we can relabel that nasty Chebyshev polynomial coefficient on the first term to $\omega_{k+1}$ and find a recurrence relation on it, we will have a complete technique available to us. Setting \begin{gather*}
+\omega_{k+1} = \frac{2 T_k\left(\frac1\rho\right) }{\rho T_{k+1}\left(\frac1\rho\right) } \hspace{2em} \left( \text{and thus } \frac{\rho}{2} \omega_k =\frac{T_{k-1}\left(\frac1\rho\right) }{T_{k}\left(\frac1\rho\right) } \right)
+\end{gather*}
+we can apply the recurrence relation on $T_{k+1}$ and derive \begin{align*}
+\omega_{k+1} &= \frac{2 T_k\left(\frac1\rho\right) }{2 T_{k}\left(\frac1\rho\right) - \rho T_{k-1} \left(\frac1\rho\right)} \\
+&= \frac{1 }{1 - \frac{\rho T_{k-1} (1/\rho)}{2 T_{k}(1/\rho)}} \\
+&= \frac{1}{1 - \frac{\rho^2}{4}\omega_k}
+\end{align*}
+
+which gives us our recurrence in $\omega_k$. Referring back to part a. of our theorem above laying out the properties of Chebyshev polynomials, by $T_0(x) = 1$ and $T_1(x) = x$ we have have $\omega_1 = 1$ via our formula for $\omega_{k+1}$ above.
+
+This provides what Meurant informally called an \textbf{Acceleration technique} and formally called \textbf{Chebyshev semi-iteration}. It calls for entirely dismissing the sequence $x_k$ which we would have iterated $x_{k+1} = Bx_k +c $ and instead iterating a weighted combination of $x_k$ which we call $y_k$, obeying a similar convergence to $x_*$. The algorithm follows, although may not match exactly with literature: \begin{itemize}
+\item Initialize $y_0,y_1,\dots, \in \reals^n$ with $y_0 = \vec 0 $ and $y_1$ chosen as an initial guess, as well as $z_1,\dots, \in \reals^n$ and $\omega_1, \dots, \in \reals$ with $\omega_1 = 1$.
+\item For each $k = 1,2,3, \dots,$, do the following: \begin{enumerate}
+\item Set $\omega_k = \frac{1}{1 - \rho^2 \omega_k / 4}$
+\item Set $z_k = M^\inv (b - A y_k)$ in place of calculating $By_k + c$. Recall this is because $A = M - N$, $B = M^\inv N$ and $c = M^\inv b$, so in fact this is $z_k = c - (I - B)y_k$ and thus $z_k + y_k  = B y_k + c$.
+\item With $z_k$, set \begin{gather*}
+y_{k+1} = \omega_{k+1} (z_k + y_k - y_{k-1}) + y_{k-1}.
+\end{gather*}
+\end{enumerate}
+\end{itemize}
+
+\subsubsection{Preconditioned Conjugate Gradient From Polynomial Methods}
+
+Recall earlier that we derived the Conjugate gradient method not by rearranging steps of the direct Lanczos method but by assuming the $A$-orthogonal basis with the properties the direct Lanczos method guarenteed were held, and nothing else. We will do something similar here, but using a different method as our base.
+
+We begin with what is called the \textbf{Richardson method}, which at first may be thought of as a splitting method $A = M - N$ with $M = \alpha^\inv I$ and $N = \alpha^\inv I - A$. As all splitting methods, we may express it as the iteration $x_{k+1} = M^\inv N x_k + M^\inv b$ iteration \begin{align*}
+x_{k+1} &= \alpha I (\alpha^\inv I - A) x_k + \alpha b \\
+&= x_k - \alpha (b - Ax_k)
+\end{align*}
+
+Additionally, if it aids the convergence of the method, it is also normal to pick a different $M= \alpha^\inv \bar M $ so long as $\bar M$ is easily invertible or $\bar M x = y$ problems are easily solved (the same things we discussed of $M$ in splitting methods). For much of this section we will assume this works because $\bar M$ is invertible, however tricks such as what was used in Gauss-Seidel similarly solve this problem, as we'll describe later. Setting $N = M - A$, we get \begin{gather*}
+\bar M x_{k+1} = \bar M x_k + \alpha (b - Ax_k)
+\end{gather*}
+in which case we say that the Richardson method is \textbf{preconditioned} with preconditioner $\bar M$. If we write this in our standardized iteration form $x_{k+1} = Bx_k + c$ owing from $x_{k+1} = M^\inv N x_k + M^\inv$ we see \begin{align*}
+x_{k+1} &= \alpha \bar M^\inv (\alpha^\inv \bar M - A) x_k + \alpha \bar M^\inv b \\
+&= (I - \alpha \bar M ^\inv A) x_k + \alpha \bar M ^\inv b.
+\end{align*}
+This $x_{k+1} = Bx_k + c$ may be plugged directly into the acceleration technique described above, in which case we obtain  \begin{gather*}
+y_{k+1} = \omega_{k+1} (\bar M^\inv (I - \alpha A) y_k + \alpha \bar M^\inv b - y_{k-1}) + y_{k-1}.
+\end{gather*}
+
+In the above Chebyshev semi-iteration algorithm, we transformed $By_k + c$ into $z_k + y_k$ by setting $z_k = M^\inv (b - Ay_k)$ which was equivalent to $z_k = c - (I - B)y_k$; a similar transformation will be possible here if we pay close attention to $\alpha$. Using $B$ and $c$ as above but this time setting $z_k = \bar M^\inv (b - A)y_k$, we observe by adding $\alpha^\inv y_k$ to both sides that \begin{align*}
+z_k + \alpha^\inv y_k &= \bar M^\inv (b - Ay_k) + \alpha^\inv y_k \\
+&=  \bar M^\inv (b - Ay_k + \alpha^\inv \bar M y_k) \\
+&=  \bar M^\inv (b + (\alpha^\inv \bar M - A) y_k ) \\
+&=  \bar M^\inv b + \alpha^\inv ( I - \alpha M^\inv A )y_k \\
+&= \alpha^\inv c + \alpha^\inv B y_k
+\end{align*}
+showing us that this definition leads to $\alpha z_k + y_k = By_k + c$. This can go right back into our acceleration method forming the following iteration.\begin{gather*}
+z_k = \bar M^\inv (b - Ay_k) \\
+y_{k+1} = \omega_{k+1} (\alpha z_k + y_k - y_{k-1}) + y_{k-1}
+\end{gather*}
+
+This is the method we will use as our base to rederive conjugate gradient as a polynomial technique, but in order to do so, we'll also need to vary $\alpha$ on each step. Since $y_k$ was the thing we needed to converge anyway, we'll relabel that back to $x_k$ and give our base method as so: \begin{gather*}
+z_k = \bar M^\inv (b - Ax_k) = \bar M^\inv r_k\\
+x_{k+1} = \omega_{k+1} (\alpha_k z_k + x_k - x_{k-1}) + x_{k-1} \\
+\omega_{k+1} = ? \\
+\alpha_k = ?
+\end{gather*}
+
+We should note two things before we continue.
+
+Staying in line with the recurring theme, there is at this stage no guarentee that this is indeed a method from which we can rederive conjugate gradient. For that reason exactly, we derived conjugate gradient earlier as a series of optimizations on Gram-Schmidt, culminating in the direct Lanczos method, where we ultimately said there is a better way to calculate the $p_k$ vectors and $\alpha_k$ parameters.
+
+What we have in place of a guarentee that conjugate gradient is possible here is the mere observation that this method already roughly looks like conjugate gradient. Recall our recurrence formula assuming successful calculation of $\alpha_k$ and $\beta_k$ were \begin{gather*}
+x_{k+1} = x_k + \alpha_k^P p_k \\
+p_{k+1} = r_{k+1} + \beta_k^P p_k.
+\end{gather*}
+marked $P$ since these coefficients are from the projection method conjugate gradient. If we set $\bar M = I$ and rearrange our iteration in $x_k$ to get $x_{k+1} - x_k = \alpha^P_k p_k$, we see immediately that our acceleration based method replaces $z_k$ with $r_k$ and looks like \begin{gather*}
+x_{k+1} = \omega_{k+1} (\alpha_k r_k + \alpha_{k-1}^P p_{k-1} ) + x_{k-1}.
+\end{gather*}
+We see clearly that the bracketted terms look a lot like the update step for $p_k$, but we also have a $x_{k-1}$ to work with. If we could set $\omega_{k+1}$ such that \begin{align*}
+\omega_{k+1} (\alpha_k r_k + \alpha_{k-1}^P p_{k-1}) &= \alpha_{k-1}^P p_{k-1} + \alpha_k^P p_k \\
+&= \alpha_{k-1}^P p_{k-1} + \alpha_k^P (r_k + \beta_k^P p_{k-1} ) \\
+&= \alpha_{k}^P r_k + (\alpha_{k-1}^P + \alpha_k^P \beta_k^P )p_{k-1}
+\end{align*}
+then we would have the standard projection conjugate gradient method via \begin{align*}
+x_{k+1} &= (\alpha_{k-1}^P p_{k-1} + \alpha_k^P p_k) + x_{k-1} \\
+&= x_k + \alpha_k^P p_k = x_{k+1}
+\end{align*} 
+exactly as it was before.
+
+So indeed we actually have good reason to think we can rederive a different version of the same basic method here, and we'll recall that the way we derived the method the first time was by enforcing only the assumptions that $r_i \cdot r_j = 0$ for all $i \neq j$ and $p_i \cdot A p_j$ for all $i \neq j$.
+
+Where our derivation will differ this time is that this time, we no longer explicitly deal explicitly in $p_k$ vectors, and we found a nice place to put a \emph{preconditioner} which will generalize the method a good bit. We had originally defined $M = \alpha^\inv \bar M$, but since our $\alpha$ is now varying on each step, we'll drop the pretense and $\bar M$ will be just called $M$ from now on. This means the first thing we'll need to ensure for our method is some kind of $z_k$ orthogonality, and in particular, we will go for $M$-orthogonality, since when $M = I$ this was the same thing as $r_i \cdot r_j = 0$ for all $i \neq j$.
+
+Enforcing this property immediately leads to a formula for $\alpha_k$, since we can require $z_k \cdot M z_{k+1} = 0$ ; showing this however is a lot easier if we first notice something basic about our iteration method. If we take our formula for $x_{k+1}$ and substitute it into $b - Ax_{k+1}$ we get \begin{align*}
+r_{k+1} &= b - Ax_{k+1} \\
+&= b - A\omega_{k+1} (\alpha_k z_k + x_k - x_{k-1}) - Ax_{k-1} \\
+&= - \omega_{k+1}(\alpha_k A z_k + Ax_k - Ax_{k-1}) + r_{k-1} \\
+&=  - \omega_{k+1}(\alpha_k A z_k - b + Ax_k + b - Ax_{k-1}) + r_{k-1} \\
+&= - \omega_{k+1}(\alpha_k A z_k - r_k + r_{k-1}) + r_{k-1} \\
+Mz_{k+1} &= - \omega_{k+1}(\alpha_k A z_k - Mz_k + Mz_{k-1}) + Mz_{k-1}
+\end{align*}
+which we can substitute into the $z_k \cdot M z_{k+1} = 0$ requirement to get \begin{align*}
+0 = z_k \cdot M z_{k+1} &= z_k \cdot Mz_{k-1} - \omega_{k+1} z_k \cdot (\alpha_k A z_k - Mz_k + Mz_{k-1}) \\
+&= (1 - \omega_{k+1})(z_k \cdot Mz_{k-1}) - \omega_{k+1} (\alpha_k z_k \cdot A z_k - z_k \cdot Mz_k)
+\end{align*}
+Enforcing $z_{i} \cdot M z_j = 0$ for all $i \neq j$ again, this time on $z_k \cdot M z_{k-1} = 0$, we can eliminate the first term on the right hand side, deriving \begin{gather*}
+\alpha_k = \frac{z_k \cdot M z_k }{z_k \cdot A z_k}
+\end{gather*}
+since the two terms in the brackets must sum to zero.
+
+We can now do a similar trick for deriving $\omega_k$ by starting from $z_{k-1} \cdot M z_{k+1}$. We can reuse almost all of the equations above \begin{align*}
+0 = z_{k-1} \cdot M z_{k+1} &= z_{k-1} \cdot Mz_{k-1} - \omega_{k+1} z_{k-1} \cdot (\alpha_k A z_k - Mz_k + Mz_{k-1}) \\
+&= (1 - \omega_{k+1})(z_{k-1} \cdot Mz_{k-1}) - \omega_{k+1} (\alpha_k z_{k-1} \cdot A z_k - z_{k-1} \cdot Mz_k)
+\end{align*}
+and eliminate the $z_{k-1} \cdot M z_k$ term by $M$-orthogonality of our $z_k$ vectors. Our $\alpha_k z_{k-1} \cdot A z_k$ term remains however, and we continue with \begin{align*}
+& 0 = z_{k-1} \cdot Mz_{k-1} + \omega_{k+1}(z_{k-1} \cdot Mz_{k-1} + \alpha_k z_{k-1} \cdot A z_k) \\
+\implies &\omega_{k+1} = \frac{z_{k-1} \cdot M z_{k-1}}{ \alpha_k (z_{k-1} \cdot A z_k) + z_{k-1} \cdot M z_{k-1} } \\
+\implies & \omega_{k+1} = \frac{1}{1 + \alpha_k (z_{k-1} \cdot A z_k) / (z_{k-1} \cdot M z_{k-1})}
+\end{align*}
+Recall that the assumptions that made the direct Lanczos algorithm possible were that $A$ was symmetric, and if we want to imagine we are applying such a method to a preconditioned system $M^\inv A x = M^\inv b$ then we also need that $M^\inv$ is symmetric and thus $M$ itself. This implies that the splitting that leads to the acceleration technique we are turning into the conjugate gradient method has $A = M - N$ with $N = M - A$ also symmetric, and Meurant tells us this also leads to an alternative (seemingly preferential) formula for $\omega_k$.
+
+Using our earlier formula for $r_{k+1} = Mz_{k+1}$ let us write \begin{align*}
+Mz_{k} &= - \omega_{k}(\alpha_{k-1} A z_{k-1} - Mz_{k-1} + Mz_{k-2}) + Mz_{k-2} \\
+ &= - \omega_{k}(\alpha_{k-1} (M - N) z_{k-1} - Mz_{k-1} + Mz_{k-2}) + Mz_{k-2} \\
+\end{align*}
+Now, if we dot product in $z_k$, the left hand side will be spared but most terms on the right hand side will go to zero by $z_k$'s $M$-orthogonality, including the $M$ component of our $A z_{k-1}$. What we get is 
+\begin{gather*}
+z_k \cdot Mz_{k} = \omega_{k}\alpha_{k-1} (z_k \cdot N z_{k-1})
+\end{gather*}
+which by symmetry, lets us swap $z_k \cdot N z_{k-1}$ for $z_{k-1} \cdot N z_{k}$ and gives us an expression \begin{gather*}
+z_{k-1} \cdot A z_{k} = z_{k-1} \cdot N z_{k} = \frac{z_{k} \cdot M z_{k}}{\omega_k \alpha_{k-1}}
+\end{gather*}
+and substituting this into $\omega_{k+1}$, \begin{gather*}
+\omega_{k+1} = \left( 1 + \frac{\alpha_k (z_k \cdot M z_k )}{\omega_k \alpha_{k-1}(z_{k-1} \cdot M z_{k-1})}\right)^\inv
+\end{gather*}
+implying one less matrix multiplication so long as we are caching our $\omega_k$'s and $\alpha_k$'s.
+
+In total, we collect these steps into Meurant's \textbf{Preconditioned Conjugate Gradient} method. It requires $A$ to be symmetric and a choice of symmetric preconditioner $M$ for which an inverse $M^\inv$ is known or easily computed. \begin{itemize}
+\item Choose an initial guess $x_0$ (with $x_{-1}$ set to $x_0$ although original authors \hyperlink{http://i.stanford.edu/pub/cstr/reports/cs/tr/76/533/CS-TR-76-533.pdf}{Concus, Golub and O'Leary 1976} suggest it may be set arbitrarily) and initialize vectors $x_0, \dots, \in \reals^n$, $r_0, r_1, \dots \in \reals^n$, and $z_0, z_1, \dots, \in \reals^n$ with $x_0 = 0$. Initialize coefficients $\alpha_0, \dots \in \reals$ as well as $\omega_1, \dots \in \reals$ with $\omega_1 = 1$.
+\item For each $k = 0, \dots,$ do the following: \begin{enumerate}
+\item Set $r_k = b - Ax_k$ and $z_k = M^\inv r_k$ (more broadly, solve the $M z_k = r_k$ system), or as desired, use formula \begin{gather*}
+r_{k} = r_{k-2} - \omega_{k}(\alpha_{k-1} A z_{k-1} - r_{k-1} + r_{k-2}) \\
+z_{k} = z_{k-2} - \omega_{k}(\alpha_{k-1} M^\inv A z_{k-1} - z_{k-1} + z_{k-2})
+\end{gather*}
+or calculate this after step c. so it is stated in $r_{k+1}$ or $z_{k+1}$ with cached $A z_k$. 
+\item Set \begin{gather*}
+\alpha_k = \frac{z_k \cdot r_k}{z_k \cdot A z_k} \hspace{2em} \left(= \frac{z_k \cdot Mz_k}{z_k \cdot A z_k}  \right)
+\end{gather*}
+\item Set \begin{gather*}
+\omega_{k+1} = \left( 1 + \frac{\alpha_k (z_k \cdot r_k )}{\omega_k \alpha_{k-1}(z_{k-1} \cdot r_{k-1})}\right)^\inv
+\end{gather*}
+\item Set \begin{gather*}
+x_{k+1} = x_{k-1} + \omega_{k+1} (\alpha_k z_k + x_k - x_{k-1})
+\end{gather*}
+\end{enumerate}
+\end{itemize}
+There are options here for whether you compute $z_k = M^\inv r_k$ on each step or set $B = M^\inv A$ and $c = M^\inv$ and instead calculate $z_k = c - Bx_k$ directly, then computing $Mz_k$ on each step.
+
+Taking our lessons here in preconditioning back to Saad's conjugate gradient method, we can reformulate it in a way that uses $p_k$ vectors as well as a preconditioner $M$. Meurant informally calls this \dquote{second form conjugate gradient}. \begin{itemize}
+\item Choose an initial $x_0$ and compute an associated $r_0 = b - Ax_0$. Initialize vectors $x_1,\dots, \in \reals^n$, $r_1,\dots, \in \reals^n$, $z_1,\dots, \in \reals^n$ and vectors $p_0,p_1,\dots, \in \reals^n$ with $p_0 = r_0$.
+\item For $k = 0, \dots$ do the following: \begin{enumerate}
+	\item Set $\alpha_k = \frac{z_k \cdot r_k}{p_k \cdot A p_k} \hspace{1em} \left( = \frac{z_k \cdot Mz_k}{p_k \cdot A p_k} \right)$.
+	\item Set $x_{k+1} = x_k + \alpha_k p_k$
+	\item Set $r_{k+1} = r_k - \alpha_k A p_k$
+	\item Decide whether $\lVert r_{k+1} \rVert$ is tolerable and if so, terminate the algorithm.
+	\item Set $\beta_{k+1} = \frac{z_{k+1} \cdot r_{k+1} }{z_k \cdot r_k } \hspace{1em} \left( = \frac{z_{k+1} \cdot Mz_{k+1} }{z_k \cdot Mz_k } \right)$
+	\item Set $p_{k+1} = r_{k+1} + \beta_{k+1} p_k$
+	\item Set $z_{k+1} = M^\inv r_{k+1}$
+\end{enumerate}
+\end{itemize}
+
+At this stage, we have a number of options for different ways we can run this algorithm, picking which quantities we compute and when to run effectively the same method depending on our constraints.
+
+\subsubsection{Optimality of Preconditioned Conjugate Gradient}
+
+Much earlier we discussed in proposition \ref{pro:iterpageOrthogonalProjectionBasicOptimality} that projection techniques minimized a notion of error where $A$ defines a notion of distance from the true solution \begin{gather*}
+E(x) = \sqrt{(x_* - x)^T A (x_* - x)}.
+\end{gather*}
+We found that orthogonal projection techniques maximally optimize this error within the subspace of allowable changes $\delta = x_{k+1} - x_k$, i.e. \begin{gather*}
+E(x_{k+1}) = \min_{\delta \in \mathcal K} E(x_k + \delta). 
+\end{gather*}
+
+What we will see now is that preconditioned conjugate gradient in the form provided by Meurant (noting of course that this must be a mathematically equivalent process to orthogonal projection conjugate gradient and by extension direct Lanczos) is also maximally optimized in the sense of an accelerating averaging just like one that defined Chebyshev semi-iteration.
+
+To show this, we'll need to specify a bit of what we mean. First, with $B = M^\inv A$ and our previous formula for $x_{k+1}$ iteration in terms of $z_{k+1}$, \begin{align*}
+Mz_{k+1} &= - \omega_{k+1}(\alpha_k A z_k - Mz_k + Mz_{k-1}) + Mz_{k-1} \\
+z_{k+1} &= - \omega_{k+1}(\alpha_k (I - M^\inv N) z_k - z_k + z_{k-1}) + z_{k-1} \\
+&= -\omega_{k+1} \alpha_k (I - B) z_k + \omega_{k+1} z_k + (1- \omega_{k+1})z_{k-1}
+\end{align*}
+we can see that each $z_{k+1}$ is a linear combination of previous $z_k$ up to some coefficients, as well as $(I-B)z_k$ with some coefficients. If we know that our $z_k$ and $z_{k-1}$ terms are also formed via this recurrence relation, we can imagine that $z_{k+1}$ is probably just a polynomial in $I - B$ multiplied by $z_0$. If we allow this polynomial to change on each iteration, then this statement becomes entirely uncontroversial, since we are essentially saying \squote{we derived this from some polynomial technique, we don't really care which one}, re-ambiguating the disambiguification we did when we derived Chebyshev semi-iteration. Accordingly, we expect the order of the polynomial to be $k+1$ since $z_1 = Q_1(K) z_0$ should not be directly proportional to $z_0$, and can be seen following the rule $z_{k+1} = M^\inv r_{k+1} = z_k - \alpha_k M^\inv A p_k$ in projective conjugate gradient.
+
+What will be useful for us however, is that to say $z_{k+1} = Q_{k+1}(I - B) z_0$ for some $k+1$ order polynomial $Q_{k+1}(t)$ is to deduce that this is equal to a different polynomial $Q_{k+1}(I - B) z_0 = (I - B P_k(B)) z_0$. This also shouldn't be too surprising to us either since each $(I - B)^a$ in $Q_{k+1}(I - B)$ with $a \le k$ will have a standard combinatorial expansion \begin{gather*}
+(I - B)^a = I - a IB + ... + a I(-B)^{a-1} + (-B)^a 
+\end{gather*}
+so grouping all terms after $I$ just leads to $P_k(t)$ being some other arbitrary polynomial, which we were intending it to be anyway. The only thing here we need to enforce when swapping $Q_{k+1}(I - B) z_0 = (I - B P_k(B)) z_0$ is that $Q_{k+1}$ has zeroth order coefficient of one, which once again by the iteration in projective conjugate gradient, should be unsurprising since $z_{k+1} = z_k - \alpha_k M^\inv A p_k$ specializes in $k=0$ to $z_1 = z_0 - $ demonstrating the coefficient on $z_0$ is indeed one.
+
+Then Meurant gives us not only the polynomial, he also tells us how this polynomial iterates $x_{k+1}$. \begin{label proposition}{0426PCGFirstFormAsIter}
+Let $\alpha_k$ and $\omega_k$ be defined as in the preconditioned conjugate gradient method. Let $P_k(t)$ be a polynomial defined \begin{align*}
+P_0(t) &= \alpha_0 \\
+P_1(t) &= \omega_2 ( \alpha_0 + \alpha_1  - \alpha_0 \alpha_1 t) \\
+P_{k}(t) &= \alpha_k \omega_{k+1} + \omega_{k+1} (1 - \alpha_k t) P_{k-1}(t)  - (\omega_{k+1} - 1)P_{k-2}(t)   
+\end{align*}
+Then the iterates $x_k$ and $z_k = M^\inv r_k = M^\inv(b - Ax_k)$  as in the preconditioned conjugate gradient method satisfy the following: \begin{enumerate}
+\item The iteration for $z_k$ can be expressed $z_{k+1} = (I - B P_k(B)) z_0$.
+\item The iteration for $x_k$ can be expressed $x_{k+1} = x_0 + P_k(B) z_0$.
+\end{enumerate}
+\end{label proposition}
+
+\begin{my proof}{m}
+Begin with part a. and proceed by induction. Recall our earlier formula for $z_k$ iteration \begin{gather*}
+z_{k+1} = z_{k-1} - \omega_{k+1}(\alpha_{k} M^\inv A z_{k} - z_{k} + z_{k-1}).
+\end{gather*}
+where we have $B = M^\inv A$.
+
+Consider first the base case; we recall that preconditioned conjugate gradient initializes $z_0  = M^\inv (b - Ax_0)$ and recall we set $x_{-1} = x_0$. This implies that $z_{-1} = z_0$ and so the above expression in $k=0$ with intialization $\omega_1 = 1$ simplifies to \begin{align*}
+z_{1} &= z_{0} - \omega_{1}\alpha_{0} M^\inv A z_{0} \\
+&= (I - \alpha_0 B) z_0 \\
+&= (I - BP_0(B)) z_0
+\end{align*}
+as we wanted. In $z_2$ we see our formula is \begin{align*}
+z_{2} &= z_{0} - \omega_{2}(\alpha_{1} B z_{1} - z_{1} + z_{0}) \\
+&= z_0 - \omega_2 \alpha_1 z_1 + \omega_2 \alpha_1 z_1 - \omega_2 \alpha_1 z_0\\
+&= -\omega_2 \alpha_1 (B - I))z_1 + (1 - \omega_2 \alpha_1) z_0 \\
+&=  - \omega_2 \alpha_1 (B - I)(I - \alpha_0 B) z_0 + (1 - \omega_2 \alpha_1) z_0 \\
+&= - \omega_2 \alpha_1 (B - \alpha_0 B^2 - I + \alpha_0 B) z_0 + (1 - \omega_2 \alpha_1) I z_0 \\
+&= (I - \omega_2 \alpha_1 (\alpha_0 B + B - \alpha_0 B^2)) z_0 \\
+&= (I - B \omega_2  (\alpha_0 \alpha_1 + \alpha_1 - \alpha_0 \alpha_1 B)) z_0 \\
+&= (I - B P_1 (B) ) z_0 
+\end{align*}
+Then to prove the inductive case goes as follows. Starting from the standard iteration and applying the inductive hypothesis, \begin{align*}
+z_{k+1} &= z_{k-1} - \omega_{k+1}(\alpha_{k} B z_{k} - z_{k} + z_{k-1}) \\
+&= - \omega_{k+1}(\alpha_k B - I) z_k + (1 - \omega_{k+1}) z_{k-1} \\
+&= - \omega_{k+1}(\alpha_k B - I) (I - BP_{k-1}(B))z_0 \\
+& \hspace{3em} + (1 - \omega_{k+1}) (I - B P_{k-2}(B))z_0 \\
+&= - \omega_{k+1}(\alpha_k B - I - BP_{k-1}(B) + \alpha_k B^2 P_{k-1}(B))z_0 \\
+& \hspace{3em} + (1 - \omega_{k+1}) (I - B P_{k-2}(B))z_0 \\
+&= Iz_0 - \omega_{k+1}(\alpha_k B - BP_{k-1}(B) + \alpha_k B^2 P_{k-1}(B))z_0 \\
+& \hspace{3em} - (\omega_{k+1} - 1)  B P_{k-2}(B)z_0 \\
+&= Iz_0 - B \begin{pmatrix} \omega_{k+1}\alpha_k + \omega_{k+1} (I - \alpha_k B)P_{k-1}(B) \\ - (\omega_{k+1} - 1) P_{k-2}(B)\end{pmatrix} z_0 \\
+&= (I - B P_k(B)) z_0
+\end{align*}
+
+We move to part b. now. Once again we will prove by induction; since we set $x_{-1} = x_0$, the preconditioned conjugate gradient iteration \begin{gather*}
+x_{k+1} = x_{k-1} + \omega_{k+1} (\alpha_k z_k + x_k - x_{k-1})
+\end{gather*}
+with $k=0$ is \begin{align*}
+x_{1} &= x_{0} + \omega_{1} \alpha_0 z_0 \\
+&= x_{0} + \alpha_0 z_0
+\end{align*}
+so with $P_0(B) = \alpha_0$ the base case is fulfilled. Applying $x_k = x_0 + P_{k-1}(B)z_0$ to an inductive step, we see \begin{align*}
+x_{k+1} &=  \omega_{k+1} (\alpha_k z_k + x_k - x_{k-1}) + x_{k-1} \\
+&=  \omega_{k+1} \alpha_k (I - B P_{k-1}(B))z_0 + \omega_{k+1}(x_0 + P_{k-1}(B)z_0) \\
+& \hspace{3em} - \omega_{k+1}(x_0 + P_{k-2}(B)z_0)) + x_0 + P_{k-2}(B)z_0 \\
+&=  \omega_{k+1} \alpha_k (I - B P_{k-1}(B))z_0  + x_0 + P_{k-2}(B)z_0 \\
+& \hspace{3em}  + \omega_{k+1}( P_{k-1}(B) - P_{k-2}(B) )z_0 \\
+&=  x_0 + \begin{pmatrix} \omega_{k+1}\alpha_k I  + \omega_{k+1} (I -B) P_{k-1}(B) \\ \quad - (\omega_{k+1} - 1) P_{k-2}(B)\end{pmatrix} z_0
+\end{align*}
+The terms in the brackets are exactly the recurrence relation for $P_{k}(t)$ in terms of the matrix parameter $B$, so this is \begin{gather*}
+x_{k+1} = x_0 + P_k(B) z_0
+\end{gather*}
+\end{my proof}
+
+This format formalizes the class of technique for which preconditioned conjugate gradient is optimal. In some sense we will say that the polynomial sequence $(P_k(t))_{k \in \nats}$ that defines the preconditioned conjugate gradient method is exactly the sequence that satisfies \begin{gather*}
+\min_{(P_k(t))_{k \in \nats}} E(x_0 + P_k(t) z_0)
+\end{gather*}
+at each $k$, although this notation is by analogy to our earlier statement and thus not certain to be meaningful.
+
+\begin{theorem}[Polynomial Optimality of Preconditioned Conjugate Gradient]
+\emph{(Stated as in Meurant)}
+
+Consider all the iterative methods that can be written as \begin{gather*}
+\bar x_{k+1} = \bar x_0 + Q_k(B) \bar z_0,\\
+\bar x_0 = x_0 \\
+M \bar z_0 = b - A \bar x_0
+\end{gather*}
+where $Q_k$ is a $k$'th degree polynomial. Of all these methods, \texttt{PCG} is the one that minimizes $E(\bar x_k)$ at each iteration.
+\end{theorem}
+
+Meurant proves this fairly explicitly over the course of three pages so unless it seems pertinant to update this page, I will merely refer to it as theorem 6.11 on page 180 of his book, lest I rewrite it as a six page proof. I must note however that at the stage he gives the proof, he defines $E(x)$ not in the way we have done so far, but as \begin{gather*}
+E(z) = (z - x)^T A (z - x) 	 
+\end{gather*}
+the square of our definition, but with $x$ used to denote the solution to $Ax = b$ rather than $x_*$ as we have done so far.
+
+Nonetheless this theorem is remarkable; what it tells us is that if we want to come up with a method that could ever beat preconditioned conjugate gradient, it would need to be one that can never be expressed in terms of a polynomial iteration in its preconditioned residuals. Failing that (or otherwise, taking some method and showing that it can be expressed in the terms above), we know that preconditioned conjugate gradient will simply beat other methods on convergence rate.
+
+In a manner of speaking, this tells us that without additional assumptions, preconditioned conjugate gradient and its mathematically equivalent algorithms are often just the best we can get. That said, we will soon see that our deeper knowledge of these algorithms is rewarded when additional assumptions about $A$ are available.
+
+\subsection{Vital Takeaways}
+
+It is at this point that I must admit this article has gone on much longer than I had initially intended. In part this is because I began this with intention to help me order my thoughts as I continued reading, but it has now become longer than makes sense for the structure I had given it. We aim to conclude now as soon as possible, but first we must discuss some matters which only appeared to me once I was I had become much more familiar with this literature.
+
+This section will serve as a \squote{skip to the juicy bits} tl;dr. Where notions such as preconditioning in abstract and conjugate gradient were very quickly mentioned to me upon taking interest in the field (although taking significant time to fully understand), it took much more time before someone mentioned \dquote{GMRES}, or I encountered the Joly-Meurant method. Or until I came to understand why the field of iterative methods so liberally spoke of solving $Mz = r$ systems as though this were an easier problem than the $Ax=b$ problem we initially aimed to solve.
+
+These topics we will sound off here before concluding.
+
+\subsubsection{Convergence Rate of Conjugate Gradient}
+
+When I began this project, I was under the impression that conjugate gradient methods could not be expected to give a good approximation of of a solution in any less than $n$ iterations since it was described to me as a method which ostensibly ran Gram-Schmidt. While in a manner of speaking, we have come to see that the latter is true, the former turns out not to be. This could perhaps be obvious to us already, on account of the fact we showed that under conjugate gradient, our residual vectors end up orthogonal to one another. In fact it is not that $n$ iterations are required, but that in $n$ iterations and in exact arithmetic, an exact solution is found.
+
+We are given the following error bound by Meurant in chapter 6.4 (specifically theorem 6.18) of his book. \begin{theorem}[Convergence Rate of Conjugate Gradient]
+Let $x_0$ be an initial guess to solve $Ax = b$ and $x_k$ a sequence of guesses as iterated by conjugate gradient. Then with \begin{gather*}
+E(z) = (z - x_*)^T A (z - x_*)
+\end{gather*}
+(this is not the definition of $E$ we used so far) we have the bound \begin{gather*}
+E(x_k) \le 4 \left( \frac{\sqrt{\kappa} - 1}{\sqrt{\kappa} + 1} \right)^{2k} E(x_0)
+\end{gather*}
+where $\kappa = \lambda_{\text{max}}/\lambda_{\text{min}}$ the ratio of the largest eigenvalue of $M^\inv A$ its smallest eigenvalue.
+\end{theorem}
+
+This tells us already that there exists some constant for $M^\inv A$ for which we can expect the error in iterations to decline exponentially. We see that this exponent is closest to zero when the eigenvalues of $M^\inv A$ are close together, hence the power of preconditioning. One could imagine then that it is possible to find oneself in a situation with a particularly poorly conditioned matrix for which this constant is not very small, and to this, Meurant says something peculiar.
+
+\emph{"It has been observed experimentally that CG exhibits what may be called a superlinear rate of convergence, that is to say, the convergence becomes faster and faster as CG proceeds, see Figure 6.1. The explanation of this phenomenon is that the components of the error on the eigenvectors corresponding to the extreme eigenvalues are rapidly dampened during the iterations and then, the convergence is faster because the “effective” condition number gets smaller."}
+
+\figurepngwithcaption{./MeurantsIterfigure6-1}{The figure 6.1 referenced by Meurant, originally captioned "log10 of the maximum norm of the error with CG for the Poisson problem on a 20 × 20 mesh". By this he means conjugate gradient was run without a preconditioner. Note that in exact arithmetic, the algorithm would have converged by iteration 20. Due to a combination of poor conditioning and rounding error, it takes significantly more iterations, but eventually hits a point of order-of-magnitude improvements per ten iterations.}
+
+Informally, it may be reasoned that what Meurant means here is to do with the fact that Krylov subspaces are successively extended in conjugate gradient. That is, in the same way that one simple algorithm one might run to extract the largest eigenvalue of a matrix would be to apply it to a vector over and over and over and see how much it grows since this should bias towards eigenvectors with larger eigenvalues, it may be that each iteration of conjugate gradient subtracts the contribution of more dominant eigenvectors in $x_* - x_k$. If true, this reasoning would suggest that $x_* - x_k$ for large $k$ simply has very little contribution from its large eigenvalue components, and so on each iteration there is a sense in which it is not $\lambda_{\text{max}}$ that is most appropriate for $\kappa$ but a smaller eigenvalue.
+
+As we will see in our subsection on Joly-Meurant, this insight is of critical importance to rapid convergence in contexts where we have many $Ax = b$ problems that share an $A$ but may change in $b$.
 
 
+\subsubsection{Generalized Minimal Residual Method (GMRES) and Methods for Nonsymmetric $A$}
 
+It would be criminal of me not to speak on GMRES before concluding, although I must admit I devoted little of my time to studying the method. The principle circumstance in which one might use GMRES is when one has a non-symmetric $A$, and when that is the case, it is of course possible to solve the $A^T A x = A^T b$ problem which has the same solution, with only a matrix-matrix multiplication and a matrix-vector multiplication up front.
+
+Nonetheless, as conjugate gradient is an orthogonal projection method, GMRES is an oblique projection method using $\mathcal L = A \mathcal K$ that follows from full orthogonalization method and Arnoldi's method.
+
+The method calls for running some version of Arnoldi's method in the way we described before (although probably with appropriate rearrangements to deal with the instabilities in naive Gram-Schmidt) to obtain an orthonormal basis $V$ in $\mathcal K_m(A,r_0)$ followed by using our previously mentioned equation $AV = \tilde V \tilde H$ (these were $\tilde V$ which is $V$ along with the extra basis vector $v_{m+1}$ derived at the end of the algorithm and $\tilde H$ the Gram-Schmidt coefficient matrix with the first column omitted) to say the following. If the solution $x_*$ has $x_* = x_0 + \delta$ where $\delta \in \mathcal K_m(A,r_0)$ then \begin{align*}
+b - Ax &= b - A(x_0 + V \vec c)  \\
+&= (b - Ax_0) - AV \vec c \\
+&= r_0 - \tilde V \tilde H \vec c \\
+&= H_{11} v_1 - \tilde V \tilde H \vec c \\
+&= \tilde V (H_{11} e_1 - \tilde H \vec c)
+\end{align*}
+Failing $x_0 + \delta = x_*$, GMRES says to solve for $\vec c$ which minimizes $\lVert H_{11} e_1 - \tilde H \vec c \rVert $ via least squares.
+
+While many sources have assured me that this is a circumstance in which least squares runs especially efficiently,  part of my disinterest in this algorithm is that I am yet to find any description that cleanly convinces me of that, much less provides any of the radical performance guarentees we have for preconditioned conjugate gradient on $A^T A x = A^T b$.
+
+\subsubsection{Solving many $Ax=b$ With Same $A$: The Joly-Meurant Method}
+
+At the beginning of this article I mentioned that my intention with all of this was to solve the kinds of $Ax=b$ problems one derived from the weak formulation of a partial differential equation in the course of a finite element method. Such applications, among others such as finite difference, finite volume, etc. often call for applying a difference method in the time variable, producing a large quantity of $Ax = b$ problems where $b$ encodes information related to the previous timestep and $A$ encodes the fundamental dynamics between timesteps, unchanging.
+
+Something interesting about the conjugate gradient method one may notice during its derivation is that since it is based on the direct Lanczos method where we required our $p_k$ basis were $A$-orthogonal, one might deduce that changing $b$ but not changing $A$ preserves this property, allowing the $P$ basis to be reused. This intuition is formalized in what I have decided to call the \hyperlink{https://gerard-meurant.fr/cgc_1992.pdf}{Joly-Meurant method}, which appears to have been developed for complex $Ax=b$ problems.
+
+Joly-Meurant effects a framework in the same way that splitting methods provide a calculation one could to to iterate without telling you how to split $A = M - N$, or how a projection method tells you what you have to do to find your update $\delta = V \vec c$ but not how to choose $\mathcal K$ or $\mathcal L$. Their iteration, for a given $x_0$ and two matrices $H$ symmetric positive definite and $K$ satisfying $(K+K^T)$ being either strictly positive definite or negative definite, and with $N = A^T H A$, $g_0 = A^T H r_0$ and $p_0 = K g_0$, looks like the following: \begin{gather*}
+\alpha_k = \frac{g_k \cdot p_k}{p_k \cdot N p_k} \\
+x_{k+1} = x_k + \alpha_k p_k \\
+r_{k+1} = r_k - \alpha_k A p_k \\
+g_{k+1} = g_k - \alpha_k N p_k \\
+\beta_{k+1}^l = - \frac{(K g_{k+1}) \cdot (N p_l)}{p_l \cdot N p_l}, \hspace{2em} 0 \le l \le k \\
+p_{k+1} = K g_{k+1} + \sum_{l = 0}^k \beta_{k+1}^l p^l 
+\end{gather*}
+
+This should look suspiciously like conjugate, and that's because it is in a general sense. If we set $H = A$ with $A$ symmetric positive definite and set $K = I$, we get $N = A^T = A$ and our $g_k$ vectors become exactly equal to $p_k$, removing the need for the triangle of $\beta_k^l$ values. With $H = I$ and $K = A^{-T}$ one derives another algorithm known as conjugate residual, and in general many other conjugate methods can be derived through choices of $H$ and $K$.
+
+What is remarkable about this framework is that, independent of a choice of $H$ and $K$, if one is to change $b$ but keep the vectors $p_k$, many of the orthogonality guarentees one would want from the newly generated $g_k^i$ generated from $g_0^i = A^T A r_0^i = A^T A (b^i - Ax_0^i)$ solved at $i$'th $b$ remain true. That is, just as in conjugate gradient we have $r_i \cdot r_j = 0 $ and $p_i \cdot A p_j = 0$ for all $i \neq j$, in Joly-Meurant we have \begin{align*}
+p_k \cdot N p_j = 0, \hspace{2em} &k \neq l \\
+g_k \cdot p_j = 0, \hspace{2em} &j < k \\
+g_j \cdot p_k = g_0 \cdot p_k, \hspace{2em} &j \le k \\
+g_k \cdot p_k = g_k \cdot K g_k \hspace{2em} & \\
+(K g_k) \cdot (Np_k) = p_k \cdot N p_k \hspace{2em} & \\
+g_k \cdot K g_j = 0, \hspace{2em} & j < k 
+\end{align*}
+with $g_k$ referring to the \squote{seed system}, an initial $Ax = b^0$ we use to calculate $p_k$ and in this case $g_k$, we find that on successive systems we still have \begin{align*}
+g_k^i \cdot p_j = 0, \hspace{2em} & j < k \\
+g_k^i \cdot p_j = g_0^i \cdot p_k , \hspace{2em} & j \le k\\
+g_k^i \cdot p_k = g_k^i \cdot K g_k, \hspace{2em} &  g_k := g_k^0
+\end{align*}
+which according to Meurant is enough for the algorithm to keep working. My understanding of precisely why, in terms more precise than what is given above, is unfortunately poor, however I am elated at the consequence.
+
+This brings us to the radical idea that a conjugate gradient method can work with zero matrix multiplications per iteration once the seed system is solved. The particular method proposed by Joly and Meurant here seems to be under the expectation that many $Ax = b^i$ systems are solved in parallel with one merely chosen as the seed system, however here it is written as a method to be run one $b^i$ after another specifically in the context of conjugate gradient.
+
+The Joly-Meurant Complex Conjugate Gradient algorithm can be thought of as the following: \begin{itemize}
+\item Choose $x_0 = x_0^0$ and initialize all other memory required to run preconditioned conjugate gradient. Set $s = 0$ as the system designated as seed-system
+\item Run preconditioned conjugate gradient, storing $p_k$ vectors and caching $A p_k$ vector and $p_k \cdot A p_k$ dot product results. Store the number of iterations the seed system needs to converge to satisfactory bound as integer $m$.
+\item For each $b^i$, set $g_0^i = A^T A  r_0^i$ (setting $x_0^i$ as the solution calculated for system $i-1$ if $b^i$ are related by some time-iteration sequence such as in finite element or finite difference) solve $Ax^i = b^i$ by these steps for each iteration $k=0,\dots $ until convergence, using cached values: \begin{enumerate}
+\item Set \begin{gather*}
+\alpha_k^i = \frac{g_k^i \cdot p_k }{p_k \cdot A p_k}
+\end{gather*}
+\item Set \begin{gather*}
+x_{k+1}^i = x_k^i + \alpha_k^i p_k
+\end{gather*}
+\item Set \begin{gather*}
+r_{k+1} = r_k - \alpha_k^i A p_k
+\end{gather*}
+\item Set \begin{gather*}
+g_{k+1}^i = g_k^i - \alpha_k^i A p_k 
+\end{gather*}
+\item If $k+1 > m$, check next step. Else, if $\lVert r_{k+1}^i \rVert$ is satisfactory, terminate loop in $k$ and move to next $i$.
+\end{enumerate} 
+\item If in the previous step a system requires more than $m$ iterations (or indeed if running preconditioned conjugate gradient and these other systems in parallel, and the seed system converges before some of the others) then perform the following steps to transfer ownership of the seed system title/property to another system and resume generating new $p_k$ vectors: \begin{enumerate}
+\item Set $\sigma = s$ to denote the old seed system.
+\item Choose new $s$ as the system $i$ with largest $\lVert r_{k+1}^i \rVert$
+\item Set \begin{gather*}
+\beta_{k+1} = \frac{g_{k+1}^s \cdot g_{k+1}^\sigma }{p_k \cdot A p_k}
+\end{gather*}
+\item Set \begin{gather*}
+p_{k+1} = g_{k+1}^s + \beta_{k+1} p_k
+\end{gather*}
+\item Resume step 2's preconditioned conjugate gradient with the new seed system, caching $p_k$, $Ap_k$ and $p_k \cdot A p_k$ results.
+\end{enumerate}
+\end{itemize}
+
+Note in particular that if vectors and inner products are cached as described above, the sum total calculations in non-seed-system iterations is one dot product in $g_k^i \cdot p_k$, three two scalar multiplications $\alpha_k^i p_k$ and $\alpha_k^i A p_k$, and three additions, and an additional $r_{k+1}^i \cdot r_{k+1}^i$ product computed only as desired to check for convergence. Counting all but the dot products as trivial, this amounts to maybe 1.1 dot products per iteration, assuming convergence is only checked every ten times.
+
+Moreover, if the step specified in which the solution to the previous $i-1$ system is used as the initial guess for the next system, by the argument made earlier, it is likely that the system initializes with much smaller \squote{effective condition number}, meaning the number of necessary iterations after the first is much smaller.
+
+In general, I find myself somewhat shocked that there is not more awareness of this algorithm. 
+
+\subsubsection{Symmetric Preconditioners and Efficient $Mz = r$ Solution}
+
+Unfortunately I did not ultimately read as much about preconditioners as I had initially set out to do, however with respect to my purposes, I have certainly learned all I needed to. Meurant notes about diagonal preconditioners \emph{"The simplest ideas (which unfortunately are by far not the most efficient ones) are based on the classical iterative methods"} so we will put diagonal preconditioners out of our minds as a topic already studied. 
+
+Throughout my review, I was frequently confused as to why methods would include a step that says \squote{solve $M z = r$} as though this would be any easier than solving the base $Ax = b$ problem we were aiming for in the first place. The answer to that, in a manner of speaking, is that I had never fully internalized the usefulness of $LU$-decompositions. A system $Lx = b$ with $L$ triangular is not merely \squote{easy to solve}, it violates the regime of thinking in which one considers finding $x$ to being equivalent to calculating $L^\inv b$. This was the lesson we learned in Gauss-Seidel splitting, when we saw that $A = M - N$ with $M = D + L$ with $L$ all elements below the diagonal in $A = D + U + L$, had \begin{gather*}
+(D + L) x_{k+1} = b - Ux_k 
+\end{gather*}
+easy to solve since we merely use previously calculated $x_{k+1}^i$ elements of the $x_{k+1}$ vector, actually computing \begin{gather*}
+x_{k+1}^i = \frac{1}{A_{ii}} \left( b^i - \sum_{i < j} A_{ij} x_k^j - \sum_{i > j} A_{ij} x_{k+1}^j \right).
+\end{gather*}
+
+The thing is that nothing stops us from doing this trick in any order that we like. We had to use lower diagonals only if we calculated each index $i$ of $x$ starting from $i=1$ and going up to $n$, but we could do this in reverse.
+
+This is especially useful to us since preconditioned conjugate calls for a symmetric preconditioner, yet never actually needs $M^\inv$, only solutions to $Mz = r$ systems. Meurant highlights the SSOR preconditioner (symmetric successive over relaxation preconditioner) which for a symmetric $A = D + L + L^T$ has these properties as well as a tuning paramter $0 < \omega < 2$. \begin{gather*}
+M = \frac{1}{\omega(2 - \omega)} (D + \omega L)D^\inv (D + \omega L^T)
+\end{gather*}
+
+When solving the $Mz = r$ step, this amounts to merely two additional matrix multiplications in a similar manner to the trick we learned in Gauss-Seidel, applied twice. First we calculate an intermediaery $z_*$ which solves $(D + \omega L^T)z_* = r$ by \begin{gather*}
+z_*^i = \frac{1}{A_{ii}} \left( r^i - \sum_{i < j} A_{ij} z_*^i \right),
+\end{gather*}
+we can multiply by our coefficient at the same time as we multiply through our diagonal $(\omega(2-\omega))^\inv D^\inv z_{**} = z_*$ in the obvious way, followed by the final step \begin{gather*}
+z^i = \frac{1}{A_{ii}} \left( z_{**}^i - \sum_{i > j} A_{ij} z^i \right),
+\end{gather*}
+allowing the trick in Gauss-Seidel to be applied to the upper triangle of $A$ followed by the lower triangle.
+
+Now, to apply this, one must choose $\omega$. In the section Meurant speaks of this as an explicit preconditioner, he gives little detail as to how to select $\omega$, but in his earlier discussion of SSOR as a splitting method, he mentions prior work by Young (the inventor of the method) showing that \begin{gather*}
+\omega = \frac{2}{1 + \sqrt{2(1- \rho(-D^\inv(L + U))^2)}}
+\end{gather*}
+is a \squote{good} choice. Of course this refers to $\rho$ as the spectral radius, giving the largest eigenvalue of a matrix, which is not easily computed except by heuristic or approximation, but if you have ten or twenty matrix multiplications to spare then you are likely to get a good approximation via \begin{gather*}
+\lambda_{\text{max}} \approx \left({\frac{x \cdot A^k x}{x \cdot x}} \right)^{1/k}
+\end{gather*}
+for some large $k$; this technique is helped by using a few different $x$ values, which can be done on a GPU, and will converge on $\lambda_{\text{max}}$ more quickly the more ill conditioned the starting matrix is.
+
+\subsection{Conclusions and Future Directions}
+
+I can't say I knew what I was going to write when I began this article, but it is clear that the majority of it became focused on understanding why exactly conjugate gradient methods work. Using that understanding, we are able to understand how to improve it with preconditioners without $M^\inv A$'s failure of symmetry becoming a problem even if $M$ and $A$ are symmetric, and we are able to understand how to cache intermediate quantities so that successive $Ax = b$ problems are easier to solve.
+
+The outline of lessons learned to the functioning of the conjugate gradient method are as follows. We first understand that a projection technique in which an update vector $\delta$ in a subspace is used to define an iteration $x_1 = x_0 + \delta$ where the new residual $b - Ax_1$ is expected to be orthogonal to that same subspace constitutes a Gram-Schmidt method as well as an inversion in the coefficient matrix calculated during Gram-Schmidt, the $\delta = V\vec c$ where $\vec c = H^\inv V^T r$ step. Next, we understand that by omitting the first column and last row of the coefficient matrix $H$, having chosen the subspace to be a Krylov subspace means that symmetry in $A$ leads to symmetry in $H$, making it tridiagonal. Knowing this, we also find that there exist iteratively defined bidiagonal $LU$ decompositions in tridiagonal matrices, as well as iteratively defined inverses for these  bidiagonal $L$ and $U$, leading to a reformulation of the full orthogonalization method of $x_{k+1} = x_k + V \vec c = x_0 + V(H^\inv V^T r_k)$ as $x_{k+1} = x_k + (V U^\inv) (L^\inv e_k) = x_k + P z_k$. Since these iterative definitions allow us to express the $x_{k+1} = x_k + Pz_k$ update as single element updates in $z_k$, we can express large single projection methods as iterative methods once again, making the Krylov subspace $\mathrm{span}(r_0,Ar_0,..., A^n r_0)$ without complication. Finally, since each $\mathrm{span}(r_0,Ar_0,..., A^{k+1} r_0)$ defines a unique new direction with respect to $\mathrm{span}(r_0,Ar_0,..., A^k r_0)$, the new update directions are always uniquely defined, and free to be calculated by much more efficient much more stable means than a highly complicated Gram-Schmidt. Seemingly for all the reasons that repeated multiplication of a matrix on a random vector can result in an estimate of the largest eigenvalue of the matrix, the use of Krylov subspaces means that conjugate gradient preferentially subtracts the contribution of eigenvectors associated to larger eigenvalues in the residual, resulting in rapid convergence.
+
+As a consequence of these lessons and the lessons required to build up to it, we also learn the following vital lessons: \begin{itemize}
+\item Via Joly-Meurant, future or simultaneous $Ax = b'$ problems which share a $A$ as the original matrix but have $b'$ instead of $b$ may reuse the $A$-orthogonal $p_k$ basis, resulting in a method which only requires a single dot product and zero matrix multiplications on each iteration.
+\item Preconditioning and the associated $Mz = r$ problems which must be frequently solved to use preconditioning are trivial, tantamount to an additional matrix multiplication, so long as $M$ is chosen as a product of triangular matrices. This is because forwards and back substitution may be performed at similar speeds as matrix multiplication, but in particular, since we may construct $M$ without a multiplicative $LU$-decomposition, we obtain effective preconditioners $M$ with roughly the same sparsity as $A$.
+\end{itemize}
+
+Finally, I'll end with what I didn't discuss but would have liked to. That is, no consideration is made in this article about the actual runtime of these algorithms on hardware, or the role of parallelisation in their optimization. One must remember that the primary sources in this review were written twenty five years ago, in a very different computing landscape. Since we conclude that Joly-Meurant is a dot-product workload, I find it highly likely that GPU acceleration is just as often harmful as it is helpful by contrast to many core CPUs methods. In fact, most of the operations described towards the end here are likely to suffer primarily from memory bandwidth limitations rather than arithmetic cost. A future article may explore the runtime differences between different implementations. Additionally, I was unable to find satisfactory graphs for the convergence rate of conjugate gradient and preconditioned conjugate gradient in larger systems, and that is definitely something I would like to visualize. Algorithms also made frequent mention of instability due to rounding error, and it became increasingly frustrating that I could not characterize this instability or how significant it was at higher precisions; I have some reason to suspect that (especially for poorly conditioned matrices) dot product steps with their large floating point additions were the principle drivers of rounding errors since smaller floating point numbers are rounded to fit with the largest value in the $x \cdot y = \sum_{i} x^ i y^i$ sum.
+
+It is worth noting that both book authors, Yousef Saad and Gerard Meurant, are still academically active and contributing to the study of the discussed topics in our changing computing landscape. While Meurant has increasingly become focused on historical matters of mathematics, Saad publishes something on parallelization in linear solving methods every few years for various applications. In particular he seems interested in the Schur-compliment and its applications in paralellizing conjugate gradient methods by approaching $A$ as a block matrix.
+
+\subsection{References and Further Reading}
+
+The following two books formed the backbone of the above narration: \begin{itemize}
+\item Yousef Saad, \emph{Iterative methods for sparse linear systems.} Society for Industrial and Applied Mathematics, 2003.
+\item Gerard Meurant, \emph{Computer solution of large linear systems.} Vol. 28. Elsevier, 1999. (I used the 2024 online pdf edition)
+\end{itemize}
+
+Additional papers referenced are as follows: \begin{itemize}
+\item Emrah Kılıç and Pantelimon Stanica. \emph{"The inverse of banded matrices."} Journal of Computational and Applied Mathematics 237.1 (2013): 126-135. (Used for $LU$-decomposition of tridiagonal $H$ and inversion of bidiagonal $L$ and $U$.)
+\item Paul Concus, Gene H. Golub, and Dianne P. O'Leary. \emph{"A generalized conjugate gradient method for the numerical solution of elliptic partial differential equations."} Sparse matrix computations. Academic Press, 1976. 309-332. (Gave early formulations of preconditioned conjugate gradient methods.)
+\item David M. Young. \emph{Iterative Solution of Large Linear Systems}. Academic Press, 1971 (Cited by Meurant as discussing SOR and SSOR methods, as well as providing heuristics for choosing optimum $\omega$ in successive over relaxation methods.)
+\item Germund Dahlquist and Åke Björck. \emph{Numerical methods in scientific computing, volume I}. Society for Industrial and Applied Mathematics, 2008. (Meurant cites this text for the properties of Chebyshev polynomials given here.)
+\item Pascal Joly, and Gérard Meurant. \emph{"Complex conjugate gradient methods."} Numerical Algorithms 4.3 (1993): 379-406. (Gives the Joly-Meurant method)
+\item Pascal Joly. \emph{"Résolution de systemes linéaires avec plusieurs seconds membres par la méthode du gradient conjugué."} Tech. ReportTech. ReportR-91012, PublicationsduLaboratoired'Analyse Numerique, Universite Pierre et Marie Curie, Paris (1991). (Unfortunately I was never able to find a copy of this, and in any case it is unlikely a translated version exists. Meurant cites this for the proof that $g_k^i$ and $p_k$ vectors maintain the necessary orthogonality conditions required for Joly-Meurant to keep working when $p_k$ are derived only for $b^0$.)
+\end{itemize}
 \end{document}

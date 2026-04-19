@@ -206,5 +206,15 @@ blogArticles = AllMyArticles [
          depends = [
             "wikipedia_Fermat_Snellius_hamsymp.svg"
             ]
+         },
+         SubChapter {
+            name = "0426-iterLinSolve",
+            title = "Introduction to Iterative Techniques for $Ax=b$ Solvers and Theory of Conjugate Gradient",
+            flags = ["IndexTopOfPage"],
+            description = "Introduction to numerical techniques for efficient solution of $Ax = b$ systems, particularly where $A$ is symmetric positive definite. We provide a full theoretical and intuitive description of how one arrives at the Conjugate Gradient algorithm, as well as extremely efficient and effective methods which seem poorly understood or poorly known in popular circles, such as Joly-Meurant Conjugate Gradient",
+            depends = [
+               "Conjugate_gradient_illustration.svg",
+               "MeurantsIterfigure6-1.png"
+            ]
          }
    ]
