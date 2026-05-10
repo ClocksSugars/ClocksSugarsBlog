@@ -690,7 +690,7 @@ P^T A P &= U^{-T} V^T A V U^\inv \\
 Now since $U$ is upper triangular, we must have $U^{-T}$ lower triangular. Moreover, triangular matrices form closed groups, so $U^{-T} L$ must also be lower triangular; however we also know that $P^T A P$ is symmetric via the symmetry of $A$, so $(P^T A P)^T = P^T A^T P = P^T A P$. If $U^{-T}L$ is lower triangular yet it is also symmetric, then it can only be non-zero on its diagonal. As above, this is the same as $p_i \cdot A p_j = 0$ for $i \neq j$. We are done with part b.
 \end{my proof}
 
-Knowing these properties, it now becomes appropriate to disassemble the direct Lanczos method in an effort to reproduce its artifacts without following the method itself. In particular, we know this must be possible in some manner since as long as we start with $p_0 = r_0$, each successive Krylov subspace $\mathcal K_2 (A , r_0) = \mathrm{span}(r_0,A r_0)$, then $ \mathrm{span}(r_0,Ar_0,A^2 r_0)$, will each specify a unique $A$-orthogonal direction at step $k+1$ not previously spanned by the $P$ basis in $k$; consequently, up to a scalar factor, we have no commitments to any way of calculating $p_{k+1}$ since it is well defined at each step. We know we cannot follow a naive Gram-Schmidt method or else we will produce an unstable method, but since in theory it is possible to derive some set of steps such as \begin{gather*}
+Knowing these properties, it now becomes appropriate to disassemble the direct Lanczos method in an effort to reproduce its artifacts without following the method itself. In particular, we know this must be possible in some manner since as long as we start with $p_0 = r_0$, each successive Krylov subspace $\mathcal K_2 (A , r_0) = \mathrm{span}(r_0,A r_0)$, then $ \mathrm{span}(r_0,Ar_0,A^2 r_0)$, will each specify a unique orthonormal vector at step $k+1$ not previously spanned by the $V = PU$ basis in $k$; since $U$ and $U^\inv$ exist as the $LU$ decomposition of $H$ which at step $k$ exist naturally per choice of $V$, up to a scalar factor, $p_{k+1}$ is uniquely defined so and we have no commitments to any way of calculating. We know we cannot follow a naive Gram-Schmidt method or else we will produce an unstable method, but since in theory it is possible to derive some set of steps such as \begin{gather*}
 x_{k+1} = x_k + \alpha_k p_k \\
 p_{k+1} = \eta_k^\inv \sigma_{k}^{-1} r_k + \beta_k p_k 
 \end{gather*}
@@ -1021,9 +1021,9 @@ Taking our lessons here in preconditioning back to Saad's conjugate gradient met
 	\item Set $x_{k+1} = x_k + \alpha_k p_k$
 	\item Set $r_{k+1} = r_k - \alpha_k A p_k$
 	\item Decide whether $\lVert r_{k+1} \rVert$ is tolerable and if so, terminate the algorithm.
-	\item Set $\beta_{k+1} = \frac{z_{k+1} \cdot r_{k+1} }{z_k \cdot r_k } \hspace{1em} \left( = \frac{z_{k+1} \cdot Mz_{k+1} }{z_k \cdot Mz_k } \right)$
-	\item Set $p_{k+1} = r_{k+1} + \beta_{k+1} p_k$
 	\item Set $z_{k+1} = M^\inv r_{k+1}$
+	\item Set $\beta_{k+1} = \frac{z_{k+1} \cdot r_{k+1} }{z_k \cdot r_k } \hspace{1em} \left( = \frac{z_{k+1} \cdot Mz_{k+1} }{z_k \cdot Mz_k } \right)$
+	\item Set $p_{k+1} = z_{k+1} + \beta_{k+1} p_k$
 \end{enumerate}
 \end{itemize}
 
@@ -1176,7 +1176,7 @@ Informally, it may be reasoned that what Meurant means here is to do with the fa
 As we will see in our subsection on Joly-Meurant, this insight is of critical importance to rapid convergence in contexts where we have many $Ax = b$ problems that share an $A$ but may change in $b$.
 
 
-\subsubsection{Generalized Minimal Residual Method (GMRES) and Methods for Nonsymmetric $A$}
+\subsubsection{GMRES and Methods for Nonsymmetric or Non-Positive-Definite $A$}
 
 It would be criminal of me not to speak on GMRES before concluding, although I must admit I devoted little of my time to studying the method. The principle circumstance in which one might use GMRES is when one has a non-symmetric $A$, and when that is the case, it is of course possible to solve the $A^T A x = A^T b$ problem which has the same solution, with only a matrix-matrix multiplication and a matrix-vector multiplication up front.
 
@@ -1191,7 +1191,18 @@ b - Ax &= b - A(x_0 + V \vec c)  \\
 \end{align*}
 Failing $x_0 + \delta = x_*$, GMRES says to solve for $\vec c$ which minimizes $\lVert H_{11} e_1 - \tilde H \vec c \rVert $ via least squares.
 
-While many sources have assured me that this is a circumstance in which least squares runs especially efficiently,  part of my disinterest in this algorithm is that I am yet to find any description that cleanly convinces me of that, much less provides any of the radical performance guarentees we have for preconditioned conjugate gradient on $A^T A x = A^T b$.
+While many sources have assured me that this is a circumstance in which least squares runs especially efficiently,  part of my disinterest in this algorithm is that I am yet to find any description that cleanly convinces me of that, much less provides any of the radical performance guarentees we have for preconditioned conjugate gradient on $A^T A x = A^T b$. It should also be noted however that there exists another dimension in which one can alter non-symmetric non-Lanczos inspired techniques by beginning with Arnoldi Full Orthogonalization kinds of algorithms and simply manually restricting the number of other basis vectors which are allowed to subtract to form new basis vectors. These methods are usually called incomplete orthogonalization; it is also possible simply to run full orthogonalization with $m$ small over many iterations, which Saad calls \squote{restarting} techniques.
+
+The option to instead do $A^T A x = A^T b$ or various flavors of it bares additional study however. I've seen this method referred to as \textbf{Conjugate Gradient Normal Equations} but both Wolfram Alpha and Meurant use CGNE to refer to the method of $A A^T y = b$ followed by $A^T y = x$, using instead the acronym CGNR (normal residuals perhaps?) to refer to the direct $A^T A x = A^T b$ problem.
+
+It is noted that both CGNE and CGNR without preconditioner suffers from taking twice as long to converge, since the condition number of $A^T A$ is going to be the square of $A$. If $A$ is sparse however, and indeed if the computer system running the solve has facilities for using the sparsity of $A$ to optimize multiplications and calculations, and vector operations are cheap, then one may implement a variety of block based algorithms in $2n\times 2n$ matrices. The simplest of these is to apply conjugate gradient on the problem \begin{gather*}
+\begin{bmatrix} 0 & A^T \\ A & -I \end{bmatrix} \begin{bmatrix} x \\ y \end{bmatrix} = \begin{bmatrix} A^T b \\ \vec 0 \end{bmatrix}
+\end{gather*}
+combining CGNE and CGNR so that the doubling of convergence iterations of either method turn into a doubling of floating point operations per iteration. Here, $y$ must be $Ax$ in order to satisfy the bottom row of the block matrix equations, but must also be $A^T y = A^T A x = A^T b$.
+
+One interesting thing about this technique for symmetrizing $A$ is that the reason we needed positive definiteness of $A$ in each instance was so that $A$ could define an inner product $\langle u,v \rangle = u^T A v$ satisfying $\langle u,v \rangle = \langle v , u \rangle$, with $u^T A v = u^T A^T v$. Consequently, using $A^T A$ to symmetrize $A$ gives us precisely that property, without any additional assurances such as diagonalizability. The only failuremode here is that $A^T A$ is positive \emph{semi}definite, not positive definite, because it will not guarentee invertibility; as frequently referred to throughout our derivation of the conjugate gradient, particularly through the sections explaining the Arnoldi method and Lanczos method, the problem with $A$ failing invertibility is principly that eventually the Krylov subspace $\mathcal K_m(A, r_0)$ fails to increase dimension, since $A^{m-1}r_0$ is eventually within the space $\mathcal K_{m-1}(A,r_0)$. As stated throughout those discussions, when this occurs in exact arithmetic, it should generally coincides with an exact solution to the $Ax = b$ system assuming one exists, meaning we simply solve our problem early.
+
+In a sense we run head first into this problem whenever we let conjugate gradient run more than $n$ iterations even in symmetric positive definite $A$. It \hyperlink{https://mathoverflow.net/questions/7903/conjugate-gradient-iteration}{appears to be understood} that conjugate gradient works for singular positive semidefinite matrices that are not fully positive definite, however recalling the conjugate gradient algorithm, running the algorithm too long may result in a failure mode where the $A$-orthogonal basis $p_k$ has some $i$ such that $p_i \cdot A p_i = 0$. In all likelihood floating point arithmetic will mean that we do not get an exact divide by zero error, but this will still blow up the algorithm, but this is solved by merely terminating the algorithm if we find the residual to suddenly increase, and this increase will generally tell us that our residual is very near zero anyway. Consequently, the remaining hypotheses of symmetry, invertibility, and positive definiteness prove to be largely irrelevant if your vector arithmetic is fast enough.
 
 \subsubsection{Solving many $Ax=b$ With Same $A$: The Joly-Meurant Method}
 
@@ -1207,8 +1218,12 @@ g_{k+1} = g_k - \alpha_k N p_k \\
 \beta_{k+1}^l = - \frac{(K g_{k+1}) \cdot (N p_l)}{p_l \cdot N p_l}, \hspace{2em} 0 \le l \le k \\
 p_{k+1} = K g_{k+1} + \sum_{l = 0}^k \beta_{k+1}^l p^l 
 \end{gather*}
+If $K$ is actually symmetric then instead we only have one $\beta_k$ value as the following:\begin{gather*}
+\beta_{k+1} = - \frac{g_{k+1} \cdot K g_{k+1}}{g_k \cdot K g_k} \\
+p_{k+1} = K g_{k+1} + \beta_{k+1} p_k 
+\end{gather*}
 
-This should look suspiciously like conjugate, and that's because it is in a general sense. If we set $H = A$ with $A$ symmetric positive definite and set $K = I$, we get $N = A^T = A$ and our $g_k$ vectors become exactly equal to $p_k$, removing the need for the triangle of $\beta_k^l$ values. With $H = I$ and $K = A^{-T}$ one derives another algorithm known as conjugate residual, and in general many other conjugate methods can be derived through choices of $H$ and $K$.
+This should look suspiciously like conjugate gradient, and that's because it is in a general sense. If we set $H = A$ with $A$ symmetric positive definite and set $K = I$, we get $N = A^T = A$ and our $g_k$ vectors become exactly equal to $p_k$, removing the need for the triangle of $\beta_k^l$ values. With $H = I$ and $K = A^{-T}$ one derives another algorithm known as conjugate residual, and in general many other conjugate methods can be derived through choices of $H$ and $K$.
 
 What is remarkable about this framework is that, independent of a choice of $H$ and $K$, if one is to change $b$ but keep the vectors $p_k$, many of the orthogonality guarentees one would want from the newly generated $g_k^i$ generated from $g_0^i = A^T A r_0^i = A^T A (b^i - Ax_0^i)$ solved at $i$'th $b$ remain true. That is, just as in conjugate gradient we have $r_i \cdot r_j = 0 $ and $p_i \cdot A p_j = 0$ for all $i \neq j$, in Joly-Meurant we have \begin{align*}
 p_k \cdot N p_j = 0, \hspace{2em} &k \neq l \\
@@ -1229,8 +1244,8 @@ This brings us to the radical idea that a conjugate gradient method can work wit
 
 The Joly-Meurant Complex Conjugate Gradient algorithm can be thought of as the following: \begin{itemize}
 \item Choose $x_0 = x_0^0$ and initialize all other memory required to run preconditioned conjugate gradient. Set $s = 0$ as the system designated as seed-system
-\item Run preconditioned conjugate gradient, storing $p_k$ vectors and caching $A p_k$ vector and $p_k \cdot A p_k$ dot product results. Store the number of iterations the seed system needs to converge to satisfactory bound as integer $m$.
-\item For each $b^i$, set $g_0^i = A^T A  r_0^i$ (setting $x_0^i$ as the solution calculated for system $i-1$ if $b^i$ are related by some time-iteration sequence such as in finite element or finite difference) solve $Ax^i = b^i$ by these steps for each iteration $k=0,\dots $ until convergence, using cached values: \begin{enumerate}
+\item Run conjugate gradient, storing $p_k$ vectors and caching $A p_k$ vector and $p_k \cdot A p_k$ dot product results. Store the number of iterations the seed system needs to converge to satisfactory bound as integer $m$.
+\item For each $b^i$, set $g_0^i = r_0^i$ (setting $x_0^i$ as the solution calculated for system $i-1$ if $b^i$ are related by some time-iteration sequence such as in finite element or finite difference) solve $Ax^i = b^i$ by these steps for each iteration $k=0,\dots $ until convergence, using cached values: \begin{enumerate}
 \item Set \begin{gather*}
 \alpha_k^i = \frac{g_k^i \cdot p_k }{p_k \cdot A p_k}
 \end{gather*}
@@ -1254,7 +1269,7 @@ g_{k+1}^i = g_k^i - \alpha_k^i A p_k
 \item Set \begin{gather*}
 p_{k+1} = g_{k+1}^s + \beta_{k+1} p_k
 \end{gather*}
-\item Resume step 2's preconditioned conjugate gradient with the new seed system, caching $p_k$, $Ap_k$ and $p_k \cdot A p_k$ results.
+\item Resume step 2's conjugate gradient with the new seed system, caching $p_k$, $Ap_k$ and $p_k \cdot A p_k$ results.
 \end{enumerate}
 \end{itemize}
 
@@ -1262,7 +1277,7 @@ Note in particular that if vectors and inner products are cached as described ab
 
 Moreover, if the step specified in which the solution to the previous $i-1$ system is used as the initial guess for the next system, by the argument made earlier, it is likely that the system initializes with much smaller \squote{effective condition number}, meaning the number of necessary iterations after the first is much smaller.
 
-In general, I find myself somewhat shocked that there is not more awareness of this algorithm. 
+In general, I find myself somewhat shocked that there is not more awareness of this algorithm, although I am unsure about its relationship to preconditioning that does not result in symmetric $M^\inv A$. 
 
 \subsubsection{Symmetric Preconditioners and Efficient $Mz = r$ Solution}
 
@@ -1301,7 +1316,7 @@ for some large $k$; this technique is helped by using a few different $x$ values
 
 I can't say I knew what I was going to write when I began this article, but it is clear that the majority of it became focused on understanding why exactly conjugate gradient methods work. Using that understanding, we are able to understand how to improve it with preconditioners without $M^\inv A$'s failure of symmetry becoming a problem even if $M$ and $A$ are symmetric, and we are able to understand how to cache intermediate quantities so that successive $Ax = b$ problems are easier to solve.
 
-The outline of lessons learned to the functioning of the conjugate gradient method are as follows. We first understand that a projection technique in which an update vector $\delta$ in a subspace is used to define an iteration $x_1 = x_0 + \delta$ where the new residual $b - Ax_1$ is expected to be orthogonal to that same subspace constitutes a Gram-Schmidt method as well as an inversion in the coefficient matrix calculated during Gram-Schmidt, the $\delta = V\vec c$ where $\vec c = H^\inv V^T r$ step. Next, we understand that by omitting the first column and last row of the coefficient matrix $H$, having chosen the subspace to be a Krylov subspace means that symmetry in $A$ leads to symmetry in $H$, making it tridiagonal. Knowing this, we also find that there exist iteratively defined bidiagonal $LU$ decompositions in tridiagonal matrices, as well as iteratively defined inverses for these  bidiagonal $L$ and $U$, leading to a reformulation of the full orthogonalization method of $x_{k+1} = x_k + V \vec c = x_0 + V(H^\inv V^T r_k)$ as $x_{k+1} = x_k + (V U^\inv) (L^\inv e_k) = x_k + P z_k$. Since these iterative definitions allow us to express the $x_{k+1} = x_k + Pz_k$ update as single element updates in $z_k$, we can express large single projection methods as iterative methods once again, making the Krylov subspace $\mathrm{span}(r_0,Ar_0,..., A^n r_0)$ without complication. Finally, since each $\mathrm{span}(r_0,Ar_0,..., A^{k+1} r_0)$ defines a unique new direction with respect to $\mathrm{span}(r_0,Ar_0,..., A^k r_0)$, the new update directions are always uniquely defined, and free to be calculated by much more efficient much more stable means than a highly complicated Gram-Schmidt. Seemingly for all the reasons that repeated multiplication of a matrix on a random vector can result in an estimate of the largest eigenvalue of the matrix, the use of Krylov subspaces means that conjugate gradient preferentially subtracts the contribution of eigenvectors associated to larger eigenvalues in the residual, resulting in rapid convergence.
+The outline of lessons learned to the functioning of the conjugate gradient method are as follows. We first understand that a projection technique in which an update vector $\delta$ in a subspace is used to define an iteration $x_1 = x_0 + \delta$ where the new residual $b - Ax_1$ is expected to be orthogonal to that same subspace constitutes a Gram-Schmidt method as well as an inversion in the coefficient matrix calculated during Gram-Schmidt, the $\delta = V\vec c$ where $\vec c = H^\inv V^T r$ step. Next, we understand that by omitting the first column and last row of the coefficient matrix $H$, having chosen the subspace to be a Krylov subspace means that symmetry in $A$ leads to symmetry in $H$, making it tridiagonal. Knowing this, we also find that there exist iteratively defined bidiagonal $LU$ decompositions in tridiagonal matrices, as well as iteratively defined inverses for these  bidiagonal $L$ and $U$, leading to a reformulation of the full orthogonalization method of $x_{k+1} = x_k + V \vec c = x_0 + V(H^\inv V^T r_k)$ as $x_{k+1} = x_k + (V U^\inv) (L^\inv e_k) = x_k + P z_k$. Since these iterative definitions allow us to express the $x_{k+1} = x_k + Pz_k$ update as single element updates in $z_k$, we can express large single projection methods as iterative methods once again, making the Krylov subspace $\mathrm{span}(r_0,Ar_0,..., A^n r_0)$ without complication. Finally, since each $\mathrm{span}(r_0,Ar_0,..., A^{k+1} r_0)$ defines a unique new direction with respect to $\mathrm{span}(r_0,Ar_0,..., A^k r_0)$, the new update directions end up always uniquely defined, and free to be calculated by much more efficient much more stable means than a highly complicated Gram-Schmidt. Seemingly for all the reasons that repeated multiplication of a matrix on a random vector can result in an estimate of the largest eigenvalue of the matrix, the use of Krylov subspaces means that conjugate gradient preferentially subtracts the contribution of eigenvectors associated to larger eigenvalues in the residual, resulting in rapid convergence.
 
 As a consequence of these lessons and the lessons required to build up to it, we also learn the following vital lessons: \begin{itemize}
 \item Via Joly-Meurant, future or simultaneous $Ax = b'$ problems which share a $A$ as the original matrix but have $b'$ instead of $b$ may reuse the $A$-orthogonal $p_k$ basis, resulting in a method which only requires a single dot product and zero matrix multiplications on each iteration.

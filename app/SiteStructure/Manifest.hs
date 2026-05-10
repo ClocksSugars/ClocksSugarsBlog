@@ -216,5 +216,14 @@ blogArticles = AllMyArticles [
                "Conjugate_gradient_illustration.svg",
                "MeurantsIterfigure6-1.png"
             ]
+         },
+         SubChapter {
+            name = "0426-measure-theory",
+            title = "Measure Theory as Introduced on 04/24/26",
+            flags = ["IndexTopOfPage"],
+            description = "The written notes for a talk on measure theory and the formal grounding of probability theory.",
+            depends = [
+               "0426-fake-lebesgue-integration.png"
+            ]
          }
    ]

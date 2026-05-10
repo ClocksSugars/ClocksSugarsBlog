@@ -1,0 +1,418 @@
+\documentclass[11pt]{article}
+    \title{\textbf{Default Doc}}
+    \author{ClocksSugars}
+    \date{03/13/26}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\rfoot{ClocksSugars -- Measure Theory}
+
+\input{../pdf.tex}
+\input{../webmacros.tex}
+\input{../programmingmacros.tex}
+\input{../amsthmstuff.tex}
+
+\usepackage{amsmath}
+\begin{document}
+
+\emph{The following is the article version of a talk given on 04/24/26. The intended audience of the talk is a split demographic of programmers/machine learning engineers and various levels of academicians/hardware engineers. The article is structured not as a comprehensive introduction to the field but as a collection of intuitional statements of where to place each idea and what to use it for. This article is not intended to give a one-to-one correspondance with the content of the talk, but rather to formally detail the scaffold of the talk. Accordingly, it is written to supplement the talk and to be able to stand on its own as a resource, but not as a transcript or an intrinsically motivated text.}
+
+A recurring pet peeve of mine in regards to mathematics education has been how little it is emphasized that mathematical theories are also philosophical theories around the nature of things we also find in the world. In the previous talk on matrix groups, where I tried to emphasize in a few places that groups and the matrices we can use to represent them are merely the artifacts of a theory of reversible actions on some system; a collection of points in a space can be moved around, spread apart from one another, rotated, all while maintaining a clear notion of what the reverse action is. In the previous talk on homotopy type theory, although we didn't discuss much of the titular topic, we discussed four mathematical backgrounds that found the theory, including what were at their core, musings on the nature of similarity, closeness, and structure of ideas; we merely called these sets, topology, category theory and type theory.
+
+Here, we aim to untangle another bundle of concepts, principly relating to the notions of mass, density, and volume. That is, not what they are in their physical incarnations, but what ideas we mean when we use those words and try to analogize more abstract concepts to their physical incarnations. Since they refer to things we feel that we \squote{see}, we must specify in some sense the level at which we have this discussion. The things we want our theory to tell us about are \emph{weighted} sums, \emph{volume} of sets, and \emph{density} distributions in abstract senses such as \emph{probability}. While we want our theory to be compatible with geometry, correctly describing volume in the sense we are familiar with, we must push those assumptions away in order to avoid describing a generalized theory of distance, as is done by metric spaces and vector spaces.
+
+The fruits of this theory, as we will see, provide a more robust notion of integration, the \emph{Lebesgue integral}, as well as providing a formal framework for probability theory in which statements are fully formal rather than requiring logical induction at every step.
+
+\subsection{Sigma Fields and Defining the Measure}
+
+\subsubsection{Setting Expectations and Desirable Properties}
+
+Before we can get to the titular concept, the measure, first we must think a bit about the objects they will measure. That is, if I ask you what the volume of a point is, you will correctly tell me that a zero dimensional point in a three dimensional space has no volume; you will tell me something similar if I ask you about the volume of a line, or of a surface. So using Euclidean space as an initial testing ground, we immediately see that whatever notion of volume we want to measure, it is not a property held at a point. Perhaps our answer would vary if we were discussing density, but nonetheless it is clear that not only must we act on a set in some way, to say \squote{the set of all points enclosed in some space has volume}, not all such sets will give a volume greater than zero.
+
+More broadly, if we think of a \squote{weighted} sum \begin{gather*}
+c_1 v_1 + c_2 + c_3 v_3 + ... = \sum_{i=1}^n c_i v_i
+\end{gather*}
+or its generalization, to the broader calculation of mass inside a set $X$ with density function $f$, the weighted sum gives us total mass $M$ which is \begin{gather*}
+M = \iiint_X f(x,y,z) dV
+\end{gather*}
+so it is clear that whatever concept we are studying coincides conceptually with something we want to do with integrals. There again, we see how there are clearly irrelevant parts of a set $X$. For instance if we are in one dimension, we think of the integral as \squote{area under the curve}, meaning that the integral over $(a,b)$ is the same as over $[a,b]$, since the points $a$ and $b$ have no area underneath them, only an infinitely thin line. But in particular, we see that in all these discussions, the thing that we are quibbling over is what goes at the bottom of the integral, the $X$, the \squote{from $a$ to $b$}, so our measure must act on sets.
+
+Some more rules also become obvious from this mode of analysis. First, since we now know we aren't explicitly interested in the integrand but rather the integrating set, we know from our experience in one dimension that when $a < b < c$, we have \begin{gather*}
+\int_a^c dV = \int_a^b dV + \int_b^c dV.
+\end{gather*}
+Similarly, we know that if $a< b \le c < d$ where $[a,c]$ and $[b,d]$ overlap, we have \begin{gather*}
+\int_a^d dV \le \int_a^c dV + \int_b^d dV.
+\end{gather*}
+The rules we are converging on are three: measure act on sets, some sets should always have measure zero, and when two sets are disjoint, i.e. $A \cap B = \emptyset$, the volume described by the collection of the two $A \cup B$ should be the sum of their measures. We'll use this to describe our notion of a measure.
+
+\begin{definition}[Measure]
+Let $\mathcal M$ be $\sigma$-algebra, an algebra of subsets of a set $X$ such that $(X,\mathcal M)$ is a measurable space. We call a function on sets $\mu : \mathcal M \to [0,\infty]$ a \textbf{measure} if it satisfies the following: \begin{itemize}
+\item The empty set is a \textbf{null set} $\mu(\emptyset) = 0$ (and in general we call any set $A \in \mathcal A$ with $\mu(A)= 0$ a null set).
+\item When $(A_n)_{n \in \nats}$ is a sequence of disjoint sets each with $A_n \in \mathcal M$ then \begin{gather*}
+\mu \left( \bigcup_{n = 1}^\infty A_n \right) = \sum_{n=1}^\infty \mu(A_n)
+\end{gather*}
+i.e. the measure of disjoint sets is the sum of the measure of the individual disjoint sets, up to and including infinite sequences of disjoint sets. We call this property $\mathbf{\sigma}$\textbf{-additivity}.
+\end{itemize}
+If $\mu$ is a measure on $(X,\mathcal M)$ then we call $(X,\mathcal M, \mu)$ a \textbf{measure space} (or measure-triple in some texts).
+\end{definition}
+
+There are a few difficulties in this definition, as it is important for us at this stage to codify the concepts we've explored, that we want there to be a notion of null sets, and $\mu(\emptyset) = 0$, and we want the measure of $A \cup B$ to be the same as $\mu(A) + \mu(B)$ when $A$ and $B$ are disjoint. Unfortunately we have not yet discussed a few other things, such as the idea that we want to allow infinite sequences of disjoint sets to have measure, both for reasons of proofs in real analysis and because we will not suffer a Zeno's paradox in measure theory, and that allowing this also means we have to allow measure of the entire set $X$ which could be infinite. For that reason, the output set of a measure is generally allowed to include infinity, with the generally expected arithmetic \begin{align*}
+\infty + a = \infty & \\
+a \cdot \infty = \infty & \hspace{2em} a > 0 \\
+a \cdot \infty = -\infty & \hspace{2em} a < 0 \\
+\infty \cdot \infty = \infty \\
+\infty - \infty = \text{undefined}\\
+\infty \div \infty = \text{undefined}
+\end{align*}
+These undefined operations are obviously a problem, but they are a problem in the sense that by being undefined, there is merely nothing meaningful that can be drawn from attempting deductions involving them. This is not a situation in which we think of a hole in our vision revealing a secret to be explored, but more like a dark featureless room from which nothing can be learned except that you should be more careful not to trip over yourself in dark rooms.
+
+More interesting than the output set of these measures is the input set. That is, we need to establish which sets we are allowed to (or would want to) measure, but our interest in the sum of disjoint sets poses the desireable quality: if I have a set $A$ with some measure and a set $B \subset A$ inside it with some measure, I want to be certain $\mu(A - B) = \mu(A) - \mu(B)$. If we're being proper we should write this with a set-minus $\mu(A \setminus B)$, but nonetheless this is a reasonable request, and it tells us something something about the kinds of sets we'd want to belong in our input-set-of-sets. Additionally, we know we want to include infinite unions of sets too, since the whole point is that we can measure them as the sum of their infinite parts. We'll codify those properties now.
+
+\begin{definition}[$\sigma$-algebra]
+Let $X$ be a set, and let $\mathcal M$ be a set of subsets of $X$. We say that $\mathcal M$ is a $\sigma$\textbf{-algebra} and $(X,\mathcal M)$ is a \textbf{measurable space} if $\mathcal M$ has the following properties: \begin{itemize}
+\item $\emptyset \in \mathcal M$ the $\sigma$-algebra contains the empty set
+\item For any set $A \in \mathcal M$, we have $A^C \equiv X - A \equiv X \setminus A \in \mathcal M$, i.e. the compliment of a set in the $\sigma$-algebra is contained in the $\sigma$-algebra. 
+\item Any sequence of sets $(A_n)_{n \in \nats}$ with each set in the $\sigma$-algebra $A_n \in \mathcal M$ has \begin{gather*}
+\bigcup_{n=1}^\infty A_n \in \mathcal M
+\end{gather*}
+the \emph{countably infinite} union in the $\sigma$-algebra.
+\end{itemize}
+\end{definition}
+
+The most straight forward example of a measurable space is the power set, the set of all subsets of a set $X$, which will trivially satisfy these assumptions by simply including all subsets. There are very important reasons not to use the power set which we will discuss later, but much more sensible option which is used most of the time is to start with a topology $(X,\mathcal T)$ (which by assumption already has countable unions just like measurable spaces) and add the compliments of each set in the topology. We call these \textbf{Borel sets}, and they define the \textbf{Borel $\sigma$-algebra}, giving a measurable space based on a topology.
+
+\subsubsection{Making sense of the $\sigma$-algebra}
+
+Measurable spaces and choices of measures $\mu$ will be the operative objects of our study here, but while we have justified measures as objects that define a notion of volume, we haven't really motivated what concept a $\sigma$-algebra corresponds to other than sets we might want to measure. We aim to spend the rest of this section discussing what a $\sigma$-algebra is at its conceptual core, and why we don't simply use the set of all sets as our $\sigma$-algebra all of the time. 
+
+To this end, we'll want to first explain what this algebra is without the $\sigma$, so the reason for the name will become obvious.
+
+\begin{definition}[Fields and Algebras]
+Let $F$ be some set with operations $\square + \square \colon F \times F \to F$ and $\square \times \square \colon F \times F \to F$ which we call addition and multiplication. We say that $(F,+,\times)$ is a \textbf{field} if it satisfies the following: \begin{itemize}
+\item ($+$-identity) There exists $0 \in F$ such that for all $a \in F$ we have $a + 0 = 0 + a = a$.
+\item ($+$-associativity) For all $a,b,c \in F$ we have $(a + b) + c = a + (b + c)$
+\item ($+$-commutativity) For all $a,b \in F$ we have $a + b = b + c$
+\item ($+$-inverses) For all $a \in F$ there exists $b = -a$ with the property that $a + b = 0$
+\item ($\times$-identity) There exists $1 \in F$ such that for all $a \in F$ we have $a \times 1 = 1 \times a = a$
+\item ($\times$-associativity) For all $a,b,c \in F$ we have $(a \times b) \times c = a \times (b \times c)$
+\item ($\times$-commutativity) For all $a,b \in F$ we have $a\times b = b \times a$
+\item ($\times$-inverses) For all $a \in F$ such that $a \neq 0$, there exists $b = a^\inv \in F$ such that $a \times b = b \times a = 1$
+\item (Distributivity) For all $a,b,c \in F$ we have $a(b + c) = ab + ac$
+\end{itemize}
+These properties define what is generally considered familiarly to be a number system, such as the real numbers, rational numbers, or complex numbers. Assume now that we have a field $(F,+, \ \cdot\ )$ i.e. relabelling the multiplication operation, and a \textbf{vector space} $\mathcal A$ based on it. In order for $\mathcal A$ to be a vector space, it must had addition and scalar multiplication properties as follows: \begin{itemize}
+\item Vector addition $u + v$ for $u,v \in \mathcal M$ must satisfy $+$-identity, $+$-associativity, $+$-commutativity and $+$-inverses, just as the underlying field $F$, so there is an origin vector $\vec 0 \in \mathcal A$ as well as negative vectors and other standard properties of addition.
+\item For $a,b,1 \in F$ and $u,v \in \mathcal A$, the following are satisfied to make scalar multiplication behave properly and linearly: \begin{itemize}
+\item $a(b v) = (a\cdot b) v$ 
+\item $1 v = v$
+\item $a(u + v) = au + av$
+\item $(a + b)v = av + bv$
+\end{itemize}
+\end{itemize}
+If in addition to these properties, $\mathcal A$ has a vector multiplication $\square \times \square \colon \mathcal A \times \mathcal A \to \mathcal A$ which has the following properties \begin{itemize}
+\item for $u,v,w \in \mathcal A$ we have $(u + v) \times w = u \times w + v \times w$
+\item for $u,v,w\in \mathcal A$ we have $u \times (v \times w) = u \times v + u \times w$
+\item for $a,b \in F$ and $u,v\in \mathcal A$ we have appropriate scalar multiplication linearity rule $(a \cdot b)(u \times v) = (au) \times (b v)$
+\end{itemize}
+then we say that $\mathcal A$ is an \textbf{algebra} or in long form an \textbf{algebra over a field}. Notable examples include the vector space $\reals^3$ with the cross product as multiplication, or the matrices $\reals^{n \times n}$ with Lie bracket $[A,B] = AB - BA$.
+\end{definition}
+
+Alright, so these are a lot of definitions at once, but all of them are ultimately just mostly familiar concepts. We give the formal rules for a field, which at the end of the day is just a number system in the sense you are familiar with, a set with addition, subtraction (via additive inverses), multiplication, division (via multiplicative inverses), a zero in the way we are familiar, and a one in the way we are familiar.
+
+We also give the formal definition of a vector space in the way we are familiar, except this is a formal symbolic vector space rather than one that is motivated by geometry. Consequently, we are describing a much more general landscape of linear algebra, one not built on real number distances or for which a vector space can have a neccessarily finite basis $v_1, v_2, v_3 \in \reals^3$. Our vector elements could be stranger objects, like complex numbers, or integers in a prime number arithmetic, and our vectors could be indexed by other strange sets, such as $\reals$ itself as is the case in vector spaces of functions.
+
+Finally, we give a definition of \emph{an algebra}, which takes a vector space and returns it to something much like a number system as in a field, but with a much less well behaved multiplication. This is evident in our examples too, where the vector cross product does \textbf{not} satisfy $(u \times v) \times w = u \times (v \times w)$ and instead of commutativity, has anti-commutativity rule $u \times v = - v \times u$. But there is no reason we cannot have an algebra that also satisfies some of these properties, such as the algebra of matrices with matrix multiplication, which does satisfy associativity, just not commutativity, and fails to have inverses because there is not only a zero matrix but an entire class of matrices with determinant zero.
+
+The reason we discuss these things is precisely because operating with sets and subsets follows a very similar pattern. Consider first, the field defined by boolean logic, with $F = \{0,1\}$ representing false and true, and operations $+$ and $\times$ defined in the following way.\begin{gather*}
+\begin{matrix}
+a & | & b & | & a + b \\ &&\text{---}&& \\ 
+0 & | & 0 & | & 0 \\
+0 & | & 1 & | & 1 \\
+1 & | & 0 & | & 1 \\
+1 & | & 1 & | & 0 \\
+\end{matrix} \hspace{5em} \begin{matrix}
+a & | & b & | & a \times b \\ &&\text{---}&& \\ 
+0 & | & 0 & | & 0 \\
+0 & | & 1 & | & 0 \\
+1 & | & 0 & | & 0 \\
+1 & | & 1 & | & 1 \\
+\end{matrix}
+\end{gather*}
+
+This is the familiar arithmetic of integers, but modulo $2$, so $1+1 = 0$, but we observe that we have merely constructed addition as logical \texttt{XOR} and multiplication as logical \texttt{AND}. Nonetheless, this set with these operations does satisfy the field axioms which we'll call $\mathbf{2}$ (bold two), and forms a valid field on which linear algebra can be performed, as evidenced if you've ever studied Hamming code. Where we begin to depart familiar territory a bit more is when we choose some set $X$ and define a vector space $\mathcal A$ on it by \begin{gather*}
+\mathcal A = \{f \mid f \colon X \to \mathbf{2} \}
+\end{gather*}
+i.e. the set of all functions from $X$ to our boolean algebra. This also forms a standard vector space of functions, defining sum functions $(u+v)(x) = u(x) + v(x)$ for $u,v\in \mathcal A$, $x \in X$, and trivially satisfying scalar multiplication since we can zero out a function or multiply it by the identity and leave it the way it is.
+
+Where this gets interesting is that this vector space $\mathcal A$ actually defines a space of subsets. We can uniquely, and somewhat trivially, define a subset $A \subset X$ as a vector $v \in \mathcal A$ by \begin{gather*}
+A = \{ x \in X \mid v(x) = 1 \} 
+\end{gather*}
+defining the subsets as the part of $X$ which $v$ evaluates \emph{true} on, or vice versa defining $v$ to be true for all $x \in A$. So in fact we have defined a subset vector space.
+
+But our subset space also has arithmetic as previously described. Since $(u+v)(x) = u(x) + v(x)$ in the sense of function addition for all $x\in X$, our vector space is naturally embued with an \texttt{XOR} operation, meaning that on the subsets $u$ and $v$ describe, lets call them $A$ and $B$, we have what mathematicians prefer to call \textbf{symmetric difference} $A \Delta B = (A \cup B) \setminus (A \cap B)$. If we could fill in that intersection, this would be an arithmetic version of the set union operation.
+
+This is where the algebra part becomes important. We actually have a relatively natural arithmetic version of the set intersection on this vector space, so long as we are willing to define the vector multiplication \begin{gather*}
+(u \times v)(x) = u(x) \times u(v)
+\end{gather*}
+i.e. \textbf{pointwise multiplication}. This allows us to apply the logical \texttt{AND} we had in boolean multiplication to entire subsets, meaning that the subset reflected by $u \times v$ is, using $A$ and $B$ again as $u$ and $v$, merely $A \cap B$. \begin{gather*}
+A \cap B = \{x \in X \mid u(x) \times v(x) = 1\}.
+\end{gather*}
+From this, we construct precisely an \textbf{associative algebra} describing subsets of $X$ on the vector space $\mathcal A$ of vectors with basis indexing set $X$ and underlying field $\mathbf{2}$.
+
+We can do one more interesting thing that usually isn't possible, since we are using $\mathbf{2}$ as our field. There exists a function $w \in \mathcal A$ which evaluates to $1$ for all $x \in X$, which naturally describes the subset which is $X$ itself, since for any element in the set $X$, $w$ just tells us \dquote{yes, it's included}. This \emph{total set} has the property that for all subsets $A \subset X$, we have $A \cup X = X$ and $A \cap X = A$, since obviously there is nothing more to include in a union, and nothing not shared in $A$ between it and $X$. Since we have this $w$ representing $X$, for any $v \in \mathcal A$ representing subset $A$, the vector operation $v + w$ corresponds to $X \Delta A$, which we earlier said was \begin{align*}
+X \Delta A &= (X \cup A) \setminus (X \cap A) \\
+&= X \setminus A
+\end{align*}
+which is exactly the set compliment of $A$, $A^C$. Moreover, as mentioned earlier, so long as we account for the intersection (which we can do now), we also have a union operation \begin{align*}
+A \cup B &= A \Delta B \Delta (A \cap B) \\
+& \sim u + v + u \times v
+\end{align*}
+
+Alright, so now we have an arithmetic system reflecting subsets of a set $X$, and we've deduced that merely using the properties of vector spaces and algebras, we can construct the set compliment, the intersection, and the union. Due to the fact we can say \begin{gather*}
+(A^C \cap B^C)^C = A \cup B \\
+(A^C \cup B^C)^C = A \cap B 
+\end{gather*}
+it is generally considered enough to have merely the compliment operation as well as one of union or intersection. With those tools together, the following definition is generally introduced in measure theory texts, but with much less context. \begin{definition}[Algebra of Sets]
+Let $X$ be a set. We say that $\mathcal A$ is an algebra of sets if all $A \in \mathcal A$ are subsets $A \subset X$, and the following properties are satisfied. \begin{itemize}
+\item $\emptyset \in \mathcal A$, the algebra contains the empty set
+\item For any set $A \in \mathcal A$, we have $A^C \in \mathcal A$, i.e. the compliment of a set in the algebra is contained in the algebra.
+\item For any finite set of sets $\{A_1, \dots, A_n\}$ with each set $A_n \in \mathcal A$ in the algebra, we also have any of \begin{gather*}
+\bigcup_{i=1}^n A_i \in \mathcal A
+\end{gather*}
+or \begin{gather*}
+\bigcap_{i=1}^n A_i \in \mathcal A
+\end{gather*}
+in the algebra.
+\end{itemize}
+\end{definition}
+
+Two things must stand out to us now. First, this is almost exactly the definition of the $\sigma$-algebra, but with our unions now finite. Second, we deduced that these conditions are equivalent to an algebra in the sense of an arithmetic algebra over a field, based on a vector space, where the field is the booleans, and all of our operations stem from addition and multiplication. 
+
+So far, we have proceeded with the primary example that $\mathcal A$ is merely all of the subsets of $X$, but seeing it as a vector space, it is perfectly reasonable to imagine it as a vector subspace, defined in the sense of linear algebra as the span of some set of basis vectors $\mathrm{span}\{A_1, A_2, \dots \}$. In this light, it becomes easier to explain that the $\sigma$ in $\sigma$ algebra in a sense refers to the fact that $\sigma$ algebras are literally algebras in the sense of a vector space, but augmented with the expectation that, specifically under unions and intersections, the algebra is closed under infinite sequences of binary operations. This is obviously not true for symmetric difference, due to its oscillatory nature, flipping trues and falses back and forth, making a notion of convergence impossible in that sense, but otherwise, the $\sigma$ can be thought of mneumonically at least as the same greek $\Sigma$ that we used to describe infinite sums.
+
+\subsubsection{Vitali Sets, or Why We Hate Power Sets}
+
+Strictly speaking, what we are about to describe can equally be considered a pathology of the axiom of choice, however since the axiom of choice is standard in modern non-constructive mathematics, its consequences can not be ignored. I also loathe to say that the most intuitive explanation I have found of what I am about to describe is due to \hyperlink{https://youtu.be/_cr46G2K5Fo&t=1042}{Veritasium}, so if youtube videos is a preferrable medium to you, this section will be explained just as well if not better there.
+
+Let us use the Lebesgue measure in $\reals$, which we shall elaborate more in further sections but in $\reals$ it is simply the measure that takes intervals $(a,b)$ or $[a,b]$ and finds them to be of measure $\lambda([a,b]) = |b - a|$, giving the traditional notion of volume in one dimension abstracted to any weirdly shaped sets you may be interested in.
+
+We'll assume for the sake of contradiction that we have a measure space $(\reals, \mathbf{2}^{\reals}, \lambda)$ with $\mathbf 2^\reals$ denoting the power set of the real numbers, i.e. the set of all subsets in the way we described $\mathcal A$ above. The procedure will be to construct a set $V$, the \textbf{Vitali set}, which we do not know the measure of initially, but we find has conflicting properties on what that measure might be, leading to no options being valid.
+
+Note first that the rational numbers are a countable set; there are \squote{less} rational numbers than there are pairs of integers, and there exists an isomorphism between pairs of integers and natural numbers since we may draw a discrete spiral out from zero; the countability of the rationals, by $\sigma$-additivity, means that $\lambda(\rationals) = 0$. We can see this if we imagine choosing an explicit counting procedure $N\colon \nats \to \rationals$ such that $(\{N(n)\})_{n \in \nats}$ forms a sequence of disjoint subsets which have $\cup_n N(n) = \rationals$. Each $\lambda(\{N(n)\}) = 0$ since it is merely a point, and adding one point at a time in a countable fashion always leads to a \emph{null set}, so \begin{gather*}
+\lambda \left( \bigcup_{n = 1}^\infty \{N(n)\}\right) = \sum_{n =1 }^\infty \lambda(\{N(n)\}) = \sum_{n=1}^\infty 0 = 0
+\end{gather*}
+
+We'll begin proper with the construction of the following set of sets. We form a similarity relation $\sim$ which is satisfied $x \sim y$ when $x,y \in \reals$ have $x - y = q$ where $q \in \rationals$, a rational number. We then form the set of equivalence classes, i.e. the set of sets $\mathcal Q$ such that each set $A \in \mathcal Q$ has $x\sim y$ for all $x,y \in A$. If you want a refresher on the concepts of equivalence classes or similarity relations, see \hyperlink{https://clockssugars.blog/appliuni/prelims/maththink.html\#EquivalenceRelation}{here in Application Unification} or \hyperlink{https://clockssugars.blog/articles/0326-homotopy-type-theory/}{here where they were introduced in the homotopy type theory talk}.
+
+Formally, the axiom of choice in set theory tells us that the non-emptiness of sets in a set such as $\mathcal Q$ is sufficient to construct a \emph{choice function} $f \colon \mathcal Q \to \reals$ which can take each set $A \in \mathcal Q$ and select a member $x \in A$ without any knowledge of the structure of $A$ or the nature of its contents, so long as we know it is not empty. Since $\mathcal Q$ consists of sets corresponding to the equivalence classes of real numbers which have rational-number distance from one another, we can use the axiom of choice to construct a choice procedure in $\mathcal Q$ which will have image $f(\mathcal Q) = \{f(A) \mid A \in \mathcal Q\}$; since these sets $A$ in $\mathcal Q$ consist of equivalence classes (thus implying they were disjoint) of rational distance numbers, we know that selecting a set of numbers which explicitly come from different equivalence classes will each have irrational difference from one another, and this property will be preserved if we shift the equivalence class representatives around by rational numbers.
+
+Since the number of elements in $f(\mathcal Q)$ is preserved under rational number shifts on each element, shift each element so that they all occur within the range [0,1]; in other words, for each $A \in \mathcal Q$, choose a number $q_A \in \rationals \cap [- f(A),1 - f(A)]$ via axiom of choice once again (specifically on the set of these intervals), and define $V = \{f(A) + q_A \mid A \in \mathcal Q \}$ such that $V \subset [0,1]$. This is our Vitali set.
+
+Consider now the set of rationals within $[0,1]$, the set $\rationals \cap [0,1]$ with counting procedure $N_b \colon \nats \to \rationals \cap [0,1]$. If we construct a sequence of sets \begin{gather*}
+(V_n)_{n \in \nats} = (\{v + N_b(n) \mid v \in V\})_{n \in \nats} 
+\end{gather*}
+such that each $V_n$ is the vitali set shifted by some rational number in $[0,1]$, then we must be able to measure $\cup_n^\infty V_n$, and since the Vitali set consists of all numbers of irrational distance, so each $V_i$ and $V_j$ must be disjoint. But adding all rational distances within $[0,1]$ should, in this union of \emph{all} numbers of irrational distance now with also all numbers of rational distance, eventually fill out all numbers rational and irrational within $[0,1]$, with some overlap into $[-1,0]$ and $[1,2]$. This tells us that \begin{gather*}
+ \lambda([0,1])= 1 \le \bigcup_{n=1}^\infty \lambda (V_n) = \sum_{n=1}^\infty \lambda(V_n) \le 3 = \lambda([-1,2])
+\end{gather*}
+
+The trouble is that since each Vitali set consists of a translation, we actually have $\lambda(V_n) = \lambda(V)$ for all $n$, just in the way that $[0,1]$ would have the same measure as $[1,2]$. So we are asking for a number that is more than one, and thus more than zero, less than three and thus finite, and is divisible by infinity. Such a number does not exist, and so we are forced to asssume we have erred somewhere. We take that error to be the allowance of \emph{all} subsets of $\reals$, since clearly we cannot come up with a consistent measure for $V \subset X$.
+
+This demonstrates that, while in many cases it is possible to construct measures for the power set of a space, we will sometimes fail to provide consistent measure numbers if we insist that every subset should have one. Consequently, the construct of a $\sigma$-algebra serves to set the guardrails as a choice of vector-algebra subspace in the power set, restricted to a subspace which will keep our measure arithmetic consistent.
+
+What's interesting about this is that the systems we fall back on to define our measure spaces in applied settings, principly the Borel $\sigma$-algebra defined by a topology, is generally in turn defined by a metric space, i.e. the topology underlying the Borel $\sigma$-algebra is generated by defining balls $\{x \in \reals \mid |x - y| < r \}$ of fixed radius as open sets, thus placing geometric concerns at the core of what defines measure. One might say, in a manner of speaking, that the failure of the Vitali sets to be Lebesgue measureable points to a friction between purely logical tools founded on discrete logical operators, and geometric statements.
+
+\subsection{Measure Theory on Integration and Differentiation}
+
+\subsubsection{Lebesgue Integration and Integrable functions}
+
+If we're discussing measure theory, we should spend at least a little time on Lebesgue integration to dispell the myths and confusion around it. It is of use to us since the standard Riemann integration is vulnerable to certain errors or instabilities, and because here it will allow us to define a clear relationship between measures and integrals.
+
+The principle example of this is, once again, the rational numbers. Due to the countability of the rational numbers as well as $\sigma$-additivity, we know that the rational numbers are a measure zero null set. Yet if we define a function $\delta \colon \reals \to \reals$ which is $\delta(q) = 1$ for all $q\in \rationals$ and zero otherwise, and take an integral as a Riemann integral, depending on the specifics we will see \begin{gather*}
+\int_{[0,1]} \delta(x) dx \approx \sum_{i=0}^n \frac{1}{n} \delta(i/n)  = \sum_{i=0}^n \frac{1}{n} \cdot 1 = 1
+\end{gather*}
+which is not correct, and easily falsified by shifting the interval by any irrational number $[\sqrt{2}, \sqrt{2} + 1]$.
+
+Unfortunately, it is a common myth that Lebesgue integration is merely a Riemann integral which is built out of horizontal segments. \figurepngwithcaption{0426-fake-lebesgue-integration}{The often depicted difference between Riemann integrals and Lebesgue integrals. It is often conceived that Riemann integrals are vertical columns of height matching the curve, whereas Lebesgue integration is horizontal rows matching the width a curve stays above some level. While close to the truth, Lebesgue integration does not have any computation procedure, nor a standardized height of these rows; it moreso says "let the integral be the \emph{best} estimate built out of arbitrary rows".}
+
+So we need a better definition of integration, and as we discussed previously, this will cut to the core what we use measure theory for.
+
+\begin{definition}[Measurable Functions]
+A function $f \colon X \to [-\infty,\infty]$ on a measure space $(X,\mathcal M, \mu)$ is called $\mu$-measurable or simply a measurable function, if the sets where the function is greater than a number are included in the $\sigma$-algebra $\mathcal M$. In other words, we require \begin{gather*}
+\{x \in X | f(x) > \alpha \} \in \mathcal M \hspace{2em} \forall \alpha \in \reals \\
+\{x \in X | f(x) =\infty \} \in \mathcal M \\
+\{x \in X | f(x) = -\infty \} \in \mathcal M
+\end{gather*}
+to be measurable sets. We then say that $f \in M(X,\mathcal M, \mu)$ to denote that $f$ is measureable in the measure space.
+\end{definition}
+
+This basic prerequisite tells us that we can in some sense draw self-consistent contours on $X$ according to the output of $f(x)$, a topographic map if you will, such that if we were to separate height-ranges of the topographic map into sets that we would measure independently, multiplied by some average of the values $f(x)$ in that preimage, we would actually be able to measure it. In fact this is essentially exactly the procedure we use to define the integral.
+
+We'll introduce the idea of an \textbf{indicator function} which is defined by a set $A \subset X$ to be \begin{gather*}
+\chi_A (x) = \left\{ \begin{matrix} 1 & x \in A \\ 0 & x\in X \setminus A \end{matrix} \right.
+\end{gather*}
+with the greek letter chi. Insofar as the earlier diagram depicting the common misconception around Lebesgue integrals was accurate, we will in fact build our integral out of these indicator functions, where the set $A$ that defines each $\chi_A$ form the \squote{width} of the rows.
+
+With indicator functions in hand, we say that a function $\varphi \colon X \to \reals$ is \textbf{simple} when it only has $n$ actual output values, or rather, there exists $\{c_1,\dots, c_n\} \subset \reals$ and a set of sets $\{A_1,\dots, A_n\}$ with $A_i \in \mathcal M$ so we can write \begin{gather*}
+\varphi(x) = \sum_{i = 1}^n c_i \chi_{A_i}
+\end{gather*}
+
+More than just being called simple, these functions are defined such that they are by definition simple to integrate. Each indicator function $\chi_A$ is merely a constant $1$ on some set $A$ and zero everywhere else, so taking it as an integrand in any reasonable generalization of our familiar integral should result simply in the volume over the set $A$. \begin{gather*}
+\int_X \chi_A d\mu = \int_A 1 d\mu + \int_{X \setminus A} 0 d\mu = \mu(A)
+\end{gather*}
+
+Taking this as our guiding principle, and assuming integrals have the standard linearity properties, we immediately know that any any simple function also has a well defined integral \begin{gather*}
+\int_X \varphi d\mu = \int_X \sum_{i=1}^n c_i \chi_{A_i} d\mu = \sum_{i=1}^n c_i\int_{A_i} d\mu = \sum_{i=1}^n c_i \mu(A_i)
+\end{gather*}
+
+The trick we use to construct the proper Lebesgue integral is basically just to extend this reasoning to the very edge of its logical consequences, quite literally. We'll now write $M^+(X,\mathcal M, \mu)$ to denote the set of measureable functions which are non-negative, i.e. positive or zero; focusing on only positive functions will give us a notion that simple functions used as an approximation of non-simple functions, so long as there is no $x \in X$ such that $\varphi(x) > f(x)$, only become more accurate approximations as they get more indicator functions.
+
+In exactly that way, we define the Lebesgue integral for $f \in M^+(X,\mathcal M, \mu)$ as \begin{gather*}
+\int_X f d\mu = \sup\left\{ \int_X \varphi d\mu \mid \ \  \begin{matrix} \varphi \in M^+(X,\mathcal M, \mu), \\ \varphi\text{ is simple,} \\ 0 \le \varphi(x) \le f(x) \ \ \forall x\in X \end{matrix} \right\} 
+\end{gather*}
+where $\sup$ denotes the supremum, the smallest number which is bigger than all numbers in the set. What we have done in essence is to define a notion of a valid under-shoot estimate of the integral, and then we've said \squote{take the best one} without providing a procedure for how to actually get it, like we have for Riemann integrals.
+
+In mathematics, this is not a problem however, since for a given function we can always come up with some way of estimating the integral or deducing its value, just so long as we know what it means to take an integral, and this definition is that. This is the condition we use to say \squote{all valid ways of taking an integral must give this number}, without actually saying what the number is.
+
+As for how we extend this procedure to functions which aren't strictly positive? We basically just split it as necessary, defining \begin{gather*}
+f^+ (x) = \left\{ \begin{matrix} f(x) & f(x) \ge 0 \\ 0 & \text{else} \end{matrix} \right. \\
+f^- (x) = \left\{ \begin{matrix} - f(x) & f(x) \le 0 \\ 0 & \text{else} \end{matrix} \right.
+\end{gather*}
+which gives two non-negative functions. The integral of the whole function is just \begin{gather*}
+\int_X f d\mu = \int_X f^+ d\mu - \int_X f^- d\mu
+\end{gather*}
+
+Now as mentioned earlier, we can obviously make vector spaces out of functions. However with a well defined integral in this manner, measure theory defines a vector norm on functions, defined by \begin{gather*}
+\lVert f \rVert_p = \left(\int_X |f|^p d \mu \right)^{1/p}
+\end{gather*}
+for $p \in \reals$ any number $1 \le p \le \infty $ and $f \in M(X, \mathcal M, \mu)$. This norm gives the $L^p$ space, the space $\mathcal L^p(X,\mu)$ of \emph{finitely} measurable functions on a space $X$ with measure $\mu$. Note that this definition is actually quite restrictive, for instance it does not allow functions such as sine or cosine to be included since it takes the absolute value of their oscillations. When $p=2$, it becomes a norm compatible with an inner product defined on functions \begin{gather*}
+\langle f, g \rangle = \int_X f g d\mu.
+\end{gather*}
+
+\subsubsection{Radon-Nikodym Derivatives}
+
+If we've just provided a way to speak about integrals in a more general setting, then for no other reason but the existence of the chain rule, we should surely have a way to speak about derivatives. Unfortunately I can't say too much about the precise nature of this here, since the formal construction of the Radon-Nikodym derivative is a very intensive proof composed primarily of analytical statements which do not speak much to the intuition of what is being done. In all likelihood, the only Radon-Nikodym derivatives you will ever calculate is a standard chain rule which you know how to calculate, probability density functions, and perhaps changes of measure for equivalent martingale measures in finance. For that reason, we'll focus only on the statement itself and its components, which will continue to serve us.
+
+\begin{theorem}[Radon-Nikodym Theorem]
+Let $\mu$ and $\nu$ be two valid $\sigma$\textbf{-finite} measures on the same measurable space $(X,\mathcal M)$. There exists \textbf{almost} uniquely a pair $(f,D)$ which is a function $f \in M^+(X,\mathcal M,\mu)$  and a set $D \in \mathcal M$ satisfying $\mu(D) = 0$ such that for all $A \in \mathcal M$,\begin{gather*}
+\nu(A) = \nu(A \cap D) + \int_A f d\mu
+\end{gather*}
+\end{theorem}
+
+We'll elaborate more on this shortly, explaining the bold terms, but this formula is to be read as a decomposition of $A$ into a part which $\mu$ will measure as zero and a part which $\mu$ measures not as zero, but as proportionate by $f$ according to the ratio by which $\mu$ and $\nu$ disagree on the density of a set $A$ in each part of it.
+
+\begin{theorem}[Lebesgue Decomposition]
+Let $\mu$ and $\nu$ be two measures on a measurable space $(X,\mathcal M)$. We say that \begin{itemize}
+\item $\mu$ and $\nu$ are \textbf{mutually singular} and write $\mu \perp \nu$ if, in a sense, $\mu$ and $\nu$ decompose $X$ into two parts which they respectively refuse to measure, formalized by the condition that there exists a pair of sets $A,B \in \mathcal M$ such that $A \cup B = X$, $A \cap B = \emptyset$ and $\mu(A) = 0$ and $\nu(B) = 0$.
+\item We say that $\nu$ is \textbf{absolutely continuous} with respect to $\mu$ and write $\nu \ll \mu $ if, in a sense, $\nu$ subordinately agrees on which sets of $X$ are null sets, formalized by the condition that $\mu(A) = 0$ implies that $\nu(A) = 0$.
+\end{itemize}
+If $\mu$ and $\nu$ are $\sigma$\textbf{-finite} then there exists a decomposition $\nu = \nu_1 + \nu_2$ such that $\nu_1 \perp \mu$ and $\nu_2 \ll \mu$, such that the pair $(f,D)$ described by the Radon-Nikodym theorem defines them \begin{gather*}
+\nu_1(A) = \nu(A \cap D) \\
+\nu_2(A) = \int_A f d\mu
+\end{gather*}
+$\nu_1$ the mutually singular component of $\nu$ and $\nu_2$ the absolutely continuous component of $\nu$.
+\end{theorem}
+
+\begin{corollary}
+If $\nu \ll \mu$ then the $\nu_1$ described by the Lebesgue decomposition is a measure which gives $\nu_1(A) = 0$ for all $A \in \mathcal M$. In this case, we have \begin{gather*}
+\nu(A) = \int_A f d\mu
+\end{gather*}
+and we say that $f$ is the \textbf{Radon-Nikodym derivative}, often writing it \begin{gather*}
+f = \frac{d\nu}{d\mu}.
+\end{gather*}
+\end{corollary}
+
+Alright, now we can actually go through this and pick apart what the terms mean.
+
+First, $\sigma$\textbf{-finite} is something of a technicality which gives a notion of a space which is infinite but not because any one part of it merely has infinite measure; one imagines a pathological measure on a space $[-1,1]$ defined $\mu(A) = 0$ except when $0 \in A$ in which case $\mu(A) = \infty$, and $\sigma$-finiteness gives us a protection against these kinds of pathologies. We say that a space is finite if $\mu(X) < \infty$, and that it is $\sigma$-finite when we can find a sequence of sets $(A_n)_{n \in \nats}$ such that the union of all sets forms the whole space $X = \cup_n A_n$ but each individual set has finite measure, e.g. the sequence of sets $[n,n+1]$ gives the positive real numbers as $\sigma$-finite. So really, all we ask with this condition is that $\mu$ and $\nu$ aren't crazy measures that just want to call certain regions infinite when another measure might consider them actually quite small.
+
+Second, I've emphasized the word \textbf{almost}. As surprising as this might sound, this is actually a well defined technical term in measure theory. The trouble with measure theory is that we generally speak on sets, not on points, and think of points and certain sets which might in one manner of thinking actually be quite large, as being \emph{null sets} or inconsequential to the measure of volume. The term \emph{almost} says that a statement is true with the wiggle room allowed precisely by some inconsequentiality caused by null sets. The most common and most important version of this statement is \textbf{almost everywhere}, in which for some condition $P$ which forms a proposition $P(x)$ if $x$ is a point in $X$, we could say that $P(x)$ is true for all $X$, i.e. $P$ holds everywhere, or we could weaken this and say $P$ holds everywhere \emph{except} on a set $D \subset X$ which has $\mu(D) = 0$. That is to say, the cases where $P$ is violated form a set which is considered inconsequential. Here, I've used \textbf{almost uniquely} to mean that the Radon-Nikodym derivative $f$ is uniquely defined except that it is perfectly reasonable to to pick another Radon-Nikodym derivative $g$ which has $f(x) = g(x)$ almost everywhere. In other words, $f$ is not defined uniquely, but the wiggle room to pick a different $f$ is defined as precisely inconsequential as far as the measure $\mu$ cares.
+
+With this frame in mind, what we have said to define the Radon-Nikodym derivative is not so radical, and in fact a fairly simple generalization of the derivative. All we are saying is that if $\nu$ and $\mu$ are measures which don't randomly assign infinite volume in weird ways ($\sigma$-finiteness), and they can basically agree which sets are inconsequential (absolute continuity), then there will be some function which describes the ratio between their notions of density.
+
+What will be interesting about this derivative is that it will follow us into other kinds of measure spaces which may generalize what we want from volume.
+
+\subsection{Formal Probability Theory}
+
+\subsubsection{Probability As Measure}
+
+One of the best things about measure theory is that in its pursuit of a generalization of volume, it turns out this generalization can be used to describe probability. We now undergo a relabelling of many of the concepts we have seen so far, and realize that they in fact formalize familiar concepts.
+
+A measure space $(X,\mathcal M, \mu)$ can be one such as $(\reals, \mathcal B(\reals), \lambda)$ as in the real numbers with the Borel $\sigma$-algebra under Lebesgue measure, or it can be one such as $(\Omega, \mathcal F, \mathbb{P})$ which is a \textbf{sample space}, an \text{event space}, and a \textbf{probability function}. Put another way, $\Omega$ is a space of outcomes, where every probabilistic question that may be asked is resolved and their answers define a strict set of outcomes that have to occur for you to be in outcome $\omega$ of $\Omega$. In that framing, leaving some questions unresolved defines a set, and for instance, only resolving one question partitions $\Omega$ into sets corresponding to each of that question's answers, and these sets must be members $E_n \in \mathcal F$, corresponding to the event in which that question is answered in a certain way. We think of the space of outcome as having total volume $\mathbb{P}(\Omega) = 1$, and so any partition of $\Omega$ along the lines of how a specific event plays out also provides disjoint sets $E_n$ where good old $\sigma$-additivity tells us \begin{gather*}
+\sum_n \mathbb{P}(E_n) = \mathbb{P}\left( \bigcup_n E_n \right) = \mathbb{P}(\Omega) = 1
+\end{gather*}
+
+As for what an event actually could be, let us introduce a \textbf{random variable}. A random variable, particularly one that evaluates to a number upon resolution, is often thought of as a weird number that is simply indeterminant. In our framing, it is not some \squote{weird number}, it is precisely a \emph{measurable function} on the space of outcomes. For instance, if I throw a dart at a one dimensional dart board centered at $x=0$ and I have a normally distributed probability of hitting any point on the wall $X$, the probability I hit $X =0$ is zero exactly, for exactly the reasons discussed earlier that any point has zero volume. Assuming our sample space contains no other events except where the dart lands $X$, we have $\Omega = \reals$ and $\mathbb{P}$ as the normal distribution; it becomes clear that the only questions I can ask about where $X$ will land with probability greater than zero are those where $\mathbb{P}(A) > 0$, and thus those where $A$ is a set with volume. Moreover, since this space only accounts for one question, where $X$ lands, it is also obvious that each $\omega \in \Omega$ corresponds to an outcome of where $X$ lands, and $X$ can be thought of uniquely as a function $X(\omega)$ which gives the landing location as a number corresponding to the event that had to happen to make it so. If $\Omega$ describes two normal random variables $X,Y$, then it is clear that each $\omega$ would correspond to two different outcomes in $X$ and $Y$, yet $X(\omega)$ will only give the outcome in $X$.
+
+In a similar manner as we discussed for the normal random variable $X\colon \Omega \to \reals$, any such a measurable function/random variable has a distribution or \squote{law} defined by \begin{gather*}
+\mathbb{P}_X([a,b]) = \mathbb{P}(\{\omega \in \Omega \mid a \le X(\omega) \le b\})
+\end{gather*} 
+and generalized from $[a,b]$ to any $A \in \mathcal {B}(\reals)$ the Borel sets of the reals. We also define the \textbf{cumulative distribution function} as it is known in probability (although measure theorists in fact canonically call this \textbf{the distribution of }$X$) which is defined \begin{gather*}
+F_X(x) = \mathbb{P}_X((-\infty, x])
+\end{gather*}
+It is the derivative of this function as a function in $\reals$ that yields what is usually familiar as the probability density function, although one similarly thinks of the probability density function as the Radon-Nikodym derivative of $\mathbb{P}_X$ with respect to the Lebesgue measure $\lambda$.
+
+If, in all the ways we described before, $X \colon \Omega \to \reals$ is not only a measurable function but an integrable function, then we may take its integral \begin{gather*}
+\int_\Omega X d\mathbb{P}
+\end{gather*}
+although, since $\Omega$ is a much more abstract space, it is not exactly clear how we would calculate this. We could however decompose $\Omega$ so that the integral over $\Omega$ is instead an integral over $-\infty < X(\omega) < \infty$, meaning we write \begin{gather*}
+\int_\Omega X d\mathbb{P} = \int_\reals X d\mathbb{P}_X = \int_\reals X \frac{d\mathbb{P}_X}{d\lambda} d\lambda
+\end{gather*}
+but if on the right hand side we have $X$ and the Radon-Nikodym derivative of $\mathbb{P}_X$ by $\lambda$, then this is actually just the expectation value in the way we are familiar with it, the mean expected outcome. We write \begin{gather*}
+\mathbb{E}(X) = \int_\Omega X d\mathbb{P}.
+\end{gather*}
+
+Now, we should begin discussing why exactly this framework is useful to us. After all, measure theory ought to do something other than relitigate basic definitions in probability. What it does for us is to both provide an underlying space of outcomes for which probabilities are formally defined as sets in an event space governed by the rules of $\sigma$-algebra and analogized to familiar notions of geometric volume, and if you're a mathematician, provide a strict framework for applying the techniques of real analysis in probability.
+
+One of the easiest ways to demonstrate this is by constructing a \textbf{random process}. That is, let us define increment random variables $X_n \colon \Omega \to \reals$ and the random process \begin{gather*}
+Y_n = \sum_{i=1}^n X_i.
+\end{gather*}
+Many random processes of a similar form to this desire that their increments are \emph{independent} from one another, i.e. knowing one does not tell you anything about what the other will do, and we can formalize this a statement about the underlying sets of outcomes in $\Omega$. We say that an event $A$ and an event $B$, perhaps something like $\{\omega \in \Omega \mid X_3(\omega) \le 0 \}$, are independent if \begin{gather*}
+\mathbb{P}(A \cap B) = \mathbb{P}(A) \cdot \mathbb{P}(B).
+\end{gather*}
+This independence condition is common in probability theory, however now we have an geometricc notion of \emph{why} something like this would be the case. Recall that $A$ and $B$ are represented by vectors in the $\sigma$-algebra, which is itself just a vector space with multiplication, and our multiplication was defined as pointwise boolean multiplication, equivalent to the intersection. We're not requiring that $A$ and $B$ are mutually exclusive, i.e. $A \cap B = \emptyset$, as this would give $\mathbb{P}(A \cap B) = 0$ and $\mathbb{P}(A \cup B) = \mathbb{P}(A) + \mathbb{P}(B)$ by $\sigma$-additivity, we are asking that multiplication in the $\sigma$-algebra carries through to multiplication in $[0,1]$. If one thinks of $\Omega$ as a square and $A$ as a partition of $\Omega$ along its $x$-axis and $B$ as a partition of $\Omega$ along its $y$-axis, one reasons that
+\begin{gather*}
+\mathbb{P}(\Omega) = \mathbb{P}(A \cap B^C) + \mathbb{P}(A^C \cap B) + \mathbb{P}(A^C \cap B^C) + \mathbb{P}(A \cap B)
+\end{gather*}
+decomposing $\Omega$ into four event rectangles, which is true in the much more general sense of sets. However, diagrammatically, the condition of independence can be seen to come from a geometric condition, showing that what we really want is that our decomposition of $\Omega$ against $A$ and $B$ gives straight lines along the axis they do not partition, and we are dealing with simple geometric quadrants, thus the formula for the area, the \emph{volume} is a simple rectangle area. Similar reasoning also gives us the formula for conditional probability \begin{gather*}
+\mathbb{P}(A \mid B) = \frac{\mathbb{P}(A \cap B)}{\mathbb{P}(B)}
+\end{gather*}
+so long as we are willing to analogize probability space to geometric space. In particular, this renormalization can also be thought of as defining a new measure $\mathbb{P}_B$ which gives $\mathbb{P}_B(B) = 1$ as the new total space, redefining $B^C$ as a null space.
+
+We generalize this to sequences of events $A_n$ each being independent from one another if \begin{gather*}
+\mathbb{P}\left( \bigcap_{n=1}^\infty A_n \right) = \prod_{n=1}^\infty \mathbb{P} (A_n)
+\end{gather*}
+and we extend this from events to random variables by using the sets $\{\omega \in \Omega \mid X_n(\omega) \le x \}$, often written $\{X_n \le x\}$ for shorthand. Requiring that $\{X_i \le x\}$ and $\{X_j \le y\}$ for all $x$ and $y$ gives us the independence condition of random variables.
+
+\subsubsection{Some Famous Theorems}
+
+I'm not really interested in getting into weedy proofs here, but now that we have developed these definitions, we are in a position to give formal descriptions of some famous theorems you may have heard people handwave about. The two we'll try to describe here are \textbf{the law of large numbers} and \textbf{the central limit theorem}. These are generally taken to mean that probabilistic events cease to be random in a large enough number of samples, and that chaotic distributions of random variables converge on a normal distribution with enough random variables respectively, but as we will see, these only hold with certain strong caveates.
+
+In the following, we will use $\mu$ to denote the mean of a random variable, defined $\mu = \mathbb{E}(X)$, and $\sigma^2$ to denote its variance, defined $\sigma^2 = \mathbb{E}((X - \mu)^2)$, giving a parameter that vaguely corresponds to how widely the random number may vary.
+
+\begin{theorem}[Kolmogorov's Strong Law of Large Numbers]
+If $(X_n)_{n \in \nats}$ is a sequence of $L^2$ random variables (functions) $ X_n \in \mathcal L^2(\Omega, \mathbb{P})$ with means $(\mu_n)_{n\in \nats}$ and variances $(\sigma_n^2)_{n \in \nats}$ such that \begin{gather*}
+\sum_{n=1}^\infty \frac{\sigma_n^2}{n^2} < \infty
+\end{gather*}
+then \begin{gather*}
+Y_n = \frac{1}{n} \sum_{i=1}^n (X_i - \mu_i)
+\end{gather*}
+defines a sequence $(Y_n)_{n\in \nats}$ with $Y_n \to 0$ almost surely as $n \to \infty$
+\end{theorem}
+
+Now roughly, yes, this does in a sense say that the sum of an infinite number of random variables, when normalized, will only give a contribution from their averages which themselves average to a constant random variable. However conditions apply. First, this result only holds in particular when each $X_n$ is $L^2$; this is a much less tight constraint on $\Omega$ since it is a finite space $\mathbb{P}(\Omega)$. Second, we also require a certain convergence property in $\sigma^2_n$, so this theorem \emph{fails} if we try to provide it with a sequence of, say, normal random variables with linearly increasing standard deviations. Finally, there is a very important \emph{almost surely} in the convergence, which is to say that there may exist a null set of points $D \subset \Omega$ where this convergence fails, and $Y_n$ does not converge to a certain function. This isn't a problem if you're doing physics, but if for some reason you are using the continuous version of the law of large numbers in a place with discrete data, you may find some of that null set blown up to a non-zero probability of occurring.
+
+\begin{theorem}[Central Limit Theorem]
+Let $(X_n)_{n\in \nats}$ be a sequence of independent functions each with the same distribution function $F_{X_i} = F_{X_j}$ in $X_n \in \mathcal L^2 (\Omega, \mathbb{P})$ with mean $\mu$ and variance $\sigma^2$. As $n \to \infty$, the distribution of \begin{gather*}
+Y_n = \frac{1}{\sigma\sqrt n} \sum_{i=1}^n (X_i - \mu)
+\end{gather*}
+converges \textbf{vaguely} to the standar normal random variable $Z$ distribution, and for all $x \in \reals$, \begin{gather*}
+\lim_{n\to \infty} \mathbb{P}\left(  \left\{\frac{1}{\sigma\sqrt n} \sum_{i=1}^n (X_i - \mu) \le x \right\} \right) = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^x e^{-t^2 /2} dt
+\end{gather*}
+\end{theorem}
+
+Vague convergence is a weird version of \emph{almost} in which the kind of thing we ignore is not null sets in general but anything that emphasizes failures in continuity. What we mean by the vague convergence of $Y_n$ here is that the probability law measures $\mathbb{P}_{Y_n}$ have \begin{gather*}
+\int_\Omega f d \mathbb{P}_{Y_n} \to \int_\Omega f d \mathbb{P}_{Z}
+\end{gather*}
+for all $f \colon \reals \to \reals$ which are continuous functions, as $n \to \infty$. Once again, we have certain regularity conditions on our random variables such as $X_n \in \mathcal L^2 (\Omega, \mathbb P)$, and we have convergence of distributions given in probability. This means, once again, that if the topology of the space is not respected in a representation, say by representing a continuous problem in discrete data, a violation on a null set can sneak in.
+
+
+\end{document}
