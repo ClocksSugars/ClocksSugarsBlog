@@ -1,0 +1,53 @@
+\documentclass[11pt]{article}
+    \title{\textbf{Default Doc}}
+    \author{ClocksSugars}
+    \date{03/13/26}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\rfoot{ClocksSugars -- Tensor Algebra}
+
+\input{../pdf.tex}
+\input{../webmacros.tex}
+\input{../programmingmacros.tex}
+\input{../amsthmstuff.tex}
+
+\usepackage{amsmath}
+\begin{document}
+
+\emph{The following is the article version of a talk given on 05/15/26. The intended audience of the talk is a split demographic of programmers/machine learning engineers and various levels of academicians/hardware engineers. The article is structured not as a comprehensive introduction to the field but as a collection of intuitional statements of where to place each idea and what to use it for. This article is not intended to give a one-to-one correspondance with the content of the talk, but rather to formally detail the scaffold of the talk. Accordingly, it is written to supplement the talk and to be able to stand on its own as a resource, but not as a transcript or an intrinsically motivated text.}
+
+rough structure:
+\begin{itemize}
+\item motivations
+\item what is standard linear algebra \begin{itemize}
+\item a monoid (generators and relations) and a monoid homomorphism,
+\item a group and a group homomorphism
+\item a vector space (and thus linear maps)
+\item what a vector space is not (normed, inner product, orthogonality, etc.)
+\item what a vector space has (linear independence,
+\end{itemize}
+\item an algebra
+\item tensor product and kronecker product
+\item tensor algebra basis vectors
+\item antisymmetric tensor products, symmetric tensor products, bilinear forms, sharps, flats
+\item tensor indices and invariant quantities
+\item tensor algebra fields
+\item exterior algebra and the exterior derivative
+\item the liebnitz determinant formula
+\end{itemize}
+
+Tensors are famous, alongside other mathematical concepts such as \dquote{monads}, for being famously poorly explained. In particular, the adage stated is usually \dquote{a tensor is an object that transforms like a tensor}, meaning nothing except those who already know what a tensor is. Almost as bad, arguably worse than that depending on where you stand, are those who will show you tensor index notation and tell you that this is all that a tensor is.
+
+The answer to what a tensor is, as with all things, is somewhere in between and in an entirely different direction. In particular, what I will argue here is that the reason for all this confusion lies in certain colloquial assumptions about vectors, in particular that they are roughly like a column matrix. In a broader geometric picture, we will see the concerns that motivate one to use tensors, and why they are discussed in such confusing ways.
+
+Ultimately, this will enable us to arrive at a framework which explains why concepts such as the determinant or cross product with such ideal geometric properties are defined or calculated in such strange ways, as well as helping us to better understand what vectors and linear transformations are.
+
+
+
+
+
+
+
+
+\end{document}
