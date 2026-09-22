@@ -655,7 +655,7 @@ We now have an algorithm that, for symmetric $A \in \reals^{n \times n}$ and ass
 Our task now will be to realize that features of this new algorithm are more robust than the particular methods we are using to calculate them.
 
 \begin{proposition}
-Let $r_k = b - A_k$ be the residual vectors produced by the Direct Lanczos algorithm above and thus inheriting its assumptions, along with the vectors $p_k$ and $v_k$ as produced by the algorithm. Then we have the following: \begin{enumerate}
+Let $r_k = b - A_k x_k$ be the residual vectors produced by the Direct Lanczos algorithm above and thus inheriting its assumptions, along with the vectors $p_k$ and $v_k$ as produced by the algorithm. Then we have the following: \begin{enumerate}
 \item Our residuals point exactly in the direction of our orthonormal vectors $v_k$, that is to say for some $\sigma_k \in \reals$, \begin{gather*}
 r_k = \sigma_k v_{k+1}.
 \end{gather*}
@@ -1223,7 +1223,7 @@ If $K$ is actually symmetric then instead we only have one $\beta_k$ value as th
 p_{k+1} = K g_{k+1} + \beta_{k+1} p_k 
 \end{gather*}
 
-This should look suspiciously like conjugate gradient, and that's because it is in a general sense. If we set $H = A$ with $A$ symmetric positive definite and set $K = I$, we get $N = A^T = A$ and our $g_k$ vectors become exactly equal to $p_k$, removing the need for the triangle of $\beta_k^l$ values. With $H = I$ and $K = A^{-T}$ one derives another algorithm known as conjugate residual, and in general many other conjugate methods can be derived through choices of $H$ and $K$.
+This should look suspiciously like conjugate gradient, and that's because it is in a general sense. If we set $H = A^\inv$ with $A$ symmetric positive definite and set $K = I$, we get $N = A^T = A$ and our $g_k$ vectors become exactly equal to $p_k$, removing the need for the triangle of $\beta_k^l$ values. With $H = I$ and $K = A^{-T}$ one derives another algorithm known as conjugate residual, and in general many other conjugate methods can be derived through choices of $H$ and $K$.
 
 What is remarkable about this framework is that, independent of a choice of $H$ and $K$, if one is to change $b$ but keep the vectors $p_k$, many of the orthogonality guarentees one would want from the newly generated $g_k^i$ generated from $g_0^i = A^T A r_0^i = A^T A (b^i - Ax_0^i)$ solved at $i$'th $b$ remain true. That is, just as in conjugate gradient we have $r_i \cdot r_j = 0 $ and $p_i \cdot A p_j = 0$ for all $i \neq j$, in Joly-Meurant we have \begin{align*}
 p_k \cdot N p_j = 0, \hspace{2em} &k \neq l \\

@@ -151,7 +151,7 @@ The answer in general is no, but there is indeed a strong link to be made here w
 \begin{label theorem}[Sequential Characterization of Function Limits]{SequentialCharacterizationRLimits}
 Let $f\colon A \to \reals$ be a function and $p,L \in \reals$ with $p$ a limit point of $A$. Then the following statements are equivalent: \begin{itemize}
 \item $\displaystyle{\lim_{x\to p} f(x) = L}$
-\item for all sequences $(a_n)_{n \in \nats}$ with $a_n \in A$ and $a_n \neq p$ for all $n \in \nats$, and with $a_n \to p$ as $n \to \infty$, we have $\lim_{n \to \infty} f(a_n) = L$.
+\item for all sequences $(a_n)_{n \in \nats}$ with $a_n \in A$ (and $a_n \neq p$ if $p \notin A$) for all $n \in \nats$, and with $a_n \to p$ as $n \to \infty$, we have $\lim_{n \to \infty} f(a_n) = L$.
 \end{itemize}
 \end{label theorem}
 
@@ -160,7 +160,7 @@ The following proof will make heavy use of propositional manipulations, so it ma
 \begin{my proof}{m}
 Suppose first that $\lim_{x \to p} f(x) = L$, that is, by the relaxed epsilon-delta characterization, that for all $\varepsilon_1 > 0$, there exists $\delta> 0$ such that when $|x - p| \le \delta$, we have $|f(x) - L| \le \varepsilon_1$. If we are given some $\varepsilon_2 > 0$ for a relaxed epsilon-N characterization of the sequence limit, along with an appropriate $(a_n)_{n\in \nats}$ with the above guarentees, we must find some $N$ such that for all $n \ge N$, we have $|f(a_n) - L| \le \varepsilon_2$. So set $\varepsilon_1 = \varepsilon_2$ so that our $\delta$ exists with the properties mentioned above. We already know that $a_n \to p$ as $n \to \infty$, so if we treat this as its own relaxed epsilon-N limit and set $\varepsilon_3 = \delta$, we obtain $N$ such that for all $n \ge N$, we have $|a_n - p| \le \delta$. This is the $N$ we want: for all $n \ge N$, we know $|a_n - p| \le \delta$, but by the relaxed epsilon-delta limit for $f$ we knew that any $x$ (including $x=a_n$) satisfying $|x - p| \le \delta$ satisfies $|f(x) - L| \le \varepsilon_1$. So we conclude $|f(a_n) - L| \le \varepsilon_1 = \varepsilon_2$.
 
-For the converse, we will need some more advanced propositional tools. This proof will be done via proof by contrapositive, so we will show not that \dquote{for all sequences $(a_n)_{n\in \nats}$ which satisfy etc. we have $\lim_{n \to \infty} f(a_n) = L$} implies $\lim_{x \to p} f(x) = L$, but rather, with those two statements as our $P$ and $Q$ respectively, we will prove $\neg Q \implies \neg P$. Under \hyperref[thm:PropNegationRules]{our various rules of propositional negation}, $\neg Q \Rightarrow \neg P$ is the same as $P \Rightarrow Q$. This will also necessitate a careful negation of the full statements, exercising our other rules of propositional negation.
+For the converse, we will need some more advanced propositional tools. This proof will be done via proof by contrapositive, so we will show not that \dquote{for all sequences $(a_n)_{n\in \nats}$ which satisfy etc. we have $\lim_{n \to \infty} f(a_n) = L$} implies $\lim_{x \to p} f(x) = L$, but rather, with those two statements as our $P$ and $Q$ respectively, we will prove $\neg Q \implies \neg P$. Under \hyperref[thm:PropNegationRules]{our various rules of propositional negation}, $\neg Q \Rightarrow \neg P$ is the same as $P \Rightarrow Q$. This will also necessitate a careful negation of the full statements, exercising our other rules of propositional negation. Without loss of generality, we will also proceed presuming we are in the case where $p \notin A$, making a minor note later of what little has to proceed differently if we are in the $p \in A$ case where $a_n \neq p$ is unnecessary.
 
 Beginning with the statement that $\lim_{x \to p}f(x) = L$, we will negate the epsilon-delta limit, taking $p$ being a limit point as a given. \begin{gather*}
 \neg \Big( \forall \varepsilon_1 > 0, \exists \delta > 0, \forall x \in A, |x - p| \le \delta \Rightarrow |f(x) - L| \le \varepsilon_1\Big) \\
@@ -182,11 +182,11 @@ The reason for the unusual format is that it is not enough to say here that \squ
 \end{gather*}
 This statement can now be read \dquote{for some sequence $(a_n)_{n\in \nats}$ which converges to $p$ and satisfies that for all $n \in \nats$, both $a_n \in A$ and $a_n \neq p$, $\big(f(a_n)\big)_{n\in \nats}$ will fail to converge to $L$ as $n \to \infty$}.
 
-We are finally ready to proceed to the actual proof, which will be to the effect that: if all sequences obeying the conditions described imply $f(a_n) \to L$ as $n \to \infty$ then $\lim_{x \to p}f(x) = L$ since we can show that if $\lim_{x \to p} f(x) = L$  is not true, then it was because there existed a counter example sequence obeying the necessary conditions in which $f(a_n)$ failed to converge to $L$.
+We are finally ready to proceed to the actual proof, which will be to the effect that: if all sequences obeying the conditions described imply $f(a_n) \to L$ as $n \to \infty$ then $\lim_{x \to p}f(x) = L$ since we can show that if $\lim_{x \to p} f(x) = L$  is not true, then it was because there existed a counter example sequence obeying the necessary conditions in which $f(a_n)$ failed to converge to $L$. Put more simply, we are trying to prove that our desired result is precisely violated when there is a violation of our theorem's hypotheses.
 
 We begin with the assumption that $\neg(\lim_{x \to p} f(x) = L)$, i.e. that there exists some $\varepsilon_1 > 0$ such that for all choices of $\delta_1 > 0$, there will exist a $x \in A$ which is both $|x- p| < \delta$ and $|f(x) - L| \ge \varepsilon_1$. Take $\varepsilon_1$ to exist as presumed. Since our statement now provides a \squote{for all} in $\delta$, let us choose a sequence of deltas assigned $(\delta_n)_{n\in \nats}$ where $\delta_n = 1/n$. Since our hypothesis holds for all $\delta_n$, we also say that each $\delta_n$ has some $x_n$ such that both $|x_n - p| < \delta_n$ and $|f(x) - L | \ge \varepsilon_1$, so we'll define a sequence of these too called $(x_n)_{n\in \nats}$.
 
-Our goal now, as previous discussed, is to find a sequence $(a_n)_{n\in \nats}$ which converges to $p$, is never $p$, and is always in $A$, for which $\lim_{n \to \infty} f(a_n) = L$ fails to hold, and we claim that $(x_n)_{n\in \nats}$ is this sequence. In order for $(x_n)_{n\in \nats}$ to be applicable however, we must first show that it converges to $p$; we already know by construction that each $x_n\in A$, and we can guarentee that $x_n \neq p$ since it is defined $|f(x) - L| > \varepsilon_1$, which may not be possible if $x_n = p$ (if $p$ is in the domain however, a version of this argument is readily constructed which drops the $a_n \neq p$ for all $n\in \nats$ condition, so without loss of generality, assume $x_n \neq p$ because $p \notin A$).
+Our goal now, as previous discussed, is to find a sequence $(a_n)_{n\in \nats}$ which converges to $p$, is never $p$, and is always in $A$, for which $\lim_{n \to \infty} f(a_n) = L$ fails to hold, and we claim that $(x_n)_{n\in \nats}$ is this sequence. In order for $(x_n)_{n\in \nats}$ to be applicable however, we must first show that it converges to $p$; we already know by construction that each $x_n\in A$, and we can guarentee that $x_n \neq p$ since it is defined $|f(x) - L| > \varepsilon_1$, which may not be possible if $x_n = p$ (if $p$ is in the domain $A$ however, a version of this argument is readily constructed which drops the $a_n \neq p$ for all $n\in \nats$ condition, so without loss of generality, assume $x_n \neq p$ because $p \notin A$).
 
 To show $(x_n)_{n\in \nats}$ converges to $p$, say we are given $\varepsilon_3 > 0$ in accordance with a relaxed epsilon-N limit. It suffices to choose $N = \lceil 1/\varepsilon_3 \rceil$ since we already know that $|x_n - p| \le \delta_n = 1/n$, so by similar reasoning as in example \ref{exa:IntroInverseNSquaredLimit}, we know for all $n \ge N = \lceil 1/\varepsilon_3 \rceil$, we satisfy $|x_n - p| \le \delta_n \le \varepsilon_3$.
 
@@ -195,11 +195,85 @@ Now, we finally show the negated limit, i.e. prove $\neg(\lim_{n \to \infty} f(x
 We are done.
 \end{my proof}
 
-From the perspective of the development of a theory, this connection is remarkable, and in a sense, exactly what we hope for in mathematics. We are now in a position to extend many of our theorems about sequence limits to function limits.
+From the perspective of the development of a theory, this connection is remarkable, and in a sense, exactly what we hope for in mathematics. We are now in a position to extend many of our theorems about sequence limits to function limits. In particular, one of our most powerful tools, the \hyperref[thm:AlgebraicLimitTheoremSequences]{algebraic limit theorem} can be immediately extended to function limits through this connection.
 
+\begin{label theorem}[Algebraic Limit Theorem for Functions]{AlgebraicLimitTheoremFunctionsR}
+Let $f$ and $g$ be two functions whose domains contain the set $A \subset \reals$, and let $p \in \reals$ be a limit point of $A$ such that $\lim_{x\to p}f(x) = a$ and $\lim_{x\to p}g(x) = b$. Then we have the following. \begin{enumerate}
+\item The function defined $h(x) = k f(x)$ for any constant $k \in \reals$ converges $\lim_{x \to p} h(x) = ka$. If we write this without $h$, this is \begin{gather*}
+\lim_{x\to p} \big(k f(x) \big) = k \left( \lim_{x\to p} f(x) \right)
+\end{gather*}
+\item The function defined $h(x) = f(x) + g(x)$ converges $\lim_{x \to p} h(x) = a + b$. If we write this without $h$, this is \begin{gather*}
+\lim_{x \to p} \big(f(x) + g(x) \big) = \left( \lim_{x\to p} f(x) \right) + \left( \lim_{x \to p} g(x) \right)
+\end{gather*}
+\item The function defined $h(x) = f(x) g(x)$ converges $\lim_{x \to p} h(x) = a b$. If we write this without $h$, this is \begin{gather*}
+\lim_{x \to p} \big( f(x)g(x) \big) = \left( \lim_{x \to p} f(x) \right) \left( \lim_{x\to p} g(x) \right)
+\end{gather*}
+\item When $g(x) \neq 0$ for all $x \in A$ and $b \neq 0$, the function defined $h(x) = f(x) / g(x)$ converges $\lim_{x \to p} h(x) = a/b$. If we write this without $h$ and the requirements are met, this is \begin{gather*}
+\lim_{x \to p} \frac{f(x)}{g(x)} = \frac{\lim_{x \to p} f(x) }{\lim_{x \to p} g(x)}
+\end{gather*}
+\end{enumerate}
+\end{label theorem}
 
+The proof proceeds as you may expect; if you aren't sure what to expect then you should absolutely look at the proof. It is emblematic of what we are often looking for in mathematics: a description we can develop theory around easily (sequence limits) and a route by which we make that description's tools pertinent (sequence characterization theorem) to other things we want to describe (function limits).
 
+\begin{my proof}{m}
 
+Before beginning the proof, let us first emphasize that we are trying to avoid proving anything wholesale again, instead only trying to transport the knowledge that we \emph{have proved} the algebraic limit theorem for sequences, through the sequential characterization theorem into the function-limits context. We can do this most verbosely for part a and then speed things up as the pattern becomes obvious.
+
+Since we know $\lim_{x \to p} f(x) = a$, we know that all sequences $(a_n)_{n \in \nats}$ with $a_n \in A$ that converge $a_n \to p$ satisfy $f(a_n) \to a$. For all such sequences, we can define an associated sequence which we'll write $\big( f(a_n) \big)_{n\in \nats}$, the sequence mapped under $f$, converging $f(a_n) \to a$ for each sequence $(a_n)_{n\in \nats}$. By the \hyperref[thm:AlgebraicLimitTheoremSequences]{algebraic limit theorem} we know that all such associated sequences $\big( f(a_n)\big)_{n\in \nats}$ satisfy \begin{gather*}
+\lim_{n \to \infty} \big(k f(a_n)\big) = k \left( \lim_{n\to \infty} f(a_n) \right)
+\end{gather*} 
+and thus all sequences $\big( k f (a_n)\big)_{n \in \nats}$ converge $k f(a_n) \to ka$ for each underlying sequence $a_n \to p$. Since this is true for all sequences $(a_n)_{n\in \nats}$ satisfying the appropriate hypotheses in the sequential limit characterization, we deduce that $\lim_{x \to p} k f(x) = k a$ as desired.
+
+For part b, some care must be exercised with our propositions about which \squote{for all} we use to generate sequences. Particularly, we wish to show $h(x) \to a + b$ as $x \to p$ where $h(x) = f(x) + g(x)$, so we'll assume we are given a sequence $(x_n)_{n \in \nats}$ satisfying the hypotheses for the sequential limit characterization, i.e. $x_n \to p$ as $n\to \infty$, etc. From the sequence characterizations of $f$ and $g$, we know immediately that $h(x_n) = f(x_n) + g(x_n) \to a + b$, applying the algebraic limit theorem for addition of sequences $\big(f(x_n) \big)_{n \in \nats}$ and $\big( g(x_n) \big)_{n\in \nats}$. Since this is true on any such sequence $(x_n)_{n\in \nats}$, we have $\lim_{x \to p}h(x) = a + b$ as desired.
+
+For part c, the same reasoning applies: we wish to show $h(x) = f(x) g(x) \to ab$ as $x \to p$, so assume we are given a sequence $(x_n)_{n \in \nats}$ following the appropriate hypotheses. Once again, we know from the algebraic limit theorem for sequences that $h(x_n) \to ab$ as $n \to \infty$, via the sequences defined by $f(x_n)$ and $g(x_n)$. Since this works for all sequences $x_n$ satisfying our hypotheses, we say $h(x) \to ab$ as $x \to p$ as desired.
+
+For part d, we proceed identically. We wish to show $h(x) = f(x) / g(x) \to a/b$ as $x \to p$, so assume we are given a sequence $(x_n)_{n\in \nats}$ which follows the appropriate hypotheses. Again, we know from the algebraic limit theorem for sequences that $h(x_n) \to a/b$ as $n\to \infty$ (in particular, the associated sequence $\big( g(x_n) \big)_{n\in \nats}$ satisfies the hypotheses avoiding being zero, since we require these hypotheses of the function $g$ itself). Since we can do this for all sequences $x_n$ satisfying these hypotheses, we say $h(x) \to a/b$ as $x \to p$ as desired. 
+\end{my proof}
+
+Following in this line of thinking, the best thing we could do with this chain of new tools is to immediately construct it's analogy in even more places; for instance, why not have an \squote{Algebraic Continuity Theorem}?
+
+\begin{label corollary}[Algebraic Continuity Theorem]{AlgebraicContinuityTheoremR}
+Let $f,g\colon A \to \reals$ be two real functions defined on $A \subset \reals$ which are continuous at a point $p \in A$ (or respectively continuous on $B \subseteq A$ more broadly). Then we have the following. \begin{enumerate}
+\item The function defined $h(x) = k f(x)$ for any constant $k \in \reals$ is also continuous at $p$ (respectively, $h$ is continuous on $B$).
+\item The function defined $h(x) = f(x) + g(x)$ is continuous at $p$ (respectively continuous on $B$).
+\item The function defined $h(x) = f(x) g(x)$ is continuous at $p$ (respectively continuous on $B$).
+\item When $g(x) \neq 0$ for all $x \in A$ and $b \neq 0$, the function defined $h(x) = f(x) / g(x)$ is continuous at $p$ (respectively continuous on $B$)
+\end{enumerate}
+When $B = A$ we simply say that $h$ (in any above incarnation, and satisfying the appropriate hypotheses) is continuous.
+\end{label corollary}
+
+While nominally described as a theorem, we label this as a corollary since it needs no particular proof. In fact, it can be interpretted as a rereading of the statement of the previous algebraic limit theorem, assuming one cares not about limits in general cases but only about when functions converge at points within their domain, and in agreement with the function itself at that point. It is a \emph{special case} of the algebraic limit theorem which concerns itself particularly with our notion of continuity.
+
+However now I must break from this narrative and reveal why we are really here, studying limits and continuity in particular; it probably won't surprise you that continuity is not merely an excuse to use limits over functions. While they are both extremely important concepts which we will reuse a lot later (limits all over analysis and continuity in topology), one of our primary motivations for establishing continuity here is as a precondition for differentiability, before we reach our discussion on calculus. If our goal is to find well defined derivatives as often and for as large a space as possible, we will want to be able to show that continuity applies as often and for as large a space as possible. Indeed, many of our most interesting function limits will be exactly our efforts to find derivatives for functions, but we are not yet there.
+
+To that end, there are a few more tools we should develop than the algebraic continuity theorem that will essentially eliminate any later need to engage with the underlying limit question when we prove continuity; this too is in line with our theory-building program, since successful tools (continuity) will abstract away the underlying constructions (limits) and expose only what we're interested in later. We are presently able to scale, add, multiply and divide continuous functions to obtain new continuous functions, but sometimes functions are also composed, i.e. $f(g(x))$. This much is relatively easy to show.
+
+\begin{label corollary}[Continuity Preserved under Composition]{ContinuityCompositionR}
+Let $f\colon A \to \reals$ be continuous at $p \in A \subseteq \reals$, and let $g \colon B \to \reals$ be continuous at $f(p) \in B \subseteq \reals$. Then $g\circ f(x) := g\big( f(x)\big)$ is continuous at $p$. If $f $ is continuous on $C \subseteq A$ and $g$ is continuous on $D \subseteq B$ where $f(C) \subseteq D$ then we say that $g\circ f\colon A \to \reals$ is continuous on $C$.
+\end{label corollary}
+
+\begin{my proof}{m}
+This follows from the sequential characterization theorem.
+
+Since $g$ is continuous at $f(p)$ and $f$ is continuous at $p$, any sequence $(b_n)_{n\in \nats}$ in $B$ converging to $f(p)$ will satisfy $g(b_n) \to g\big(f(p))$ as $n\to \infty$, and any sequence $(a_n)_{n\in \nats}$ in $A$ converging to $p$ will satisfy $f(a_n) \to f(p)$ as $n \to \infty$. To that end, we may pick $b_n = f(a_n)$ and find once again that $g\big(f(a_n) \big) \to g\big(f(p) \big)$ as $n \to \infty$, and indeed this should follow for any sequence $(a_n)_{n\in \nats}$ in $A$ converging to $p$.
+
+Since all valid sequences $(a_n)_{n\in \nats}$ converging to $p$ satisfy $g\big(f(a_n)\big) \to g\big(f(p)\big)$ as above, the sequential characterization theorem tells us that the function defined $g\circ f \colon x \mapsto g\big(f(x)\big)$ must have limit \begin{gather*}
+\lim_{x \to p} g\big(f(x)\big) = g\big(f(p)\big)
+\end{gather*}
+satisfying the definition of continuity.
+\end{my proof}
+
+%One more thing should be noted before we move on, connecting our discussion about intervals in the previous section to our discussion about continuity here, as well as paving the road for a future discussion of topology and of functional analysis. And that is that, just as we described continuity as implying that the graph of a function involves one continuous stroke of a pen, we should expect that any given continuous stroke on the input (i.e. an interval) should result in 
+
+Next: \begin{itemize}
+\item Intermediate Value Theorem
+\item Preservation of intervals
+\end{itemize}
+
+\subsection{Section Appendix: Series, and Pointwise/Uniform Convergence}
+(WIP)
 
 
 \end{document}

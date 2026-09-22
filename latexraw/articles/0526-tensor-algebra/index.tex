@@ -17,31 +17,422 @@
 
 \emph{The following is the article version of a talk given on 05/15/26. The intended audience of the talk is a split demographic of programmers/machine learning engineers and various levels of academicians/hardware engineers. The article is structured not as a comprehensive introduction to the field but as a collection of intuitional statements of where to place each idea and what to use it for. This article is not intended to give a one-to-one correspondance with the content of the talk, but rather to formally detail the scaffold of the talk. Accordingly, it is written to supplement the talk and to be able to stand on its own as a resource, but not as a transcript or an intrinsically motivated text.}
 
-rough structure:
-\begin{itemize}
-\item motivations
-\item what is standard linear algebra \begin{itemize}
-\item a monoid (generators and relations) and a monoid homomorphism,
-\item a group and a group homomorphism
-\item a vector space (and thus linear maps)
-\item what a vector space is not (normed, inner product, orthogonality, etc.)
-\item what a vector space has (linear independence,
-\end{itemize}
-\item an algebra
-\item tensor product and kronecker product
-\item tensor algebra basis vectors
-\item antisymmetric tensor products, symmetric tensor products, bilinear forms, sharps, flats
-\item tensor indices and invariant quantities
-\item tensor algebra fields
-\item exterior algebra and the exterior derivative
-\item the liebnitz determinant formula
-\end{itemize}
-
 Tensors are famous, alongside other mathematical concepts such as \dquote{monads}, for being famously poorly explained. In particular, the adage stated is usually \dquote{a tensor is an object that transforms like a tensor}, meaning nothing except those who already know what a tensor is. Almost as bad, arguably worse than that depending on where you stand, are those who will show you tensor index notation and tell you that this is all that a tensor is.
 
 The answer to what a tensor is, as with all things, is somewhere in between and in an entirely different direction. In particular, what I will argue here is that the reason for all this confusion lies in certain colloquial assumptions about vectors, in particular that they are roughly like a column matrix. In a broader geometric picture, we will see the concerns that motivate one to use tensors, and why they are discussed in such confusing ways.
 
 Ultimately, this will enable us to arrive at a framework which explains why concepts such as the determinant or cross product with such ideal geometric properties are defined or calculated in such strange ways, as well as helping us to better understand what vectors and linear transformations are.
+
+\subsection{Part 1: Standard Linear Algebra with a focus on the Algebra}
+
+In this section we will build up some of what is going on under the hood of linear algebra, trying to keep the algebraic perspective at the forefront of our minds and thus dispelling some myths and inappropriate intuitions.
+
+To that end, we will start with re-explaining what a vector space is with careful attention to describing it in formal terms so we will know precisely what it is and precisely what it is not. To do that, we will start with monoids, show how monoids include all groups, and then how groups include all vector spaces.
+
+\subsubsection{Monoids}
+
+A monoid, despite the name, is not so scary a beast. We will follow the exposition that a monoid is nothing but a choice of alphabetic symbols and a set of equivalences on the words that can be written with those alphabetic symbols.
+
+\begin{definition}[Monoid]
+Let $M$ be a set together with a binary \squote{multiplicaton} operation on any two elements $x,y \in M$ such that $x \cdot y \in M$, or $xy \in M$ for short, so that this multiplication never produces something outside of $M$. We call $M$ a \textbf{monoid} if the multiplication operation obeys the following desireable properties: \begin{itemize}
+\item (Identity) There exists an element $e\in M$ called the \textbf{identity} which has the property that for all $x \in M$ we have $ex = x$ and $xe = x$.
+\item (Associativity) For any $x,y,z \in M$, the order in which we evaluate multiplications within the sequence $x\cdot y \cdot z$ does not matter, i.e. \begin{gather*}
+(xy)z = xyz = x(yz)
+\end{gather*}
+\end{itemize}
+Monoids always admit a (non-unique) \textbf{presentation} $M = \langle A \mid R \rangle$ of a set of symbols $A$ called an \textbf{alphabet} and a set of \textbf{relations} (or reduction rules) that tell us which sequences of multiplications of symbols are equal to one another. In this way, every element of the monoid is considered a \textbf{word} composed of symbols from the alphabet, or \textbf{generated} by that alphabet.
+\end{definition}
+
+We'll focus on discussing monoids in terms of these presentations, beginning with the simplest example, the \textbf{free monoid}. The free monoid is any monoid defined by a presentation in whicch the relation set $R$ is the emtpy set, i.e. there are no relations; this is great since we don't need to explain how those work yet.
+
+If our alphabet consists of the symbol $A = \{a \}$, then the generated monoid $M = \langle a \rangle$ consists of the identity $e \in M$ (as required by axioms), $a e = e a = a$, and all other $a x$ or $x a$ where $x \in M$. But since all elements of $M$ are constructed in this way, from this symbol $a$, all we are really able to do in this free monoid is count the number of $a$ symbols applied, and any attempt to look inside the selection of a $x \in M$ shows that it is either $a$ or $aaa$ or some $a^n$ for $n$ as a counting number. The formal way to say what we have discovered is that \squote{the free monoid on one generator is equivalent to the counting numbers} since we have $0 \sim e$, $1 \sim a$, $2 \sim aa$, etc.
+
+Free monoids are called such because they are \textbf{freely generated}, and their elements are defined exclusively by the sequences of letters from the alphabet; due to this, they are generally infinite sets. The case of a free monoid in one generator is unusually simple to wrap our head around in free monoids; it is not the case that a free monoid in two generators is equivalent to pairs of counting numbers; we can achieve this with the use of relators, but first let us focus on what exactly happens when indeed we do have a free monoid on two generators.
+
+When our monoid was $\langle a \rangle$, we could write long sequences as $aaaaa=a^5$, but this was merely notation. This notation does not help us much with the words of a free monoid on two generators, such as $\langle a, b \rangle$ which has words such as \begin{gather*}
+aabbbaaaabbbbb = a^2 b^3 a ^4 b ^5 \in \langle a, b \rangle\\
+abababababababa \in \langle a, b \rangle
+\end{gather*}
+As you can see, it is clear that the free monoid on two generators is not only infinite in the sense that it corresponds to counting numbers, but also in the sense that we can make these sequences as long as we want, alternating between $a$ and $b$ so that no nice way to rewrite the word exists. Indeed, there are a few things we can do about these kinds of problems once we start playing with relators, but before that, let's motivate monoids a little.
+
+As you may have noticed, monoids are in some sense \emph{too general}, as they have so little structure that they could superficially describe a lot of things without particularly telling us much about the thing itself. Free monoids in particular may as well describe \emph{string concatination}. But this is an interesting example, since some strings, namely code in a programming language, clearly follows cases where some strings are equivalent to other strings. For instance, two imperative statements such as \texttt{x = 1; x = x + 1;} is clearly equivalent to \texttt{x = 2;}. If we think of our code as built out of an alphabet $A = \{\texttt{x},\texttt{=},\texttt{+},\texttt{1},\texttt{2},\texttt{;}\}$ then it is obvious we would want certain sequences of characters to be equivalent to other sequences of characters, such as \texttt{2} and \texttt{1+1}. In this case, we might define our little language as a monoid $M = \langle A \mid R \rangle$ with the relator set $R$ containing such relations as $\{(\texttt{1+1},\texttt{2}), (\texttt{x = 1; x = x + 1;},\texttt{x=2;}),...\}$ which instructs us on how to take a chunk of code and write it in a simplified form.
+
+While certainly a valid and interesting application of monoids, formal languages are perhaps better handled by the fields of lambda calculus and rewriting systems, the latter of which is particularly concerned with when a program is written correctly and its reducibility to a final \squote{normal} form; we will instead take monoids in a direction more towards group theory.
+
+Our earlier problem with free monoids being a pain to write out could have been remedied by simply saying \squote{let's define a new symbol, $c$, and we say that $c = ab$ so that $abababab = c^4$}. This is entirely valid, except that it no longer speaks about free monoids. The new symbol $c$ with this assignment effectively defines the monoid $\langle a,b,c \mid \{c=ab \} \rangle$, which is equivalent to the free monoid on two generators, but clearly a different presentation. Recall we noted in the definition that monoid presentations are not unique.
+
+\subsubsection{Groups}
+
+If instead we had a monoid such as $\langle a,b \mid ab = e, ba = e \rangle$ then we could do something interesting: we could change the symbol we write for $b$ to $a^\inv$ with the understanding that $ab = a (a^\inv) = e$ and $ba = (a^\inv) a = e$, effectively reinterpretting one of our generators as the inverse of the other. When all of our generators have their own inverses, the monoid we are describing can be used to model reversible transformations of some system, such as rotations or translations. For instance, we may describe $90^\circ$ rotations by the monoid $\langle a \mid a^4 = e \rangle$, implying that $a^3 = a^\inv$. Algebraic structures such as these are called \emph{groups}.
+
+\begin{definition}[Groups]
+Let $G$ be a set together with a binary \squote{multiplicaton} operation on any two elements $x,y \in G$ such that $(xy) \in M$, so that this multiplication never produces something outside of $G$. We call $G$ a \textbf{group} if the multiplication operation obeys the following desireable properties: \begin{itemize}
+\item (Identity) There exists an element $e\in G$ called the identity which has the property that for all $x \in M$ we have $ex = x$ and $xe = x$.
+\item (Associativity) For any $x,y,z \in G$, the order in which we evaluate multiplications within the sequence $x\cdot y \cdot z$ does not matter, i.e. \begin{gather*}
+(xy)z = xyz = x(yz)
+\end{gather*}
+\item (Inverses) For any $x \in G$ there exists $x^\inv \in G$ such that $x x^\inv = x^\inv x = e$, so every element in $G$ has an inverse in $G$.
+\end{itemize}
+Finite groups always admit a (non-unique) group presentation $G = \langle A \mid R \rangle$ of an alphabet $A$ and a relator set $R$ (and often still admit a presentation when they are infinite). A group presentation $\langle A \mid R \rangle$ can be considered to be a monoid presentation \begin{gather*}
+\langle A, A^\inv \mid R, \{ a a^\inv = e \mid a \in A, a^\inv \in A^\inv \} \rangle
+\end{gather*}
+where $A^\inv$ is a matching inverse alphabet of symbols inverse to those in $A$. Since groups always have inverses, relators such as $a = b$ are often written instead as $ab^\inv = e$ and so it is common for relator sets not to include relations explicitly but rather words/terms which are equal to zero; i.e. often one writes $a b^\inv$ implied equal to $e$ in $R$ instead of $a = b$.
+\end{definition}
+
+These are the groups of group theory, which we discussed \hyperlink{https://clockssugars.blog/articles/0326-matrixgroups/}{in a previous talk}, albeit from a different perspective.
+
+Previously, and it bares reminding here too, we emphasized that one of the significant reasons that group theory is valuable is that it studies the decomposition of groups, i.e. the separation of sets of reversible symmetries into actions which one might think of as \squote{orthogonal} to one another; this orthogonality can be made literal if the group we are studying is a vector space (or more generally commutative, e.g. a \squote{vector space} of integers). One of our greatest tools in identifying these separable subgroups, in particular the quotient groups and the normal groups we had to factor out of the group to get them, was the \textbf{group homomorphism}.
+
+A group homomorphism is a map from a group that can be said to preserve the structure of that group. It is defined formally by being a function $f \colon G \to H$ obeying the property that any $g,h \in G$ have $f(gh) = f(g) \cdot f(h)$ i.e. multiplication before the function is the same as multiplication after the function. When this is the case, we can guarentee that the output set $H$ also satisfies the properties of a group, meaning among other things that any multiplication within that set will remain within it. 
+
+We will not be getting into the minutia or usefulness of groups in abstract today, but we will notice that by introducing a group presentation, we have a very efficient way of representing our group homomorphism. Rather than thinking of it as a mapping from each possible input to each possible output, with our understanding that groups are just monoids with inverses, and monoids are themselves merely sets of words generated by an alphabet up to some reduction rules, we would hope that a homomorphism obeying $f(gh) = f(g) \cdot f(h)$ would have this property on the generator alphabet too. What that would mean is that every word in the group, and its underlying monoid, could be reduced to a sequence of $f(a) f(b) f(c)... $ for some set of generators $a,b,c,...$, and thus choosing the output of the generators would fully define the homomorphism. Indeed, we can do this.
+
+\begin{theorem}[Von Dyck]
+Let $G = \langle A \mid R \rangle$ and $f_A \colon A \to H$ a function into a group $H = \langle B \mid Q \rangle$. If each relator in $R$ in its alphabetic word form $a^n b^m ... z^k$ has $f_A(a)^n f_A(b)^m ... f_A(z)^k = e_H$ the identity in $H$, then $f_A$ extends to a homomorphism $f\colon G \to H$.
+\end{theorem}
+
+However the intention here is not to spend too much time talking about the structure of groups; what we aim to do is merely to frame groups as an algebraic abstraction consisting of sets of symbols and sets of symbolic transformations. When we see $(ab)c$ we know we can rewrite $a(bc)$. When we see $aa^\inv$ we know we can rewrite the identity $e$. Irrespective of applications or intuitions we can and do place on groups, they are a system of symbolic manipulation on those circumstances that groups may aim to model.
+
+This framing is especially important as we move to vector spaces, which we will try to think of first as groups, taking great care not to push onto them any geometric intuitions that are not yet appropriate; indeed we will see that many common assumptions about vector spaces borrow from additional structure which is obvious from a euclidean perspective, and also from a matrix perspective, but isn't actually in the definition anywhere.
+
+\subsubsection{Vector Spaces, and Unlearning Orthogonality}
+
+\begin{definition}[Vector Space]
+Let $V$ be a group which is \textbf{commutative}, i.e. we write its group multiplication as $u + v$ and it has relations such that any $u,v \in V$ satisfy $u + v = v + u$. We say that $V$ forms a vector space (on $\reals$) if it also has \textbf{scalar multiplication} $\square \cdot \square \colon \reals \times V \to V$ such that the following properties are obeyed: \begin{itemize}
+\item (Scalar associativity) if $a,b \in \reals$ and $v \in V$ then $a(b v) = (a\cdot b) v$
+\item (Scalar identity) for all $v \in V$, we have $1v = v$
+\item (Scalar distributivity) if $a\in \reals$ and $u,v \in V$ then $a(u + v) = au + av$
+\item (Vector distributivity) if $a,b \in \reals$ and $v \in \reals$ then $(a + b) v = av + bv$
+\end{itemize}
+Unlike discrete groups, vector spaces are \textbf{infinitessimally generated}, since for any $v \in V$ there exists $(1/2)v \in V$, which can be shrunk arbitrarily. Instead of a group presentation, a vector space may often be written as the \textbf{span} of a set of vectors which may form a \textbf{basis}. In this case, such a basis $\{v_1,\dots, v_n \}$ allows us to say $V = \mathrm{span}\{v_1,\dots, v_n \}$, which is the closest we get to a presentation.
+\end{definition}
+
+At least a few things can fall into place immediately. For instance, the condition of a \emph{group homomorphism} becomes no more than familiar linearity since writing the group multiplication operator as $+$ yields $f(u+v) = f(u) + f(v)$. In other words, linear functions from one vector space to another get their properties from being group homomorphisms; in particular, this is why matrix multiplication behaves the way that it does.
+
+With some other things, we have to be cautious. You are probably used to thinking of vectors as column matrices, and it is certainly true that column matrices satisfy the conditions above to form a vector space. However, column matrix vectors come with a number of assumptions baked into them; they tend to assume an orthogonal basis, which in turn implies they assume an inner product. For matrices this inner product is $\langle u,v \rangle = u^T v$, although it is also the case that a new inner product can be defined with a matrix $A$ as $\langle u,v \rangle_A = u^T A v$ so long as the matrix $A$ is symmetric and has the property that all non-zero $v \in V$ will have $v^T A v$; we'll get back to that in a little bit.
+
+\begin{gather*}
+u \cdot v = u^T v = \sum_{i} u_i v_i
+\end{gather*}
+(If $u$ and $v$ are indeed column matrix vectors then each row of the column matrix can be treated as a mere number which we write $u_i$ or $v_i$ for the item in the $i$'th row. In this way, standard matrix multiplication in this situation can be expressed as a sum over all the rows, taking the product of the $i$'th element of $u$ with the $i$'th element of $v$. We call this \textbf{index notation}, since the operations are only between familiar real numbers rather than any abstractions such as vectors or matrices.)
+
+Unfortunately the expectation that there is indeed an inner product is exceptionally loadbaring for the common conception of vectors. In a euclidean space of column matrix vectors, we tend to call the $u^T v$ inner product the \textbf{dot product} $u \cdot v$ and it has a few special properties. First, since $u \cdot u = u^T u$, the dot product of a column matrix with itself gives the square of each row's element in the column matrix, and their sum together, just like pythagorean distance without the square root. That is to say, $u \cdot u$ gives the square of pythagorean distance, so we write $\lVert u \rVert$ for this distance and call it the \textbf{norm} of $u$, and write $u \cdot u = \lVert u \rVert^2$.
+
+When we take a dot product $u \cdot v$ that is not with a vector against itself, we instead have a different property where $u \cdot v = \lVert u \rVert \lVert v \rVert \cos \theta$ where $\theta$ is the angle between the arrows $u$ and $v$ draw pointing out from the $0$ point of the vector space. Since cosine of $0^\circ$ is 1, when we take the dot product of two vectors pointing in the same direction, this cosine factor becomes $1$ and $u\cdot v$ becomes merely the product of lengths $\lVert u \rVert \lVert v \rVert$. This also means that the dot product can tell us when two vectors point in maximally different directions, which is not to say that they point in literally opposite directions, but rather that the arrows drawn by the vectors are at a right angle to one another, like altitude vs lattitude. In this case, since cosine of $90^\circ$ is zero, we can tell if this maximum different direction condition has been triggered because the dot product will just become zero.
+
+\begin{my proof}[For completeness{,} a proof that {$u\cdot v = \lVert u \rVert \lVert v \rVert \cos \theta$}]{m}
+For this, we need the cosine rule, a formula about triangles that says that the squares of the side lengths obey a property in relation to the other side lengths and the angles opposite them. For instance, if side length $a$ is on the opposite side of the triangle as the corner with angle $A^\circ$, and $b$ and $c$ are the other side lengths, then the cosine rules says that \begin{gather*}
+a^2 = b^2 + c^2 - 2bc \cos{A^\circ}.
+\end{gather*}
+If the corner with angle $A^\circ$ is at the origin, then the other corners can be considered vectors $u,v \in \reals^2$ pointing to their positions and the side length $a$ would be $\lVert u - v \rVert$. This means that the cosine rule tells us in vector language that \begin{gather*}
+\lVert u - v\rVert^2 = \lVert u \rVert^2 + \lVert v \rVert^2 - 2 \lVert u \rVert \lVert v \rVert \cos{A^\circ}.
+\end{gather*}
+
+Now, we have assumed that $u,v \in \reals^2$ but this assumption isn't actually significant; we can draw a triangle on a 2D plane which we find in any number of dimensions greater than or equal to 2, and similarly we can decompose a vector into three parts, the component going \squote{up} in the plane, the component going \squote{right} in the plane, and the component going out of the plane. Since we define this plane using these vectors, i.e. by the triangle, the component going out of the plane is zero since otherwise we'd just pick a new appropriate plane which actually puts us in the same plane with our triangle. This means, without loss of generality, we can treat $u,v$ as if they are in $\reals^2$ and proceed with index notation.
+
+Using \begin{align*}
+\lVert u - v \rVert &= (u_1 - v_1)^2 + (u_2 - v_2)^2 \\
+&= u_1^2 + v_1^2 - 2u_1 v_1 + u_2^2 + v_2^2 - 2u_2 v_2
+\end{align*}
+and
+\begin{align*}
+\lVert u \rVert ^2 &= u_1^2 + u_2^2 \\
+\lVert v \rVert ^2 &= v_1^2 + v_2^2 
+\end{align*}
+we can cancel $u_1^2$, $u_2^2$, $v_1^2$, $v_2^2$ terms in the above vector equation. This gets us to \begin{gather*}
+- 2u_1 v_1 - 2u_2 v_2 = - 2 \lVert u \rVert \lVert v \rVert \cos{A^\circ}
+\end{gather*}
+which we simplify to \begin{gather*}
+u_1 v_1 + u_2 v_2 = \lVert u \rVert \lVert v \rVert \cos{A^\circ}
+\end{gather*}
+and observe on the left hand side we have the index form of $u \cdot v$ in $\reals^2$.
+\end{my proof}
+
+We derive the concept of orthogonality precisely from this, or from any other inner product that we decide is canonical for a vector space, and the condition that two orthogonal vectors have $\langle u, v \rangle = 0$. From it, we establish the idea of an orthogonal basis, with the norm $\lVert u \rVert = \sqrt{\langle u, u \rangle}$ in hand we establish the idea of a \textbf{orthonormal basis} $e_1,e_2, \dots, e_n$ which are all $\lVert e_i \rVert = 1$ and $\langle e_i, e_j \rangle = 0$ unless $i=j$ in which case $\langle e_i , e_i \rangle = 1$. And because we expect there to be an inner product, and in turn a norm, and due to both of those, an orthonormal basis, we tend to feel comfortable turning a vector space into a space of column matrices if it was not already. After all, we could simply turn an abstract vector $v \in V$ into a column matrix by setting the $i$'th row of the matrix as $v \cdot e_i$, decomposing it into orthogonal components.
+
+All of this is valid, but only if we do have an inner product, which the definition of a vector space does not give us. Indeed the \squote{obvious} choice of an inner product in the case of column matrices as $\langle u, v \rangle = u^T v$ is only obvious because we are able to divide the vector into orthogonal components, its real number entries in each row of the column matrix, in the first place. And that, we were only able to do because we had an orthonormal basis; in effect, the \squote{naturalness} of the $u^T v$ dot product and the manner in which each orthonormal vector could be written as a one in a row and a zero in every other row only resulted because we had \emph{chosen} those vectors to be orthonormal. Without a norm, we can't actually say that the vectors have length one, or any length other than zero for that matter, and without an inner product we cannot say that the angle between two vectors is $90^\circ$ rather than perhaps $85^\circ$. Any attempt to assign lengths or angles to a vector space is equivalent to choosing a norm or inner product on it respectively, and unless it makes circumstancial sense for an applied problem, it is difficult to say that we should pick any one norm or inner product over any other.
+
+So we have learned that what a vector space is, fundamentally, does not say anything about which vectors are orthogonal, which vectors have what lengths, etc. which takes a lot of arrows out of our quiver. We move now to ask, what \emph{can} we say in a vector space? If we cannot compare vectors with the dot product, or compare their lengths with the norm, what tools of comparison exist?
+
+In fact we can still say quite a bit so long as we are willing to change our expectations about how one discusses a vector space. It is still meaningful to ask if two vectors are equal, and we know that our vector space enables scalar multiplication, addition, and has an zero vector $\vec 0$. So it remains meaningful to ask if a vector has non-zero length, since either $v = \vec 0$ or $v \neq \vec 0$, and it remains meaningful to ask if two vectors point in the same direction, since if they do there should exist a scale factor $k \in \reals$ such that $k u = v$. These techniques can be combined and used in more interesting ways as anyone who's taken a linear algebra class would know, but may not have fully appreciated. For instance, without an inner product or norm, we can still tell whether a basis $v_1, \dots, v_n$ is linearly independent by asking if there exists a set of non-zero scale factors $k_1, \dots, k_n \in \reals$ such that \begin{gather*}
+k_1 v_1 + \dots + k_n v_n = \vec 0
+\end{gather*}
+
+If any of these were to point in the same direction, or even in a direction which could be achieved by a combination of the other basis vectors, there would exist a set of $k_1, \dots, k_n$ such that that vector would be cancelled out by the others, and we would find a non-zero set of scale factors that still achieve a zero vector. That is not to say that we have a way to find the set of scale factors that would give this linear dependence if it existed, but we may ask the question and expect there to be a meaningful answer, even if finding it is problematic.
+
+What this amounts to is two things.
+
+Without a norm, without a way to measure the length of a vector, we have no meter stick. A vector in a vector space suffers from the same malody as a line segment with no unit of measurement on it; one can say that it \emph{has length}, but not what the length is because doing so would require choosing a unit of measurement, and the number resulting from that unit of measurement would not exist in abstract either. One does not say that a line is \squote{five long}, it can be five feet long, but in that case we are still describing an abstract distance by five units of feet, where one foot requires a definition, in our case given by history. The same thing even applies in the Cartesian plane, although this is generally obscured by an implicit choice of length unit, the numbers on the axes themselves. The caution here is not then to say that a vector does not have length, it clearly does, but that a vector does not intrinsically have length which is \emph{a number}.
+
+Without an inner product, we have no way to measure angles, other than to tell that two vectors point in the same direction (or precisely opposite directions). I am fond of the description that vector is at its conceptual core merely an arrow, with a length, and indeed a length that it makes sense to double, half, etc. but not to assign a number to; the failure to assign angles without an inner product does however mean that, for a vector in two dimensions for instance, there is no fixed 2D plane on which to view these arrows. Think of it like this: if we pick two linearly independent vectors $v_1$ and $v_2$ and choose $v_1$ to be the arrow that defines increments on the vertical axis, then we \emph{could} choose $v_2$ to define increments on a horizontal axis, but this choice would be the same as choosing an inner product in which they are orthogonal. We could just as easily pick another inner product in which $v_1$ is orthogonal to $v_1 + v_2$, in which case $v_2$ might be drawn on the diagonal axis of the 2D plane. The different choices of inner product we could make will always tell us that $v_2$ points in some direction other than $v_1$, but will remain unclear on how \emph{skewed} or \emph{sheared} $v_2$ is from the vector orthogonal to $v_1$. The comparison is from a square to a parallelogram; it is not that the points are rotated but rather the further points are away from the $v_1$ axis the more they may be shifted up or down.
+
+\figurepngwithcaption{./0514-wiki-Simple_shear}{Diagram from wikipedia depicting the shear of an area element (a square) in a material under shear deformation. Notice for our purposes that the left-to-right lines continue to point the same way whereas the down-to-up lines are transformed to a different notion of down-to-up, which still points in a different direction than left-to-right but at a different angle than before. So long as this arrow is not zero, any such a shear transformation on these axes represents a valid way to draw a two dimensional vector space.}
+
+Knowing all of this however tells us about the nature of the inner product and the nature of vector space basis. Once it is clear that an inner product is indeed not a canonical object and merely a choice, we can begin to disentangle the inner product from the basis. To do this, we'll start by re-establishing a notion of column matrix vectors which doesn't carry the standard implications of canonicity. Say in a vector space $V$ of dimension $n$ we have $n$ linearly independent basis vectors $v_1, \dots, v_n$; since they are linearly independent and, in a similar manner to group presentation, this basis \emph{spans} the vector space $V = \mathrm{span}\{v_1,\dots,v_n\}$, we know that \emph{any} vector $v \in V$ has a decomposition \begin{gather*}
+v = k_1 v_1 + \dots + k_n v_n
+\end{gather*}
+for some set of scalars $k_1, \dots, k_n \in \reals$. Without trying to \squote{look inside} these vectors $v_1, \dots, v_n$, we can represent the above sum in terms of matrices anyway by abuse of notation with a vector-valued matrix. \begin{gather*}
+v = \begin{bmatrix} v_1 & \dots & v_n \end{bmatrix} \begin{bmatrix} k_1 \\ \vdots \\ k_n \end{bmatrix}
+\end{gather*}
+
+If we insist that $v_i$ vectors \emph{are} column matrix vectors, even without trying to \squote{look inside} the columns and assign numerical components, we would conclude that this vector-valued row matrix is equivalent to an $n \times n$ matrix; we can't actually make it a matrix since matrices are rectangles of numbers, so we'll say that this \squote{matrix} is merely a \emph{linear map} $B \colon \reals^n \to V$. The coefficients $k_1, \dots, k_n$ here represented as a column matrix are indeed a \emph{valid column matrix vector} $\vec k $ in $\reals^n$, acted on by the linear map $B$ to translate it from a vector space we can talk about easily, column matrices, to one which is a bit harder to introspect on, $V$.
+
+Alright, so given a basis and a corresponding \emph{change} of basis $B$ which parameterizes a vector space via the basis, we can now choose an inner product on $V$. Now, the change of basis $B$ definitely implies an inner product; we could take the inverse of $B$, $B^\inv$ and define an inner product on $V$ by $\langle u,v \rangle_V = (B^\inv u)^T (B^\inv v)$, defined by the dot product on the column matrix vector space, but all this would do is tell us that the vectors $v_1, \dots, v_n$ are orthogonal. We'll do something a bit more interesting instead; if we choose some other inner product $\langle \square, \square \rangle_V$ which does not call $v_1, \dots, v_n$ an orthogonal basis, then this choice also defines an inner product on the column matrix space, allowing us to parameterize the inner product instead of the vector. That is, if we take two column matrix vectors $\vec k, \vec p \in \reals^n$, we know that $B \vec k, B \vec p \in V$, so in a sense we can extend the inner product on $V$ to $\langle \vec k, \vec p \rangle_{B} = \langle B \vec k, B \vec p \rangle_{V}$. This is kind of weird, because inner products are linear maps in both elements, so we should expect that if $\langle \vec k , \vec p \rangle_{B}$ is an inner product on column matrices, then there should exist a matrix $A$ such that $\langle \vec k , \vec p \rangle_{B} = \vec k^T A \vec p$.
+
+Giving a formal definition of an inner product, we can see some properties that this matrix will obey.
+
+\begin{definition}[Inner Product]
+Let $V$ be a (real) vector space. An inner product on $V$ is a map $g \colon V \times V \to \reals$ with the following properties: \begin{itemize}
+\item (Symmetry) Any $u,v\in V$ have $g(u,v) = g(v,u)$
+\item (Bilinearity) Any $u,v,w \in V$ have $g(u + v, w) = g(u,w) + g(v,w)$ and $g(u, v + w) = g(u,v) + g(u,w)$
+\item (Positive Definiteness) Any $v \in V$ which is not the zero vector has $g(v,v) > 0$.
+\end{itemize}
+\end{definition}
+
+Each of these properties reflect something we expect of a rule for comparing two vectors in a way that indicates lengths and angles; symmetry tells us that this comparison doesn't have a notion of which vector comes \emph{first}; positive definiteness tells us that when a vector is compared with itself, the inner product will tell us that the vector \squote{points in the same direction as itself}, and thus not give a negative number or a zero. The true reason for bilinearity of such a comparison rule is a little more sophisticated, but one way to think about it here is that when we choose an inner product and \emph{one} vector, $g(u, \square)\colon V \to \reals$, we effectively define a linear map that uses $u$ as a meter stick, comparing all input vectors to it; if a meter stick agrees that a meter is always a meter no matter how many meters it has already measured, then we expect the function to yield the same result even if we divide its input into many parts, apply the function on each part, then add them all back up again. In short, we expect the nature of this comparison to be \emph{linear}, and by symmetry, we expect it to be \emph{bilinear}.
+
+\figuresvgwithcaption{./0515-wiki-Gradient_1-form}{(From wikipedia) A depiction of a linear map $\alpha$ in $\reals^3$ defined by the standard inner product defining a meter stick in a direction, in the same way that an inner product with one argument defines a linear function waiting for a second comparator vector, using the first as a definition of a unit length. Importantly, this kind of meter stick is \emph{directed}, ignoring distances perpendicular to it, as an inner product does.}
+
+In fact, these kinds of linear maps which go from a vector space $V$ to $\reals$, easily generated by taking an inner product and giving it one but not two vectors, are called \textbf{covectors}, denoted $V^*$ and called the \textbf{dual space} of $V$. Since we can think of them as forming a space of directed meter sticks, covectors \emph{also form a vector space}, but with slightly different properties as we will see.
+
+Returning to our earlier project of learning to describe various abstract objects related to vector spaces in terms of matrices given some choice of a basis, we move now to describe what it means to change basis representation.
+
+Say we have two sets of linearly independent bases on $V$, $u_1, \dots, u_n$ and $w_1, \dots, w_n$, which just as $B$ defined a linear map $B \vec k = k_1 v_1 + \dots + k_n v_n$ interpretting column matrices as vectors, each have their own corresponding linear map $U \colon \reals^n \to V$ and $W\colon \reals^n \to V$ for the respective bases. Assuming the two linearly independent bases are not equal, they are in conflict over which column matrices define which vectors; each gives a different system for how one writes a vector down as numbers. Now, some linear map $A \colon V \to V$ can be turned into a $\reals^n \to \reals^n$ linear map, a matrix in particular, despite being defined in an abstract space by merely taking $U^\inv A U$. In effect, we turn a column matrix into a vector, apply $A$ and then turn it back. We could then test this $U^\inv A U$ linear map with various column matrices which are one in a single row and zero everywhere else to extract a $U$-representation of $A$. But we can also do this for $W$, and the $W^\inv A W$ matrix representation will disagree.
+
+This disagreement is perfectly fine as long as we acknowledge that it's happening; if we write the matrix $U^\inv A U$ as $A_U \in \reals^{n\times n}$ and $W^\inv A W$ as $A_W \in \reals^{n \times n}$, we have the change of basis formula $A_W = (U^\inv W)^\inv A_U (U^\inv W)$ where $U^\inv W \in \reals^{n \times n}$ since $W$ takes a column matrix and turns it into a vector in $V$, then $U^\inv$ turns it back. These $A_U$ and $A_W$ representations of $A$ now have the property that if we know $\vec k \in \reals^n$ satisfies $U \vec k = v \in V$, i.e. $\vec k = v_U$ it is the vector $v$ in the $U$ basis, then we can find $(Av)_U$ as $A_U v_U = (U^\inv A U) (U^\inv v)$. Our calculuations, no matter how abstract in the vector space, are made numerical, but at the cost that all of these calculations exist in a basis and must be translated in and out of that basis in order to remain meaningful on the actual vector space. In other words, these column matrix representations, or indeed these matrix representations in general of various objects such as the inner product, or a linear map, are \emph{simply lists of numbers}. They help us to keep track of where we are or what we are doing in a vector space, keeping track of arrows, rules for repointing arrows, comparing them, but only so long as we have agreed on a system of measurement, a basis. If we want to change system of measurement from $U$ to $W$, we require the change of basis matrix $(W^\inv U) \in \reals^{n \times n}$ so that $(W^\inv U) v_U = v_W$ or $(W^\inv U)^\inv A_U (W^\inv U) = A_W$.
+
+We are also interested in these numerical representations because they will draw the difference between covectors and vectors. If we want to say that covectors define, at least in the formal terms described above, \emph{a vector space} then we expect a lot of our discourse so far about what a vector space is or has without an inner product or norm. This includes, in particular, a basis of \textbf{functionals} (one of the names for covectors that emphasize their roles as linear maps). Whereas we could think of a linear map $U^\inv \colon V \to \reals^n$ as turning a vector into a column matrix representation, if we were to choose a linearly independent basis in the dual space $f_1, \dots, f_n$, we could perform the same operation before, saying that any covector $f \in V^*$ can be represented as a sum in the basis $f = k_1 f_1 + \dots + k_n f_n$, then form a column matrix from \begin{gather*}
+f = \begin{bmatrix} f_1 & \dots & f_n \end{bmatrix} \begin{bmatrix} k_1 \\ \vdots \\ k_n \end{bmatrix}.
+\end{gather*}
+We may however not want to. If we are to try to keep the structure of out matrix representations as helpful as possible, it is clear that linear maps of the form $\reals^n \to \reals$ mapping column matrices to numbers are simply \emph{row matrices}, so it is more desirable to put the $k_1,\dots, k_n$ coefficients into the row matrix and imagine on the right a \squote{covector valued column matrix}. \begin{gather*}
+f = \begin{bmatrix} k_1 & \dots & k_n \end{bmatrix} \begin{bmatrix} f_1 \\ \vdots \\ f_n \end{bmatrix}.
+\end{gather*}
+In this case, one still imagines that $f$ describes a column matrix vector $\vec k \in \reals^n$ but we only care about this as a row matrix vector $\vec k^T$. The main reason we want this row matrix in the first place though is so that, for a covector $f \in V^* = V \to \reals$ and a vector $v \in V$, we can actually act $f$ on $v$ and find $f(v) \in \reals$. Just as before this operation can only be done on the matrix representation if the basis agree; we calculate $(Av)_U$ only with $A_U v_U$, and if we tried $A_U v_W$ then we use metric data as feet and our space mission fails historically, that is to say we get something that doesn't mean anything due to incompatible units and waste everyone's time. The trouble is that we'd like to figure out what $f_U$ would be, given that $U$ is defined by a vector basis, and above we have only figured out how to define a covector basis.
+
+This problem is somewhat deceptive, principally because if you haven't shaken the canonicity of column matrices and the assumption that we always have a preferred inner product out of your head, it will seem obvious what to do here. If we assumed that the vectors $u_1 \dots u_n$ that define $U\colon \reals^n \to V$ are orthogonal, i.e. we select an inner product $\langle \square, \square \rangle_U$ and say that our basis $f_1, \dots, f_n$ is defined by $f_i = \langle u_i, \square \rangle$, then this works perfectly, our $\vec k^T = f_U$ is already in the $U$ basis. Attempting to represent $f(v)$ given the basis yields as desired \begin{align*}
+f &= \left( \begin{bmatrix} k_1 & \dots & k_n \end{bmatrix} \begin{bmatrix} f_1 \\ \vdots \\ f_n \end{bmatrix} \right) \left( \begin{bmatrix} u_1 & \dots & u_n \end{bmatrix} \begin{bmatrix} p_1 \\ \vdots \\ p_n \end{bmatrix} \right) \\
+&= \begin{bmatrix} k_1 & \dots & k_n \end{bmatrix} \begin{bmatrix} f_1(u_1) & f_1(u_2)  & \dots & f_1 (u_n) \\ f_2(u_1) & f_2(u_2) & \dots & f_2(u_n) \\ \vdots & \vdots & \ddots & \vdots \\ f_n(u_1) & f_n u(u_2) & \dots & f_n(u_n) \end{bmatrix} \begin{bmatrix} p_1 \\ \vdots \\ p_n \end{bmatrix} \\
+&= \begin{bmatrix} k_1 & \dots & k_n \end{bmatrix} \begin{bmatrix} \langle u_1,u_1 \rangle_U & \langle u_1,u_2 \rangle_U  & \dots & \langle u_1,u_n \rangle_U \\ \langle u_2,u_1 \rangle_U & \langle u_2,u_2 \rangle_U & \dots & \langle u_2,u_n \rangle_U \\ \vdots & \vdots & \ddots & \vdots \\ \langle u_n,u_1 \rangle_U & \langle u_n,u_2 \rangle_U & \dots & \langle u_n,u_n \rangle_U \end{bmatrix} \begin{bmatrix} p_1 \\ \vdots \\ p_n \end{bmatrix} \\
+&= \begin{bmatrix} k_1 & \dots & k_n \end{bmatrix} \begin{bmatrix} 1 & 0  & \dots & 1 \\ 0 & 1 & \dots & 0 \\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \dots & 1 \end{bmatrix} \begin{bmatrix} p_1 \\ \vdots \\ p_n \end{bmatrix} \\
+&= \begin{bmatrix} k_1 & \dots & k_n \end{bmatrix}  \begin{bmatrix} p_1 \\ \vdots \\ p_n \end{bmatrix}
+\end{align*}
+owing from the orthogonality of $\langle u_i, u_j \rangle_U$. Using such a framework, one would assume that an abstract dual space of linear functions  $V^* = V \to \reals$ has a canonical basis wherever $V$ has a basis.
+
+What we have presented above is a simplified version of the Riesz representation theorem, or at least the intuition people tend to internalize from it. Formally, the Riesz representation theorem tells us that a \emph{Hilbert space}, a special kind of vector space which \emph{has an inner product} and has converging limits, has a way to turn functionals $f$ into a vector $w_f$ such that $f(v) = \langle w_f, v \rangle$. But our exposition above and the Riesz representation theorem both only function \emph{with an inner product}. Once again, we have to point out that we have imported a notion of orthogonality in order to do this.
+
+Nonetheless, as long as we don't fixate on a notion of orthogonality as canonical in any way, we can choose a basis such as $U$ and allow it to define an inner product, a notion of orthogonality, purely for the sake of calculations; its just that the onus will be on us to remember that this orthogonality is a false one, and that if any true notion of orthogonality actually exists in our system, this orthogonality will disagree with it. We send linear maps $A \colon V \to V$ to representations $A_U, A_W$, we send vectors to $v_U$, covectors to $f_U$, and linear map results $A_U v_U = (Av)_U$. But note something interesting: if $f(v)$ is a number as is appropriate for $f \colon V \to \reals$, then $f_U(v_U)$ should be that same number, and a number does not need a basis; in other words we do $f_U(v_U) = x$ and get a $x \in \reals$ that is not $x_U$, it's just $x$, a number no matter what basis you choose on $V$. These numbers are \textbf{invariant} to different perspectives, bases, inner products, on our space, and so if we want to calculate them, it actually doesn't matter what basis we use to do it, and so we are free to choose an orthogonal basis.
+
+This concern with invariance to a basis can even be applicable when we \emph{do} have an inner product if our vector space is troublesome to develop intuitions for; one of the major examples of this is \emph{Minkowski space}, the vector space describing the space-time of special relativity. In a normal vector space, an inner product doesn't necessarily fix an orthogonal basis, but any orthogonal basis can be rotated and flipped into any other one; in Minkowski space, we have an unusual inner product which breaks some of our earlier established rules, since vectors $(t_1,x_1,y_1,z_1)$ and $(t_2,x_2,y_2,z_2)$ have inner product $t_1 t_2 - x_1 x_2 - y_1 y_2 - z_1 z_2$, with the time component positive and the rest of the inner product negated. In this case, any basis can still be \squote{rotated} into any other basis, except that these rotations aren't always the typical circular rotations which maintain distance; the rotations associated with preserving this inner product are also \emph{hyperbolic rotations}, which cause length contraction and time dilation in space time. For more information in that direction, look into hyperbolic trigonometry.
+
+But back to covectors, it is apparent to us that $f_U$ as a row matrix must follow different change-of-basis-representation rules to the column matrix vectors. For $v \in V$ we had $v_U = U^\inv v \in \reals^n$, and $v_W = W^\inv U v_U$. But we also had for linear maps $A_U = U^\inv A U$, and thus $A_W = (W^\inv U) A_U (W^\inv U)^\inv$. It is easy to think of a row vector as a functional $\reals^n \to \reals$, but it is also reasonable to think of a choice of a vector as itself an arrow by which we construct many arrows in the same direction of different lengths, $\reals \to \reals^n$, in which case we have used the matrix structure of the column vector to make $v_U$ look like a very thin matrix $A$. Put in this context, the $(W^\inv U)$ in $(W^\inv U) v_U = v_W$ and the $(W^\inv U)$ in $(W^\inv U) A_U (W^\inv U)^\inv = A_W$ are the same, merely the transformation of the \squote{output}, with square matrices and column matrices only distinguished by their input spaces being $\reals^n$ and $\reals$ respectively. If covectors are to be row matrices, then it makes sense to transform the \emph{inputs} in the same way $A$ does, writing $f_W = f_U (W^\inv U)^\inv$.
+
+This lets us point to one of the key differences between covectors and vectors with respect to the underlying geometry of a space, the geometry that might indicate which notion of orthogonality is \emph{real} rather than merely a fiction for calculations. Imagine for a moment that $w_i = 2 u_i$, i.e. the $W$ basis describes a system in which our meter sticks are twice as long and thus give a smaller number for the same distance; we would expect then that $v_W$ as a numerical representation would give numbers half the size as $v_U$, and indeed we see this since $v_W = (W^\inv U) v_U$ and $W = 2U$ would imply $ W^\inv = U^\inv/2$, thus $W^\inv U = (1/2)I$, and $v_W = (1/2) v_U$. But since covectors take an inverse of this $W^\inv U$ transformation matrix, we see $f_W = 2 f_U$. Changing the basis by scaling things up causes the representations of vectors, the numerical \emph{components} to change in the \emph{opposite way}, whereas the components of covectors change in the \emph{same way} as the change in the basis. For this reason, vectors and covectors are respectively called \textbf{contravariant} and \textbf{covariant}.
+
+\subsection{Tensor Algebra}
+
+A disclaimer must be made that I learned tensor algebra for the purposes of differential geometry, so the notation used here may not be perfectly standard with algebraically motivated treatments of the topic.
+
+\subsubsection{Tensor Product}
+
+With all of these concepts and reframings built up, we will now see that we have done the heavy lifting in advance. We will see that what a tensor is is merely the general descriptor of all of the objects we have already been discussing, the vectors, the linear maps, the inner products, with a focus on their description as a fundamentally algebraic and geometric object which has no respect for any choice of basis or representation for them. It is here that we can finally say the reason why people say tensors are \squote{objects that transform like a tensor} is because tensors are all of the objects we have described above and all such combinations of them such that change of basis rules are obeyed.
+
+\begin{definition}[Algebra]
+Let $V$ be a vector space. We say that $V$ is an algebra if it has a multiplication $\square \times \square \colon V \times V \to V$ with the following properties \begin{itemize}
+\item for $u,v,w \in V$ we have $(u + v) \times w = u \times w + v \times w$
+\item for $u,v,w\in V$ we have $u \times (v \times w) = u \times v + u \times w$
+\item for $a,b \in \reals$ and $u,v\in V$ we have appropriate scalar multiplication linearity rule $(a \cdot b)(u \times v) = (au) \times (b v)$
+\end{itemize}
+\end{definition}
+
+There can be a few meanings of \squote{algebra} in mathematics; there is highschool algebra, referring often merely to symbolic manipulation of numbers or variables representing numbers; there is the philosophy of studying objects based on their symbolic properties, which we have focused on here; and there is the oft contracted \emph{algebra over a field}, algebra for short, which is merely a vector space imbued with multiplication. Importantly, this multiplication distributes in the way we expect multiplication to, but does not have associativity, i.e. one cannot assume $(u \times v) \times w = u \times (v \times w)$, so the order in which things are bracketed may matter, as in $\reals^3$ with the cross product algebra.
+
+That last concern will not be a problem for us, as we will from hereon work in the space of \emph{associative algebras}.
+
+\begin{definition}[Graded Free Tensor Algebra]
+Let $V$ be a vector space. We denote $\bigotimes V$ as the graded free algebra on $V$ which is an algebra with the \textbf{tensor product}, obeying the following properties: \begin{itemize}
+\item The real numbers are a subset of $\bigotimes V$
+\item The vector space $V$ is a subset of $\bigotimes V$.
+\item Any two vectors $v_1, v_2 \in V$ form the tensor product $v_1 \otimes v_2 \in \bigotimes V$, which is $v_1 \otimes v_2 \notin V$, $v_1 \otimes v_2 \notin \reals$.
+\item $\square \otimes \square \colon \bigotimes V \times \bigotimes V \to \bigotimes V$ is an associative multiplication, i.e. $(u \otimes v) \otimes w = u \otimes (v \otimes w)$ for $u,v,w \in \bigotimes V$, that forms an associative algebra with $\bigotimes V$, thus obeying all of the same linearity and distributivity rules.
+\end{itemize}
+
+We may also denote $\bigotimes^k V$ for a counting number $k \ge 0$ as the subset of $\bigotimes V$ composed of exactly $k$ vectors in $V$. For example, if we have $v_1, \dots, v_k \in V$, then $v_1 \otimes \dots \otimes v_k \in \bigotimes^k V$. Each $\bigotimes^k V$ forms a vector space under addition but not an algebra since, e.g. $v \in V$ has $v \otimes (\bigotimes^k V) \subset \bigotimes^{k+1} v$ moving each \squote{grade} up one. In this way, we say that $\bigotimes^0 V = \reals$ and $\bigotimes^1 V = V$.
+\end{definition}
+
+We've introduced the tensor product and tensor algebra in the same manner as a free monoid, a free group, and a symbolically defined vector space. That is to say, just as a vector space defined only by the presentation $V = \mathrm{span}\{ v_1, \dots, v_n \}$ can say very little about the \emph{shape} of things within it other than writing vectors as linear combinations $v = k_1 v_1 + \dots + k_n v_n \in V$, i.e. $V$ is \emph{generated} by its spanning vectors in a similar way to how a monoid is generated by an alphabet, the basic tensor algebra is generated by a vector space, with $u \otimes v$ not necessarily resolving or reducing to anything in the way we might naively want to think of \emph{a calculation}. Ultimately, $u \otimes v$ for $u,v \in V$ \emph{does} give us a new object, just as multiplying two big numbers could give us a much bigger number we've never seen before but isn't necessarily interesting other than telling us the structure of $\reals$ is a line. But we must begin to uncover what this structure is, line or otherwise, and what it would mean to say anything about the contents of $\bigotimes V$. What we provide here is a minimal structure that is a tensor algebra and no more, just to see what happens.
+
+The first basic insight to make is that while we can certainly compose elements of this tensor algebra using vectors in the base vector space $V$, not all elements in the tensor algebra can be written as merely a sequence of tensor products. For instance, if $u,v \in V$, consider the element $u \otimes v + v \otimes u \in \bigotimes V$. We could certainly try things like $(u + v) \otimes (u - v) = u \otimes u - u \otimes v - v\otimes u + v \otimes v$ but none of these will yield precisely $u \otimes v + v \otimes u$.
+
+In fact, a similar situation is reflected in matrices. We can picture whats going on by choosing the vector space $\reals^n$ and considering only the first three grades of the graded free tensor algebra, $\bigotimes^0 \reals^n = \reals$, $\bigotimes^1 \reals^n = \reals^n$ and $\bigotimes^2 \reals^n = \reals^{n \times n}$, which look like numbers, columns, and square matrices respectively. Using this, we can at least write for our intuitions each tensor product $u \otimes v$ as $u v^T$, the outer product \begin{gather*}
+\begin{bmatrix} u_1 \\ \vdots \\ u_n \end{bmatrix} \begin{bmatrix} v_1 & \dots & v_n \end{bmatrix} = \begin{bmatrix} u_1 v_1 & \dots & u_1 v_n \\ \vdots & \ddots & \vdots \\ u_n v_1 & \dots & u_n v_n \end{bmatrix}
+\end{gather*}
+obeying standard matrix multiplication properties. Although we cannot represent the entire graded algebra this way (or at least, not without putting matrices in matrices), we can do experiments by hand, and similarly verify that some elements of the tensor algebra cannot directly be produced by a product alone. The analogy to our above example is that \begin{align*}
+\begin{bmatrix}
+	0 & 1\\
+	1 & 0\\
+\end{bmatrix}
+&= \begin{bmatrix}
+	0\\
+	1\\
+\end{bmatrix}
+\begin{bmatrix}
+	1 & 0
+\end{bmatrix} +
+\begin{bmatrix}
+	1\\
+	0\\
+\end{bmatrix}
+\begin{bmatrix}
+	0 & 1
+\end{bmatrix} \\
+&= \begin{bmatrix}
+	0 & 0\\
+	1 & 0\\
+\end{bmatrix} + \begin{bmatrix}
+	0 & 1\\
+	0 & 0\\
+\end{bmatrix}
+\end{align*}
+but there isn't really a way to make the off-diagonal matrix with only the exterior product; addition is needed.
+
+Before moving on, we should definitely mention the \textbf{Kronecker product}, which is \textbf{not a tensor product} but often uses the same symbol $\otimes$. The idea of the Kronecker product is to achieve some of the algebraic effects as tensor algebra without engaging in any of the geometric implications, so Kronecker products act only on matrices and simply make bigger matrices, with the rule $\otimes \colon \reals^{a \times b} \times \reals^{m \times n} \to \reals^{(am) \times (bn)}$. Some examples are given, and notice that this follows similar rules to the outer product, which itself owes from standard matrix multiplication, however the kronecker product palys with the shape a lot more: \begin{gather*}
+\begin{bmatrix}
+	a_1\\
+	a_2\\
+\end{bmatrix}
+\otimes
+\begin{bmatrix}
+	b_1\\
+	b_2\\
+\end{bmatrix} =
+\begin{bmatrix}
+	a_1b_1\\
+	a_2b_1\\
+	a_1b_2\\
+	a_2b_2\\
+\end{bmatrix} \\
+\begin{bmatrix} u_1 \\ \vdots \\ u_n \end{bmatrix} \otimes \begin{bmatrix} v_1 & \dots & v_n \end{bmatrix} = \begin{bmatrix} u_1 v_1 & \dots & u_1 v_n \\ \vdots & \ddots & \vdots \\ u_n v_1 & \dots & u_n v_n \end{bmatrix} \\
+\begin{bmatrix}
+	a_1&
+	a_2
+\end{bmatrix}
+\otimes
+\begin{bmatrix}
+	b_1&
+	b_2
+\end{bmatrix} =
+\begin{bmatrix}
+	a_1b_1&
+	a_2b_1&
+	a_1b_2&
+	a_2b_2
+\end{bmatrix}
+\end{gather*}
+
+The true richness of tensor algebra calls us to move beyond merely taking tensor products generated by a vector space itself. In order to do all the things with tensors we want to do, we'll need to take tensor products with covectors as well, and so we will need some general framework with which to consider vectors and covectors on the same level. One way to do this is to think of covectors as $V \to \reals$ linear maps and vectors as $\reals \to V$ linear maps, as we discussed before, but the much more common way to do this is actually to think of vectors as linear maps \emph{on the vector space of covectors}, i.e. vectors are $V^* \to \reals$. The way we would do this is a little silly, with $v \in V$ and $f\in V^*$ writing $v(f) = f(v)$, but at least algebraically it achieves the effect of making them similar. In this way, we would think of the graded free tensor algebra above as linear maps $u \otimes v \in \bigotimes^2 V$ as \textbf{multilinear maps} $u \otimes v \colon (V^*)^2 \to \reals$, taking $k$ covectors $f_1,f_2 \in V^*$ and giving $z(f_1, f_2) = u(f_1) \cdot v(f_2)$.
+
+\begin{definition}[Tensor Space]
+Let $V$ be a vector space and $V^*$ its dual space. A \textbf{tensor} is a multilinear map \begin{gather*}
+A \colon (V^*)^r \times V^s \to \reals
+\end{gather*}
+given counting numbers $r,s \ge 0$, or $A \in \mathcal T_s^r$ for short, forming a vector space under addition. Tensors have the tensor product $\otimes$ which maps $A \in \mathcal T_s^r$ and $B \in \mathcal T_b^a$ to $A \otimes B \in \mathcal T_{s + b}^{r + a}$. The tensor space embeds vectors and covectors within it as $V = \mathcal T^1_0$ and $V^* = \mathcal T_1^0$.
+\end{definition}
+
+None of the rules of tensor spaces that we've discussed so far are any different now that we include covectors in the tensor products; the only thing that is different is how the tensor behaves as a multilinear map: we now have things like $f \otimes v \in \mathcal T_1^1$ which act as a linear map consuming a vector $u$ and a covector $g$ and giving $f\otimes v(u,g) = f(u) \cdot v(g)$.
+
+Superficially this is not very exciting, but in fact what we have done is generalize every object we described previously. We find vectors in $\mathcal T^1_0$, covectors in $\mathcal T_1^0$. Importantly, we can leave out arguments to make new functions, so all $V \to V$ linear maps are merely $A \in \mathcal T_1^1$ which could take a vector and covector to give $A(f,v)\in \reals$ but if left without a covector argument are $A(\square, v) \in V = V^* \to \reals $ since we would get a $V^* \to \reals$ map owing to the missing argument, a co-covector, but we decided those are vectors. Inner products are now described as belonging to $\mathcal T_2^0$, since they take two vectors and give a number; additional rules apply to qualify as an inner product, namely symmetry and positive definiteness, but those properties also can be expressed in terms of the properties of the multilinear map, so the space of inner products is merely a subset of $\mathcal T_2^0$.
+
+In all of this, our earlier discussions about vector spaces, abstract linear maps, etc. all existing in dependent of a choice of a basis applies to tensors as well. We can at any point choose a basis $u_1, \dots, u_n$, define an inner product in which they are orthogonal and thus a dual basis $f_1, \dots, f_n$, and then probe a tensor $A \in \mathcal T_s^r$ for numerical elements via $A(f_{i_1}, f_{i_2}, \dots, f_{i_n}, v_{j_1}, v_{j_2}, \dots, v_{j_n})$, but $U$-representation will once again only make sense from the perspective $U$ lays out. This is the \squote{a tensor is an object that transforms like a tensor} trouble that people always talk about; it is merely the exact problem we have in vector spaces of dealing with change of basis operations, and avoiding treating any one basis as canonical, applied to multilinear maps that have to mix the change-of-basis rules of vectors and covectors. Indeed we saw this with square matrices, which had the change-of-basis rule $A_W = (W^\inv U) A_U (W^\inv U)^\inv$, with the change-of-basis pattern of a vector $v_W = (W^\inv U) v_U$ and a covector $f_W = f_U (W^\inv U)^\inv$ on both sides, and this is \emph{exactly} due to the fact that in the tensor framing, a square matrix is a $V^* \times V \to \reals$ style linear map.
+
+This also provides an important recontextualization of what a linear map is, and by extension, what a tensor at its core really is. Consider a linear map $V \to V$ with matrix representation $A_U \in \reals^{n \times n}$. If we were to act $A_U$ on a vector $v\in V$ or rather its representation $v_U$, we would see component-wise that the matrix calculation is \begin{gather*}
+(A_U v_U)_{i} = \sum_{j=1}^n (A_U)_{ij} (v_U)_j
+\end{gather*}
+which can also be interpretted as producing a linear combination of the columns of $A_U$, using the elements of $v_U$ as coefficients; this is exactly what we did when we defined $v_U$ as \begin{gather*}
+v = \begin{bmatrix} v_1 & \dots & v_n \end{bmatrix} \begin{bmatrix} k_1 \\ \vdots \\ k_n \end{bmatrix}
+\end{gather*}
+where in this case, the vector-valued row matrix literally forms a linear combination its columns, using the vector as coefficients. Equivalently, we thought of a covector as \begin{gather*}
+f = \begin{bmatrix} k_1 & \dots & k_n \end{bmatrix} \begin{bmatrix} f_1 \\ \vdots \\ f_n \end{bmatrix}.
+\end{gather*}
+and we could imagine taking the covector-valued column vector as a linear map (omitting the row vector coefficients), acting on a vector $v$ \begin{gather*}
+(Av)_U = \begin{bmatrix} A_{1, \square} \\ \vdots \\ A_{n,\square} \end{bmatrix} v = \begin{bmatrix} A_{\square,1}(v) \\ \vdots \\ A_{\square,n}(v) \end{bmatrix}.
+\end{gather*}
+
+Two clear interpretations arise from this: a linear map can be thought of as either a collection of arrows waiting to be told how much each should be magnified or shrunk before they are unified into a single arrow, or even better, a linear map is a collection of directed meter sticks paired with arrows, with each meterstick waiting to measure a single arrow, $v$, before using the number they get from this measuring to magnify or shrink their arrow, combining it into the whole, $Av$.
+
+I advocate for extending this interpretation, thinking of all tensors, vectors, covectors, linear maps, inner products, etc. as sets of combinations of directed meter sticks and arrows; if you are looking for an answer to \squote{what a tensor is}, this is mine. They are rules for taking arrows or measurement systems, producing measurements and using those to define new arrows or measurement systems.
+
+\subsubsection{Tensor Indices, Index Contraction, and Einstein Summation Notation}
+
+Nonetheless, it is at times desirable to pick a basis and do calculations element-by-element, either for numerical reasons or to prove something which will show that the choice of basis did not matter in that case, or even to do much more sophisticated tricks with tensors. When this needs to happen, mathematicians and physicists have a rule for deal with the mixed vector-covector nature of tensors.
+
+Let's say we have a basis $u_1, \dots, u_n \in V$ and a dual basis $f^1, \dots, f^n \in V^*$ so that $f^i(u_i) = 1$ and $f^i(u_j) = 0$ otherwise, departing from the notation we've used before where all identifying indices are written as subscripts. With basis vectors and covectors in particular, tensor index notation calls for writing basis vector indices as subscripts and basis covector indices as superscripts; this basis is arbitrary, but as discussed earlier, it is our connection to the underlying geometric space whereas the coefficients $k^1, \dots, k^n$ that form a given vector $v = k^1 u_1 + \dots k^n u_n$, now written with superscripts, are just numbers. The idea here will be to say that if we want to discuss $v$, a vector, an \emph{arrow} in a space, in terms of \emph{numbers}, we can use our meter-sticks $f^1, \dots, f_n$ to decompose it into separate arrow components $u_1, \dots, u_n$, but these meter sticks and arrow components and numbers $k^1 = f_1(v)$, $\dots$, $k^n = f_n(v)$ are arbitrary with respect to $v$; the whole point of this notation is that we say that all arbitrariness is gone, made irrelevant, and only the true geometric facts/properties/etc. of the object in discussion is present, if all superscript indices are matched with subscript indices, and we call this \textbf{index contraction}. That is, we say \begin{gather*}
+v = \sum_{i} f^i(v) \ u_i = \sum_i k^i u_i
+\end{gather*}
+or \begin{gather*}
+g = \sum_{i} u_i(g) \ f^i = \sum_i p_i f^i
+\end{gather*}
+
+When up-indices are matched with down-indices, and after you get used to writing these kinds of equations a lot, it gets tiresome to write the big sum symbol over and over again when you know that the index is summed over because it is paired; Einstein noticed this was obvious, and dropped the summation symbol, so when an index symbol such as $i$ or $j$ is seen paired with up and down indices, it is assumed to be summed over.
+
+A tensor $A \in \mathcal T_s^r$ can then be expressed as a grid of values in some number of dimensions in a chosen basis by probing it with each basis vector or covector \begin{gather*}
+A = \LARGE{{A^{i_1, \dots, i_r}}_{j_1, \dots, j_s}} \hspace{0.5em}u_{i_1} \otimes \dots \otimes u_{i_r} \otimes f^{j_1} \otimes \dots \otimes f^{j_s}
+\end{gather*}
+
+In this way, we can keep track of what arbitrariness is present and in what way; recall as before, a covector and a vector are covariant and contravariant with respect to a chosen basis, so each up-index we see on something indicates that it is vulnerable to a contravariant factor if the basis were to change, and each down index indicates that the element is vulnerable to a covariant factor if the basis were to change.
+
+This lets us do some kind of funky things, such as making tensors act on other whole tensors instead of merely vectors or covectors. Consider a tensor $A \in \mathcal T_2^0$ and a tensor $B \in \mathcal T_0^2$. We would indicate their indices in a basis as $A_{ij} f^i \otimes f^j$ and $B^{kl} u_k \otimes u_l$. We could for instance write \begin{gather*}
+A_{ij} B^{ij} = A(u_i, u_j) B(f^i, f^j)
+\end{gather*}
+which would actually be an invariant basis-independent quantity due to the paired indices, although what it means depends on specifics. In this particular case, if you wrote $A$ and $B$ like matrices, this would be the same as multiplying them pointwise and then adding up all the numbers, or alternatively taking their matrix multiplication and then taking the trace. We can actually express the trace in a similar way; if $A \in \mathcal T_1^1$ then, in line with the paired meter-sticks-and-arrows analogy from earlier, we write it $A = {A^i}_j u_i \otimes f^j$, and we can get a single result by applying ${A^i}_i = A(u_i,f^i)$, adding up the elements along the diagonal of a matrix. We can also contract indices in such a way as to result in other tensors, such as taking a tensor $A \in \mathcal T_1^2$ and doing something similar to taking a trace but only in the first two indices: we get a new vector ${A^{ij}}_i u_j$ in this case, since what appears is a number ${A^{ij}}_i$ paired with the basis vectors $u_j$.
+
+What's interesting about these cases is that, under the rules we set out around tensor indices that paired indices imply an invariant quantity, we can often perform calculations that seem \emph{very} dependent on the basis, and ultimately get something which our math will tell us is a true geometric object or invariant number that reflects something that wasn't arbitrary in the system.
+
+The main important thing to remember here is that we \emph{cannot} mix our metaphors. While it \emph{can sometimes} be okay to write various forms of tensors in terms of matrices if it gets a calculation done correctly, the onus is actually on you to make sure the matrix math did the same thing that index contraction should have done. In general, it is possible to turn an up-index into a down-index, but just as with vectors turning into covectors or vice versa, it requires an inner product in $\mathcal T_2^0$ or an inverse of the inner product in $\mathcal T_0^2$. If we have an inner product $g \in \mathcal T_2^0$ and some other tensor, say $A\in \mathcal T^2_0$, we can make a new tensor $B \in \mathcal T^1_1$ by $B = A^{ij} g_{jk} u_i \otimes f^k$, and it will be basis independent, but it will \emph{not} be inner product independent, as $g$ will be baked into how $B$ is used. \textbf{You cannot raise or lower tensor indices unless your space has a canonical inner product.}
+
+\subsubsection{Exterior Algebra}
+
+We can now discuss a few particularly interesting subspaces of the tensor algebra.
+
+\begin{definition}[Symmetrized Tensors]
+Let $V$ be a vector space and $V^*$ its dual. The vector subspace of the graded free tensor algebra $\bigotimes V^*$ of multilinear forms which are symmetric, i.e. order of vector arguments does not matter, form an algebra called the \textbf{symmetric algebra of } $V^*$, or $\bigoplus V^*$ with the product we will denote $\oplus$ with the following properties: \begin{itemize}
+\item The real numbers are a subset of $\bigoplus V^*$
+\item The covector space $V^*$ is a subset of $\bigoplus V^*$.
+\item Any two symmetric tensors $A, B \in \bigoplus V^*$ form the tensor $A \oplus B = A \otimes B + B \otimes A$, thus $\oplus$ is commutative, obeying $A \oplus B = B \oplus A$.
+\end{itemize}
+\end{definition}
+
+Just as we can define symmetric tensors, we can also form anti-symmetric tensors, and these can be even more interesting than the symmetric ones.
+
+\begin{definition}[Wedge Product and Exterior algebra]
+Let $V$ be a vector space and $V^*$ its dual. The vector subspace of the graded free tensor algebra $\bigotimes V^*$ of multilinear forms which are antisymmetric, or \textbf{alternating}, meaning swapping any two arguments changes the sign of the output, form an algebra called the \textbf{exterior algebra of } $V^*$, or $\bigwedge V^*$ with the \textbf{wedge product} $\wedge$ with the following properties: \begin{itemize}
+\item The real numbers are a subset of $\bigwedge V^*$
+\item The covector space $V^*$ is a subset of $\bigwedge V^*$.
+\item Any two covectors $f_1, f_2 \in V^*$ form the tensor $f_1 \wedge f_2 = f_1 \otimes f_2 - f_2 \otimes f_1$, thus $f_1 \wedge f_2 = - f_2 \wedge f_1$, and the wedge of any vector with itself is zero $f \wedge f = f \otimes f - f \otimes f = 0 \in \bigwedge^2 V^*$. If $A \in \bigwedge^k V^*$ and $B \in \bigwedge^l V^*$ then things are a little more complicated, with $A \wedge B = (-1)^{kl} B \wedge A$, so a factor of $-1$ is added depending on the grades involved in the swap.
+\end{itemize}
+\end{definition}
+
+The exterior algebra presents a very different situation to the graded free tensor algebra, since in that case we could increase the grade of a tensor ad-infinitum. For an exterior algebra, the anti-symmetry actually means that the number of grades for the exterior algebra is capped at the dimension of the underlying vector space. One way to think about this is to take a linearly independent basis in $V^*$, $f_1, \dots, f_n$, and think about what happens when we have $f_1 \wedge \dots \wedge f_n$. If $f_1, \dots, f_n$ span $V^*$, then any covector in $V^*$ will be written as a linear combination of those other vectors $f = k_1 f_1 + \dots + k_n f_n$. Then by linearity of the wedge product (owing from the linearity of the tensor product), we would see \begin{gather*}
+f \wedge f_1 \wedge \dots \wedge f_n = (k_1 f_1 + \dots + k_n f_n) \wedge f_1 \wedge \dots \wedge f_n
+\end{gather*}
+expanding the brackets to yield in each term \begin{gather*}
+k_1 (f_1 \wedge f_1 \wedge \dots \wedge f_n) \\
+\vdots \\
+k_n (f_n \wedge f_1 \wedge \dots \wedge f_n)
+\end{gather*}
+where each term goes to zero due to the wedge product of two equal vectors (involving swaps to place the equal vectors next to one another if you prefer). So not only is the dimension of the subspace $\bigwedge^{n+1} V^*$ zero, but the dimension of $\bigwedge^n V^*$ is also only one, since there's only one way to combine all the covectors in the basis, and rearranging them only changes the sign but not the direction.
+
+One of the remarkable things about all of this is that that one dimension of multi-linear form in the exterior algebra, actually describes a notion of volume, and in fact exactly the same notion of volume as is often stated of a determinant. This is because the multilinear forms in $\bigwedge^n V^*$ are exactly \emph{the determinants of} $V$. This is far more obvious for $V = V^* = \reals^n$, and indeed if you go to the wikipedia page for the \hyperlink{https://en.wikipedia.org/wiki/Leibniz_formula_for_determinants}{Leibniz determinant formula}, what it will basically tell you is that the Leibniz determinant is not really a formula, it is a \emph{theorem} that states there is only one antisymmetric $n$-multilinear in $\reals^n$, with formula \begin{gather*}
+\det(v_1, \dots, v_n) = \sum_{\sigma \in S_n} \mathrm{sign}(\sigma) \prod_{k=1}^n (v_i)_{\sigma(i)}
+\end{gather*}
+where $S_n$ is the symmetric group, i.e. the group of permutations, so we sum over every permutation of $n$ indices, and $\mathrm{sign}$ is a function that takes a permutation and tells us if it is formed of an even or odd number of swaps. Given the oft cited geometric properties of the determinant, you may wonder what on earth permutations are doing in such a formula, but in the context of exterior algebra, it should begin to make sense. We are saying if I have $n$ vectors $v_1, \dots, v_n$ and a dual basis $f^1, \dots, f^n$ which spans $V^*$, then the one tensor-direction in $\bigwedge^n V^*$ acting on these $v_1,\dots, v_n$ vectors is \begin{gather*}
+\det(v_1, \dots, v_n) = f^1 \wedge \dots \wedge f^n (v_1, \dots, v_n)  
+\end{gather*}
+which, in the underlying tensor products that define the wedge product, is 
+\begin{gather*}
+\det(v_1, \dots, v_n) = \sum_{\sigma \in S_n} \mathrm{sign}(\sigma) f^{\sigma(1)} \otimes \dots \otimes f^{\sigma(n)} (v_1, \dots, v_n).
+\end{gather*}
+
+
 
 
 
